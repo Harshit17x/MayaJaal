@@ -1,0 +1,32 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #f7f7f5;
+  --foreground: #1c2022;
+  --charcoal-muted: #50565b;
+  --forest-green: #153e28;
+  --forest-green-hover: #0f2f1e;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  margin: 0;
+  padding: 0;
+}
+
+.btn-forest-green {
+  background-color: var(--forest-green);
+  color: #ffffff;
+  transition: all 0.2s ease-in-out;
+}
+
+.btn-forest-green:hover {
+  background-color: var(--forest-green-hover);
+}
