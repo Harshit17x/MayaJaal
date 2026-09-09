@@ -324,7 +324,9 @@ def draw_bounding_boxes(
             cv2.line(frame, (x2, y2), (x2, y2 - corner_len), color, 3)
 
         # Label background pill
-        label = f"{cls_name.upper()} {int(conf * 100)}%"
+        track_id = det.get("track_id")
+        id_prefix = f"#{track_id} " if track_id is not None else ""
+        label = f"{id_prefix}{cls_name.upper()} {int(conf * 100)}%"
         (lbl_w, lbl_h), _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.42, 1)
         pill_y1 = max(0, y1 - lbl_h - 6)
         pill_y2 = y1
@@ -379,6 +381,15 @@ def stream_generator(
             )
         except Exception as exc:
             logger.warning("Could not create preprocessor for live stream: %s", exc)
+
+    # Initialize ByteTracker for in-stream multi-object tracking
+    tracker = None
+    if draw_detections:
+        try:
+            from app.tracking.tracker import ByteTrackerWrapper
+            tracker = ByteTrackerWrapper()
+        except Exception as exc:
+            logger.warning("Could not initialize ByteTracker for stream: %s", exc)
 
     cached_detections: list[dict] = []
     frame_count = 0
@@ -464,7 +475,15 @@ def stream_generator(
                             iou_threshold=0.45,
                             original_image_size=(w, h),
                         )
-                        cached_detections = res.get("detections", [])
+                        raw_dets = res.get("detections", [])
+                        if tracker is not None:
+                            try:
+                                tracked = tracker.update(raw_dets, frame_resolution=(w, h))
+                                cached_detections = [t.to_dict() for t in tracked]
+                            except Exception:
+                                cached_detections = raw_dets
+                        else:
+                            cached_detections = raw_dets
                     except Exception as exc:
                         logger.debug("In-stream inference skip: %s", exc)
 

@@ -13,7 +13,7 @@ export function CameraGrid({ selectedCameraId, onSelectCamera }: CameraGridProps
   const { cameras } = useCameras();
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4" suppressHydrationWarning>
       {cameras.map((camera) => (
         <CameraCard
           key={camera.id}

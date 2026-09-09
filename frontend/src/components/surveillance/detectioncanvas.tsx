@@ -148,7 +148,8 @@ export function DetectionCanvas({
         ctx.stroke();
 
         // 4. Label Badge
-        const labelText = `${det.class_name.replace(/_/g, " ").toUpperCase()} ${Math.round(det.confidence * 100)}%`;
+        const trackTag = det.track_id !== undefined ? `ID #${det.track_id} · ` : "";
+        const labelText = `${trackTag}${det.class_name.replace(/_/g, " ").toUpperCase()} ${Math.round(det.confidence * 100)}%`;
         ctx.font = "bold 11px monospace";
         const textMetrics = ctx.measureText(labelText);
         const paddingX = 6;
@@ -158,6 +159,12 @@ export function DetectionCanvas({
 
         ctx.fillStyle = color;
         ctx.fillRect(rx1, badgeY, badgeW, badgeH);
+
+        if (det.track_id !== undefined) {
+          ctx.strokeStyle = "#ffffff";
+          ctx.lineWidth = 1;
+          ctx.strokeRect(rx1, badgeY, badgeW, badgeH);
+        }
 
         ctx.fillStyle = "#ffffff";
         ctx.textBaseline = "middle";

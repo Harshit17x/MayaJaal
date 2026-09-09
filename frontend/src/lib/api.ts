@@ -4,6 +4,8 @@ import {
   InferenceStatusResponse,
   ModelStatusResponse,
   RTSPInferenceResponse,
+  RTSPTrackingResponse,
+  TrackingVideoResponse,
   VideoInferenceResponse,
 } from "@/types/backend";
 import {
@@ -218,6 +220,69 @@ export const api = {
       formData.append("max_frames", params.maxFrames.toString());
 
     return request<RTSPInferenceResponse>("/api/inference/rtsp", {
+      method: "POST",
+      body: formData,
+    });
+  },
+
+  /**
+   * Run ByteTrack multi-object tracking on an uploaded video file
+   */
+  async runVideoTracking(params: {
+    file: File | Blob;
+    modelName: string;
+    confThreshold?: number;
+    iouThreshold?: number;
+    maxFrames?: number;
+    activationThreshold?: number;
+    lostTrackBuffer?: number;
+    matchingThreshold?: number;
+  }): Promise<TrackingVideoResponse> {
+    const formData = new FormData();
+    formData.append("file", params.file);
+    formData.append("model_name", params.modelName);
+    if (params.confThreshold !== undefined)
+      formData.append("conf_threshold", params.confThreshold.toString());
+    if (params.iouThreshold !== undefined)
+      formData.append("iou_threshold", params.iouThreshold.toString());
+    if (params.maxFrames !== undefined)
+      formData.append("max_frames", params.maxFrames.toString());
+    if (params.activationThreshold !== undefined)
+      formData.append("activation_threshold", params.activationThreshold.toString());
+    if (params.lostTrackBuffer !== undefined)
+      formData.append("lost_track_buffer", params.lostTrackBuffer.toString());
+    if (params.matchingThreshold !== undefined)
+      formData.append("matching_threshold", params.matchingThreshold.toString());
+
+    return request<TrackingVideoResponse>("/api/tracking/video", {
+      method: "POST",
+      body: formData,
+    });
+  },
+
+  /**
+   * Run ByteTrack tracking on an RTSP stream with persistent camera tracking state
+   */
+  async runRtspTracking(params: {
+    rtspUrl: string;
+    cameraId?: string;
+    modelName: string;
+    confThreshold?: number;
+    iouThreshold?: number;
+    maxFrames?: number;
+  }): Promise<RTSPTrackingResponse> {
+    const formData = new FormData();
+    formData.append("rtsp_url", params.rtspUrl);
+    formData.append("model_name", params.modelName);
+    if (params.cameraId) formData.append("camera_id", params.cameraId);
+    if (params.confThreshold !== undefined)
+      formData.append("conf_threshold", params.confThreshold.toString());
+    if (params.iouThreshold !== undefined)
+      formData.append("iou_threshold", params.iouThreshold.toString());
+    if (params.maxFrames !== undefined)
+      formData.append("max_frames", params.maxFrames.toString());
+
+    return request<RTSPTrackingResponse>("/api/tracking/rtsp", {
       method: "POST",
       body: formData,
     });

@@ -102,6 +102,11 @@ class VideoLoader:
                 f"{self.video_path.name}"
             )
 
+        try:
+            capture.set(cv2.CAP_PROP_ORIENTATION_AUTO, 1)
+        except Exception:
+            pass
+
         self.capture = capture
 
         logger.info(
@@ -119,24 +124,34 @@ class VideoLoader:
 
         fps = self.capture.get(cv2.CAP_PROP_FPS)
         frame_count = self.capture.get(cv2.CAP_PROP_FRAME_COUNT)
-        width = self.capture.get(cv2.CAP_PROP_FRAME_WIDTH)
-        height = self.capture.get(cv2.CAP_PROP_FRAME_HEIGHT)
+        width = int(self.capture.get(cv2.CAP_PROP_FRAME_WIDTH))
+        height = int(self.capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
+
+        rot = 0
+        try:
+            rot = int(self.capture.get(cv2.CAP_PROP_ORIENTATION_META))
+        except Exception:
+            pass
+
+        if rot in (90, 270) and width > height:
+            width, height = height, width
 
         return {
             "filename": self.video_path.name,
             "path": str(self.video_path),
-            "fps": fps,
+            "fps": fps if fps > 0 else 30.0,
             "frame_count": int(frame_count),
-            "width": int(width),
-            "height": int(height),
+            "width": width,
+            "height": height,
             "duration_seconds": (
                 frame_count / fps if fps > 0 else None
             ),
+            "rotation": rot,
         }
 
     def read_frame(self) -> tuple[bool, Any]:
         """
-        Read the next frame.
+        Read the next frame with orientation correction.
 
         Returns:
             (True, frame) when successful.
@@ -170,6 +185,18 @@ class VideoLoader:
                 f"Video returned an empty frame: "
                 f"{self.video_path.name}"
             )
+
+        # Apply rotation if OpenCV did not auto-rotate portrait mobile video
+        try:
+            rot = int(self.capture.get(cv2.CAP_PROP_ORIENTATION_META))
+            if rot == 90 and frame.shape[1] > frame.shape[0]:
+                frame = cv2.rotate(frame, cv2.ROTATE_90_CLOCKWISE)
+            elif rot == 180:
+                frame = cv2.rotate(frame, cv2.ROTATE_180)
+            elif rot == 270 and frame.shape[1] > frame.shape[0]:
+                frame = cv2.rotate(frame, cv2.ROTATE_90_COUNTERCLOCKWISE)
+        except Exception:
+            pass
 
         return True, frame
 
