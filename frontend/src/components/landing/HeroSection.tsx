@@ -3,8 +3,10 @@
 import Link from "next/link";
 import { ArrowRight, ArrowDown } from "lucide-react";
 import { LandingNavbar } from "./LandingNavbar";
+import { useAuth } from "@/lib/authStore";
 
 export function HeroSection() {
+  const { isAuthenticated } = useAuth();
   return (
     <div className="relative w-full min-h-screen flex flex-col justify-between overflow-hidden bg-[#eef1ed] select-none">
       {/* 1. Panoramic Background Animated Video & Mist Overlays */}
@@ -50,7 +52,7 @@ export function HeroSection() {
 
           <div className="pt-2">
             <Link
-              href="/dashboard"
+              href={isAuthenticated ? "/gis-map" : "/login?redirect=/gis-map"}
               className="inline-flex items-center gap-3 px-8 py-3.5 rounded-full bg-[#1b3a2a] hover:bg-[#12281c] text-white text-base font-semibold tracking-wide shadow-lg shadow-emerald-950/20 hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
             >
               <span>View Live Map</span>

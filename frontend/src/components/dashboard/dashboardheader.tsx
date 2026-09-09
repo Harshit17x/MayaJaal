@@ -1,4 +1,37 @@
+"use client";
+
+import { useState, useEffect } from "react";
+
 export function DashboardHeader() {
+  const [timestamp, setTimestamp] = useState<{ date: string; time: string }>({
+    date: "09 Sep 2026",
+    time: "10:24:00",
+  });
+
+  useEffect(() => {
+    const updateTime = () => {
+      const now = new Date();
+      const date = now.toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        timeZone: "Asia/Kolkata",
+      });
+      const time = now.toLocaleTimeString("en-GB", {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false,
+        timeZone: "Asia/Kolkata",
+      });
+      setTimestamp({ date, time });
+    };
+
+    updateTime();
+    const interval = setInterval(updateTime, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <header className="bg-white rounded-xl border border-slate-200/80 p-5 md:p-6 shadow-xs flex flex-col md:flex-row md:items-center md:justify-between gap-4">
       {/* Left Greeting */}
@@ -17,8 +50,11 @@ export function DashboardHeader() {
           <span className="font-semibold text-slate-700">
             BOP: Demo Border Outpost
           </span>
-          <span className="text-xs font-mono text-slate-500 mt-0.5">
-            08 Sep 2026 | 10:24 IST
+          <span
+            className="text-xs font-mono text-slate-500 mt-0.5"
+            suppressHydrationWarning
+          >
+            {timestamp.date} | {timestamp.time} IST
           </span>
         </div>
 

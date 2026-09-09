@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   Map as MapIcon,
@@ -17,8 +17,10 @@ import {
   Search,
   Bell,
   Cpu,
+  LogOut,
 } from "lucide-react";
 import { useAlerts } from "@/lib/alertsStore";
+import { useAuth } from "@/lib/authStore";
 
 interface NavItem {
   label: string;
@@ -34,8 +36,41 @@ export default function OperatorLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { operator, logout } = useAuth();
   const { unacknowledgedCount } = useAlerts();
   const [searchQuery, setSearchQuery] = useState("");
+  const [currentTimestamp, setCurrentTimestamp] = useState<{
+    date: string;
+    time: string;
+  }>({
+    date: "09 Sep 2026",
+    time: "10:24:00",
+  });
+
+  useEffect(() => {
+    const updateTime = () => {
+      const now = new Date();
+      const date = now.toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        timeZone: "Asia/Kolkata",
+      });
+      const time = now.toLocaleTimeString("en-GB", {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false,
+        timeZone: "Asia/Kolkata",
+      });
+      setCurrentTimestamp({ date, time });
+    };
+
+    updateTime();
+    const interval = setInterval(updateTime, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   const mainNavItems: NavItem[] = [
     {
@@ -232,15 +267,20 @@ export default function OperatorLayout({
             {/* BOP Outpost pill */}
             <div className="flex items-center gap-2 font-bold text-slate-800">
               <Shield className="w-4 h-4 text-emerald-800" />
-              <span>BOP Alpha • Demo Border Outpost</span>
+              <span className="truncate max-w-[220px]">{operator?.sector || "Sector-04 (BOP Alpha)"}</span>
             </div>
 
             <div className="hidden md:block w-px h-4 bg-slate-200" />
 
             {/* Time Stamp */}
-            <div className="hidden md:flex flex-col text-xs font-mono text-slate-500">
-              <span>08 Sep 2026</span>
-              <span className="text-[10px] text-slate-400">10:24 IST</span>
+            <div
+              className="hidden md:flex flex-col text-xs font-mono text-slate-500"
+              suppressHydrationWarning
+            >
+              <span suppressHydrationWarning>{currentTimestamp.date}</span>
+              <span className="text-[10px] text-slate-400" suppressHydrationWarning>
+                {currentTimestamp.time} IST
+              </span>
             </div>
 
             {/* Online Nodes indicator */}
@@ -276,19 +316,35 @@ export default function OperatorLayout({
 
             <div className="w-px h-6 bg-slate-200" />
 
-            {/* Officer Profile */}
-            <div className="flex items-center gap-2.5">
+            {/* Officer Profile & Sign Out */}
+            <div className="flex items-center gap-2">
               <div className="text-right hidden sm:block">
                 <div className="text-xs font-bold text-slate-900 leading-tight">
-                  Insp. K. Rathore
+                  {operator?.name || "Insp. K. Rathore"}
                 </div>
                 <div className="text-[10px] font-medium text-slate-500">
-                  Shift Commander
+                  {operator?.role || "Shift Commander"}
                 </div>
               </div>
-              <div className="w-8 h-8 rounded-full bg-[#143724] text-white flex items-center justify-center text-xs font-bold ring-2 ring-emerald-600/20 shadow-xs">
-                KR
+              <div
+                className="w-8 h-8 rounded-full bg-[#143724] text-white flex items-center justify-center text-xs font-bold ring-2 ring-emerald-600/20 shadow-xs select-none"
+                title={operator ? `${operator.name} • ${operator.badgeNumber}` : "Shift Commander"}
+              >
+                {operator?.avatarInitials || "KR"}
               </div>
+
+              {/* Sign Out / Exit button */}
+              <button
+                type="button"
+                onClick={() => {
+                  logout();
+                  router.push("/login");
+                }}
+                className="p-1.5 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+                title="Sign Out / Switch Operator"
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
             </div>
           </div>
         </header>

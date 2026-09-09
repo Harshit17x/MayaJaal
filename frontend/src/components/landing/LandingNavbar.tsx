@@ -1,8 +1,13 @@
+"use client";
+
 import Link from "next/link";
-import { Search, User } from "lucide-react";
+import { Search, User, ShieldCheck } from "lucide-react";
 import { EmblemIndia } from "./EmblemIndia";
+import { useAuth } from "@/lib/authStore";
 
 export function LandingNavbar() {
+  const { isAuthenticated, operator } = useAuth();
+
   return (
     <header className="w-full z-30 pt-6 px-6 sm:px-10 lg:px-16 flex items-center justify-between">
       {/* Left Branding */}
@@ -21,33 +26,6 @@ export function LandingNavbar() {
         </div>
       </div>
 
-      {/* Center Navigation Links */}
-      <nav className="hidden md:flex items-center gap-8">
-        <Link
-          href="/"
-          className="relative text-sm font-bold text-slate-950 pb-1 after:absolute after:bottom-0 after:left-0 after:w-full after:h-[2px] after:bg-[#1e4933]"
-        >
-          Home
-        </Link>
-        <Link
-          href="/live"
-          className="text-sm font-semibold text-slate-700 hover:text-slate-950 transition-colors"
-        >
-          Live View
-        </Link>
-        <Link
-          href="/dashboard"
-          className="text-sm font-semibold text-slate-700 hover:text-slate-950 transition-colors"
-        >
-          Reports
-        </Link>
-        <Link
-          href="/about"
-          className="text-sm font-semibold text-slate-700 hover:text-slate-950 transition-colors"
-        >
-          About
-        </Link>
-      </nav>
 
       {/* Right Search & Login Button */}
       <div className="flex items-center gap-4">
@@ -63,14 +41,26 @@ export function LandingNavbar() {
         {/* Divider */}
         <div className="h-4 w-[1px] bg-slate-400 hidden sm:block" />
 
-        {/* Login Button */}
-        <Link
-          href="/dashboard"
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#172e22] hover:bg-[#0f1f17] text-white text-sm font-semibold shadow-sm transition-all"
-        >
-          <User className="w-4 h-4 text-white" />
-          <span>Login</span>
-        </Link>
+        {/* Login / Console Button */}
+        {isAuthenticated && operator ? (
+          <Link
+            href="/dashboard"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#143724] hover:bg-[#0b2416] text-white text-xs font-semibold shadow-sm transition-all"
+            title={`Connected as ${operator.name} (${operator.role})`}
+          >
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+            <span className="font-bold">{operator.name}</span>
+            <span className="hidden sm:inline text-[10px] text-emerald-300 font-mono">Console &rarr;</span>
+          </Link>
+        ) : (
+          <Link
+            href="/login"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#172e22] hover:bg-[#0f1f17] text-white text-sm font-semibold shadow-sm transition-all"
+          >
+            <User className="w-4 h-4 text-white" />
+            <span>Login</span>
+          </Link>
+        )}
       </div>
     </header>
   );
