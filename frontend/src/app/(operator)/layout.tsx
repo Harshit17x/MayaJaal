@@ -532,11 +532,6 @@ export default function OperatorLayout({
               </span>
             </div>
 
-            {/* Online Nodes indicator */}
-            <div className="hidden lg:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-xs font-medium text-emerald-800 flex-shrink-0">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span>12/12 Mesh Nodes Online</span>
-            </div>
           </div>
 
           {/* Right Search, Alerts, & Commander Profile */}
