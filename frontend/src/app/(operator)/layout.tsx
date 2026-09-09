@@ -13,7 +13,6 @@ import {
   Globe,
   Car,
   Settings,
-  Shield,
   Search,
   Bell,
   Cpu,
@@ -510,14 +509,6 @@ export default function OperatorLayout({
                   : "Pinned"}
               </span>
             </button>
-
-            {/* BOP Outpost pill */}
-            <div className="flex items-center gap-2 font-bold text-slate-800 truncate">
-              <Shield className="w-4 h-4 text-emerald-800 flex-shrink-0" />
-              <span className="truncate max-w-[160px] sm:max-w-[240px]">
-                {operator?.sector || "Sector-04 (BOP Alpha)"}
-              </span>
-            </div>
 
             <div className="hidden md:block w-px h-4 bg-slate-200 flex-shrink-0" />
 
