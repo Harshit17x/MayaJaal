@@ -1,8 +1,19 @@
 from __future__ import annotations
 
 import logging
+import os
 from pathlib import Path
 from typing import Any
+
+# Ensure CUDA and cuDNN DLLs (e.g. from PyTorch lib) are discoverable on Windows
+if os.name == "nt":
+    try:
+        import torch
+        torch_lib = Path(torch.__file__).parent / "lib"
+        if torch_lib.exists():
+            os.add_dll_directory(str(torch_lib))
+    except Exception:
+        pass
 
 import numpy as np
 import onnxruntime as ort

@@ -5,6 +5,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+from app.api.anpr import router as anpr_router
 from app.api.cameras import router as cameras_router
 from app.api.health import router as health_router
 from app.api.inference import router as inference_router
@@ -119,6 +120,7 @@ app.include_router(models_router)
 app.include_router(inference_router)
 app.include_router(stream_router)
 app.include_router(tracking_router)
+app.include_router(anpr_router)
 
 
 @app.get("/")
