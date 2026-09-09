@@ -5,6 +5,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+from app.api.cameras import router as cameras_router
 from app.api.health import router as health_router
 from app.api.inference import router as inference_router
 from app.api.models import router as models_router
@@ -103,6 +104,7 @@ async def unexpected_exception_handler(
 
 
 app.include_router(health_router)
+app.include_router(cameras_router)
 app.include_router(models_router)
 app.include_router(inference_router)
 

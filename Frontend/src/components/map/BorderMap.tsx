@@ -1,19 +1,14 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { Camera, AlertTriangle, Layers, Navigation, RefreshCw, ZoomIn, ZoomOut } from "lucide-react";
+import { useEffect, useRef, useState, useMemo } from "react";
+import { Camera, AlertTriangle, Navigation, RefreshCw, Layers } from "lucide-react";
+import { Camera as CameraEntity } from "@/types/camera";
+import { useCameras } from "@/lib/camerasStore";
 
 // Google Maps API Key
 const GOOGLE_MAPS_KEY =
   process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ||
   "AIzaSyBf6-zZna3bNFU7cBNeeHpYfVtrOrHa-d4";
-
-// Demo Camera Markers
-const DEMO_CAMERAS = [
-  { id: "cam-1", name: "Camera 01 — North Perimeter", lat: 24.10, lng: 77.70, type: "Optical 4K" },
-  { id: "cam-2", name: "Camera 02 — Eastern Gate", lat: 23.70, lng: 79.30, type: "Elevated Activity" },
-  { id: "cam-3", name: "Camera 03 — Watch Tower", lat: 22.40, lng: 78.10, type: "Thermal FLIR" },
-];
 
 // Demo Alert Marker
 const DEMO_ALERT = {
@@ -37,18 +32,36 @@ interface BorderMapProps {
   initialMapType?: "hybrid" | "satellite" | "roadmap" | "terrain";
   className?: string;
   height?: string;
+  customCameras?: CameraEntity[];
+  selectedCameraId?: string;
+  onMapClick?: (coords: { lat: number; lng: number }) => void;
+  center?: { lat: number; lng: number };
+  zoom?: number;
+  interactive?: boolean;
 }
 
 export function BorderMap({
   initialMapType = "hybrid",
   className = "",
   height = "560px",
+  customCameras,
+  selectedCameraId,
+  onMapClick,
+  center = { lat: 23.30, lng: 78.60 },
+  zoom = 6.2,
+  interactive = true,
 }: BorderMapProps) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<google.maps.Map | null>(null);
+  const markersRef = useRef<google.maps.Marker[]>([]);
+  const clickListenerRef = useRef<google.maps.MapsEventListener | null>(null);
+
   const [mapType, setMapType] = useState<"hybrid" | "satellite" | "roadmap" | "terrain">(initialMapType);
   const [isLoaded, setIsLoaded] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
+
+  const { cameras: storeCameras } = useCameras();
+  const activeCameras = customCameras ?? storeCameras;
 
   // Load Google Maps Script
   useEffect(() => {
@@ -83,16 +96,15 @@ export function BorderMap({
         if (!isMounted || !mapContainerRef.current) return;
 
         const google = (window as any).google;
-        const center = { lat: 23.30, lng: 78.60 };
 
         // Initialize Google Map
         const map = new google.maps.Map(mapContainerRef.current, {
           center,
-          zoom: 6.2,
+          zoom,
           mapTypeId: mapType,
           disableDefaultUI: false,
           zoomControl: true,
-          mapTypeControl: false, // controlled by our custom tactical toolbar
+          mapTypeControl: false,
           scaleControl: true,
           streetViewControl: false,
           rotateControl: true,
@@ -107,51 +119,6 @@ export function BorderMap({
         });
 
         mapInstanceRef.current = map;
-
-        // Custom InfoWindow
-        const infoWindow = new google.maps.InfoWindow({
-          maxWidth: 240,
-        });
-
-        // 1. Add Camera Markers (Green)
-        DEMO_CAMERAS.forEach((cam) => {
-          const markerSvg = `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(`
-            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="42" viewBox="0 0 36 42">
-              <path d="M18 0C8.06 0 0 8.06 0 18c0 13.5 18 24 18 24s18-10.5 18-24C36 8.06 27.94 0 18 0z" fill="#059669" stroke="#ffffff" stroke-width="2"/>
-              <circle cx="18" cy="18" r="9" fill="#047857"/>
-              <path d="M22 13h-1.5l-1-1.5h-3l-1 1.5H14c-.55 0-1 .45-1 1v6c0 .55.45 1 1 1h8c.55 0 1-.45 1-1v-6c0-.55-.45-1-1-1zm-4 7c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3z" fill="#ffffff"/>
-            </svg>
-          `)}`;
-
-          const marker = new google.maps.Marker({
-            position: { lat: cam.lat, lng: cam.lng },
-            map,
-            title: cam.name,
-            icon: {
-              url: markerSvg,
-              scaledSize: new google.maps.Size(32, 38),
-              anchor: new google.maps.Point(16, 38),
-            },
-          });
-
-          marker.addListener("click", () => {
-            const contentString = `
-              <div style="font-family:system-ui,-apple-system,sans-serif; padding:6px 2px; min-width:160px;">
-                <div style="display:flex; align-items:center; gap:6px; margin-bottom:4px;">
-                  <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#10b981;"></span>
-                  <strong style="font-size:12px; color:#064e3b;">Online • ${cam.type}</strong>
-                </div>
-                <h4 style="margin:0 0 4px; font-size:13px; font-weight:700; color:#0f172a;">${cam.name}</h4>
-                <p style="margin:0 0 8px; font-size:11px; color:#64748b; font-family:monospace;">${cam.lat.toFixed(2)}°N, ${cam.lng.toFixed(2)}°E</p>
-                <a href="/live" style="display:block; text-align:center; padding:5px 8px; font-size:11px; font-weight:700; color:#ffffff; background:#143724; border-radius:6px; text-decoration:none;">
-                  View Live Feed &rarr;
-                </a>
-              </div>
-            `;
-            infoWindow.setContent(contentString);
-            infoWindow.open(map, marker);
-          });
-        });
 
         // 2. Add Red Alert Marker
         const alertSvg = `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(`
@@ -173,6 +140,7 @@ export function BorderMap({
           },
         });
 
+        const alertInfoWindow = new google.maps.InfoWindow();
         alertMarker.addListener("click", () => {
           const alertContent = `
             <div style="font-family:system-ui,-apple-system,sans-serif; padding:6px 2px; min-width:160px;">
@@ -187,8 +155,8 @@ export function BorderMap({
               </a>
             </div>
           `;
-          infoWindow.setContent(alertContent);
-          infoWindow.open(map, alertMarker);
+          alertInfoWindow.setContent(alertContent);
+          alertInfoWindow.open(map, alertMarker);
         });
 
         // 3. Add Dashed Green Border Perimeter Line
@@ -225,6 +193,127 @@ export function BorderMap({
     };
   }, []);
 
+  // Update onMapClick listener
+  useEffect(() => {
+    if (!mapInstanceRef.current || !(window as any).google?.maps) return;
+    const map = mapInstanceRef.current;
+
+    if (clickListenerRef.current) {
+      (window as any).google.maps.event.removeListener(clickListenerRef.current);
+      clickListenerRef.current = null;
+    }
+
+    if (onMapClick) {
+      clickListenerRef.current = map.addListener("click", (e: any) => {
+        if (e.latLng) {
+          onMapClick({
+            lat: Number(e.latLng.lat().toFixed(4)),
+            lng: Number(e.latLng.lng().toFixed(4)),
+          });
+        }
+      });
+    }
+
+    return () => {
+      if (clickListenerRef.current) {
+        (window as any).google.maps.event.removeListener(clickListenerRef.current);
+      }
+    };
+  }, [onMapClick, isLoaded]);
+
+  // Render / Update Camera Markers whenever cameras change
+  useEffect(() => {
+    if (!mapInstanceRef.current || !isLoaded || !(window as any).google?.maps) return;
+    const google = (window as any).google;
+    const map = mapInstanceRef.current;
+
+    // Clear existing camera markers
+    markersRef.current.forEach((m) => m.setMap(null));
+    markersRef.current = [];
+
+    const infoWindow = new google.maps.InfoWindow({ maxWidth: 260 });
+
+    activeCameras.forEach((cam) => {
+      const lat = Number(cam.latitude ?? (cam.coordinates ? cam.coordinates[1] : 0));
+      const lng = Number(cam.longitude ?? (cam.coordinates ? cam.coordinates[0] : 0));
+      if (!lat || !lng || isNaN(lat) || isNaN(lng)) return;
+
+      const isSelected = cam.id === selectedCameraId;
+      const isAlert = cam.status === "alert";
+      const isDegraded = cam.status === "degraded";
+      const isOffline = cam.status === "offline";
+
+      let pinColor = "#059669"; // emerald
+      let innerColor = "#047857";
+      let statusLabel = "Online";
+
+      if (isAlert) {
+        pinColor = "#dc2626"; // red
+        innerColor = "#b91c1c";
+        statusLabel = "Alert Active";
+      } else if (isDegraded) {
+        pinColor = "#d97706"; // amber
+        innerColor = "#b45309";
+        statusLabel = "Degraded";
+      } else if (isOffline) {
+        pinColor = "#64748b"; // slate
+        innerColor = "#475569";
+        statusLabel = "Offline";
+      }
+
+      const markerSvg = `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(`
+        <svg xmlns="http://www.w3.org/2000/svg" width="${isSelected ? "44" : "36"}" height="${isSelected ? "50" : "42"}" viewBox="0 0 36 42">
+          <path d="M18 0C8.06 0 0 8.06 0 18c0 13.5 18 24 18 24s18-10.5 18-24C36 8.06 27.94 0 18 0z" fill="${pinColor}" stroke="#ffffff" stroke-width="${isSelected ? "3" : "2"}"/>
+          <circle cx="18" cy="18" r="9" fill="${innerColor}"/>
+          <path d="M22 13h-1.5l-1-1.5h-3l-1 1.5H14c-.55 0-1 .45-1 1v6c0 .55.45 1 1 1h8c.55 0 1-.45 1-1v-6c0-.55-.45-1-1-1zm-4 7c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3z" fill="#ffffff"/>
+        </svg>
+      `)}`;
+
+      const marker = new google.maps.Marker({
+        position: { lat, lng },
+        map,
+        title: cam.name,
+        zIndex: isSelected ? 999 : isAlert ? 500 : 100,
+        icon: {
+          url: markerSvg,
+          scaledSize: new google.maps.Size(isSelected ? 40 : 32, isSelected ? 46 : 38),
+          anchor: new google.maps.Point(isSelected ? 20 : 16, isSelected ? 46 : 38),
+        },
+      });
+
+      marker.addListener("click", () => {
+        const contentString = `
+          <div style="font-family:system-ui,-apple-system,sans-serif; padding:6px 2px; min-width:200px;">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;">
+              <span style="font-size:10px; font-weight:800; text-transform:uppercase; color:${pinColor}; background:${pinColor}15; padding:2px 6px; border-radius:4px;">
+                ${statusLabel} • ${cam.type || "Optical"}
+              </span>
+              <span style="font-size:10px; color:#64748b; font-family:monospace;">${cam.id}</span>
+            </div>
+            <h4 style="margin:2px 0 4px; font-size:13px; font-weight:800; color:#0f172a;">${cam.name}</h4>
+            <div style="font-size:11px; color:#475569; margin-bottom:6px;">
+              <div><strong>Sector:</strong> ${cam.sector}</div>
+              <div><strong>Coordinates:</strong> <span style="font-family:monospace;">${lat.toFixed(4)}°N, ${lng.toFixed(4)}°E</span></div>
+              ${cam.ipAddress ? `<div><strong>RTSP IP:</strong> <span style="font-family:monospace;">${cam.ipAddress}</span></div>` : ""}
+            </div>
+            <div style="display:flex; gap:6px; margin-top:8px;">
+              <a href="/cameras" style="flex:1; text-align:center; padding:6px 8px; font-size:11px; font-weight:700; color:#ffffff; background:#143724; border-radius:6px; text-decoration:none;">
+                Manage Node
+              </a>
+              <a href="/live" style="flex:1; text-align:center; padding:6px 8px; font-size:11px; font-weight:700; color:#143724; background:#ecfdf5; border:1px solid #10b981; border-radius:6px; text-decoration:none;">
+                Live Stream
+              </a>
+            </div>
+          </div>
+        `;
+        infoWindow.setContent(contentString);
+        infoWindow.open(map, marker);
+      });
+
+      markersRef.current.push(marker);
+    });
+  }, [activeCameras, isLoaded, selectedCameraId]);
+
   // Sync MapType switch
   const handleMapTypeChange = (type: "hybrid" | "satellite" | "roadmap" | "terrain") => {
     setMapType(type);
@@ -236,8 +325,8 @@ export function BorderMap({
   // Reset Camera View
   const handleResetView = () => {
     if (mapInstanceRef.current) {
-      mapInstanceRef.current.setCenter({ lat: 23.30, lng: 78.60 });
-      mapInstanceRef.current.setZoom(6.2);
+      mapInstanceRef.current.setCenter(center);
+      mapInstanceRef.current.setZoom(zoom);
     }
   };
 
@@ -251,7 +340,7 @@ export function BorderMap({
             Google Maps Tactical Surveillance
           </h2>
           <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-emerald-100/70 text-emerald-800 font-semibold">
-            Google API Live
+            {activeCameras.length} Node{activeCameras.length === 1 ? "" : "s"}
           </span>
         </div>
 
@@ -286,7 +375,7 @@ export function BorderMap({
           <button
             type="button"
             onClick={handleResetView}
-            title="Reset to Demo Cluster"
+            title="Reset to Center"
             className="p-1.5 rounded-lg border border-slate-200 bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50 shadow-xs transition-colors"
           >
             <Navigation className="w-3.5 h-3.5" />
@@ -324,11 +413,11 @@ export function BorderMap({
         <div className="flex flex-wrap items-center gap-4">
           <div className="flex items-center gap-1.5 font-medium">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-600 inline-block shadow-xs" />
-            <span>3 Active Cameras</span>
+            <span>{activeCameras.filter((c) => c.status === "online").length} Online Nodes</span>
           </div>
           <div className="flex items-center gap-1.5 font-medium">
             <span className="w-2.5 h-2.5 rounded-full bg-rose-600 inline-block shadow-xs" />
-            <span>1 Threat Perimeter Alert</span>
+            <span>{activeCameras.filter((c) => c.status === "alert").length} Elevated/Alert</span>
           </div>
           <div className="flex items-center gap-1.5 font-medium">
             <span className="inline-block w-4 h-0.5 border-t-2 border-dashed border-emerald-600" />
@@ -337,7 +426,7 @@ export function BorderMap({
         </div>
 
         <div className="text-[11px] font-mono text-slate-400">
-          Powered by Google Maps Platform
+          Click map to pin coordinates
         </div>
       </div>
     </div>

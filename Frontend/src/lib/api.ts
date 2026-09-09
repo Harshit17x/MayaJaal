@@ -6,6 +6,12 @@ import {
   RTSPInferenceResponse,
   VideoInferenceResponse,
 } from "@/types/backend";
+import {
+  Camera,
+  CreateCameraInput,
+  UpdateCameraInput,
+  StreamTestResult,
+} from "@/types/camera";
 
 const BACKEND_BASE_URL =
   process.env.NEXT_PUBLIC_BACKEND_URL?.replace(/\/$/, "") || "http://localhost:8000";
@@ -200,6 +206,51 @@ export const api = {
     return request<RTSPInferenceResponse>("/api/inference/rtsp", {
       method: "POST",
       body: formData,
+    });
+  },
+
+  /**
+   * Cameras Management API
+   */
+  async getCameras(filters?: { sector?: string; status?: string }): Promise<Camera[]> {
+    const params = new URLSearchParams();
+    if (filters?.sector) params.append("sector", filters.sector);
+    if (filters?.status) params.append("status", filters.status);
+    const qs = params.toString() ? `?${params.toString()}` : "";
+    return request<Camera[]>(`/api/cameras${qs}`);
+  },
+
+  async getCamera(id: string): Promise<Camera> {
+    return request<Camera>(`/api/cameras/${encodeURIComponent(id)}`);
+  },
+
+  async createCamera(input: CreateCameraInput): Promise<Camera> {
+    return request<Camera>("/api/cameras", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(input),
+    });
+  },
+
+  async updateCamera(id: string, input: UpdateCameraInput): Promise<Camera> {
+    return request<Camera>(`/api/cameras/${encodeURIComponent(id)}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(input),
+    });
+  },
+
+  async deleteCamera(id: string): Promise<{ status: string; message: string; deleted_id: string }> {
+    return request(`/api/cameras/${encodeURIComponent(id)}`, {
+      method: "DELETE",
+    });
+  },
+
+  async testStream(params: { streamUrl?: string; ipAddress?: string; port?: number }): Promise<StreamTestResult> {
+    return request<StreamTestResult>("/api/cameras/test-stream", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(params),
     });
   },
 };
