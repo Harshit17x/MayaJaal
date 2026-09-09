@@ -20,12 +20,13 @@ from __future__ import annotations
 
 import logging
 import tempfile
+import uuid
 from pathlib import Path
 
 import cv2
 import numpy as np
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse
 
 from app.core.config import settings
 from app.core.runtime import (
@@ -48,6 +49,7 @@ from app.pipeline.rtsp_loader import (
 from app.tracking.config import TrackerConfig
 from app.tracking.tracker import ByteTrackerWrapper, ByteTrackerError
 from app.tracking.session_store import tracker_session_store
+from app.tracking.annotator import draw_tracked_boxes, convert_video_to_h264
 
 
 logger = logging.getLogger(__name__)
@@ -88,19 +90,27 @@ def _create_preprocessor(target_width: int = 640, target_height: int = 640) -> P
 
 
 def _build_tracker_config(
-    activation_threshold: float,
-    lost_track_buffer: int,
-    matching_threshold: float,
-    frame_rate: int,
-    min_consecutive_frames: int,
+    activation_threshold: Any,
+    lost_track_buffer: Any,
+    matching_threshold: Any,
+    frame_rate: Any,
+    min_consecutive_frames: Any,
 ) -> TrackerConfig:
+    def _val(v: Any, default: Any, fn: Any) -> Any:
+        if hasattr(v, "default"):
+            v = v.default
+        try:
+            return fn(v)
+        except Exception:
+            return default
+
     try:
         return TrackerConfig(
-            track_activation_threshold=activation_threshold,
-            lost_track_buffer=lost_track_buffer,
-            minimum_matching_threshold=matching_threshold,
-            frame_rate=frame_rate,
-            minimum_consecutive_frames=min_consecutive_frames,
+            track_activation_threshold=_val(activation_threshold, 0.25, float),
+            lost_track_buffer=_val(lost_track_buffer, 30, int),
+            minimum_matching_threshold=_val(matching_threshold, 0.8, float),
+            frame_rate=_val(frame_rate, 30, int),
+            minimum_consecutive_frames=_val(min_consecutive_frames, 1, int),
         )
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=f"Invalid tracker config: {exc}") from exc
@@ -131,6 +141,21 @@ async def video_tracking(
     Returns per-frame tracked objects with persistent ``track_id`` values.
     """
 
+    try:
+        conf_threshold = float(getattr(conf_threshold, "default", conf_threshold))
+    except Exception:
+        conf_threshold = 0.25
+
+    try:
+        iou_threshold = float(getattr(iou_threshold, "default", iou_threshold))
+    except Exception:
+        iou_threshold = 0.45
+
+    try:
+        max_frames = int(getattr(max_frames, "default", max_frames))
+    except Exception:
+        max_frames = 300
+
     # ── Model validation ────────────────────────────────────────────────
     model_name = (model_name or "").strip()
     if not model_name:
@@ -147,7 +172,7 @@ async def video_tracking(
         raise HTTPException(status_code=415, detail=f"Unsupported video type: {extension}")
 
     # ── Frame limit ──────────────────────────────────────────────────────
-    if not isinstance(max_frames, int) or max_frames < 1 or max_frames > 3000:
+    if max_frames < 1 or max_frames > 3000:
         raise HTTPException(status_code=400, detail="max_frames must be between 1 and 3000.")
 
     # ── Read upload ──────────────────────────────────────────────────────
@@ -197,8 +222,19 @@ async def video_tracking(
         if not temp_path.exists() or temp_path.stat().st_size == 0:
             raise HTTPException(status_code=500, detail="Temporary video file could not be created.")
 
-        # ── Per-request tracker ──────────────────────────────────────────
+        # ── Per-request tracker & server-side annotation ─────────────────
         tracker = ByteTrackerWrapper(tracker_config)
+
+        session_video_id = uuid.uuid4().hex[:12]
+        annotated_dir = settings.temp_directory / "annotated"
+        annotated_dir.mkdir(parents=True, exist_ok=True)
+        raw_annotated_path = settings.temp_directory / f"raw_ann_{session_video_id}.mp4"
+        final_annotated_path = annotated_dir / f"annotated_{session_video_id}.mp4"
+        frames_dir = settings.temp_directory / "annotated_frames" / session_video_id
+        frames_dir.mkdir(parents=True, exist_ok=True)
+
+        writer: cv2.VideoWriter | None = None
+        has_written_frames = False
 
         try:
             tw, th = _get_model_input_size(model_name)
@@ -269,23 +305,74 @@ async def video_tracking(
                 except ByteTrackerError as exc:
                     raise HTTPException(status_code=500, detail=str(exc)) from exc
 
+                tracked_dicts = [t.to_dict() for t in tracked_objects]
+
+                # ── Server-Side Bounding Box & Track ID Creation ─────────
+                annotated_frame = frame.copy()
+                draw_tracked_boxes(
+                    annotated_frame,
+                    tracked_dicts,
+                    frame_idx=frames_processed,
+                    draw_hud=True,
+                )
+
+                if writer is None:
+                    fps_val = float(metadata.get("fps") or 25.0)
+                    if fps_val <= 0 or fps_val > 120:
+                        fps_val = 25.0
+                    writer = cv2.VideoWriter(
+                        str(raw_annotated_path),
+                        cv2.VideoWriter_fourcc(*"mp4v"),
+                        fps_val,
+                        (orig_w, orig_h),
+                    )
+
+                if writer is not None and writer.isOpened():
+                    writer.write(annotated_frame)
+                    has_written_frames = True
+
+                # Save individual frame JPEG for frame inspector
+                frame_jpg_path = frames_dir / f"frame_{frames_processed:05d}.jpg"
+                try:
+                    cv2.imwrite(str(frame_jpg_path), annotated_frame, [cv2.IMWRITE_JPEG_QUALITY, 85])
+                except Exception:
+                    pass
+
                 frame_results.append(
                     {
                         "frame_index": frames_processed,
-                        "tracked_objects": [t.to_dict() for t in tracked_objects],
+                        "tracked_objects": tracked_dicts,
                         "detections_count": len(raw_detections),
                         "tracks_count": len(tracked_objects),
+                        "annotated_frame_url": f"/api/tracking/video/frame/{session_video_id}/{frames_processed}",
                     }
                 )
 
                 frames_processed += 1
 
+        if writer is not None:
+            writer.release()
+            writer = None
+
+        annotated_video_url: str | None = None
+        if has_written_frames and raw_annotated_path.exists():
+            success = convert_video_to_h264(raw_annotated_path, final_annotated_path)
+            if success and final_annotated_path.exists():
+                annotated_video_url = f"/api/tracking/video/annotated/annotated_{session_video_id}.mp4"
+            if raw_annotated_path.exists():
+                try:
+                    raw_annotated_path.unlink()
+                except OSError:
+                    pass
+
         return {
             "model_name": model_name,
             "status": "success",
             "video": metadata,
+            "video_id": session_video_id,
             "frames_requested": max_frames,
             "frames_processed": frames_processed,
+            "annotated_video_url": annotated_video_url,
             "tracker_config": {
                 "track_activation_threshold": tracker_config.track_activation_threshold,
                 "lost_track_buffer": tracker_config.lost_track_buffer,
@@ -350,6 +437,21 @@ async def rtsp_tracking(
     if not model_name:
         raise HTTPException(status_code=400, detail="model_name is required.")
 
+    try:
+        conf_threshold = float(getattr(conf_threshold, "default", conf_threshold))
+    except Exception:
+        conf_threshold = 0.25
+
+    try:
+        iou_threshold = float(getattr(iou_threshold, "default", iou_threshold))
+    except Exception:
+        iou_threshold = 0.45
+
+    try:
+        max_frames = int(getattr(max_frames, "default", max_frames))
+    except Exception:
+        max_frames = 5
+
     rtsp_url = (rtsp_url or "").strip()
     if not rtsp_url:
         raise HTTPException(status_code=400, detail="rtsp_url is required.")
@@ -360,7 +462,7 @@ async def rtsp_tracking(
     if not camera_id:
         raise HTTPException(status_code=400, detail="camera_id is required.")
 
-    if not isinstance(max_frames, int) or max_frames < 1 or max_frames > 100:
+    if max_frames < 1 or max_frames > 100:
         raise HTTPException(status_code=400, detail="max_frames must be between 1 and 100.")
 
     # ── Tracker config (only used if this is a new session) ──────────────
@@ -556,3 +658,39 @@ async def reset_rtsp_session(camera_id: str) -> dict:
         "status": "success",
         "message": f"Tracker session for camera_id='{camera_id}' has been reset.",
     }
+
+
+# ---------------------------------------------------------------------------
+# Server-side Annotated Video & Frame File Serving
+# ---------------------------------------------------------------------------
+
+@router.get("/video/annotated/{filename}")
+async def get_annotated_video(filename: str):
+    """
+    Serve a server-annotated ByteTrack video with burned-in bounding boxes (H.264 MP4).
+    """
+    safe_name = Path(filename).name
+    target_path = settings.temp_directory / "annotated" / safe_name
+    if not target_path.exists() or not target_path.is_file():
+        raise HTTPException(status_code=404, detail="Annotated video not found.")
+    return FileResponse(
+        str(target_path),
+        media_type="video/mp4",
+        filename=safe_name,
+    )
+
+
+@router.get("/video/frame/{video_id}/{frame_index}")
+async def get_annotated_frame(video_id: str, frame_index: int):
+    """
+    Serve a single server-annotated JPEG frame from tracked video.
+    """
+    safe_id = Path(video_id).name
+    frame_path = settings.temp_directory / "annotated_frames" / safe_id / f"frame_{frame_index:05d}.jpg"
+    if not frame_path.exists() or not frame_path.is_file():
+        raise HTTPException(status_code=404, detail="Annotated frame not found.")
+    return FileResponse(
+        str(frame_path),
+        media_type="image/jpeg",
+    )
+

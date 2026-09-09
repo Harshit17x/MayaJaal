@@ -192,6 +192,10 @@ function notify() {
 
 export const camerasStore = {
   getCameras(): Camera[] {
+    return [...memoryCameras];
+  },
+
+  initClientStorage(): Camera[] {
     if (!hasInitialized && typeof window !== "undefined") {
       memoryCameras = loadInitialData();
       hasInitialized = true;
@@ -379,14 +383,13 @@ export const camerasStore = {
 };
 
 export function useCameras() {
-  const [cameras, setCameras] = useState<Camera[]>(() =>
-    camerasStore.getCameras()
-  );
+  const [cameras, setCameras] = useState<Camera[]>(INITIAL_CAMERAS);
   const [isSyncing, setIsSyncing] = useState(false);
 
   useEffect(() => {
-    // Initial sync
-    setCameras(camerasStore.getCameras());
+    // Initial sync from client storage after hydration completes
+    const loaded = camerasStore.initClientStorage();
+    setCameras(loaded);
 
     const handleUpdate = (updated: Camera[]) => {
       setCameras(updated);

@@ -276,7 +276,7 @@ async def image_inference(
 async def video_inference(
     model_name: str = Form(...),
     file: UploadFile = File(...),
-    max_frames: int = Form(30),
+    max_frames: int = Form(300),
     conf_threshold: float = Form(0.25),
     iou_threshold: float = Form(0.45),
     postprocess: bool = Form(True),
@@ -329,10 +329,10 @@ async def video_inference(
             detail="max_frames must be an integer.",
         )
 
-    if max_frames < 1 or max_frames > 300:
+    if max_frames < 1 or max_frames > 3000:
         raise HTTPException(
             status_code=400,
-            detail="max_frames must be between 1 and 300.",
+            detail="max_frames must be between 1 and 3000.",
         )
 
     # -------------------------

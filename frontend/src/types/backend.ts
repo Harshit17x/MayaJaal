@@ -48,7 +48,10 @@ export interface Detection {
   confidence: number;
   class_id: number;
   class_name: string;
+  track_id?: number;
 }
+
+export type TrackedObject = Detection & { track_id: number };
 
 export interface OutputTensorMetadata {
   index: number;
@@ -86,6 +89,10 @@ export interface VideoFrameResult {
     detections: Detection[];
   };
   detections?: Detection[];
+  tracked_objects?: Detection[];
+  detections_count?: number;
+  tracks_count?: number;
+  annotated_frame_url?: string;
 }
 
 export type VideoFrameInference = VideoFrameResult;
@@ -103,10 +110,33 @@ export interface VideoInferenceResponse {
   frame_results?: VideoFrameResult[];
 }
 
+export interface TrackingVideoResponse {
+  model_name: string;
+  status: string;
+  video?: VideoMetadata;
+  video_id?: string;
+  frames_requested?: number;
+  frames_processed?: number;
+  annotated_video_url?: string;
+  results: VideoFrameResult[];
+  tracker_config?: Record<string, unknown>;
+}
+
 export interface RTSPInferenceResponse {
   model_name: string;
   status: string;
   rtsp_url: string;
   frames_sampled: number;
   frame_results: VideoFrameInference[];
+}
+
+export interface RTSPTrackingResponse {
+  model_name: string;
+  status: string;
+  camera_id?: string;
+  rtsp_url: string;
+  frames_requested?: number;
+  frames_processed?: number;
+  tracker_frame_index?: number;
+  results: VideoFrameResult[];
 }

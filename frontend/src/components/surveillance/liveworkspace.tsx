@@ -59,6 +59,9 @@ export function LiveWorkspace() {
   const [confThreshold, setConfThreshold] = useState<number>(0.25);
   const [iouThreshold, setIouThreshold] = useState<number>(0.45);
 
+  // Multi-Object Tracking (ByteTrack) toggle
+  const [enableTracking, setEnableTracking] = useState<boolean>(true);
+
   // ─── Live Stream (RTSP & IP Webcam Pro) state ───────────────────────────
   const [rtspUrl, setRtspUrl] = useState<string>("sample");
   const [rtspInputValue, setRtspInputValue] = useState<string>("sample");
@@ -84,9 +87,16 @@ export function LiveWorkspace() {
   const [videoPreviewUrl, setVideoPreviewUrl] = useState<string>(
     "/videos/himalayan-border-animated.mp4"
   );
+  const [originalVideoUrl, setOriginalVideoUrl] = useState<string>(
+    "/videos/himalayan-border-animated.mp4"
+  );
+  const [annotatedVideoUrl, setAnnotatedVideoUrl] = useState<string | null>(null);
+  const [isServerAnnotatedActive, setIsServerAnnotatedActive] = useState<boolean>(true);
   const [videoResults, setVideoResults] = useState<VideoFrameResult[]>([]);
   const [selectedFrameIndex, setSelectedFrameIndex] = useState<number>(0);
   const [videoMetadata, setVideoMetadata] = useState<VideoMetadata | null>(null);
+  // Max frames for video tracking / inference (default 300 = ~10s at 30fps)
+  const [videoMaxFrames, setVideoMaxFrames] = useState<number>(300);
 
   // Resolution dimensions
   const [sourceDims, setSourceDims] = useState<{ width: number; height: number }>({
@@ -261,6 +271,9 @@ export function LiveWorkspace() {
     setSelectedVideoFile(file);
     const url = URL.createObjectURL(file);
     setVideoPreviewUrl(url);
+    setOriginalVideoUrl(url);
+    setAnnotatedVideoUrl(null);
+    setIsServerAnnotatedActive(false);
     setSourceMode("upload-video");
     setDetections([]);
     setVideoResults([]);
@@ -287,6 +300,12 @@ export function LiveWorkspace() {
         width: videoRef.current.videoWidth || 1280,
         height: videoRef.current.videoHeight || 720,
       });
+      const dur = videoRef.current.duration;
+      if (dur && !isNaN(dur) && isFinite(dur) && dur > 0) {
+        // Automatically set frame limit to cover the video duration (up to 1800 frames / 60s)
+        const estFrames = Math.min(1800, Math.max(30, Math.round(dur * 30)));
+        setVideoMaxFrames(estFrames);
+      }
     }
   };
 
@@ -295,7 +314,7 @@ export function LiveWorkspace() {
     setSelectedFrameIndex(frameIndex);
     const target = videoResults.find((fr) => fr.frame_index === frameIndex);
     if (target) {
-      const dets = target.inference?.detections || target.detections || [];
+      const dets = target.tracked_objects || target.inference?.detections || target.detections || [];
       setDetections(dets);
     }
 
@@ -380,7 +399,6 @@ export function LiveWorkspace() {
           });
         }
       } else if (sourceMode === "upload-video") {
-        setStatusMessage("Sending video to backend endpoint /api/inference/video...");
         let fileToSubmit = selectedVideoFile;
         if (!fileToSubmit) {
           const res = await fetch(videoPreviewUrl);
@@ -390,58 +408,111 @@ export function LiveWorkspace() {
           });
         }
 
-        const result = await api.runVideoInference({
-          file: fileToSubmit,
-          modelName: modelToUse,
-          confThreshold,
-          iouThreshold,
-          maxFrames: 30,
-          postprocess: true,
-        });
+        let rawResults: VideoFrameResult[] = [];
+        let videoMeta: VideoMetadata | undefined;
+        let framesProcessed = 0;
+
+        if (enableTracking) {
+          setStatusMessage(
+            `Tracking objects across video sequence with ByteTrack (${videoMaxFrames} frames requested)...`
+          );
+          const result = await api.runVideoTracking({
+            file: fileToSubmit,
+            modelName: modelToUse,
+            confThreshold,
+            iouThreshold,
+            maxFrames: videoMaxFrames,
+          });
+          videoMeta = result.video;
+          framesProcessed = result.frames_processed ?? result.results.length;
+          rawResults = (result.results || []).map((fr) => ({
+            ...fr,
+            detections: fr.tracked_objects || fr.detections || [],
+          }));
+
+          // Server-Side Bounding Box Integration
+          if (result.annotated_video_url) {
+            const backendBase = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
+            const fullAnnUrl = `${backendBase}${result.annotated_video_url}?_t=${Date.now()}`;
+            setAnnotatedVideoUrl(fullAnnUrl);
+            setVideoPreviewUrl(fullAnnUrl);
+            setIsServerAnnotatedActive(true);
+          }
+        } else {
+          setStatusMessage(
+            `Sending video to backend endpoint /api/inference/video (${videoMaxFrames} frames requested)...`
+          );
+          const result = await api.runVideoInference({
+            file: fileToSubmit,
+            modelName: modelToUse,
+            confThreshold,
+            iouThreshold,
+            maxFrames: videoMaxFrames,
+            postprocess: true,
+          });
+          videoMeta = result.video;
+          framesProcessed =
+            result.frames_processed ??
+            result.total_frames_processed ??
+            (result.results || []).length;
+          rawResults = (result.results || result.frame_results || []).map((fr) => ({
+            ...fr,
+            detections: fr.inference?.detections || fr.detections || [],
+          }));
+        }
 
         const elapsed = Math.round(performance.now() - t0);
         setLatencyMs(elapsed);
-
-        const rawResults = result.results || result.frame_results || [];
         setVideoResults(rawResults);
 
-        if (result.video) {
-          setVideoMetadata(result.video);
-          if (result.video.width && result.video.height) {
+        if (videoMeta) {
+          setVideoMetadata(videoMeta);
+          if (videoMeta.width && videoMeta.height) {
             setSourceDims({
-              width: result.video.width,
-              height: result.video.height,
+              width: videoMeta.width,
+              height: videoMeta.height,
             });
           }
         }
 
-        // Collect all detections across all frames
+        // Collect all detections / tracked objects across all frames
         const allDetections: Detection[] = [];
+        const uniqueTrackIds = new Set<number>();
         rawResults.forEach((fr) => {
-          const dets = fr.inference?.detections || fr.detections || [];
-          dets.forEach((d) => allDetections.push(d));
+          const dets = fr.tracked_objects || fr.inference?.detections || fr.detections || [];
+          dets.forEach((d) => {
+            allDetections.push(d);
+            if (d.track_id !== undefined) {
+              uniqueTrackIds.add(d.track_id);
+            }
+          });
         });
 
         // Set active frame to first frame with detections
         const firstWithDets =
           rawResults.find(
-            (fr) => (fr.inference?.detections || fr.detections || []).length > 0
+            (fr) => (fr.tracked_objects || fr.inference?.detections || fr.detections || []).length > 0
           ) || rawResults[0];
 
         const activeDets = firstWithDets
-          ? firstWithDets.inference?.detections || firstWithDets.detections || []
+          ? firstWithDets.tracked_objects || firstWithDets.inference?.detections || firstWithDets.detections || []
           : [];
 
         setSelectedFrameIndex(firstWithDets?.frame_index ?? 0);
         setDetections(activeDets);
 
-        const framesProcessed =
-          result.frames_processed ??
-          result.total_frames_processed ??
-          rawResults.length;
+        const trackSummary =
+          uniqueTrackIds.size > 0
+            ? ` • ${uniqueTrackIds.size} unique targets tracked (ByteTrack MOT)`
+            : "";
+
+        const durationSecs =
+          videoMeta?.fps && videoMeta.fps > 0
+            ? (framesProcessed / videoMeta.fps).toFixed(1)
+            : (framesProcessed / 30).toFixed(1);
 
         setStatusMessage(
-          `Processed ${framesProcessed} video frames in ${elapsed}ms. Found ${allDetections.length} targets across sequence.`
+          `Processed ${framesProcessed} video frames (~${durationSecs}s) in ${elapsed}ms. Found ${allDetections.length} targets${trackSummary}.`
         );
 
         // Register alerts in store
@@ -458,8 +529,9 @@ export function LiveWorkspace() {
             const isHigh = highThreatClasses.includes(
               det.class_name.toLowerCase()
             );
+            const trackPrefix = det.track_id !== undefined ? `[Track #${det.track_id}] ` : "";
             alertsStore.addAlert({
-              title: `${det.class_name
+              title: `${trackPrefix}${det.class_name
                 .replace(/_/g, " ")
                 .toUpperCase()} Identified in Video Stream`,
               location: `Video Stream (${fileToSubmit.name})`,
@@ -472,22 +544,43 @@ export function LiveWorkspace() {
           }
         });
       } else if (sourceMode === "rtsp") {
-        setStatusMessage("Connecting to RTSP stream and sampling frames...");
-        const result = await api.runRtspInference({
-          rtspUrl,
-          modelName: modelToUse,
-          confThreshold,
-          iouThreshold,
-          maxFrames: 5,
-        });
+        if (enableTracking) {
+          setStatusMessage("Connecting to RTSP stream and running ByteTrack tracking...");
+          const result = await api.runRtspTracking({
+            rtspUrl,
+            cameraId: selectedCamera?.id || "live_workspace_rtsp",
+            modelName: modelToUse,
+            confThreshold,
+            iouThreshold,
+            maxFrames: 5,
+          });
 
-        const elapsed = Math.round(performance.now() - t0);
-        setLatencyMs(elapsed);
-        const lastFrame = result.frame_results?.[result.frame_results.length - 1];
-        setDetections(lastFrame?.detections || []);
-        setStatusMessage(
-          `Sampled ${result.frames_sampled} frames from RTSP stream.`
-        );
+          const elapsed = Math.round(performance.now() - t0);
+          setLatencyMs(elapsed);
+          const lastFrame = result.results?.[result.results.length - 1];
+          const trackedDets = lastFrame?.tracked_objects || lastFrame?.detections || [];
+          setDetections(trackedDets);
+          setStatusMessage(
+            `ByteTrack tracked ${trackedDets.length} targets across ${result.frames_processed ?? 5} RTSP frames (Session: ${result.camera_id}).`
+          );
+        } else {
+          setStatusMessage("Connecting to RTSP stream and sampling frames...");
+          const result = await api.runRtspInference({
+            rtspUrl,
+            modelName: modelToUse,
+            confThreshold,
+            iouThreshold,
+            maxFrames: 5,
+          });
+
+          const elapsed = Math.round(performance.now() - t0);
+          setLatencyMs(elapsed);
+          const lastFrame = result.frame_results?.[result.frame_results.length - 1];
+          setDetections(lastFrame?.detections || []);
+          setStatusMessage(
+            `Sampled ${result.frames_sampled} frames from RTSP stream.`
+          );
+        }
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Inference failed";
@@ -609,6 +702,34 @@ export function LiveWorkspace() {
             />
           </div>
 
+          {/* Video Frames Limit Control */}
+          {sourceMode === "upload-video" && (
+            <div className="flex items-center gap-1.5 text-xs text-slate-700 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5">
+              <Film className="w-3.5 h-3.5 text-slate-500" />
+              <span className="font-medium whitespace-nowrap">Frames:</span>
+              <select
+                value={videoMaxFrames}
+                onChange={(e) => setVideoMaxFrames(parseInt(e.target.value, 10))}
+                className="text-xs bg-white border border-slate-300 rounded px-1.5 py-0.5 font-mono text-slate-800 focus:outline-none focus:ring-1 focus:ring-emerald-600 cursor-pointer"
+                title="Number of video frames to annotate with ByteTrack"
+              >
+                <option value={30}>30 frames (~1s preview)</option>
+                <option value={90}>90 frames (~3s)</option>
+                <option value={150}>150 frames (~5s)</option>
+                <option value={300}>300 frames (~10s full)</option>
+                <option value={450}>450 frames (~15s)</option>
+                <option value={600}>600 frames (~20s)</option>
+                <option value={900}>900 frames (~30s)</option>
+                <option value={1800}>1800 frames (~60s)</option>
+                {![30, 90, 150, 300, 450, 600, 900, 1800].includes(videoMaxFrames) && (
+                  <option value={videoMaxFrames}>
+                    {videoMaxFrames} frames ({((videoMaxFrames) / 30).toFixed(1)}s auto)
+                  </option>
+                )}
+              </select>
+            </div>
+          )}
+
           {/* Upload Button based on mode */}
           {sourceMode === "upload-image" ? (
             <button
@@ -632,6 +753,23 @@ export function LiveWorkspace() {
             </button>
           ) : null}
 
+          {/* ByteTrack MOT Toggle (for Video & RTSP) */}
+          {(sourceMode === "upload-video" || sourceMode === "rtsp") && (
+            <button
+              type="button"
+              onClick={() => setEnableTracking((prev) => !prev)}
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
+                enableTracking
+                  ? "bg-emerald-700 hover:bg-emerald-600 text-white border-emerald-500 shadow-xs"
+                  : "bg-slate-100 hover:bg-slate-200 text-slate-600 border-slate-300"
+              }`}
+              title="ByteTrack Multi-Object Tracking (persistent Track IDs across frames)"
+            >
+              <Layers className="w-3.5 h-3.5" />
+              <span>ByteTrack: {enableTracking ? "ON" : "OFF"}</span>
+            </button>
+          )}
+
           {/* Run Inference CTA */}
           <button
             type="button"
@@ -642,12 +780,12 @@ export function LiveWorkspace() {
             {isInferencing ? (
               <>
                 <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                Inferencing...
+                {enableTracking && sourceMode !== "upload-image" ? "Tracking..." : "Inferencing..."}
               </>
             ) : (
               <>
                 <Play className="w-3.5 h-3.5 fill-current" />
-                Run AI Detection
+                {enableTracking && sourceMode !== "upload-image" ? "Run ByteTrack Tracking" : "Run AI Detection"}
               </>
             )}
           </button>
@@ -996,10 +1134,10 @@ export function LiveWorkspace() {
               />
             )}
 
-            {/* Detection overlay canvas — only for image / video modes */}
+            {/* Detection overlay canvas — only for image mode or when client canvas is active */}
             {sourceMode !== "rtsp" && (
               <DetectionCanvas
-                detections={detections}
+                detections={isServerAnnotatedActive && sourceMode === "upload-video" ? [] : detections}
                 sourceWidth={sourceDims.width}
                 sourceHeight={sourceDims.height}
               />
@@ -1009,11 +1147,45 @@ export function LiveWorkspace() {
           {/* Video Frames Scrubber Bar (visible when video results are available) */}
           {sourceMode === "upload-video" && videoResults.length > 0 && (
             <div className="bg-slate-900 px-4 py-2.5 border-t border-slate-800">
-              <div className="flex items-center justify-between text-xs text-slate-400 mb-2">
+              <div className="flex flex-wrap items-center justify-between text-xs text-slate-400 mb-2 gap-2">
                 <span className="font-mono flex items-center gap-1.5 text-emerald-400 font-semibold">
                   <Film className="w-3.5 h-3.5" />
                   Processed Video Frames ({videoResults.length})
                 </span>
+
+                {annotatedVideoUrl && (
+                  <div className="flex items-center gap-1.5 bg-slate-800 p-0.5 rounded-md border border-slate-700">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setVideoPreviewUrl(annotatedVideoUrl);
+                        setIsServerAnnotatedActive(true);
+                      }}
+                      className={`px-2 py-0.5 rounded text-[10px] font-mono font-medium transition-all ${
+                        isServerAnnotatedActive
+                          ? "bg-emerald-600 text-white font-bold"
+                          : "text-slate-400 hover:text-white"
+                      }`}
+                    >
+                      Server Bounding Boxes (Active)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setVideoPreviewUrl(originalVideoUrl);
+                        setIsServerAnnotatedActive(false);
+                      }}
+                      className={`px-2 py-0.5 rounded text-[10px] font-mono font-medium transition-all ${
+                        !isServerAnnotatedActive
+                          ? "bg-emerald-600 text-white font-bold"
+                          : "text-slate-400 hover:text-white"
+                      }`}
+                    >
+                      Raw Video + Canvas
+                    </button>
+                  </div>
+                )}
+
                 <span className="text-[11px] text-slate-400">
                   Click frame to inspect targets
                 </span>
@@ -1097,7 +1269,12 @@ export function LiveWorkspace() {
                 {detections.map((det, idx) => (
                   <div key={idx} className="py-2.5 space-y-1">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold font-mono uppercase text-slate-800">
+                      <span className="text-xs font-bold font-mono uppercase text-slate-800 flex items-center gap-1.5">
+                        {det.track_id !== undefined && (
+                          <span className="bg-emerald-950 text-emerald-300 border border-emerald-700/50 px-1.5 py-0.5 rounded text-[10px] font-bold font-mono">
+                            ID #{det.track_id}
+                          </span>
+                        )}
                         {det.class_name} #{idx + 1}
                       </span>
                       <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">
