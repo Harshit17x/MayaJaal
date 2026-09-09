@@ -22,12 +22,12 @@ const GOOGLE_MAPS_KEY =
   process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ||
   "AIzaSyBf6-zZna3bNFU7cBNeeHpYfVtrOrHa-d4";
 
-// Demo Alert Marker
+// Demo Alert Marker on International Border
 const DEMO_ALERT = {
   id: "alert-1",
-  name: "Demo Alert — Geofence Crossing",
-  lat: 23.25,
-  lng: 78.75,
+  name: "Sector-02 Intrusion Alert — RS Pura Border Fence",
+  lat: 32.7160,
+  lng: 74.6590,
   severity: "High",
 };
 
@@ -68,8 +68,8 @@ export function BorderMap({
   customCameras,
   selectedCameraId,
   onMapClick,
-  center = { lat: 23.30, lng: 78.60 },
-  zoom = 5.2,
+  center = { lat: 28.60, lng: 77.20 },
+  zoom = 5.5,
   interactive = true,
 }: BorderMapProps) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
