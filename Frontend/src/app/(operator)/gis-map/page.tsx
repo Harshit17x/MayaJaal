@@ -17,7 +17,7 @@ import {
 
 export default function GisMapPage() {
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [activeLayer, setActiveLayer] = useState<"liberty" | "satellite">("liberty");
+  const [activeLayer, setActiveLayer] = useState<"hybrid" | "satellite" | "terrain" | "roadmap">("hybrid");
 
   return (
     <div className="space-y-6 pb-12">
@@ -47,17 +47,17 @@ export default function GisMapPage() {
             <span>23.30° N, 78.60° E</span>
           </div>
 
-          {/* Layer Toggle */}
+          {/* Google Maps Layer Toggle */}
           <div className="inline-flex p-1 rounded-xl bg-slate-100 border border-slate-200">
             <button
-              onClick={() => setActiveLayer("liberty")}
+              onClick={() => setActiveLayer("hybrid")}
               className={`px-3 py-1 text-xs font-semibold rounded-lg transition-all ${
-                activeLayer === "liberty"
+                activeLayer === "hybrid"
                   ? "bg-white text-slate-900 shadow-xs"
                   : "text-slate-600 hover:text-slate-900"
               }`}
             >
-              Terrain / Vector
+              Hybrid
             </button>
             <button
               onClick={() => setActiveLayer("satellite")}
@@ -68,6 +68,16 @@ export default function GisMapPage() {
               }`}
             >
               Satellite
+            </button>
+            <button
+              onClick={() => setActiveLayer("terrain")}
+              className={`px-3 py-1 text-xs font-semibold rounded-lg transition-all ${
+                activeLayer === "terrain"
+                  ? "bg-white text-slate-900 shadow-xs"
+                  : "text-slate-600 hover:text-slate-900"
+              }`}
+            >
+              Terrain
             </button>
           </div>
 
@@ -97,15 +107,15 @@ export default function GisMapPage() {
           isFullscreen ? "grid-cols-1" : "grid-cols-1 lg:grid-cols-12"
         }`}
       >
-        {/* Full Interactive BorderMap */}
+        {/* Full Interactive Google BorderMap */}
         <div
           className={`${
             isFullscreen
-              ? "col-span-1 min-h-[750px]"
+              ? "col-span-1 min-h-[760px]"
               : "lg:col-span-7 xl:col-span-8"
           } flex flex-col`}
         >
-          <BorderMap />
+          <BorderMap initialMapType={activeLayer} height={isFullscreen ? "760px" : "560px"} />
         </div>
 
         {/* Tactical Feed / Recent Alerts */}
