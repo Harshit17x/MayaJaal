@@ -15,6 +15,7 @@ from app.utils.logging import get_logger, setup_logging
 
 setup_logging()
 logger = get_logger("SIH26187.API")
+cors_origins = [origin.strip() for origin in settings.cors_origins.split(",") if origin.strip()]
 
 
 @asynccontextmanager
@@ -49,10 +50,11 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# Cross-Origin Resource Sharing (CORS) setup
+# Cross-Origin Resource Sharing (CORS) setup. Keep this to trusted operator UI
+# origins; a wildcard with credentials permits untrusted browser clients.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

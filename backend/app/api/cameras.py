@@ -1,4 +1,5 @@
 import json
+import ipaddress
 import os
 from pathlib import Path
 import re
@@ -11,6 +12,7 @@ from fastapi import APIRouter, HTTPException, Query, status
 from pydantic import BaseModel, Field
 
 from app.utils.logging import get_logger
+from app.core.config import settings
 
 logger = get_logger("SIH26187.Cameras")
 
@@ -219,6 +221,69 @@ def _save_cameras(cameras: list[dict[str, Any]]) -> None:
     with open(temp_file, "w", encoding="utf-8") as f:
         json.dump(cameras, f, indent=2)
     temp_file.replace(DATA_FILE)
+
+
+def _allowed_camera_networks() -> tuple[ipaddress.IPv4Network | ipaddress.IPv6Network, ...]:
+    """Return the explicitly configured camera networks.
+
+    Stream testing opens a network connection from the backend. Keeping the
+    target in an allowlist prevents the endpoint from becoming a general
+    internal-network scanner.
+    """
+    try:
+        networks = tuple(
+            ipaddress.ip_network(value.strip(), strict=False)
+            for value in settings.allowed_camera_cidrs.split(",")
+            if value.strip()
+        )
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Invalid SIH_ALLOWED_CAMERA_CIDRS configuration.",
+        ) from exc
+
+    if not networks:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Camera stream testing is disabled until an allowed network is configured.",
+        )
+    return networks
+
+
+def _resolve_approved_camera_host(host: str, port: int) -> str:
+    """Resolve *host* and return an allowlisted address for the socket call."""
+    if not host:
+        raise HTTPException(status_code=400, detail="RTSP URL must include a host.")
+
+    try:
+        address_records = socket.getaddrinfo(
+            host,
+            port,
+            family=socket.AF_UNSPEC,
+            type=socket.SOCK_STREAM,
+        )
+    except socket.gaierror as exc:
+        raise HTTPException(
+            status_code=400,
+            detail="Unable to resolve the requested camera host.",
+        ) from exc
+
+    allowed_networks = _allowed_camera_networks()
+    for record in address_records:
+        resolved_host = record[4][0]
+        try:
+            address = ipaddress.ip_address(resolved_host)
+        except ValueError:
+            continue
+        if any(address in network for network in allowed_networks):
+            # Connect using the resolved address rather than the supplied DNS
+            # name, preventing a DNS-rebinding change between validation and use.
+            return str(address)
+
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail="Camera host is outside the approved camera networks.",
+    )
 
 
 class HealthStats(BaseModel):
@@ -450,7 +515,7 @@ async def test_stream(payload: TestStreamRequest) -> dict[str, Any]:
                     "latencyMs": 0,
                     "message": f"Invalid protocol '{parsed.scheme}'. RTSP streams must begin with rtsp://",
                 }
-            target_host = parsed.hostname or ip or "127.0.0.1"
+            target_host = parsed.hostname or ip
             target_port = parsed.port or port or 554
         except Exception as exc:
             return {
@@ -460,27 +525,30 @@ async def test_stream(payload: TestStreamRequest) -> dict[str, Any]:
                 "message": f"Failed to parse RTSP URL: {exc}",
             }
 
-    # Attempt TCP handshake test to RTSP port
+    approved_host = _resolve_approved_camera_host(target_host or "", target_port)
+
+    # Attempt TCP handshake test to the approved RTSP port.
     start_time = time.perf_counter()
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    address_family = socket.AF_INET6 if ":" in approved_host else socket.AF_INET
+    sock = socket.socket(address_family, socket.SOCK_STREAM)
     sock.settimeout(1.5)  # 1.5s timeout for local/edge network check
 
     reachable = False
     message = ""
     try:
-        sock.connect((target_host, target_port))
+        sock.connect((approved_host, target_port))
         elapsed_ms = int((time.perf_counter() - start_time) * 1000)
         reachable = True
-        message = f"RTSP handshake successful at {target_host}:{target_port} (Latency: {elapsed_ms}ms)"
+        message = f"RTSP handshake successful at {approved_host}:{target_port} (Latency: {elapsed_ms}ms)"
     except socket.timeout:
         elapsed_ms = int((time.perf_counter() - start_time) * 1000)
         reachable = False
-        message = f"Connection timed out connecting to {target_host}:{target_port}."
+        message = f"Connection timed out connecting to {approved_host}:{target_port}."
     except Exception as exc:
         elapsed_ms = int((time.perf_counter() - start_time) * 1000)
         # Note: in demo or isolated environments, the target camera IP might be simulated.
         reachable = False
-        message = f"Connection refused or unreachable at {target_host}:{target_port}: {exc}"
+        message = f"Connection refused or unreachable at {approved_host}:{target_port}: {exc}"
     finally:
         sock.close()
 
