@@ -10,8 +10,18 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "IBVAP — Intelligent Border Video Analytics Platform",
-  description: "Intelligent Border Video Analytics Platform",
+  title: "MayaJaal — Border Video Analytics",
+  description: "Intelligent Border Video Analytics Platform • Real-time surveillance for a secure tomorrow",
+  icons: {
+    icon: [
+      { url: "/favicon.ico" },
+      { url: "/images/logo/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/images/logo/favicon-64x64.png", sizes: "64x64", type: "image/png" },
+    ],
+    apple: [
+      { url: "/images/logo/apple-touch-icon.png", sizes: "192x192", type: "image/png" },
+    ],
+  },
 };
 
 export default function RootLayout({

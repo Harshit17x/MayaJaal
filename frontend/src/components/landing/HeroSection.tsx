@@ -52,10 +52,10 @@ export function HeroSection() {
 
           <div className="pt-2">
             <Link
-              href={isAuthenticated ? "/gis-map" : "/login?redirect=/gis-map"}
+              href={isAuthenticated ? "/dashboard" : "/login?redirect=/dashboard"}
               className="inline-flex items-center gap-3 px-8 py-3.5 rounded-full bg-[#1b3a2a] hover:bg-[#12281c] text-white text-base font-semibold tracking-wide shadow-lg shadow-emerald-950/20 hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
             >
-              <span>View Live Map</span>
+              <span>Open Dashboard</span>
               <ArrowRight className="w-4 h-4 text-emerald-300" />
             </Link>
           </div>

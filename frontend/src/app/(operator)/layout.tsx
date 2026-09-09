@@ -214,11 +214,11 @@ export default function OperatorLayout({
         />
       )}
 
-      {/* Dark Forest Green Left Sidebar (Auto-expand on hover, auto-collapse on mouse leave) */}
+      {/* Army Green Left Sidebar (Auto-expand on hover, auto-collapse on mouse leave) */}
       <aside
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
-        className={`fixed top-0 bottom-0 left-0 z-40 bg-[#0e2218] text-white flex flex-col border-r border-[#091710] select-none transition-all duration-300 ease-in-out ${
+        className={`fixed top-0 bottom-0 left-0 z-40 bg-[#133322] text-white flex flex-col border-r border-[#0e2619] select-none transition-all duration-300 ease-in-out ${
           sidebarMode === "hidden"
             ? isExpanded
               ? "w-64 translate-x-0 shadow-2xl shadow-black/70 ring-1 ring-emerald-500/20"
@@ -229,28 +229,20 @@ export default function OperatorLayout({
         }`}
       >
         {/* Top Header: MayaJaal Logo, Status & Controls */}
-        <div className="p-3.5 border-b border-[#163325]">
+        <div className="p-3.5 border-b border-[#19402b]">
           <div className="flex items-center justify-between gap-2">
             <Link
               href="/dashboard"
               className="flex items-center gap-3 group min-w-0"
               title="MayaJaal - Border Video Analytics"
             >
-              {/* Stylized MayaJaal Brand Icon */}
-              <div className="w-10 h-10 rounded-xl bg-[#17432c] border border-emerald-500/30 flex items-center justify-center flex-shrink-0 shadow-xs group-hover:border-emerald-400/60 transition-colors">
-                <svg
-                  className="w-6 h-6 text-emerald-400"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <polygon points="12 2 2 7 12 12 22 7 12 2" />
-                  <polyline points="2 17 12 22 22 17" />
-                  <polyline points="2 12 12 17 22 12" />
-                </svg>
+              {/* Official MayaJaal Brand Emblem (High-visibility Army Green / Mint variant) */}
+              <div className="w-10 h-10 rounded-xl bg-[#1b442e] border border-emerald-400/40 ring-1 ring-emerald-400/20 flex items-center justify-center flex-shrink-0 shadow-xs group-hover:border-emerald-300/60 transition-all p-1.5 overflow-hidden">
+                <img
+                  src="/images/logo/mayajaal-emblem-light.png"
+                  alt="MayaJaal Logo"
+                  className="w-full h-full object-contain filter drop-shadow-xs"
+                />
               </div>
 
               {isExpanded && (
@@ -258,7 +250,7 @@ export default function OperatorLayout({
                   <h1 className="text-base font-extrabold tracking-wider text-white uppercase truncate leading-tight">
                     MAYAJAAL
                   </h1>
-                  <p className="text-[11px] font-medium text-emerald-300/80 truncate">
+                  <p className="text-[11px] font-medium text-emerald-300/90 truncate">
                     Border Video Analytics
                   </p>
                 </div>
@@ -319,13 +311,13 @@ export default function OperatorLayout({
 
           {/* Node Active Sector Pill */}
           {isExpanded ? (
-            <div className="mt-3 flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#143224] border border-emerald-600/30 text-xs font-medium text-emerald-300 w-full animate-in fade-in duration-200">
+            <div className="mt-3 flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#183e29] border border-emerald-500/30 text-xs font-medium text-emerald-300 w-full animate-in fade-in duration-200">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse flex-shrink-0" />
               <span className="truncate">Node Active • Sector-04</span>
             </div>
           ) : (
             <div
-              className="mt-3 flex items-center justify-center w-10 h-8 mx-auto rounded-lg bg-[#143224] border border-emerald-600/30 cursor-help"
+              className="mt-3 flex items-center justify-center w-10 h-8 mx-auto rounded-lg bg-[#183e29] border border-emerald-500/30 cursor-help"
               title="Node Active • Sector-04"
             >
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />

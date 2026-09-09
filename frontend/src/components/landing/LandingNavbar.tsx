@@ -10,19 +10,36 @@ export function LandingNavbar() {
 
   return (
     <header className="w-full z-30 pt-6 px-6 sm:px-10 lg:px-16 flex items-center justify-between">
-      {/* Left Branding */}
-      <div className="flex items-center gap-3.5">
-        <EmblemIndia className="w-10 h-12" />
-        <div className="flex flex-col">
-          <span className="text-[11px] font-semibold text-slate-700 tracking-wide uppercase">
-            Government of India
-          </span>
-          <span className="text-base sm:text-lg font-bold tracking-tight text-slate-950 leading-tight">
-            Border Surveillance Portal
-          </span>
-          <span className="text-[10px] font-bold tracking-[0.22em] text-[#1b4332] uppercase mt-0.5">
-            SECURE BORDERS • SAFER TOMORROW
-          </span>
+      {/* Left Branding: MayaJaal Logo & Official Seal */}
+      <div className="flex items-center gap-4">
+        <Link href="/" className="flex items-center gap-3 group">
+          <img
+            src="/images/logo/mayajaal-emblem.png"
+            alt="MayaJaal Logo"
+            className="w-10 h-10 object-contain drop-shadow-xs group-hover:scale-105 transition-transform"
+          />
+          <div className="flex flex-col">
+            <span className="text-base sm:text-lg font-extrabold tracking-wider text-slate-950 leading-tight">
+              MAYAJAAL
+            </span>
+            <span className="text-[10px] font-bold tracking-[0.18em] text-[#1b4332] uppercase">
+              BORDER VIDEO ANALYTICS
+            </span>
+          </div>
+        </Link>
+
+        <div className="h-8 w-px bg-slate-300/80 hidden md:block" />
+
+        <div className="hidden md:flex items-center gap-2.5">
+          <EmblemIndia className="w-7 h-9 text-slate-800" />
+          <div className="flex flex-col">
+            <span className="text-[10px] font-bold text-slate-600 tracking-wide uppercase">
+              Government of India
+            </span>
+            <span className="text-[9px] font-bold tracking-[0.2em] text-[#1b4332] uppercase">
+              SECURE BORDERS • SAFER TOMORROW
+            </span>
+          </div>
         </div>
       </div>
 
@@ -54,7 +71,7 @@ export function LandingNavbar() {
           </Link>
         ) : (
           <Link
-            href="/login"
+            href="/login?redirect=/dashboard"
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#172e22] hover:bg-[#0f1f17] text-white text-sm font-semibold shadow-sm transition-all"
           >
             <User className="w-4 h-4 text-white" />

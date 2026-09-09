@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { User, Lock, ArrowRight, Eye, EyeOff } from "lucide-react";
@@ -10,9 +10,17 @@ import { useAuth, DEMO_OPERATORS } from "@/lib/authStore";
 function LoginFormCard() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectTarget = searchParams.get("redirect") || "/dashboard";
+  const rawRedirect = searchParams.get("redirect");
+  const redirectTarget = !rawRedirect || rawRedirect === "/gis-map" ? "/dashboard" : rawRedirect;
 
-  const { login } = useAuth();
+  const { login, isAuthenticated } = useAuth();
+
+  // If already logged in, navigate straight to the destination dashboard
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.replace(redirectTarget);
+    }
+  }, [isAuthenticated, redirectTarget, router]);
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -47,14 +55,24 @@ function LoginFormCard() {
     <div className="w-full max-w-[420px] mx-auto">
       {/* Clean White Card matching reference design */}
       <div className="bg-white/95 backdrop-blur-md rounded-[32px] p-8 sm:p-10 shadow-2xl shadow-black/30 border border-white/60 text-slate-900 transition-all">
-        {/* Title & Subtitle */}
-        <div className="text-center mb-8">
-          <h1 className="text-2xl sm:text-[28px] font-bold text-slate-900 tracking-tight">
-            Welcome Back
+        {/* MayaJaal Emblem & Title */}
+        <div className="flex flex-col items-center mb-6">
+          <div className="w-16 h-16 rounded-2xl bg-emerald-50/80 border border-emerald-200/80 p-2.5 shadow-sm flex items-center justify-center mb-3 group">
+            <img
+              src="/images/logo/mayajaal-emblem.png"
+              alt="MayaJaal Logo"
+              className="w-full h-full object-contain"
+            />
+          </div>
+          <h1 className="text-2xl font-black text-slate-900 tracking-wider">
+            MAYAJAAL
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Sign in to continue
+          <p className="text-[11px] font-bold text-[#1a4a32] tracking-[0.18em] uppercase mt-0.5">
+            Border Video Analytics
           </p>
+          <span className="text-xs text-slate-500 mt-1">
+            Sign in to operator console
+          </span>
         </div>
 
         {/* Input Form */}
