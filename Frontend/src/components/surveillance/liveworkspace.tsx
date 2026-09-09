@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect } from "react";
 import { api } from "@/lib/api";
 import { useBackendStatus } from "@/lib/hooks/useBackendStatus";
-import { Detection } from "@/types/backend";
+import { Detection, VideoFrameResult, VideoMetadata } from "@/types/backend";
 import { alertsStore } from "@/lib/alertsStore";
 import { DetectionCanvas } from "./detectioncanvas";
 import { CameraGrid } from "./cameragrid";
@@ -12,20 +12,23 @@ import {
   Upload,
   Radio,
   Sliders,
-  AlertTriangle,
   RefreshCw,
   CheckCircle2,
   Cpu,
   Layers,
   Sparkles,
   Camera,
+  Video,
+  Film,
 } from "lucide-react";
 
 export function LiveWorkspace() {
   const { isOnline, loadedModels, refetch } = useBackendStatus();
 
   // Mode: "upload-image" | "upload-video" | "rtsp"
-  const [sourceMode, setSourceMode] = useState<"upload-image" | "upload-video" | "rtsp">("upload-image");
+  const [sourceMode, setSourceMode] = useState<
+    "upload-image" | "upload-video" | "rtsp"
+  >("upload-image");
 
   // Selected Model
   const [selectedModel, setSelectedModel] = useState<string>("");
@@ -39,8 +42,21 @@ export function LiveWorkspace() {
   const [rtspUrl, setRtspUrl] = useState<string>("rtsp://127.0.0.1:8554/live");
 
   // Image source state
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string>("/images/himalayan-border-hero.jpg");
+  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
+  const [imagePreviewUrl, setImagePreviewUrl] = useState<string>(
+    "/images/himalayan-border-hero.jpg"
+  );
+
+  // Video source state
+  const [selectedVideoFile, setSelectedVideoFile] = useState<File | null>(null);
+  const [videoPreviewUrl, setVideoPreviewUrl] = useState<string>(
+    "/videos/himalayan-border-animated.mp4"
+  );
+  const [videoResults, setVideoResults] = useState<VideoFrameResult[]>([]);
+  const [selectedFrameIndex, setSelectedFrameIndex] = useState<number>(0);
+  const [videoMetadata, setVideoMetadata] = useState<VideoMetadata | null>(null);
+
+  // Resolution dimensions
   const [sourceDims, setSourceDims] = useState<{ width: number; height: number }>({
     width: 1280,
     height: 720,
@@ -52,8 +68,10 @@ export function LiveWorkspace() {
   const [latencyMs, setLatencyMs] = useState<number | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const imageFileInputRef = useRef<HTMLInputElement>(null);
+  const videoFileInputRef = useRef<HTMLInputElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   // Set default model when models list updates (prioritize 'best')
   useEffect(() => {
@@ -82,17 +100,35 @@ export function LiveWorkspace() {
     }
   };
 
-  // Handle local file selection
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Handle local image selection
+  const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    setSelectedFile(file);
+    setSelectedImageFile(file);
     const url = URL.createObjectURL(file);
-    setPreviewUrl(url);
+    setImagePreviewUrl(url);
+    setSourceMode("upload-image");
     setDetections([]);
     setLatencyMs(null);
-    setStatusMessage(null);
+    setStatusMessage(`Loaded image: ${file.name}`);
+  };
+
+  // Handle local video selection
+  const handleVideoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setSelectedVideoFile(file);
+    const url = URL.createObjectURL(file);
+    setVideoPreviewUrl(url);
+    setSourceMode("upload-video");
+    setDetections([]);
+    setVideoResults([]);
+    setLatencyMs(null);
+    setStatusMessage(
+      `Loaded video: ${file.name} (${(file.size / (1024 * 1024)).toFixed(1)} MB)`
+    );
   };
 
   // Measure natural dimensions when preview image loads
@@ -105,7 +141,31 @@ export function LiveWorkspace() {
     }
   };
 
-  // Trigger AI Inference
+  // Measure natural dimensions when preview video loads
+  const handleVideoLoaded = () => {
+    if (videoRef.current) {
+      setSourceDims({
+        width: videoRef.current.videoWidth || 1280,
+        height: videoRef.current.videoHeight || 720,
+      });
+    }
+  };
+
+  // Switch active video frame inspector
+  const handleSelectFrame = (frameIndex: number) => {
+    setSelectedFrameIndex(frameIndex);
+    const target = videoResults.find((fr) => fr.frame_index === frameIndex);
+    if (target) {
+      const dets = target.inference?.detections || target.detections || [];
+      setDetections(dets);
+    }
+
+    if (videoRef.current && videoMetadata?.fps && videoMetadata.fps > 0) {
+      videoRef.current.currentTime = frameIndex / videoMetadata.fps;
+    }
+  };
+
+  // Trigger AI Inference (Image, Video, or RTSP)
   const handleRunInference = async () => {
     if (!isOnline) {
       setStatusMessage("Cannot run inference: Backend is offline.");
@@ -119,15 +179,14 @@ export function LiveWorkspace() {
     }
 
     setIsInferencing(true);
-    setStatusMessage("Executing ONNX pipeline...");
     const t0 = performance.now();
 
     try {
       if (sourceMode === "upload-image") {
-        let fileToSubmit = selectedFile;
+        setStatusMessage("Executing ONNX pipeline on image frame...");
+        let fileToSubmit = selectedImageFile;
         if (!fileToSubmit) {
-          // Fetch existing preview image as blob
-          const res = await fetch(previewUrl);
+          const res = await fetch(imagePreviewUrl);
           const blob = await res.blob();
           fileToSubmit = new File([blob], "surveillance_sample.jpg", {
             type: "image/jpeg",
@@ -143,20 +202,34 @@ export function LiveWorkspace() {
         });
 
         const elapsed = Math.round(performance.now() - t0);
-        setLatencyMs(result.inference_time_ms ? Math.round(result.inference_time_ms) : elapsed);
+        setLatencyMs(
+          result.inference_time_ms
+            ? Math.round(result.inference_time_ms)
+            : elapsed
+        );
         setDetections(result.detections || []);
         setStatusMessage(
           `Detected ${result.detections?.length || 0} objects in ${elapsed}ms.`
         );
 
-        // If detections found, create live alert in store
+        // Register high threat alerts
         if (result.detections && result.detections.length > 0) {
-          const highThreatClasses = ["firearm", "explosive", "melee_weapon", "person", "blunt_weapon"];
+          const highThreatClasses = [
+            "firearm",
+            "explosive",
+            "melee_weapon",
+            "person",
+            "blunt_weapon",
+          ];
           result.detections.forEach((det) => {
             if (det.confidence >= 0.4) {
-              const isHigh = highThreatClasses.includes(det.class_name.toLowerCase());
+              const isHigh = highThreatClasses.includes(
+                det.class_name.toLowerCase()
+              );
               alertsStore.addAlert({
-                title: `${det.class_name.replace(/_/g, " ").toUpperCase()} Identified in Sector`,
+                title: `${det.class_name
+                  .replace(/_/g, " ")
+                  .toUpperCase()} Identified in Sector`,
                 location: "Live Surveillance Feed (Cam 01)",
                 severity: isHigh ? "High" : "Medium",
                 className: det.class_name,
@@ -167,7 +240,100 @@ export function LiveWorkspace() {
             }
           });
         }
+      } else if (sourceMode === "upload-video") {
+        setStatusMessage("Sending video to backend endpoint /api/inference/video...");
+        let fileToSubmit = selectedVideoFile;
+        if (!fileToSubmit) {
+          const res = await fetch(videoPreviewUrl);
+          const blob = await res.blob();
+          fileToSubmit = new File([blob], "surveillance_sample.mp4", {
+            type: "video/mp4",
+          });
+        }
+
+        const result = await api.runVideoInference({
+          file: fileToSubmit,
+          modelName: modelToUse,
+          confThreshold,
+          iouThreshold,
+          maxFrames: 30,
+          postprocess: true,
+        });
+
+        const elapsed = Math.round(performance.now() - t0);
+        setLatencyMs(elapsed);
+
+        const rawResults = result.results || result.frame_results || [];
+        setVideoResults(rawResults);
+
+        if (result.video) {
+          setVideoMetadata(result.video);
+          if (result.video.width && result.video.height) {
+            setSourceDims({
+              width: result.video.width,
+              height: result.video.height,
+            });
+          }
+        }
+
+        // Collect all detections across all frames
+        const allDetections: Detection[] = [];
+        rawResults.forEach((fr) => {
+          const dets = fr.inference?.detections || fr.detections || [];
+          dets.forEach((d) => allDetections.push(d));
+        });
+
+        // Set active frame to first frame with detections
+        const firstWithDets =
+          rawResults.find(
+            (fr) => (fr.inference?.detections || fr.detections || []).length > 0
+          ) || rawResults[0];
+
+        const activeDets = firstWithDets
+          ? firstWithDets.inference?.detections || firstWithDets.detections || []
+          : [];
+
+        setSelectedFrameIndex(firstWithDets?.frame_index ?? 0);
+        setDetections(activeDets);
+
+        const framesProcessed =
+          result.frames_processed ??
+          result.total_frames_processed ??
+          rawResults.length;
+
+        setStatusMessage(
+          `Processed ${framesProcessed} video frames in ${elapsed}ms. Found ${allDetections.length} targets across sequence.`
+        );
+
+        // Register alerts in store
+        const highThreatClasses = [
+          "firearm",
+          "explosive",
+          "melee_weapon",
+          "person",
+          "blunt_weapon",
+          "car",
+        ];
+        allDetections.forEach((det) => {
+          if (det.confidence >= 0.45) {
+            const isHigh = highThreatClasses.includes(
+              det.class_name.toLowerCase()
+            );
+            alertsStore.addAlert({
+              title: `${det.class_name
+                .replace(/_/g, " ")
+                .toUpperCase()} Identified in Video Stream`,
+              location: `Video Stream (${fileToSubmit.name})`,
+              severity: isHigh ? "High" : "Medium",
+              className: det.class_name,
+              confidence: det.confidence,
+              cameraName: "Video Upload Stream",
+              box: det.box,
+            });
+          }
+        });
       } else if (sourceMode === "rtsp") {
+        setStatusMessage("Connecting to RTSP stream and sampling frames...");
         const result = await api.runRtspInference({
           rtspUrl,
           modelName: modelToUse,
@@ -194,11 +360,28 @@ export function LiveWorkspace() {
 
   return (
     <div className="space-y-6">
+      {/* Hidden File Inputs */}
+      <input
+        ref={imageFileInputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleImageFileChange}
+        className="hidden"
+      />
+      <input
+        ref={videoFileInputRef}
+        type="file"
+        accept="video/*,.mp4,.avi,.mov,.mkv"
+        onChange={handleVideoFileChange}
+        className="hidden"
+      />
+
       {/* 1. Tactical Controls Bar */}
       <div className="bg-white rounded-xl border border-slate-200/80 shadow-xs p-4 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
         {/* Source Mode Tabs */}
         <div className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-lg">
           <button
+            type="button"
             onClick={() => setSourceMode("upload-image")}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-colors ${
               sourceMode === "upload-image"
@@ -209,7 +392,27 @@ export function LiveWorkspace() {
             <Camera className="w-3.5 h-3.5" />
             Surveillance Image
           </button>
+
           <button
+            type="button"
+            onClick={() => {
+              setSourceMode("upload-video");
+              if (!selectedVideoFile) {
+                videoFileInputRef.current?.click();
+              }
+            }}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-colors ${
+              sourceMode === "upload-video"
+                ? "bg-white text-slate-900 shadow-xs"
+                : "text-slate-600 hover:text-slate-900"
+            }`}
+          >
+            <Video className="w-3.5 h-3.5" />
+            Upload Video
+          </button>
+
+          <button
+            type="button"
             onClick={() => setSourceMode("rtsp")}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-colors ${
               sourceMode === "rtsp"
@@ -222,7 +425,7 @@ export function LiveWorkspace() {
           </button>
         </div>
 
-        {/* Model Selector and Thresholds */}
+        {/* Model Selector, Thresholds, and Action Buttons */}
         <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
           {/* Model selection */}
           <div className="flex items-center gap-1.5">
@@ -241,6 +444,7 @@ export function LiveWorkspace() {
               </select>
             ) : (
               <button
+                type="button"
                 onClick={handleLoadDefaultModel}
                 disabled={loadingModel || !isOnline}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-300 hover:bg-emerald-100 transition-colors disabled:opacity-50"
@@ -266,27 +470,32 @@ export function LiveWorkspace() {
             />
           </div>
 
-          {/* Hidden File Input */}
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            onChange={handleFileChange}
-            className="hidden"
-          />
-
-          {sourceMode === "upload-image" && (
+          {/* Upload Button based on mode */}
+          {sourceMode === "upload-image" ? (
             <button
-              onClick={() => fileInputRef.current?.click()}
+              type="button"
+              onClick={() => imageFileInputRef.current?.click()}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors"
             >
               <Upload className="w-3.5 h-3.5" />
               Upload Image
             </button>
-          )}
+          ) : sourceMode === "upload-video" ? (
+            <button
+              type="button"
+              onClick={() => videoFileInputRef.current?.click()}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 transition-colors"
+            >
+              <Upload className="w-3.5 h-3.5" />
+              {selectedVideoFile
+                ? `Video: ${selectedVideoFile.name.slice(0, 14)}...`
+                : "Upload Video"}
+            </button>
+          ) : null}
 
           {/* Run Inference CTA */}
           <button
+            type="button"
             onClick={handleRunInference}
             disabled={isInferencing || !isOnline}
             className="inline-flex items-center gap-2 px-4 py-1.5 rounded-lg text-xs font-semibold bg-[#123824] hover:bg-[#18462d] text-white shadow-xs transition-all duration-150 disabled:opacity-50"
@@ -335,11 +544,16 @@ export function LiveWorkspace() {
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
               </span>
               <span className="font-mono font-bold tracking-wider">
-                CAM-01 • SECTOR NORTH-EAST
+                {sourceMode === "upload-video"
+                  ? "VIDEO FEED • BORDER SURVEILLANCE"
+                  : sourceMode === "rtsp"
+                  ? "RTSP LIVE STREAM • SECTOR 04"
+                  : "CAM-01 • SECTOR NORTH-EAST"}
               </span>
             </div>
             <div className="font-mono text-[11px] text-slate-400">
               RES: {sourceDims.width}x{sourceDims.height}
+              {videoMetadata?.fps ? ` • ${Math.round(videoMetadata.fps)} FPS` : ""}
               {latencyMs !== null && ` • LATENCY: ${latencyMs}ms`}
             </div>
           </div>
@@ -347,20 +561,32 @@ export function LiveWorkspace() {
           {/* Media Viewport + Overlay Canvas */}
           <div className="relative w-full aspect-video min-h-[360px] max-h-[560px] flex items-center justify-center bg-black overflow-hidden">
             {/* Corner Reticles */}
-            <div className="absolute top-3 left-3 w-5 h-5 border-t-2 border-l-2 border-emerald-500/80 z-30 pointer-events-none"></div>
-            <div className="absolute top-3 right-3 w-5 h-5 border-t-2 border-r-2 border-emerald-500/80 z-30 pointer-events-none"></div>
-            <div className="absolute bottom-3 left-3 w-5 h-5 border-b-2 border-l-2 border-emerald-500/80 z-30 pointer-events-none"></div>
-            <div className="absolute bottom-3 right-3 w-5 h-5 border-b-2 border-r-2 border-emerald-500/80 z-30 pointer-events-none"></div>
+            <div className="absolute top-3 left-3 w-5 h-5 border-t-2 border-l-2 border-emerald-500/80 z-30 pointer-events-none" />
+            <div className="absolute top-3 right-3 w-5 h-5 border-t-2 border-r-2 border-emerald-500/80 z-30 pointer-events-none" />
+            <div className="absolute bottom-3 left-3 w-5 h-5 border-b-2 border-l-2 border-emerald-500/80 z-30 pointer-events-none" />
+            <div className="absolute bottom-3 right-3 w-5 h-5 border-b-2 border-r-2 border-emerald-500/80 z-30 pointer-events-none" />
 
-            {/* Displayed Image Frame */}
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              ref={imageRef}
-              src={previewUrl}
-              alt="Surveillance Feed Frame"
-              onLoad={handleImageLoaded}
-              className="w-full h-full object-contain"
-            />
+            {/* Displayed Video or Image */}
+            {sourceMode === "upload-video" ? (
+              <video
+                ref={videoRef}
+                src={videoPreviewUrl}
+                controls
+                playsInline
+                loop
+                onLoadedMetadata={handleVideoLoaded}
+                className="w-full h-full object-contain"
+              />
+            ) : (
+              /* eslint-disable-next-line @next/next/no-img-element */
+              <img
+                ref={imageRef}
+                src={imagePreviewUrl}
+                alt="Surveillance Feed Frame"
+                onLoad={handleImageLoaded}
+                className="w-full h-full object-contain"
+              />
+            )}
 
             {/* Tactical Canvas Overlay */}
             <DetectionCanvas
@@ -370,12 +596,56 @@ export function LiveWorkspace() {
             />
           </div>
 
+          {/* Video Frames Scrubber Bar (visible when video results are available) */}
+          {sourceMode === "upload-video" && videoResults.length > 0 && (
+            <div className="bg-slate-900 px-4 py-2.5 border-t border-slate-800">
+              <div className="flex items-center justify-between text-xs text-slate-400 mb-2">
+                <span className="font-mono flex items-center gap-1.5 text-emerald-400 font-semibold">
+                  <Film className="w-3.5 h-3.5" />
+                  Processed Video Frames ({videoResults.length})
+                </span>
+                <span className="text-[11px] text-slate-400">
+                  Click frame to inspect targets
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 custom-scrollbar">
+                {videoResults.map((fr) => {
+                  const frameDets =
+                    fr.inference?.detections || fr.detections || [];
+                  const isSelected = fr.frame_index === selectedFrameIndex;
+                  const hasDetections = frameDets.length > 0;
+
+                  return (
+                    <button
+                      key={fr.frame_index}
+                      onClick={() => handleSelectFrame(fr.frame_index)}
+                      className={`px-2 py-1 rounded text-[11px] font-mono whitespace-nowrap transition-all flex items-center gap-1 ${
+                        isSelected
+                          ? "bg-emerald-600 text-white font-bold ring-1 ring-emerald-400"
+                          : hasDetections
+                          ? "bg-slate-800 text-emerald-300 hover:bg-slate-700 border border-emerald-800/60"
+                          : "bg-slate-800/80 text-slate-400 hover:bg-slate-700"
+                      }`}
+                    >
+                      <span>#{fr.frame_index}</span>
+                      {hasDetections && (
+                        <span className="px-1 rounded bg-emerald-950/80 text-[10px] text-emerald-300 font-semibold">
+                          {frameDets.length}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {/* Bottom Bar with Status Telemetry */}
           <div className="px-4 py-2 bg-slate-900/90 border-t border-slate-800 flex items-center justify-between text-xs text-slate-300">
             <span className="font-mono text-[11px]">
               {statusMessage ||
                 (isOnline
-                  ? "Engine Ready — Trigger detection to scan frame."
+                  ? "Engine Ready — Trigger detection to scan feed."
                   : "AI Engine Offline — Start backend on port 8000.")}
             </span>
             <span className="font-semibold text-emerald-400 text-xs font-mono">
@@ -393,7 +663,9 @@ export function LiveWorkspace() {
                 Target Inspector
               </h3>
               <span className="text-xs font-mono font-medium text-slate-500">
-                {detections.length} Detected
+                {sourceMode === "upload-video" && videoResults.length > 0
+                  ? `Frame #${selectedFrameIndex} (${detections.length})`
+                  : `${detections.length} Detected`}
               </span>
             </div>
 
@@ -432,6 +704,12 @@ export function LiveWorkspace() {
               <span>Runtime Specs</span>
               <span className="font-mono text-emerald-700 font-bold">
                 {selectedModel || "None Selected"}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span>Mode:</span>
+              <span className="font-mono font-medium text-slate-800 capitalize">
+                {sourceMode.replace("-", " ")}
               </span>
             </div>
             <div className="flex justify-between">
