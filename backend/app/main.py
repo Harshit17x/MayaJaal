@@ -9,13 +9,13 @@ from app.api.cameras import router as cameras_router
 from app.api.health import router as health_router
 from app.api.inference import router as inference_router
 from app.api.models import router as models_router
+from app.api.stream import router as stream_router
 from app.core.config import settings
 from app.utils.logging import get_logger, setup_logging
 
 
 setup_logging()
 logger = get_logger("SIH26187.API")
-cors_origins = [origin.strip() for origin in settings.cors_origins.split(",") if origin.strip()]
 
 
 @asynccontextmanager
@@ -50,11 +50,10 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# Cross-Origin Resource Sharing (CORS) setup. Keep this to trusted operator UI
-# origins; a wildcard with credentials permits untrusted browser clients.
+# Cross-Origin Resource Sharing (CORS) setup
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=cors_origins,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -109,6 +108,7 @@ app.include_router(health_router)
 app.include_router(cameras_router)
 app.include_router(models_router)
 app.include_router(inference_router)
+app.include_router(stream_router)
 
 
 @app.get("/")

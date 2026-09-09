@@ -13,10 +13,8 @@ import {
   StreamTestResult,
 } from "@/types/camera";
 
-const rawUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000").trim();
-const BACKEND_BASE_URL = (
-  rawUrl.startsWith("http://") || rawUrl.startsWith("https://") ? rawUrl : `http://${rawUrl}`
-).replace(/\/+$/, "");
+const BACKEND_BASE_URL =
+  process.env.NEXT_PUBLIC_BACKEND_URL?.replace(/\/$/, "") || "http://localhost:8000";
 
 class ApiError extends Error {
   constructor(
@@ -35,13 +33,7 @@ async function request<T>(
 ): Promise<T> {
   const url = `${BACKEND_BASE_URL}${endpoint}`;
   try {
-    const timeoutSignal =
-      typeof AbortSignal !== "undefined" && "timeout" in AbortSignal
-        ? AbortSignal.timeout(2500)
-        : undefined;
-
     const res = await fetch(url, {
-      signal: options.signal || timeoutSignal,
       ...options,
       headers: {
         Accept: "application/json",
@@ -73,6 +65,20 @@ async function request<T>(
       `Network error contacting backend at ${url}: ${message}`
     );
   }
+}
+
+export interface StreamValidationResult {
+  reachable: boolean;
+  status: "ready" | "online" | "unreachable";
+  protocol: string;
+  target_url: string;
+  resolved_url: string;
+  host?: string;
+  port?: number;
+  latency_ms: number;
+  message: string;
+  is_ip_webcam: boolean;
+  candidates?: string[];
 }
 
 export const api = {
@@ -261,4 +267,13 @@ export const api = {
       body: JSON.stringify(params),
     });
   },
+
+  /**
+   * Validate stream reachability, protocol, and candidate endpoints
+   */
+  async validateStream(streamUrl: string): Promise<StreamValidationResult> {
+    const params = new URLSearchParams({ stream_url: streamUrl });
+    return request<StreamValidationResult>(`/api/stream/validate?${params.toString()}`);
+  },
 };
+

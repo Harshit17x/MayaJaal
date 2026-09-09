@@ -1,5 +1,4 @@
 import json
-import ipaddress
 import os
 from pathlib import Path
 import re
@@ -12,7 +11,6 @@ from fastapi import APIRouter, HTTPException, Query, status
 from pydantic import BaseModel, Field
 
 from app.utils.logging import get_logger
-from app.core.config import settings
 
 logger = get_logger("SIH26187.Cameras")
 
@@ -26,18 +24,18 @@ DATA_FILE = Path(__file__).resolve().parent.parent / "data" / "cameras.json"
 DEFAULT_CAMERAS: list[dict[str, Any]] = [
     {
         "id": "cam-1",
-        "name": "BOP Alpha — Wagah-Attari Forward Post",
-        "sector": "Sector-01 (Punjab Western IB)",
-        "location": "Pillar 102 — Zero Line Trench Observation",
+        "name": "North Perimeter Optical 4K",
+        "sector": "Sector-04 (BOP Alpha)",
+        "location": "Pillar 14 — Forward Trench",
         "status": "online",
         "type": "Optical 4K",
         "ipAddress": "10.20.72.101",
         "port": 554,
         "streamUrl": "rtsp://admin:pass@10.20.72.101:554/live/ch0",
         "isRtsp": True,
-        "latitude": 31.3344,
-        "longitude": 74.5433,
-        "coordinates": [74.5433, 31.3344],
+        "latitude": 24.10,
+        "longitude": 77.70,
+        "coordinates": [77.70, 24.10],
         "modelAssigned": "best.onnx (Threat Detector)",
         "resolution": "4K UHD (3840x2160)",
         "fps": 30,
@@ -48,24 +46,24 @@ DEFAULT_CAMERAS: list[dict[str, Any]] = [
         "lastActive": "Just now",
         "healthStats": {
             "bitrate": "8.4 Mbps",
-            "latencyMs": 34,
+            "latencyMs": 42,
             "packetLoss": "0.01%",
         },
     },
     {
         "id": "cam-2",
-        "name": "BOP Bravo — RS Pura Jammu Border Gate",
-        "sector": "Sector-02 (Jammu Frontier IB)",
-        "location": "Vehicle Crossing Checkpost — Pillar 48",
+        "name": "Eastern Gate Rapid Response",
+        "sector": "Sector-04 (BOP Alpha)",
+        "location": "Eastern Vehicle Checkpost & Gate",
         "status": "alert",
         "type": "ANPR Dedicated",
         "ipAddress": "10.20.72.102",
         "port": 554,
         "streamUrl": "rtsp://admin:pass@10.20.72.102:554/live/ch0",
         "isRtsp": True,
-        "latitude": 32.7150,
-        "longitude": 74.6580,
-        "coordinates": [74.6580, 32.7150],
+        "latitude": 23.70,
+        "longitude": 79.30,
+        "coordinates": [79.30, 23.70],
         "modelAssigned": "best.onnx (Threat Detector)",
         "resolution": "1080p FHD (1920x1080)",
         "fps": 60,
@@ -76,24 +74,24 @@ DEFAULT_CAMERAS: list[dict[str, Any]] = [
         "lastActive": "Just now",
         "healthStats": {
             "bitrate": "6.2 Mbps",
-            "latencyMs": 29,
+            "latencyMs": 38,
             "packetLoss": "0.00%",
         },
     },
     {
         "id": "cam-3",
-        "name": "BOP Charlie — Thar Longewala Desert Post",
-        "sector": "Sector-03 (Rajasthan Thar Frontier)",
-        "location": "Watch Tower 03 — Border Dune Observation",
+        "name": "Watch Tower High-Mast FLIR",
+        "sector": "Sector-04 (BOP Alpha)",
+        "location": "Watch Tower 03 — Elevated Ridge",
         "status": "online",
         "type": "Thermal FLIR",
         "ipAddress": "10.20.72.103",
         "port": 554,
         "streamUrl": "rtsp://admin:pass@10.20.72.103:554/live/ch1",
         "isRtsp": True,
-        "latitude": 27.9612,
-        "longitude": 71.8983,
-        "coordinates": [71.8983, 27.9612],
+        "latitude": 22.40,
+        "longitude": 78.10,
+        "coordinates": [78.10, 22.40],
         "modelAssigned": "best.onnx (Threat Detector)",
         "resolution": "1080p Thermal",
         "fps": 25,
@@ -103,93 +101,37 @@ DEFAULT_CAMERAS: list[dict[str, Any]] = [
         "alertTriggerEnabled": True,
         "lastActive": "1 min ago",
         "healthStats": {
-            "bitrate": "4.8 Mbps",
-            "latencyMs": 46,
-            "packetLoss": "0.03%",
+            "bitrate": "4.5 Mbps",
+            "latencyMs": 56,
+            "packetLoss": "0.05%",
         },
     },
     {
         "id": "cam-4",
-        "name": "BOP Delta — Sir Creek Riverine Outpost",
-        "sector": "Sector-04 (Kutch Creek Frontier)",
-        "location": "Harami Nala — Floating Bunkered Post 02",
+        "name": "Southern Ridge Fog Penetration",
+        "sector": "Sector-03 (South Riverine)",
+        "location": "Riverine Crossing — Point Charlie",
         "status": "online",
         "type": "Night Vision / IR",
         "ipAddress": "10.20.72.104",
         "port": 554,
         "streamUrl": "rtsp://admin:pass@10.20.72.104:554/live/ch0",
         "isRtsp": True,
-        "latitude": 23.5125,
-        "longitude": 68.5038,
-        "coordinates": [68.5038, 23.5125],
+        "latitude": 22.90,
+        "longitude": 79.40,
+        "coordinates": [79.40, 22.90],
         "modelAssigned": "best.onnx (Threat Detector)",
         "resolution": "1080p FHD (1920x1080)",
         "fps": 30,
         "confThreshold": 0.75,
         "iouThreshold": 0.45,
-        "isRecording": True,
+        "isRecording": False,
         "alertTriggerEnabled": True,
         "lastActive": "3 mins ago",
         "healthStats": {
             "bitrate": "5.1 Mbps",
-            "latencyMs": 52,
+            "latencyMs": 64,
             "packetLoss": "0.02%",
-        },
-    },
-    {
-        "id": "cam-5",
-        "name": "BOP Echo — Nathu La Pass High-Altitude Post",
-        "sector": "Sector-05 (Sikkim Northern LAC)",
-        "location": "Mountain Ridge Bunker 09 — Pass Perimeter",
-        "status": "degraded",
-        "type": "PTZ 360",
-        "ipAddress": "10.20.72.105",
-        "port": 554,
-        "streamUrl": "rtsp://admin:pass@10.20.72.105:554/live/ch0",
-        "isRtsp": True,
-        "latitude": 27.9900,
-        "longitude": 88.3552,
-        "coordinates": [88.3552, 27.9900],
-        "modelAssigned": "best.onnx (Threat Detector)",
-        "resolution": "1080p FHD (1920x1080)",
-        "fps": 25,
-        "confThreshold": 0.75,
-        "iouThreshold": 0.45,
-        "isRecording": True,
-        "alertTriggerEnabled": False,
-        "lastActive": "8 mins ago",
-        "healthStats": {
-            "bitrate": "3.5 Mbps",
-            "latencyMs": 112,
-            "packetLoss": "1.80%",
-        },
-    },
-    {
-        "id": "cam-6",
-        "name": "BOP Foxtrot — Petrapole Eastern Zero Line",
-        "sector": "Sector-06 (Bengal Eastern Border)",
-        "location": "Integrated Checkpost Gate — Border Line",
-        "status": "online",
-        "type": "Optical 4K",
-        "ipAddress": "10.20.72.106",
-        "port": 554,
-        "streamUrl": "rtsp://admin:pass@10.20.72.106:554/live/ch0",
-        "isRtsp": True,
-        "latitude": 25.8001,
-        "longitude": 88.1830,
-        "coordinates": [88.1830, 25.8001],
-        "modelAssigned": "best.onnx (Threat Detector)",
-        "resolution": "4K UHD (3840x2160)",
-        "fps": 30,
-        "confThreshold": 0.80,
-        "iouThreshold": 0.45,
-        "isRecording": True,
-        "alertTriggerEnabled": True,
-        "lastActive": "Just now",
-        "healthStats": {
-            "bitrate": "7.8 Mbps",
-            "latencyMs": 31,
-            "packetLoss": "0.01%",
         },
     },
 ]
@@ -223,69 +165,6 @@ def _save_cameras(cameras: list[dict[str, Any]]) -> None:
     temp_file.replace(DATA_FILE)
 
 
-def _allowed_camera_networks() -> tuple[ipaddress.IPv4Network | ipaddress.IPv6Network, ...]:
-    """Return the explicitly configured camera networks.
-
-    Stream testing opens a network connection from the backend. Keeping the
-    target in an allowlist prevents the endpoint from becoming a general
-    internal-network scanner.
-    """
-    try:
-        networks = tuple(
-            ipaddress.ip_network(value.strip(), strict=False)
-            for value in settings.allowed_camera_cidrs.split(",")
-            if value.strip()
-        )
-    except ValueError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Invalid SIH_ALLOWED_CAMERA_CIDRS configuration.",
-        ) from exc
-
-    if not networks:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Camera stream testing is disabled until an allowed network is configured.",
-        )
-    return networks
-
-
-def _resolve_approved_camera_host(host: str, port: int) -> str:
-    """Resolve *host* and return an allowlisted address for the socket call."""
-    if not host:
-        raise HTTPException(status_code=400, detail="RTSP URL must include a host.")
-
-    try:
-        address_records = socket.getaddrinfo(
-            host,
-            port,
-            family=socket.AF_UNSPEC,
-            type=socket.SOCK_STREAM,
-        )
-    except socket.gaierror as exc:
-        raise HTTPException(
-            status_code=400,
-            detail="Unable to resolve the requested camera host.",
-        ) from exc
-
-    allowed_networks = _allowed_camera_networks()
-    for record in address_records:
-        resolved_host = record[4][0]
-        try:
-            address = ipaddress.ip_address(resolved_host)
-        except ValueError:
-            continue
-        if any(address in network for network in allowed_networks):
-            # Connect using the resolved address rather than the supplied DNS
-            # name, preventing a DNS-rebinding change between validation and use.
-            return str(address)
-
-    raise HTTPException(
-        status_code=status.HTTP_403_FORBIDDEN,
-        detail="Camera host is outside the approved camera networks.",
-    )
-
-
 class HealthStats(BaseModel):
     bitrate: Optional[str] = "6.0 Mbps"
     latencyMs: Optional[int] = 45
@@ -295,7 +174,7 @@ class HealthStats(BaseModel):
 class CameraCreateRequest(BaseModel):
     id: Optional[str] = None
     name: str = Field(..., min_length=2, max_length=120)
-    sector: str = Field("Sector-01 (Punjab Western IB)", min_length=2)
+    sector: str = Field("Sector-04 (BOP Alpha)", min_length=2)
     location: str = Field(..., min_length=2)
     status: str = Field("online")
     type: str = Field("Optical 4K")
@@ -504,51 +383,55 @@ async def test_stream(payload: TestStreamRequest) -> dict[str, Any]:
     # Resolve target host & port
     target_host = ip
     target_port = port
+    protocol_desc = "RTSP/1.0"
 
     if stream_url:
         try:
-            parsed = urlparse(stream_url)
-            if parsed.scheme.lower() != "rtsp":
+            clean_url = stream_url.strip()
+            if "://" not in clean_url:
+                clean_url = f"rtsp://{clean_url}" if (":554" in clean_url or "rtsp" in clean_url.lower()) else f"http://{clean_url}"
+
+            parsed = urlparse(clean_url)
+            scheme = (parsed.scheme or "rtsp").lower()
+            if scheme not in ("rtsp", "rtsps", "http", "https"):
                 return {
                     "reachable": False,
                     "status": "error",
                     "latencyMs": 0,
-                    "message": f"Invalid protocol '{parsed.scheme}'. RTSP streams must begin with rtsp://",
+                    "message": f"Invalid protocol '{parsed.scheme}'. Streams must use rtsp:// or http:// (e.g. IP Webcam)",
                 }
-            target_host = parsed.hostname or ip
-            target_port = parsed.port or port or 554
+            default_port = {"rtsp": 554, "rtsps": 322, "http": 80, "https": 443}.get(scheme, 554)
+            target_host = parsed.hostname or ip or "127.0.0.1"
+            target_port = parsed.port or port or default_port
+            protocol_desc = "HTTP MJPEG" if scheme in ("http", "https") else "RTSP/1.0"
         except Exception as exc:
             return {
                 "reachable": False,
                 "status": "error",
                 "latencyMs": 0,
-                "message": f"Failed to parse RTSP URL: {exc}",
+                "message": f"Failed to parse stream URL: {exc}",
             }
 
-    approved_host = _resolve_approved_camera_host(target_host or "", target_port)
-
-    # Attempt TCP handshake test to the approved RTSP port.
+    # Attempt TCP handshake test to stream port
     start_time = time.perf_counter()
-    address_family = socket.AF_INET6 if ":" in approved_host else socket.AF_INET
-    sock = socket.socket(address_family, socket.SOCK_STREAM)
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.settimeout(1.5)  # 1.5s timeout for local/edge network check
 
     reachable = False
     message = ""
     try:
-        sock.connect((approved_host, target_port))
+        sock.connect((target_host, target_port))
         elapsed_ms = int((time.perf_counter() - start_time) * 1000)
         reachable = True
-        message = f"RTSP handshake successful at {approved_host}:{target_port} (Latency: {elapsed_ms}ms)"
+        message = f"{protocol_desc} handshake successful at {target_host}:{target_port} (Latency: {elapsed_ms}ms)"
     except socket.timeout:
         elapsed_ms = int((time.perf_counter() - start_time) * 1000)
         reachable = False
-        message = f"Connection timed out connecting to {approved_host}:{target_port}."
+        message = f"Connection timed out connecting to {target_host}:{target_port}."
     except Exception as exc:
         elapsed_ms = int((time.perf_counter() - start_time) * 1000)
-        # Note: in demo or isolated environments, the target camera IP might be simulated.
         reachable = False
-        message = f"Connection refused or unreachable at {approved_host}:{target_port}: {exc}"
+        message = f"Connection refused or unreachable at {target_host}:{target_port}: {exc}"
     finally:
         sock.close()
 

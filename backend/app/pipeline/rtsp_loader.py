@@ -52,12 +52,22 @@ class RTSPStream:
 
         if not self.rtsp_url:
             raise InvalidRTSPUrlError(
-                "RTSP URL cannot be empty."
+                "Stream URL cannot be empty."
             )
 
-        if not self.rtsp_url.lower().startswith("rtsp://"):
+        # Normalize bare IP/ports
+        clean_url = self.rtsp_url
+        if "://" not in clean_url:
+            if ":554" in clean_url or "rtsp" in clean_url.lower():
+                clean_url = f"rtsp://{clean_url}"
+            else:
+                clean_url = f"http://{clean_url}"
+        self.rtsp_url = clean_url
+
+        allowed_schemes = ("rtsp://", "rtsps://", "http://", "https://")
+        if not any(self.rtsp_url.lower().startswith(s) for s in allowed_schemes):
             raise InvalidRTSPUrlError(
-                "RTSP URL must start with rtsp://"
+                "Stream URL must start with rtsp://, rtsps://, http://, or https://"
             )
 
         if reconnect_attempts < 0:
@@ -88,41 +98,48 @@ class RTSPStream:
         self.capture: cv2.VideoCapture | None = None
 
     def connect(self) -> None:
-        """Open the RTSP stream with bounded timeouts."""
+        """Open the stream (RTSP or HTTP IP Webcam) with candidate fallbacks and bounded timeouts."""
 
         self.release()
 
-        params = [
-            cv2.CAP_PROP_OPEN_TIMEOUT_MSEC,
-            self.connection_timeout_ms,
-            cv2.CAP_PROP_READ_TIMEOUT_MSEC,
-            self.read_timeout_ms,
-        ]
+        # Generate candidates for IP Webcam if applicable
+        candidates = [self.rtsp_url]
+        lower_url = self.rtsp_url.lower()
+        if lower_url.startswith("http://") or lower_url.startswith("https://"):
+            if not lower_url.endswith("/video") and not lower_url.endswith("/videofeed"):
+                base = self.rtsp_url.rstrip("/")
+                candidates = [f"{base}/video", f"{base}/videofeed", self.rtsp_url]
 
-        try:
-            capture = cv2.VideoCapture(
-                self.rtsp_url,
-                cv2.CAP_FFMPEG,
-                params,
-            )
+        last_error = None
+        for target in candidates:
+            try:
+                capture = cv2.VideoCapture(
+                    target,
+                    cv2.CAP_FFMPEG,
+                )
+                if capture.isOpened():
+                    success, frame = capture.read()
+                    if success and frame is not None and frame.size > 0:
+                        self.capture = capture
+                        logger.info("Stream connected successfully to %s", target)
+                        return
+                    capture.release()
 
-        except Exception as exc:
-            logger.exception(
-                "Failed to create RTSP capture."
-            )
+                # Fallback to CAP_ANY
+                capture = cv2.VideoCapture(target)
+                if capture.isOpened():
+                    success, frame = capture.read()
+                    if success and frame is not None and frame.size > 0:
+                        self.capture = capture
+                        logger.info("Stream connected successfully to %s (CAP_ANY)", target)
+                        return
+                    capture.release()
+            except Exception as exc:
+                last_error = exc
 
-            raise RTSPConnectionError(
-                f"Failed to connect to RTSP stream: {exc}"
-            ) from exc
-
-        if not capture.isOpened():
-            capture.release()
-
-            raise RTSPConnectionError(
-                "Could not open RTSP stream."
-            )
-
-        self.capture = capture
+        raise RTSPConnectionError(
+            f"Could not open live stream from {self.rtsp_url} ({last_error or 'no valid video frame returned'})."
+        )
 
         logger.info(
             "RTSP stream connected successfully."
