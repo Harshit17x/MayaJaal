@@ -13,8 +13,10 @@ import {
   StreamTestResult,
 } from "@/types/camera";
 
-const BACKEND_BASE_URL =
-  process.env.NEXT_PUBLIC_BACKEND_URL?.replace(/\/$/, "") || "http://localhost:8000";
+const rawUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000").trim();
+const BACKEND_BASE_URL = (
+  rawUrl.startsWith("http://") || rawUrl.startsWith("https://") ? rawUrl : `http://${rawUrl}`
+).replace(/\/+$/, "");
 
 class ApiError extends Error {
   constructor(

@@ -9,7 +9,31 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["var(--font-sans)", "ui-sans-serif", "system-ui", "sans-serif"],
+        sans: [
+          "-apple-system",
+          "BlinkMacSystemFont",
+          '"SF Pro Display"',
+          '"SF Pro Text"',
+          '"SF Pro"',
+          "var(--font-sans)",
+          "system-ui",
+          "-apple-system-body",
+          '"Helvetica Neue"',
+          "Helvetica",
+          "Arial",
+          "sans-serif",
+        ],
+        mono: [
+          '"SF Mono"',
+          "SFMono-Regular",
+          "ui-monospace",
+          "Menlo",
+          "Monaco",
+          "Consolas",
+          '"Liberation Mono"',
+          '"Courier New"',
+          "monospace",
+        ],
       },
     },
   },

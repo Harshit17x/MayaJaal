@@ -200,12 +200,12 @@ export function BorderMap({
               const source = event.feature.getProperty("SOURCE") || "Survey of India";
 
               const content = `
-                <div style="font-family:system-ui,-apple-system,sans-serif; padding:6px 2px; min-width:220px;">
+                <div style="font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','SF Pro Display',system-ui,sans-serif; padding:6px 2px; min-width:220px;">
                   <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
                     <span style="font-size:10px; font-weight:800; text-transform:uppercase; color:${color}; background:${color}15; padding:2px 6px; border-radius:4px;">
                       ${escapeHtml(source)}
                     </span>
-                    <span style="font-size:10px; color:#64748b; font-family:monospace;">WGS 84 (EPSG:4326)</span>
+                    <span style="font-size:10px; color:#64748b; font-family:'SF Mono',SFMono-Regular,ui-monospace,Menlo,monospace;">WGS 84 (EPSG:4326)</span>
                   </div>
                   <h4 style="margin:0 0 4px; font-size:13px; font-weight:800; color:#0f172a;">
                     🇮🇳 India — ${escapeHtml(neighbor)} Border
@@ -253,13 +253,13 @@ export function BorderMap({
         const alertInfoWindow = new google.maps.InfoWindow();
         alertMarker.addListener("click", () => {
           const alertContent = `
-            <div style="font-family:system-ui,-apple-system,sans-serif; padding:6px 2px; min-width:160px;">
+            <div style="font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','SF Pro Display',system-ui,sans-serif; padding:6px 2px; min-width:160px;">
               <div style="display:flex; align-items:center; gap:6px; margin-bottom:4px;">
                 <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#ef4444;"></span>
                 <strong style="font-size:11px; color:#dc2626; text-transform:uppercase;">Critical Threat</strong>
               </div>
               <h4 style="margin:0 0 4px; font-size:13px; font-weight:700; color:#991b1b;">${DEMO_ALERT.name}</h4>
-              <p style="margin:0 0 8px; font-size:11px; color:#64748b; font-family:monospace;">${DEMO_ALERT.lat.toFixed(2)}°N, ${DEMO_ALERT.lng.toFixed(2)}°E</p>
+              <p style="margin:0 0 8px; font-size:11px; color:#64748b; font-family:'SF Mono',SFMono-Regular,ui-monospace,Menlo,monospace;">${DEMO_ALERT.lat.toFixed(2)}°N, ${DEMO_ALERT.lng.toFixed(2)}°E</p>
               <a href="/alerts" style="display:block; text-align:center; padding:5px 8px; font-size:11px; font-weight:700; color:#ffffff; background:#dc2626; border-radius:6px; text-decoration:none;">
                 Inspect Alert Details &rarr;
               </a>
@@ -393,18 +393,18 @@ export function BorderMap({
 
       marker.addListener("click", () => {
         const contentString = `
-          <div style="font-family:system-ui,-apple-system,sans-serif; padding:6px 2px; min-width:200px;">
+          <div style="font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','SF Pro Display',system-ui,sans-serif; padding:6px 2px; min-width:200px;">
             <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;">
               <span style="font-size:10px; font-weight:800; text-transform:uppercase; color:${pinColor}; background:${pinColor}15; padding:2px 6px; border-radius:4px;">
                 ${statusLabel} • ${escapeHtml(cam.type || "Optical")}
               </span>
-              <span style="font-size:10px; color:#64748b; font-family:monospace;">${escapeHtml(cam.id)}</span>
+              <span style="font-size:10px; color:#64748b; font-family:'SF Mono',SFMono-Regular,ui-monospace,Menlo,monospace;">${escapeHtml(cam.id)}</span>
             </div>
             <h4 style="margin:2px 0 4px; font-size:13px; font-weight:800; color:#0f172a;">${escapeHtml(cam.name)}</h4>
             <div style="font-size:11px; color:#475569; margin-bottom:6px;">
               <div><strong>Sector:</strong> ${escapeHtml(cam.sector)}</div>
-              <div><strong>Coordinates:</strong> <span style="font-family:monospace;">${lat.toFixed(4)}°N, ${lng.toFixed(4)}°E</span></div>
-              ${cam.ipAddress ? `<div><strong>RTSP IP:</strong> <span style="font-family:monospace;">${escapeHtml(cam.ipAddress)}</span></div>` : ""}
+              <div><strong>Coordinates:</strong> <span style="font-family:'SF Mono',SFMono-Regular,ui-monospace,Menlo,monospace;">${lat.toFixed(4)}°N, ${lng.toFixed(4)}°E</span></div>
+              ${cam.ipAddress ? `<div><strong>RTSP IP:</strong> <span style="font-family:'SF Mono',SFMono-Regular,ui-monospace,Menlo,monospace;">${escapeHtml(cam.ipAddress)}</span></div>` : ""}
             </div>
             <div style="display:flex; gap:6px; margin-top:8px;">
               <a href="/cameras" style="flex:1; text-align:center; padding:6px 8px; font-size:11px; font-weight:700; color:#ffffff; background:#143724; border-radius:6px; text-decoration:none;">
