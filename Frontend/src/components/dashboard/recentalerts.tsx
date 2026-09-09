@@ -1,43 +1,11 @@
-interface AlertItem {
-  id: string;
-  title: string;
-  location: string;
-  time: string;
-  severity: "High" | "Medium" | "Low";
-}
+"use client";
 
-const recentAlertsData: AlertItem[] = [
-  {
-    id: "alert-1",
-    title: "Person Crossing Geofence",
-    location: "Camera 02 — Eastern Gate",
-    time: "2 mins ago",
-    severity: "High",
-  },
-  {
-    id: "alert-2",
-    title: "Vehicle at Unauthorised Hour",
-    location: "Camera 01 — North Perimeter",
-    time: "14 mins ago",
-    severity: "Medium",
-  },
-  {
-    id: "alert-3",
-    title: "Group Movement",
-    location: "Camera 04 — Southern Trail",
-    time: "28 mins ago",
-    severity: "Medium",
-  },
-  {
-    id: "alert-4",
-    title: "Suspicious Loitering",
-    location: "Camera 03 — Watch Tower",
-    time: "45 mins ago",
-    severity: "Low",
-  },
-];
+import { useAlerts } from "@/lib/alertsStore";
+import { AlertSeverity } from "@/types/alert";
+import { Check, ShieldAlert } from "lucide-react";
+import Link from "next/link";
 
-function SeverityBadge({ severity }: { severity: "High" | "Medium" | "Low" }) {
+function SeverityBadge({ severity }: { severity: AlertSeverity }) {
   if (severity === "High") {
     return (
       <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200">
@@ -60,36 +28,91 @@ function SeverityBadge({ severity }: { severity: "High" | "Medium" | "Low" }) {
 }
 
 export function RecentAlerts() {
+  const { alerts, acknowledgeAlert } = useAlerts();
+
+  // Display top 4 most recent alerts
+  const displayAlerts = alerts.slice(0, 4);
+
   return (
-    <div className="bg-white rounded-xl border border-slate-200/80 shadow-xs p-5 flex flex-col justify-between">
+    <div className="bg-white rounded-xl border border-slate-200/80 shadow-xs p-5 flex flex-col justify-between h-full min-h-[380px]">
       {/* Header */}
-      <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-        <h2 className="text-base font-semibold text-slate-900">Recent Alerts</h2>
-        <span className="text-xs font-medium text-slate-500">Live Queue</span>
+      <div>
+        <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+          <div className="flex items-center gap-2">
+            <ShieldAlert className="w-4 h-4 text-emerald-800" />
+            <h2 className="text-base font-semibold text-slate-900">Recent Alerts</h2>
+          </div>
+          <Link
+            href="/alerts"
+            className="text-xs font-medium text-emerald-700 hover:text-emerald-900 transition-colors"
+          >
+            View All ({alerts.length})
+          </Link>
+        </div>
+
+        {/* Alert Rows */}
+        <div className="divide-y divide-slate-100 mt-1">
+          {displayAlerts.length === 0 ? (
+            <div className="py-8 text-center text-xs text-slate-500">
+              No active security alerts recorded.
+            </div>
+          ) : (
+            displayAlerts.map((alert) => (
+              <div
+                key={alert.id}
+                className={`py-3 flex items-center justify-between gap-3 rounded-md px-1 transition-colors ${
+                  alert.acknowledged
+                    ? "opacity-60 bg-slate-50/40"
+                    : "hover:bg-slate-50/70"
+                }`}
+              >
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-sm font-semibold text-slate-800 truncate">
+                      {alert.title}
+                    </h3>
+                    {alert.acknowledged && (
+                      <span className="text-[10px] font-medium text-slate-400 bg-slate-100 px-1.5 py-0.2 rounded">
+                        Ack
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-slate-500 mt-0.5 flex items-center gap-1.5 truncate">
+                    <span>{alert.location}</span>
+                    <span className="text-slate-300">•</span>
+                    <span className="font-mono text-[11px]">{alert.time}</span>
+                    {alert.confidence && (
+                      <>
+                        <span className="text-slate-300">•</span>
+                        <span className="text-emerald-700 font-medium">
+                          {Math.round(alert.confidence * 100)}% conf
+                        </span>
+                      </>
+                    )}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <SeverityBadge severity={alert.severity} />
+                  {!alert.acknowledged && (
+                    <button
+                      onClick={() => acknowledgeAlert(alert.id)}
+                      title="Acknowledge Alert"
+                      className="p-1 rounded hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition-colors"
+                    >
+                      <Check className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))
+          )}
+        </div>
       </div>
 
-      {/* Alert Rows */}
-      <div className="divide-y divide-slate-100">
-        {recentAlertsData.map((alert) => (
-          <div
-            key={alert.id}
-            className="py-3 flex items-center justify-between gap-3 hover:bg-slate-50/60 rounded-md px-1 transition-colors"
-          >
-            <div className="min-w-0">
-              <h3 className="text-sm font-semibold text-slate-800 truncate">
-                {alert.title}
-              </h3>
-              <p className="text-xs text-slate-500 mt-0.5 flex items-center gap-1.5 truncate">
-                <span>{alert.location}</span>
-                <span className="text-slate-300">•</span>
-                <span className="font-mono text-[11px]">{alert.time}</span>
-              </p>
-            </div>
-            <div className="flex-shrink-0">
-              <SeverityBadge severity={alert.severity} />
-            </div>
-          </div>
-        ))}
+      {/* Footer Info */}
+      <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
+        <span>Autonomous Edge Dispatch</span>
+        <span className="font-mono">SIH26187 Rules Engine</span>
       </div>
     </div>
   );
