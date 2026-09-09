@@ -1,5 +1,9 @@
+﻿from __future__ import annotations
+
+import asyncio
 from pathlib import Path
 import tempfile
+from typing import Any
 
 import cv2
 import numpy as np
@@ -272,17 +276,251 @@ async def image_inference(
         ) from exc
 
 
+# ---------------------------------------------------------------------------
+# Helpers - video-level aggregation
+# ---------------------------------------------------------------------------
+
+
+def _aggregate_video_detections(
+    frame_results: list[dict[str, Any]],
+) -> dict[str, Any]:
+    """
+    Produce a video-level threat summary from per-frame detection results.
+
+    Returns:
+        total_detections       - sum of all bounding boxes across all frames
+        frames_with_detections - number of frames that had >=1 detection
+        unique_classes         - sorted list of distinct class names detected
+        peak_confidence        - highest single-detection confidence in the clip
+        class_counts           - {class_name: total_count} across all frames
+        threat_detected        - True when any detection was found
+    """
+    total_detections = 0
+    frames_with_detections = 0
+    class_counts: dict[str, int] = {}
+    peak_confidence = 0.0
+
+    for frame in frame_results:
+        inference = frame.get("inference", {})
+        detections: list[dict[str, Any]] = inference.get("detections", [])
+
+        if detections:
+            frames_with_detections += 1
+            total_detections += len(detections)
+
+            for det in detections:
+                cls = det.get("class_name") or "unknown"
+                class_counts[cls] = class_counts.get(cls, 0) + 1
+
+                conf = det.get("confidence", 0.0)
+                if isinstance(conf, (int, float)) and conf > peak_confidence:
+                    peak_confidence = float(conf)
+
+    return {
+        "total_detections": total_detections,
+        "frames_with_detections": frames_with_detections,
+        "unique_classes": sorted(class_counts.keys()),
+        "peak_confidence": round(peak_confidence, 4),
+        "class_counts": class_counts,
+        "threat_detected": total_detections > 0,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Video inference - blocking worker (runs in a thread)
+# ---------------------------------------------------------------------------
+
+
+def _run_video_inference_sync(
+    temp_path: Path,
+    model_name: str,
+    max_frames: int,
+    frame_skip: int,
+    conf_threshold: float,
+    iou_threshold: float,
+    postprocess: bool,
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    """
+    Blocking video inference worker.
+
+    Opens the video, samples frames according to *frame_skip*, runs
+    preprocessing + ONNX inference on each sampled frame, and returns
+    ``(metadata, frame_results)``.
+
+    Raises VideoLoaderError / HTTPException on failure.
+    """
+
+    with VideoLoader(temp_path) as video:
+
+        try:
+            metadata = video.get_metadata()
+        except VideoLoaderError as exc:
+            raise HTTPException(
+                status_code=400,
+                detail=str(exc),
+            ) from exc
+
+        tw, th = get_model_input_size(model_name)
+        preprocessor = create_preprocessor(target_width=tw, target_height=th)
+
+        frame_results: list[dict[str, Any]] = []
+        frames_read = 0        # total frames read from the file
+        frames_processed = 0   # frames actually sent through inference
+
+        while frames_processed < max_frames:
+
+            # -------------------------
+            # Read next frame
+            # -------------------------
+
+            try:
+                success, frame = video.read_frame()
+            except VideoLoaderError as exc:
+                raise HTTPException(
+                    status_code=400,
+                    detail=str(exc),
+                ) from exc
+            except Exception as exc:
+                raise HTTPException(
+                    status_code=500,
+                    detail="Unexpected error while reading video frame.",
+                ) from exc
+
+            if not success or frame is None:
+                break  # end-of-stream
+
+            frames_read += 1
+
+            # -------------------------
+            # Frame sampling
+            # -------------------------
+            # frame_skip=1 -> every frame
+            # frame_skip=2 -> every other frame
+            # frame_skip=N -> one in every N frames
+
+            if (frames_read - 1) % frame_skip != 0:
+                continue
+
+            # -------------------------
+            # Frame validation
+            # -------------------------
+
+            if not isinstance(frame, np.ndarray):
+                raise HTTPException(
+                    status_code=500,
+                    detail="VideoLoader returned an invalid frame type.",
+                )
+
+            if frame.size == 0:
+                raise HTTPException(
+                    status_code=400,
+                    detail="VideoLoader returned an empty frame.",
+                )
+
+            if frame.ndim != 3 or frame.shape[2] != 3:
+                raise HTTPException(
+                    status_code=400,
+                    detail=(
+                        "VideoLoader returned a frame that is "
+                        "not a 3-channel color image."
+                    ),
+                )
+
+            # -------------------------
+            # Preprocessing
+            # -------------------------
+
+            try:
+                tensor = preprocessor.process(frame)
+            except PreprocessingError as exc:
+                raise HTTPException(
+                    status_code=400,
+                    detail=str(exc),
+                ) from exc
+            except Exception as exc:
+                raise HTTPException(
+                    status_code=500,
+                    detail="Video frame preprocessing failed.",
+                ) from exc
+
+            # -------------------------
+            # Inference
+            # -------------------------
+
+            try:
+                orig_h, orig_w = frame.shape[:2]
+
+                result = inference_service.predict(
+                    model_name=model_name,
+                    input_data=tensor,
+                    postprocess=postprocess,
+                    conf_threshold=conf_threshold,
+                    iou_threshold=iou_threshold,
+                    original_image_size=(orig_w, orig_h),
+                )
+            except KeyError as exc:
+                raise HTTPException(
+                    status_code=404,
+                    detail=str(exc),
+                ) from exc
+            except Exception as exc:
+                raise HTTPException(
+                    status_code=500,
+                    detail="Video frame inference failed.",
+                ) from exc
+
+            frame_results.append(
+                {
+                    "frame_index": frames_read - 1,    # original 0-based index in file
+                    "sampled_index": frames_processed,  # 0-based index among sampled frames
+                    "inference": result,
+                }
+            )
+
+            frames_processed += 1
+
+    return metadata, frame_results
+
+
+# ---------------------------------------------------------------------------
+# /api/inference/video endpoint
+# ---------------------------------------------------------------------------
+
+
 @router.post("/video")
 async def video_inference(
     model_name: str = Form(...),
     file: UploadFile = File(...),
     max_frames: int = Form(30),
+    frame_skip: int = Form(1),
     conf_threshold: float = Form(0.25),
     iou_threshold: float = Form(0.45),
     postprocess: bool = Form(True),
 ) -> dict:
     """
-    Run bounded inference on frames from an uploaded video.
+    Run bounded inference on frames sampled from an uploaded video.
+
+    Parameters
+    ----------
+    model_name     : Name of a loaded ONNX model.
+    file           : Video file (mp4 / avi / mov / mkv / webm).
+    max_frames     : Maximum number of frames to run inference on (1-300).
+    frame_skip     : Sample one frame every *frame_skip* frames (1 = every
+                     frame, 2 = every other frame, etc.).  Useful for long
+                     videos where processing every frame is unnecessary.
+    conf_threshold : Minimum detection confidence (0-1).
+    iou_threshold  : NMS IoU threshold (0-1).
+    postprocess    : Whether to run NMS / bbox decoding.
+
+    Returns
+    -------
+    A JSON object containing:
+    - ``video``             - video metadata (fps, dimensions, duration ...)
+    - ``frames_requested``  - max_frames param
+    - ``frames_processed``  - actual frames that went through inference
+    - ``frame_skip``        - the sampling interval used
+    - ``results``           - per-frame inference results
+    - ``summary``           - video-level aggregated threat summary
     """
 
     # -------------------------
@@ -333,6 +571,22 @@ async def video_inference(
         raise HTTPException(
             status_code=400,
             detail="max_frames must be between 1 and 300.",
+        )
+
+    # -------------------------
+    # Frame-skip validation
+    # -------------------------
+
+    if not isinstance(frame_skip, int):
+        raise HTTPException(
+            status_code=400,
+            detail="frame_skip must be an integer.",
+        )
+
+    if frame_skip < 1 or frame_skip > 120:
+        raise HTTPException(
+            status_code=400,
+            detail="frame_skip must be between 1 and 120.",
         )
 
     # -------------------------
@@ -388,7 +642,6 @@ async def video_inference(
         )
 
     temp_path = None
-    metadata = None
 
     try:
         # -------------------------
@@ -408,7 +661,7 @@ async def video_inference(
             ) from exc
 
         # -------------------------
-        # Unique temporary file
+        # Write upload to a unique temp file
         # -------------------------
 
         try:
@@ -453,129 +706,42 @@ async def video_inference(
             )
 
         # -------------------------
-        # Open video
+        # Run blocking inference in a thread pool
+        # so the async event loop is not blocked.
         # -------------------------
 
-        with VideoLoader(temp_path) as video:
+        try:
+            metadata, frame_results = await asyncio.to_thread(
+                _run_video_inference_sync,
+                temp_path,
+                model_name,
+                max_frames,
+                frame_skip,
+                conf_threshold,
+                iou_threshold,
+                postprocess,
+            )
 
-            try:
-                metadata = video.get_metadata()
+        except HTTPException:
+            raise
 
-            except VideoLoaderError as exc:
-                raise HTTPException(
-                    status_code=400,
-                    detail=str(exc),
-                ) from exc
+        except VideoLoaderError as exc:
+            raise HTTPException(
+                status_code=400,
+                detail=str(exc),
+            ) from exc
 
-            tw, th = get_model_input_size(model_name)
-            preprocessor = create_preprocessor(target_width=tw, target_height=th)
+        except Exception as exc:
+            raise HTTPException(
+                status_code=500,
+                detail="Video inference failed.",
+            ) from exc
 
-            frame_results = []
-            frames_processed = 0
+        # -------------------------
+        # Aggregate threat summary
+        # -------------------------
 
-            # -------------------------
-            # Frame processing
-            # -------------------------
-
-            while frames_processed < max_frames:
-
-                try:
-                    success, frame = video.read_frame()
-
-                except VideoLoaderError as exc:
-                    raise HTTPException(
-                        status_code=400,
-                        detail=str(exc),
-                    ) from exc
-
-                except Exception as exc:
-                    raise HTTPException(
-                        status_code=500,
-                        detail="Unexpected error while reading video frame.",
-                    ) from exc
-
-                if not success:
-                    break
-
-                if frame is None:
-                    break
-
-                if not isinstance(frame, np.ndarray):
-                    raise HTTPException(
-                        status_code=500,
-                        detail="VideoLoader returned an invalid frame type.",
-                    )
-
-                if frame.size == 0:
-                    raise HTTPException(
-                        status_code=400,
-                        detail="VideoLoader returned an empty frame.",
-                    )
-
-                if frame.ndim != 3 or frame.shape[2] != 3:
-                    raise HTTPException(
-                        status_code=400,
-                        detail=(
-                            "VideoLoader returned a frame that is "
-                            "not a 3-channel color image."
-                        ),
-                    )
-
-                # -------------------------
-                # Preprocessing
-                # -------------------------
-
-                try:
-                    tensor = preprocessor.process(frame)
-
-                except PreprocessingError as exc:
-                    raise HTTPException(
-                        status_code=400,
-                        detail=str(exc),
-                    ) from exc
-
-                except Exception as exc:
-                    raise HTTPException(
-                        status_code=500,
-                        detail="Video frame preprocessing failed.",
-                    ) from exc
-
-                # -------------------------
-                # Inference
-                # -------------------------
-
-                try:
-                    orig_h, orig_w = frame.shape[:2]
-
-                    result = inference_service.predict(
-                        model_name=model_name,
-                        input_data=tensor,
-                        postprocess=postprocess,
-                        conf_threshold=conf_threshold,
-                        iou_threshold=iou_threshold,
-                        original_image_size=(orig_w, orig_h),
-                    )
-
-                except KeyError as exc:
-                    raise HTTPException(
-                        status_code=404,
-                        detail=str(exc),
-                    ) from exc
-
-                except Exception as exc:
-                    raise HTTPException(
-                        status_code=500,
-                        detail="Video frame inference failed.",
-                    ) from exc
-
-                frame_results.append(
-                    {
-                        "frame_index": frames_processed,
-                        "inference": result,
-                    }
-                )
-
-                frames_processed += 1
+        summary = _aggregate_video_detections(frame_results)
 
         # -------------------------
         # Video response
@@ -586,7 +752,9 @@ async def video_inference(
             "status": "success",
             "video": metadata,
             "frames_requested": max_frames,
-            "frames_processed": frames_processed,
+            "frames_processed": len(frame_results),
+            "frame_skip": frame_skip,
+            "summary": summary,
             "results": frame_results,
         }
 
