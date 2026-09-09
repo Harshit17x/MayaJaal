@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import asyncio
 from pathlib import Path
@@ -277,7 +277,7 @@ async def image_inference(
 
 
 # ---------------------------------------------------------------------------
-# Helpers – video-level aggregation
+# Helpers - video-level aggregation
 # ---------------------------------------------------------------------------
 
 
@@ -288,12 +288,12 @@ def _aggregate_video_detections(
     Produce a video-level threat summary from per-frame detection results.
 
     Returns:
-        total_detections   – sum of all bounding boxes across all frames
-        frames_with_detections – number of frames that had ≥1 detection
-        unique_classes     – sorted list of distinct class names detected
-        peak_confidence    – highest single-detection confidence in the clip
-        class_counts       – {class_name: total_count} across all frames
-        threat_detected    – True when any detection was found
+        total_detections       - sum of all bounding boxes across all frames
+        frames_with_detections - number of frames that had >=1 detection
+        unique_classes         - sorted list of distinct class names detected
+        peak_confidence        - highest single-detection confidence in the clip
+        class_counts           - {class_name: total_count} across all frames
+        threat_detected        - True when any detection was found
     """
     total_detections = 0
     frames_with_detections = 0
@@ -327,7 +327,7 @@ def _aggregate_video_detections(
 
 
 # ---------------------------------------------------------------------------
-# Video inference – blocking worker (runs in a thread)
+# Video inference - blocking worker (runs in a thread)
 # ---------------------------------------------------------------------------
 
 
@@ -394,9 +394,9 @@ def _run_video_inference_sync(
             # -------------------------
             # Frame sampling
             # -------------------------
-            # frame_skip=1 → every frame
-            # frame_skip=2 → every other frame
-            # frame_skip=N → one in every N frames
+            # frame_skip=1 -> every frame
+            # frame_skip=2 -> every other frame
+            # frame_skip=N -> one in every N frames
 
             if (frames_read - 1) % frame_skip != 0:
                 continue
@@ -471,8 +471,8 @@ def _run_video_inference_sync(
 
             frame_results.append(
                 {
-                    "frame_index": frames_read - 1,   # original 0-based index in file
-                    "sampled_index": frames_processed, # 0-based index among sampled frames
+                    "frame_index": frames_read - 1,    # original 0-based index in file
+                    "sampled_index": frames_processed,  # 0-based index among sampled frames
                     "inference": result,
                 }
             )
@@ -515,12 +515,12 @@ async def video_inference(
     Returns
     -------
     A JSON object containing:
-    - ``video``             – video metadata (fps, dimensions, duration …)
-    - ``frames_requested``  – max_frames param
-    - ``frames_processed``  – actual frames that went through inference
-    - ``frame_skip``        – the sampling interval used
-    - ``results``           – per-frame inference results
-    - ``summary``           – video-level aggregated threat summary
+    - ``video``             - video metadata (fps, dimensions, duration ...)
+    - ``frames_requested``  - max_frames param
+    - ``frames_processed``  - actual frames that went through inference
+    - ``frame_skip``        - the sampling interval used
+    - ``results``           - per-frame inference results
+    - ``summary``           - video-level aggregated threat summary
     """
 
     # -------------------------
