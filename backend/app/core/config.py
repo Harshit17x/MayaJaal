@@ -40,7 +40,7 @@ class Settings(BaseSettings):
 
     # Network security. Comma-separated values keep .env setup simple, e.g.
     # SIH_ALLOWED_CAMERA_CIDRS=10.20.72.0/24.
-    cors_origins: str = "http://localhost:3000,http://127.0.0.1:3000,http://10.20.72.81:3000"
+    cors_origins: str = "http://localhost:3000,http://127.0.0.1:3000,http://localhost:3002,http://127.0.0.1:3002,http://10.20.72.81:3000,http://10.20.72.81:3002"
     allowed_camera_cidrs: str = "10.20.72.0/24"
 
     # Supported input types
