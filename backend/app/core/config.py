@@ -32,7 +32,7 @@ class Settings(BaseSettings):
     max_concurrent_inference: int = Field(default=2, ge=1)
 
     # Request/resource limits
-    max_upload_size_mb: int = Field(default=50, ge=1)
+    max_upload_size_mb: int = Field(default=200, ge=1)
     inference_timeout_seconds: float = Field(
         default=30.0,
         gt=0,
@@ -53,6 +53,30 @@ class Settings(BaseSettings):
         ".mov",
         ".mkv",
         ".webm",
+    )
+
+    # ByteTrack multi-object tracking defaults
+    # All values can be overridden via SIH_TRACKER_* environment variables.
+    tracker_activation_threshold: float = Field(
+        default=0.25,
+        ge=0.01,
+        le=1.0,
+        description="Min detection confidence to activate a new ByteTrack track.",
+    )
+    tracker_lost_track_buffer: int = Field(
+        default=30,
+        ge=1,
+        description="Frames to hold a lost track before permanently removing it.",
+    )
+    tracker_frame_rate: int = Field(
+        default=30,
+        ge=1,
+        description="Expected stream FPS used by the internal Kalman filter.",
+    )
+    tracker_min_consecutive_frames: int = Field(
+        default=1,
+        ge=1,
+        description="Consecutive matched frames before a track is confirmed.",
     )
 
     # Logging
