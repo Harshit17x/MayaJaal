@@ -81,10 +81,16 @@ export default function GisMapPage() {
             </button>
           </div>
 
-          {/* Fullscreen Map Toggle */}
+          {/* Focus Map Toggle */}
           <button
+            type="button"
             onClick={() => setIsFullscreen(!isFullscreen)}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors shadow-xs"
+            className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border text-xs font-bold transition-all shadow-xs cursor-pointer ${
+              isFullscreen
+                ? "bg-emerald-600 text-white border-emerald-500 hover:bg-emerald-500"
+                : "border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100 hover:border-emerald-300"
+            }`}
+            title={isFullscreen ? "Exit Maximum Focus Mode (Esc)" : "Open Map to Maximum Screen Space"}
           >
             {isFullscreen ? (
               <>
@@ -93,7 +99,7 @@ export default function GisMapPage() {
               </>
             ) : (
               <>
-                <Maximize2 className="w-3.5 h-3.5" />
+                <Maximize2 className="w-3.5 h-3.5 text-emerald-700" />
                 <span>Focus Map</span>
               </>
             )}
@@ -102,37 +108,27 @@ export default function GisMapPage() {
       </div>
 
       {/* Main Map + Recent Alerts Panel */}
-      <div
-        className={`grid gap-6 items-start transition-all ${
-          isFullscreen ? "grid-cols-1" : "grid-cols-1 lg:grid-cols-12"
-        }`}
-      >
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Full Interactive Google BorderMap */}
-        <div
-          className={`${
-            isFullscreen
-              ? "col-span-1 min-h-[760px]"
-              : "lg:col-span-7 xl:col-span-8"
-          } flex flex-col`}
-        >
-          <BorderMap initialMapType={activeLayer} height={isFullscreen ? "760px" : "560px"} />
+        <div className="lg:col-span-7 xl:col-span-8 flex flex-col">
+          <BorderMap
+            initialMapType={activeLayer}
+            onMapTypeChange={(layer) => setActiveLayer(layer)}
+            isFullscreen={isFullscreen}
+            onToggleFullscreen={() => setIsFullscreen(!isFullscreen)}
+            height="580px"
+          />
         </div>
 
         {/* Tactical Feed / Recent Alerts */}
-        {!isFullscreen && (
-          <div className="lg:col-span-5 xl:col-span-4 flex flex-col space-y-6">
-            <RecentAlerts />
-          </div>
-        )}
+        <div className="lg:col-span-5 xl:col-span-4 flex flex-col space-y-6">
+          <RecentAlerts />
+        </div>
       </div>
 
       {/* System Status & Camera Feed Strip */}
-      {!isFullscreen && (
-        <>
-          <SystemStatus />
-          <CameraFeedStrip />
-        </>
-      )}
+      <SystemStatus />
+      <CameraFeedStrip />
     </div>
   );
 }

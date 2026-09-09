@@ -13,6 +13,9 @@ import {
   Check,
   Globe,
   SlidersHorizontal,
+  Maximize2,
+  Minimize2,
+  Expand,
 } from "lucide-react";
 import { Camera as CameraEntity } from "@/types/camera";
 import { useCameras } from "@/lib/camerasStore";
@@ -59,6 +62,7 @@ export const NEIGHBOR_BORDERS: NeighborBorder[] = [
 
 interface BorderMapProps {
   initialMapType?: "hybrid" | "satellite" | "roadmap" | "terrain";
+  onMapTypeChange?: (mapType: "hybrid" | "satellite" | "roadmap" | "terrain") => void;
   className?: string;
   height?: string;
   customCameras?: CameraEntity[];
@@ -67,10 +71,13 @@ interface BorderMapProps {
   center?: { lat: number; lng: number };
   zoom?: number;
   interactive?: boolean;
+  isFullscreen?: boolean;
+  onToggleFullscreen?: () => void;
 }
 
 export function BorderMap({
   initialMapType = "hybrid",
+  onMapTypeChange,
   className = "",
   height = "560px",
   customCameras,
@@ -79,6 +86,8 @@ export function BorderMap({
   center = { lat: 28.60, lng: 77.20 },
   zoom = 5.5,
   interactive = true,
+  isFullscreen: isFullscreenProp,
+  onToggleFullscreen,
 }: BorderMapProps) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<google.maps.Map | null>(null);
@@ -89,10 +98,23 @@ export function BorderMap({
   const [isLoaded, setIsLoaded] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
 
+  // Fullscreen / Focus Mode state (supports controlled or uncontrolled)
+  const [internalFullscreen, setInternalFullscreen] = useState(false);
+  const isFocusMode = isFullscreenProp !== undefined ? isFullscreenProp : internalFullscreen;
+
+  const toggleFocusMode = useCallback(() => {
+    if (onToggleFullscreen) {
+      onToggleFullscreen();
+    } else {
+      setInternalFullscreen((prev) => !prev);
+    }
+  }, [onToggleFullscreen]);
+
   // International Border Layer state
   const [showBorders, setShowBorders] = useState(true);
   const [selectedNeighbor, setSelectedNeighbor] = useState<string>("All");
   const [isBordersLoaded, setIsBordersLoaded] = useState(false);
+  const [isBrowserFullscreen, setIsBrowserFullscreen] = useState(false);
 
   const { cameras: storeCameras } = useCameras();
   const activeCameras = customCameras ?? storeCameras;
@@ -423,9 +445,20 @@ export function BorderMap({
     });
   }, [activeCameras, isLoaded, selectedCameraId]);
 
+  // Sync MapType when parent prop changes
+  useEffect(() => {
+    if (initialMapType && initialMapType !== mapType) {
+      setMapType(initialMapType);
+      if (mapInstanceRef.current && (window as any).google?.maps) {
+        mapInstanceRef.current.setMapTypeId(initialMapType);
+      }
+    }
+  }, [initialMapType]);
+
   // Sync MapType switch
   const handleMapTypeChange = (type: "hybrid" | "satellite" | "roadmap" | "terrain") => {
     setMapType(type);
+    onMapTypeChange?.(type);
     if (mapInstanceRef.current && (window as any).google?.maps) {
       mapInstanceRef.current.setMapTypeId(type);
     }
@@ -449,83 +482,188 @@ export function BorderMap({
     }
   };
 
+  // Monitor map container resizing to trigger Google Maps resize
+  useEffect(() => {
+    if (!mapContainerRef.current) return;
+    const el = mapContainerRef.current;
+    const observer = new ResizeObserver(() => {
+      if (mapInstanceRef.current && (window as any).google?.maps) {
+        (window as any).google.maps.event.trigger(mapInstanceRef.current, "resize");
+      }
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [isLoaded]);
+
+  // Explicitly trigger Google Maps resize when focus mode or height changes
+  useEffect(() => {
+    if (!mapInstanceRef.current || !(window as any).google?.maps) return;
+    const map = mapInstanceRef.current;
+    const triggerResize = () => {
+      const currentCenter = map.getCenter();
+      (window as any).google.maps.event.trigger(map, "resize");
+      if (currentCenter) {
+        map.setCenter(currentCenter);
+      }
+    };
+
+    triggerResize();
+    const t1 = setTimeout(triggerResize, 60);
+    const t2 = setTimeout(triggerResize, 250);
+
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+    };
+  }, [isFocusMode, height]);
+
+  // Keyboard Escape listener to exit focus mode
+  useEffect(() => {
+    if (!isFocusMode) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        if (document.fullscreenElement) {
+          document.exitFullscreen().catch(() => {});
+        }
+        toggleFocusMode();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isFocusMode, toggleFocusMode]);
+
+  // Lock body scroll in focus mode so trackpad / mousewheel zooms the map instead of background
+  useEffect(() => {
+    if (isFocusMode) {
+      const prevOverflow = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = prevOverflow;
+      };
+    }
+  }, [isFocusMode]);
+
+  // Monitor native fullscreen state
+  useEffect(() => {
+    const handleFsChange = () => {
+      setIsBrowserFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener("fullscreenchange", handleFsChange);
+    return () => document.removeEventListener("fullscreenchange", handleFsChange);
+  }, []);
+
+  const handleToggleNativeFullscreen = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(() => {});
+    } else {
+      document.exitFullscreen().catch(() => {});
+    }
+  };
+
+  const handleExit = () => {
+    if (document.fullscreenElement) {
+      document.exitFullscreen().catch(() => {});
+    }
+    toggleFocusMode();
+  };
+
   return (
-    <div className={`bg-white rounded-2xl border border-slate-200/90 shadow-xs overflow-hidden flex flex-col ${className}`}>
-      {/* Map Header with Title, Status & Controls */}
-      <div className="p-4 border-b border-slate-200/80 flex flex-wrap items-center justify-between gap-3 bg-slate-50/70">
-        <div className="flex items-center gap-2.5">
-          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-          <h2 className="text-sm sm:text-base font-bold text-slate-900 tracking-tight flex items-center gap-2">
-            <span>Google Maps Tactical Surveillance</span>
-            <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-emerald-100/70 text-emerald-800 font-semibold">
-              Survey of India Land Borders
+    <div
+      className={
+        isFocusMode
+          ? `fixed inset-0 z-[100] w-screen h-screen bg-slate-950 flex flex-col overflow-hidden animate-in fade-in duration-200 ${className}`
+          : `bg-white rounded-2xl border border-slate-200/90 shadow-xs overflow-hidden flex flex-col ${className}`
+      }
+    >
+      {/* Standard Map Header (Shown only when NOT in focus mode) */}
+      {!isFocusMode && (
+        <div className="p-4 border-b border-slate-200/80 flex flex-wrap items-center justify-between gap-3 bg-slate-50/70">
+          <div className="flex items-center gap-2.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+            <h2 className="text-sm sm:text-base font-bold text-slate-900 tracking-tight flex items-center gap-2">
+              <span>Google Maps Tactical Surveillance</span>
+              <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-emerald-100/70 text-emerald-800 font-semibold">
+                Survey of India Land Borders
+              </span>
+            </h2>
+            <span
+              suppressHydrationWarning
+              className="hidden sm:inline-block text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-slate-200/70 text-slate-700 font-semibold"
+            >
+              {activeCameras.length} Node{activeCameras.length === 1 ? "" : "s"}
             </span>
-          </h2>
-          <span
-            suppressHydrationWarning
-            className="hidden sm:inline-block text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-slate-200/70 text-slate-700 font-semibold"
-          >
-            {activeCameras.length} Node{activeCameras.length === 1 ? "" : "s"}
-          </span>
-        </div>
-
-        {/* Tactical Controls (Layers, Border Toggle, View Reset) */}
-        <div className="flex flex-wrap items-center gap-2">
-          {/* Border Layer Toggle Button */}
-          <button
-            type="button"
-            onClick={() => setShowBorders(!showBorders)}
-            className={`inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold rounded-xl transition-all border ${
-              showBorders
-                ? "bg-[#143724] text-white border-emerald-700 shadow-xs"
-                : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
-            }`}
-            title="Toggle Survey of India International Land Borders"
-          >
-            <Shield className="w-3.5 h-3.5 text-emerald-400" />
-            <span>🇮🇳 Land Borders</span>
-            {showBorders && <Check className="w-3 h-3 text-emerald-300" />}
-          </button>
-
-          {/* Map Layer Mode buttons */}
-          <div className="inline-flex p-1 rounded-xl bg-slate-200/60 border border-slate-300/60 text-xs font-semibold">
-            {(
-              [
-                { id: "hybrid", label: "Hybrid" },
-                { id: "satellite", label: "Satellite" },
-                { id: "terrain", label: "Terrain" },
-                { id: "roadmap", label: "Roadmap" },
-              ] as const
-            ).map((layer) => (
-              <button
-                key={layer.id}
-                type="button"
-                onClick={() => handleMapTypeChange(layer.id)}
-                className={`px-2.5 py-1 rounded-lg transition-all text-[11px] font-medium ${
-                  mapType === layer.id
-                    ? "bg-white text-slate-900 shadow-xs font-bold"
-                    : "text-slate-600 hover:text-slate-900"
-                }`}
-              >
-                {layer.label}
-              </button>
-            ))}
           </div>
 
-          {/* Reset Center button */}
-          <button
-            type="button"
-            onClick={handleResetView}
-            title="Reset Map to Pan-India Overview"
-            className="p-1.5 rounded-lg border border-slate-200 bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50 shadow-xs transition-colors"
-          >
-            <Navigation className="w-3.5 h-3.5" />
-          </button>
-        </div>
-      </div>
+          {/* Tactical Controls (Layers, Border Toggle, View Reset, Focus Map) */}
+          <div className="flex flex-wrap items-center gap-2">
+            {/* Border Layer Toggle Button */}
+            <button
+              type="button"
+              onClick={() => setShowBorders(!showBorders)}
+              className={`inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold rounded-xl transition-all border cursor-pointer ${
+                showBorders
+                  ? "bg-[#143724] text-white border-emerald-700 shadow-xs"
+                  : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
+              }`}
+              title="Toggle Survey of India International Land Borders"
+            >
+              <Shield className="w-3.5 h-3.5 text-emerald-400" />
+              <span>🇮🇳 Land Borders</span>
+              {showBorders && <Check className="w-3 h-3 text-emerald-300" />}
+            </button>
 
-      {/* Neighbor Frontier Quick Focus Ribbon */}
-      {showBorders && (
+            {/* Map Layer Mode buttons */}
+            <div className="inline-flex p-1 rounded-xl bg-slate-200/60 border border-slate-300/60 text-xs font-semibold">
+              {(
+                [
+                  { id: "hybrid", label: "Hybrid" },
+                  { id: "satellite", label: "Satellite" },
+                  { id: "terrain", label: "Terrain" },
+                  { id: "roadmap", label: "Roadmap" },
+                ] as const
+              ).map((layer) => (
+                <button
+                  key={layer.id}
+                  type="button"
+                  onClick={() => handleMapTypeChange(layer.id)}
+                  className={`px-2.5 py-1 rounded-lg transition-all text-[11px] font-medium cursor-pointer ${
+                    mapType === layer.id
+                      ? "bg-white text-slate-900 shadow-xs font-bold"
+                      : "text-slate-600 hover:text-slate-900"
+                  }`}
+                >
+                  {layer.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Reset Center button */}
+            <button
+              type="button"
+              onClick={handleResetView}
+              title="Reset Map to Pan-India Overview"
+              className="p-1.5 rounded-lg border border-slate-200 bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50 shadow-xs transition-colors cursor-pointer"
+            >
+              <Navigation className="w-3.5 h-3.5" />
+            </button>
+
+            {/* Focus / Maximize Map Button */}
+            <button
+              type="button"
+              onClick={toggleFocusMode}
+              title="Open Map to Maximum Screen Space"
+              className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100 hover:border-emerald-300 shadow-xs transition-all cursor-pointer"
+            >
+              <Maximize2 className="w-3.5 h-3.5 text-emerald-700" />
+              <span>Focus Map</span>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Standard Neighbor Frontier Quick Focus Ribbon (Shown only when NOT in focus mode) */}
+      {!isFocusMode && showBorders && (
         <div className="px-4 py-2 bg-slate-100/80 border-b border-slate-200 flex items-center gap-1.5 overflow-x-auto text-[11px]">
           <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mr-1 shrink-0 flex items-center gap-1">
             <Globe className="w-3 h-3 text-slate-500" />
@@ -538,7 +676,7 @@ export function BorderMap({
               setSelectedNeighbor("All");
               handleResetView();
             }}
-            className={`px-2.5 py-0.5 rounded-md font-bold transition-all shrink-0 ${
+            className={`px-2.5 py-0.5 rounded-md font-bold transition-all shrink-0 cursor-pointer ${
               selectedNeighbor === "All"
                 ? "bg-slate-900 text-white shadow-xs"
                 : "bg-white text-slate-700 border border-slate-200 hover:bg-slate-50"
@@ -552,7 +690,7 @@ export function BorderMap({
               key={border.name}
               type="button"
               onClick={() => handleFocusNeighbor(border)}
-              className={`px-2.5 py-0.5 rounded-md font-semibold transition-all shrink-0 flex items-center gap-1.5 ${
+              className={`px-2.5 py-0.5 rounded-md font-semibold transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
                 selectedNeighbor === border.name
                   ? "bg-white text-slate-900 ring-2 shadow-xs"
                   : "bg-white/80 text-slate-700 border border-slate-200/80 hover:bg-white"
@@ -574,8 +712,13 @@ export function BorderMap({
         </div>
       )}
 
-      {/* Map Container */}
-      <div className="relative w-full bg-slate-900 overflow-hidden" style={{ height }}>
+      {/* Map Container (Stretches to 100% of viewport in Focus Mode) */}
+      <div
+        className={`relative w-full bg-slate-950 overflow-hidden ${
+          isFocusMode ? "flex-1 h-full min-h-0" : ""
+        }`}
+        style={isFocusMode ? undefined : { height }}
+      >
         {/* Loading Spinner */}
         {!isLoaded && !loadError && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-900/90 text-white z-20">
@@ -597,60 +740,297 @@ export function BorderMap({
 
         {/* The Google Map DOM Node */}
         <div ref={mapContainerRef} className="w-full h-full" />
+
+        {/* FOCUS MODE FLOATING TACTICAL HUD */}
+        {isFocusMode && (
+          <>
+            {/* Top Floating Command HUD */}
+            <div className="absolute top-3 left-3 right-3 z-30 pointer-events-none flex flex-col gap-2">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                {/* Left: Tactical Badge & Node Count */}
+                <div className="pointer-events-auto bg-slate-900/90 backdrop-blur-md border border-slate-700/60 text-white px-3.5 py-2 rounded-xl shadow-2xl flex items-center gap-2.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
+                  <span className="text-xs font-black tracking-wider uppercase text-white">
+                    Tactical GIS Surveillance
+                  </span>
+                  <span className="text-[10px] font-mono text-emerald-300 bg-emerald-950/80 border border-emerald-500/40 px-2 py-0.5 rounded font-bold uppercase">
+                    Survey of India
+                  </span>
+                  <span className="hidden sm:inline-block text-[10px] font-mono text-slate-300 bg-slate-800/80 px-2 py-0.5 rounded">
+                    {activeCameras.length} Nodes Active
+                  </span>
+                </div>
+
+                {/* Center: Desktop Frontier Quick Navigation */}
+                <div className="pointer-events-auto hidden lg:flex items-center gap-1 bg-slate-900/90 backdrop-blur-md border border-slate-700/60 px-2 py-1.5 rounded-xl shadow-2xl overflow-x-auto max-w-2xl">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-1.5 flex items-center gap-1 shrink-0">
+                    <Globe className="w-3 h-3 text-emerald-400" />
+                    Frontiers:
+                  </span>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedNeighbor("All");
+                      handleResetView();
+                    }}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all shrink-0 cursor-pointer ${
+                      selectedNeighbor === "All"
+                        ? "bg-emerald-600 text-white shadow-xs"
+                        : "text-slate-300 hover:text-white hover:bg-slate-800/80"
+                    }`}
+                  >
+                    All (14,349 km)
+                  </button>
+
+                  {NEIGHBOR_BORDERS.map((border) => (
+                    <button
+                      key={border.name}
+                      type="button"
+                      onClick={() => handleFocusNeighbor(border)}
+                      className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
+                        selectedNeighbor === border.name
+                          ? "bg-white text-slate-900 font-bold shadow-xs"
+                          : "text-slate-300 hover:text-white hover:bg-slate-800/80"
+                      }`}
+                    >
+                      <span
+                        className="w-2 h-2 rounded-full inline-block shrink-0"
+                        style={{ backgroundColor: border.color }}
+                      />
+                      <span>{border.name}</span>
+                    </button>
+                  ))}
+                </div>
+
+                {/* Right: Tactical Controls & High-Visibility Exit Focus Button */}
+                <div className="pointer-events-auto flex items-center gap-2 bg-slate-900/90 backdrop-blur-md border border-slate-700/60 p-1.5 rounded-xl shadow-2xl">
+                  {/* Border Toggle Button */}
+                  <button
+                    type="button"
+                    onClick={() => setShowBorders(!showBorders)}
+                    className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+                      showBorders
+                        ? "bg-emerald-950/80 text-emerald-300 border border-emerald-500/40"
+                        : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/80"
+                    }`}
+                    title="Toggle Survey of India International Land Borders"
+                  >
+                    <Shield className="w-3.5 h-3.5 text-emerald-400" />
+                    <span className="hidden sm:inline">Land Borders</span>
+                    {showBorders && <Check className="w-3 h-3 text-emerald-400" />}
+                  </button>
+
+                  {/* Map Layer Mode buttons */}
+                  <div className="inline-flex p-0.5 rounded-lg bg-slate-800/80 border border-slate-700/50 text-xs font-semibold">
+                    {(
+                      [
+                        { id: "hybrid", label: "Hybrid" },
+                        { id: "satellite", label: "Satellite" },
+                        { id: "terrain", label: "Terrain" },
+                        { id: "roadmap", label: "Roadmap" },
+                      ] as const
+                    ).map((layer) => (
+                      <button
+                        key={layer.id}
+                        type="button"
+                        onClick={() => handleMapTypeChange(layer.id)}
+                        className={`px-2 py-1 rounded-md transition-all text-[11px] cursor-pointer ${
+                          mapType === layer.id
+                            ? "bg-white text-slate-900 font-bold shadow-xs"
+                            : "text-slate-400 hover:text-slate-200"
+                        }`}
+                      >
+                        {layer.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Reset Center button */}
+                  <button
+                    type="button"
+                    onClick={handleResetView}
+                    title="Reset Map to Pan-India Overview"
+                    className="p-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/80 transition-colors cursor-pointer"
+                  >
+                    <Navigation className="w-3.5 h-3.5" />
+                  </button>
+
+                  {/* Native Fullscreen Toggle Button */}
+                  <button
+                    type="button"
+                    onClick={handleToggleNativeFullscreen}
+                    title={isBrowserFullscreen ? "Exit Fullscreen Window" : "Fullscreen Window (F11)"}
+                    className="p-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/80 transition-colors cursor-pointer hidden sm:inline-flex"
+                  >
+                    <Expand className="w-3.5 h-3.5" />
+                  </button>
+
+                  {/* Exit Focus Button */}
+                  <button
+                    type="button"
+                    onClick={handleExit}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-lg transition-all cursor-pointer active:scale-95"
+                    title="Exit Maximum Focus View (Esc)"
+                  >
+                    <Minimize2 className="w-3.5 h-3.5" />
+                    <span>Exit Focus</span>
+                    <kbd className="text-[9px] bg-emerald-800/90 text-emerald-200 px-1 py-0.5 rounded font-mono font-bold tracking-tight">
+                      ESC
+                    </kbd>
+                  </button>
+                </div>
+              </div>
+
+              {/* Mobile/Tablet Frontier Quick Navigation Ribbon */}
+              <div className="pointer-events-auto lg:hidden flex items-center gap-1 bg-slate-900/90 backdrop-blur-md border border-slate-700/60 px-2 py-1.5 rounded-xl shadow-2xl overflow-x-auto">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-1 flex items-center gap-1 shrink-0">
+                  <Globe className="w-3 h-3 text-emerald-400" />
+                  Frontiers:
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedNeighbor("All");
+                    handleResetView();
+                  }}
+                  className={`px-2 py-0.5 rounded text-xs font-bold transition-all shrink-0 cursor-pointer ${
+                    selectedNeighbor === "All"
+                      ? "bg-emerald-600 text-white"
+                      : "text-slate-300 hover:bg-slate-800"
+                  }`}
+                >
+                  All
+                </button>
+                {NEIGHBOR_BORDERS.map((border) => (
+                  <button
+                    key={border.name}
+                    type="button"
+                    onClick={() => handleFocusNeighbor(border)}
+                    className={`px-2.5 py-0.5 rounded text-xs font-semibold transition-all shrink-0 flex items-center gap-1 cursor-pointer ${
+                      selectedNeighbor === border.name
+                        ? "bg-white text-slate-900 font-bold"
+                        : "text-slate-300 hover:bg-slate-800"
+                    }`}
+                  >
+                    <span
+                      className="w-1.5 h-1.5 rounded-full inline-block"
+                      style={{ backgroundColor: border.color }}
+                    />
+                    <span>{border.name}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Floating Bottom Tactical Legend HUD */}
+            <div className="absolute bottom-3 left-3 z-30 pointer-events-auto flex flex-wrap items-center gap-3 bg-slate-900/85 backdrop-blur-md border border-slate-700/60 px-3.5 py-1.5 rounded-xl shadow-2xl text-xs text-slate-300">
+              <div className="flex items-center gap-1.5 font-medium">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block shadow-xs" />
+                <span suppressHydrationWarning>
+                  {activeCameras.filter((c) => c.status === "online").length} Online Nodes
+                </span>
+              </div>
+
+              <div className="flex items-center gap-1.5 font-medium">
+                <span className="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block shadow-xs" />
+                <span suppressHydrationWarning>
+                  {activeCameras.filter((c) => c.status === "alert").length} Elevated/Alert
+                </span>
+              </div>
+
+              {showBorders && (
+                <div className="hidden sm:flex flex-wrap items-center gap-2.5 text-[11px] font-medium text-slate-400 border-l border-slate-700 pl-3">
+                  <span className="flex items-center gap-1">
+                    <span className="w-2 h-0.5 bg-[#dc2626] inline-block" />
+                    <span>Pakistan</span>
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <span className="w-2 h-0.5 bg-[#f59e0b] inline-block" />
+                    <span>China</span>
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <span className="w-2 h-0.5 bg-[#10b981] inline-block" />
+                    <span>Nepal</span>
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <span className="w-2 h-0.5 bg-[#059669] inline-block" />
+                    <span>Bhutan</span>
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <span className="w-2 h-0.5 bg-[#3b82f6] inline-block" />
+                    <span>Bangladesh</span>
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <span className="w-2 h-0.5 bg-[#8b5cf6] inline-block" />
+                    <span>Myanmar</span>
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Floating Bottom Right Hint */}
+            <div className="absolute bottom-3 right-3 z-30 pointer-events-none hidden md:flex items-center gap-2 bg-slate-900/75 backdrop-blur-md border border-slate-700/50 px-2.5 py-1 rounded-lg text-[10px] font-mono text-slate-400 shadow-xl">
+              <span>Press <kbd className="bg-slate-800 text-slate-200 px-1 py-0.5 rounded font-bold">ESC</kbd> to exit focus view</span>
+            </div>
+          </>
+        )}
       </div>
 
-      {/* Map Footer Legend */}
-      <div className="px-4 py-2.5 bg-slate-50 border-t border-slate-200/80 flex flex-wrap items-center justify-between text-xs text-slate-600 gap-3">
-        <div className="flex flex-wrap items-center gap-4">
-          <div className="flex items-center gap-1.5 font-medium">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-600 inline-block shadow-xs" />
-            <span suppressHydrationWarning>
-              {activeCameras.filter((c) => c.status === "online").length} Online Nodes
-            </span>
-          </div>
-
-          <div className="flex items-center gap-1.5 font-medium">
-            <span className="w-2.5 h-2.5 rounded-full bg-rose-600 inline-block shadow-xs" />
-            <span suppressHydrationWarning>
-              {activeCameras.filter((c) => c.status === "alert").length} Elevated/Alert
-            </span>
-          </div>
-
-          {/* Dynamic Border Legend */}
-          {showBorders && (
-            <div className="flex flex-wrap items-center gap-3 text-[11px] font-medium text-slate-500 border-l border-slate-200 pl-3">
-              <span className="flex items-center gap-1">
-                <span className="w-2 h-0.5 bg-[#dc2626] inline-block" />
-                <span>Pakistan</span>
-              </span>
-              <span className="flex items-center gap-1">
-                <span className="w-2 h-0.5 bg-[#f59e0b] inline-block" />
-                <span>China</span>
-              </span>
-              <span className="flex items-center gap-1">
-                <span className="w-2 h-0.5 bg-[#10b981] inline-block" />
-                <span>Nepal</span>
-              </span>
-              <span className="flex items-center gap-1">
-                <span className="w-2 h-0.5 bg-[#059669] inline-block" />
-                <span>Bhutan</span>
-              </span>
-              <span className="flex items-center gap-1">
-                <span className="w-2 h-0.5 bg-[#3b82f6] inline-block" />
-                <span>Bangladesh</span>
-              </span>
-              <span className="flex items-center gap-1">
-                <span className="w-2 h-0.5 bg-[#8b5cf6] inline-block" />
-                <span>Myanmar</span>
+      {/* Standard Map Footer Legend (Shown only when NOT in focus mode) */}
+      {!isFocusMode && (
+        <div className="px-4 py-2.5 bg-slate-50 border-t border-slate-200/80 flex flex-wrap items-center justify-between text-xs text-slate-600 gap-3">
+          <div className="flex flex-wrap items-center gap-4">
+            <div className="flex items-center gap-1.5 font-medium">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-600 inline-block shadow-xs" />
+              <span suppressHydrationWarning>
+                {activeCameras.filter((c) => c.status === "online").length} Online Nodes
               </span>
             </div>
-          )}
-        </div>
 
-        <div className="text-[11px] font-mono text-slate-400">
-          Source: Survey of India OUTLINE_OF_INDIA (WGS 84)
+            <div className="flex items-center gap-1.5 font-medium">
+              <span className="w-2.5 h-2.5 rounded-full bg-rose-600 inline-block shadow-xs" />
+              <span suppressHydrationWarning>
+                {activeCameras.filter((c) => c.status === "alert").length} Elevated/Alert
+              </span>
+            </div>
+
+            {/* Dynamic Border Legend */}
+            {showBorders && (
+              <div className="flex flex-wrap items-center gap-3 text-[11px] font-medium text-slate-500 border-l border-slate-200 pl-3">
+                <span className="flex items-center gap-1">
+                  <span className="w-2 h-0.5 bg-[#dc2626] inline-block" />
+                  <span>Pakistan</span>
+                </span>
+                <span className="flex items-center gap-1">
+                  <span className="w-2 h-0.5 bg-[#f59e0b] inline-block" />
+                  <span>China</span>
+                </span>
+                <span className="flex items-center gap-1">
+                  <span className="w-2 h-0.5 bg-[#10b981] inline-block" />
+                  <span>Nepal</span>
+                </span>
+                <span className="flex items-center gap-1">
+                  <span className="w-2 h-0.5 bg-[#059669] inline-block" />
+                  <span>Bhutan</span>
+                </span>
+                <span className="flex items-center gap-1">
+                  <span className="w-2 h-0.5 bg-[#3b82f6] inline-block" />
+                  <span>Bangladesh</span>
+                </span>
+                <span className="flex items-center gap-1">
+                  <span className="w-2 h-0.5 bg-[#8b5cf6] inline-block" />
+                  <span>Myanmar</span>
+                </span>
+              </div>
+            )}
+          </div>
+
+          <div className="text-[11px] font-mono text-slate-400">
+            Source: Survey of India OUTLINE_OF_INDIA (WGS 84)
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
