@@ -339,7 +339,10 @@ export function BorderMap({
           <h2 className="text-sm sm:text-base font-bold text-slate-900 tracking-tight">
             Google Maps Tactical Surveillance
           </h2>
-          <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-emerald-100/70 text-emerald-800 font-semibold">
+          <span
+            suppressHydrationWarning
+            className="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-emerald-100/70 text-emerald-800 font-semibold"
+          >
             {activeCameras.length} Node{activeCameras.length === 1 ? "" : "s"}
           </span>
         </div>
@@ -413,11 +416,11 @@ export function BorderMap({
         <div className="flex flex-wrap items-center gap-4">
           <div className="flex items-center gap-1.5 font-medium">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-600 inline-block shadow-xs" />
-            <span>{activeCameras.filter((c) => c.status === "online").length} Online Nodes</span>
+            <span suppressHydrationWarning>{activeCameras.filter((c) => c.status === "online").length} Online Nodes</span>
           </div>
           <div className="flex items-center gap-1.5 font-medium">
             <span className="w-2.5 h-2.5 rounded-full bg-rose-600 inline-block shadow-xs" />
-            <span>{activeCameras.filter((c) => c.status === "alert").length} Elevated/Alert</span>
+            <span suppressHydrationWarning>{activeCameras.filter((c) => c.status === "alert").length} Elevated/Alert</span>
           </div>
           <div className="flex items-center gap-1.5 font-medium">
             <span className="inline-block w-4 h-0.5 border-t-2 border-dashed border-emerald-600" />
