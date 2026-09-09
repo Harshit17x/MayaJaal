@@ -43,8 +43,8 @@ export default function GisMapPage() {
         <div className="flex flex-wrap items-center gap-3">
           {/* Geolocation Tag */}
           <div className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 text-xs font-mono font-medium">
-            <Crosshair className="w-3.5 h-3.5 text-emerald-600" />
-            <span>Survey of India • 14,348 km Border Grid</span>
+            <Crosshair className="w-3.5 h-3.5 text-slate-500" />
+            <span>23.30° N, 78.60° E</span>
           </div>
 
           {/* Google Maps Layer Toggle */}

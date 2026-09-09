@@ -40,7 +40,7 @@ class PreprocessingConfig:
 
     convert_bgr_to_rgb: bool = True
     normalize: bool = False
-    scale: float = 1.0
+    scale: float = 1.0 / 255.0
     mean: tuple[float, float, float] | None = None
     std: tuple[float, float, float] | None = None
 

@@ -1,21 +1,31 @@
+"use client";
+
 import { CameraCard } from "./cameracard";
+import { useCameras } from "@/lib/camerasStore";
+import { Camera } from "@/types/camera";
 
-const temporaryCameras = [
-  { id: "cam-01", name: "Camera 01", location: "North Perimeter" },
-  { id: "cam-02", name: "Camera 02", location: "Eastern Gate" },
-  { id: "cam-03", name: "Camera 03", location: "Watch Tower" },
-  { id: "cam-04", name: "Camera 04", location: "Southern Trail" },
-];
+interface CameraGridProps {
+  selectedCameraId?: string;
+  onSelectCamera?: (camera: Camera) => void;
+}
 
-export function CameraGrid() {
+export function CameraGrid({ selectedCameraId, onSelectCamera }: CameraGridProps) {
+  const { cameras } = useCameras();
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      {temporaryCameras.map((camera) => (
+      {cameras.map((camera) => (
         <CameraCard
           key={camera.id}
+          id={camera.id}
           name={camera.name}
           location={camera.location}
-          isOnline={true}
+          sector={camera.sector}
+          isOnline={camera.status !== "offline"}
+          streamUrl={camera.streamUrl}
+          ipAddress={camera.ipAddress}
+          isSelected={camera.id === selectedCameraId}
+          onClick={() => onSelectCamera?.(camera)}
         />
       ))}
     </div>

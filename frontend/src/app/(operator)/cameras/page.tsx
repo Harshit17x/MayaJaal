@@ -43,14 +43,12 @@ import {
 import { useCameras } from "@/lib/camerasStore";
 import { BorderMap } from "@/components/map/BorderMap";
 
-// Common border sector options
+// Common sector options
 const SECTORS = [
-  "Sector-01 (Punjab Western IB)",
-  "Sector-02 (Jammu Frontier IB)",
-  "Sector-03 (Rajasthan Thar Frontier)",
-  "Sector-04 (Kutch Creek Frontier)",
-  "Sector-05 (Sikkim Northern LAC)",
-  "Sector-06 (Bengal Eastern Border)",
+  "Sector-04 (BOP Alpha)",
+  "Sector-03 (South Riverine)",
+  "Sector-02 (Eastern Gate)",
+  "Sector-01 (Western Flank)",
 ];
 
 // Camera type options
@@ -63,20 +61,18 @@ const CAMERA_TYPES: CameraType[] = [
   "Panoramic",
 ];
 
-// Preset coordinates along real international border outposts
+// Preset coordinates along border sector
 const COORDINATE_PRESETS = [
-  { name: "Wagah-Attari (Punjab IB)", lat: 31.3344, lng: 74.5433 },
-  { name: "RS Pura (Jammu IB)", lat: 32.7150, lng: 74.6580 },
-  { name: "Thar Longewala (Rajasthan Frontier)", lat: 27.9612, lng: 71.8983 },
-  { name: "Sir Creek (Kutch Frontier)", lat: 23.5125, lng: 68.5038 },
-  { name: "Nathu La Pass (Sikkim LAC)", lat: 27.9900, lng: 88.3552 },
-  { name: "Petrapole Zero Line (Bengal Border)", lat: 25.8001, lng: 88.1830 },
+  { name: "North Forward Post", lat: 24.10, lng: 77.70 },
+  { name: "Eastern Outpost Gate", lat: 23.70, lng: 79.30 },
+  { name: "Watch Tower 03", lat: 22.40, lng: 78.10 },
+  { name: "Southern Ridge Point", lat: 22.90, lng: 79.40 },
+  { name: "Central Riverine Crossing", lat: 23.25, lng: 78.75 },
 ];
 
 export default function CamerasPage() {
   const {
     cameras,
-    isMounted,
     isSyncing,
     totalCount,
     onlineCount,
@@ -236,10 +232,7 @@ export default function CamerasPage() {
                 <h1 className="text-xl md:text-2xl font-black tracking-tight text-slate-900">
                   Perimeter Camera Operator
                 </h1>
-                <span
-                  suppressHydrationWarning
-                  className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-[11px] font-semibold text-emerald-800"
-                >
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-[11px] font-semibold text-emerald-800">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                   {onlineCount}/{totalCount} Online
                 </span>
@@ -281,11 +274,11 @@ export default function CamerasPage() {
             <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
               Configured Nodes
             </span>
-            <div suppressHydrationWarning className="text-2xl font-black text-slate-900 mt-0.5">
+            <div className="text-2xl font-black text-slate-900 mt-0.5">
               {totalCount}
             </div>
             <span className="text-[11px] text-slate-500 font-medium">
-              National Border Grid Mesh
+              Perimeter Sector-04 Mesh
             </span>
           </div>
           <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-700">
@@ -298,10 +291,10 @@ export default function CamerasPage() {
             <span className="text-[11px] font-bold text-emerald-700 uppercase tracking-wider">
               Online Feeds
             </span>
-            <div suppressHydrationWarning className="text-2xl font-black text-emerald-700 mt-0.5">
+            <div className="text-2xl font-black text-emerald-700 mt-0.5">
               {onlineCount}
             </div>
-            <span suppressHydrationWarning className="text-[11px] text-emerald-600 font-medium">
+            <span className="text-[11px] text-emerald-600 font-medium">
               {((onlineCount / (totalCount || 1)) * 100).toFixed(0)}% Network Availability
             </span>
           </div>
@@ -315,7 +308,7 @@ export default function CamerasPage() {
             <span className="text-[11px] font-bold text-rose-700 uppercase tracking-wider">
               Alerts & Breaches
             </span>
-            <div suppressHydrationWarning className="text-2xl font-black text-rose-700 mt-0.5">
+            <div className="text-2xl font-black text-rose-700 mt-0.5">
               {alertCount}
             </div>
             <span className="text-[11px] text-rose-600 font-medium">
@@ -332,7 +325,7 @@ export default function CamerasPage() {
             <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
               Avg RTSP Latency
             </span>
-            <div suppressHydrationWarning className="text-2xl font-black text-slate-900 mt-0.5">
+            <div className="text-2xl font-black text-slate-900 mt-0.5">
               {avgLatencyMs} <span className="text-xs font-semibold text-slate-500">ms</span>
             </div>
             <span className="text-[11px] text-emerald-600 font-medium">
@@ -872,7 +865,7 @@ export default function CamerasPage() {
                     </span>
                   </h3>
                   <p className="text-[11px] font-mono text-slate-400">
-                    {previewCamera.streamUrl || previewCamera.ipAddress} • {previewCamera.sector || "Border Grid"}
+                    {previewCamera.streamUrl || previewCamera.ipAddress} • Sector-04
                   </p>
                 </div>
               </div>
@@ -1202,7 +1195,7 @@ function AddCameraModal({
   onTestStream: (p: { streamUrl?: string; ipAddress?: string; port?: number }) => Promise<StreamTestResult>;
 }) {
   const [name, setName] = useState("");
-  const [sector, setSector] = useState("Sector-01 (Punjab Western IB)");
+  const [sector, setSector] = useState("Sector-04 (BOP Alpha)");
   const [location, setLocation] = useState("");
   const [type, setType] = useState<CameraType>("Optical 4K");
 
@@ -1211,9 +1204,9 @@ function AddCameraModal({
   const [port, setPort] = useState(554);
   const [streamUrl, setStreamUrl] = useState("rtsp://admin:pass@10.20.72.110:554/live/ch0");
 
-  // Lat / Long (Default: BOP Alpha - Wagah-Attari Punjab IB)
-  const [latitude, setLatitude] = useState(31.3344);
-  const [longitude, setLongitude] = useState(74.5433);
+  // Lat / Long
+  const [latitude, setLatitude] = useState(24.10);
+  const [longitude, setLongitude] = useState(77.70);
 
   // Model & Params
   const [modelAssigned, setModelAssigned] = useState("best.onnx (Threat Detector)");
@@ -1906,26 +1899,6 @@ function EditCameraModal({
               <MapPin className="w-3.5 h-3.5 text-emerald-700" />
               <span>Geospatial Coordinates (Lat / Long)</span>
             </h4>
-
-            {/* Presets row */}
-            <div className="flex flex-wrap items-center gap-1.5">
-              <span className="text-[11px] text-slate-500 font-semibold mr-1">
-                Presets:
-              </span>
-              {COORDINATE_PRESETS.map((p) => (
-                <button
-                  key={p.name}
-                  type="button"
-                  onClick={() => {
-                    setLatitude(p.lat);
-                    setLongitude(p.lng);
-                  }}
-                  className="px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-[11px] font-mono text-slate-700 transition-colors"
-                >
-                  {p.name}
-                </button>
-              ))}
-            </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
