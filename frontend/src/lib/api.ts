@@ -14,6 +14,12 @@ import {
   UpdateCameraInput,
   StreamTestResult,
 } from "@/types/camera";
+import {
+  AnprRecord,
+  AnprScanResponse,
+  AnprVideoResponse,
+  WatchlistEntry,
+} from "@/types/anpr";
 
 const BACKEND_BASE_URL =
   process.env.NEXT_PUBLIC_BACKEND_URL?.replace(/\/$/, "") || "http://localhost:8000";
@@ -339,6 +345,61 @@ export const api = {
   async validateStream(streamUrl: string): Promise<StreamValidationResult> {
     const params = new URLSearchParams({ stream_url: streamUrl });
     return request<StreamValidationResult>(`/api/stream/validate?${params.toString()}`);
+  },
+
+  /**
+   * ANPR APIs
+   */
+  async scanAnprImage(file: File | Blob, cameraId: string = "CAM-UPLOAD"): Promise<AnprScanResponse> {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("camera_id", cameraId);
+    return request<AnprScanResponse>("/api/anpr/image", {
+      method: "POST",
+      body: formData,
+    });
+  },
+
+  async processAnprVideo(file: File | Blob, cameraId: string = "VIDEO-ANPR", stride: number = 15): Promise<AnprVideoResponse> {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("camera_id", cameraId);
+    formData.append("stride", stride.toString());
+    return request<AnprVideoResponse>("/api/anpr/video", {
+      method: "POST",
+      body: formData,
+    });
+  },
+
+  async getAnprRecords(params?: { query?: string; cameraId?: string; limit?: number }): Promise<AnprRecord[]> {
+    const qs = new URLSearchParams();
+    if (params?.query) qs.append("query", params.query);
+    if (params?.cameraId) qs.append("camera_id", params.cameraId);
+    if (params?.limit) qs.append("limit", params.limit.toString());
+    const queryString = qs.toString() ? `?${qs.toString()}` : "";
+    return request<AnprRecord[]>(`/api/anpr/records${queryString}`);
+  },
+
+  async getAnprWatchlist(): Promise<WatchlistEntry[]> {
+    return request<WatchlistEntry[]>("/api/anpr/watchlist");
+  },
+
+  async addAnprWatchlist(entry: { plate_number: string; reason?: string; severity?: string; vehicle_type?: string }): Promise<{ status: string; message: string; entry: WatchlistEntry }> {
+    const formData = new FormData();
+    formData.append("plate_number", entry.plate_number);
+    if (entry.reason) formData.append("reason", entry.reason);
+    if (entry.severity) formData.append("severity", entry.severity);
+    if (entry.vehicle_type) formData.append("vehicle_type", entry.vehicle_type);
+    return request("/api/anpr/watchlist", {
+      method: "POST",
+      body: formData,
+    });
+  },
+
+  async deleteAnprWatchlist(plateNumber: string): Promise<{ status: string; message: string }> {
+    return request(`/api/anpr/watchlist/${encodeURIComponent(plateNumber)}`, {
+      method: "DELETE",
+    });
   },
 };
 
