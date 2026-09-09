@@ -149,12 +149,13 @@ export const api = {
    * Run inference on an uploaded video file
    */
   async runVideoInference(params: {
-    file: File;
+    file: File | Blob;
     modelName: string;
     confThreshold?: number;
     iouThreshold?: number;
     frameStride?: number;
     maxFrames?: number;
+    postprocess?: boolean;
   }): Promise<VideoInferenceResponse> {
     const formData = new FormData();
     formData.append("file", params.file);
@@ -167,6 +168,8 @@ export const api = {
       formData.append("frame_stride", params.frameStride.toString());
     if (params.maxFrames !== undefined)
       formData.append("max_frames", params.maxFrames.toString());
+    if (params.postprocess !== undefined)
+      formData.append("postprocess", params.postprocess.toString());
 
     return request<VideoInferenceResponse>("/api/inference/video", {
       method: "POST",

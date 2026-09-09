@@ -67,19 +67,40 @@ export interface InferenceResponse {
   raw_outputs?: unknown;
 }
 
-export interface VideoFrameInference {
-  frame_index: number;
-  timestamp_seconds: number;
-  detections: Detection[];
+export interface VideoMetadata {
+  filename?: string;
+  fps?: number;
+  frame_count?: number;
+  width?: number;
+  height?: number;
+  duration_seconds?: number;
 }
+
+export interface VideoFrameResult {
+  frame_index: number;
+  timestamp_seconds?: number;
+  inference?: {
+    model_name?: string;
+    status?: string;
+    inference_time_ms?: number;
+    detections: Detection[];
+  };
+  detections?: Detection[];
+}
+
+export type VideoFrameInference = VideoFrameResult;
 
 export interface VideoInferenceResponse {
   model_name: string;
   status: string;
-  total_frames_processed: number;
-  duration_seconds: number;
-  fps: number;
-  frame_results: VideoFrameInference[];
+  video?: VideoMetadata;
+  frames_requested?: number;
+  frames_processed?: number;
+  total_frames_processed?: number;
+  duration_seconds?: number;
+  fps?: number;
+  results?: VideoFrameResult[];
+  frame_results?: VideoFrameResult[];
 }
 
 export interface RTSPInferenceResponse {
