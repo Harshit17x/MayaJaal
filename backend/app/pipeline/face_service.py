@@ -153,6 +153,10 @@ class FaceService:
                     person_id = r.get("id")
                     thumb_name = f"{person_id}.jpg"
                     image_url = f"/api/faces/thumbnail/{thumb_name}"
+                    is_suspect = bool(r.get("is_suspect", False))
+                    threat_level = str(r.get("threat_level", "HIGH" if is_suspect else "LOW"))
+                    category = str(r.get("category", "Wanted / BOLO" if is_suspect else "Authorized Personnel"))
+                    notes = str(r.get("notes", ""))
 
                     if features_np:
                         self.known_persons.append({
@@ -162,6 +166,10 @@ class FaceService:
                             "created_at": r.get("created_at", ""),
                             "features": features_np,
                             "feature": features_np[0],
+                            "is_suspect": is_suspect,
+                            "threat_level": threat_level,
+                            "category": category,
+                            "notes": notes,
                         })
                 logger.info("Loaded %d enrolled persons into FaceService.", len(self.known_persons))
             except Exception as exc:
@@ -178,6 +186,10 @@ class FaceService:
                 "created_at": p["created_at"],
                 "features": feats_list,
                 "feature": feats_list[0] if feats_list else [],
+                "is_suspect": p.get("is_suspect", False),
+                "threat_level": p.get("threat_level", "HIGH" if p.get("is_suspect") else "LOW"),
+                "category": p.get("category", "Wanted / BOLO" if p.get("is_suspect") else "Authorized Personnel"),
+                "notes": p.get("notes", ""),
             })
         with open(self.db_file, "w", encoding="utf-8") as f:
             json.dump(records, f, indent=2)
@@ -191,9 +203,53 @@ class FaceService:
                     "image_url": p["image_url"],
                     "created_at": p["created_at"],
                     "sample_count": len(p.get("features", [1])),
+                    "is_suspect": p.get("is_suspect", False),
+                    "threat_level": p.get("threat_level", "HIGH" if p.get("is_suspect") else "LOW"),
+                    "category": p.get("category", "Wanted / BOLO" if p.get("is_suspect") else "Authorized Personnel"),
+                    "notes": p.get("notes", ""),
                 }
                 for p in self.known_persons
             ]
+
+    def update_person_metadata(
+        self,
+        person_id: str,
+        is_suspect: Optional[bool] = None,
+        threat_level: Optional[str] = None,
+        category: Optional[str] = None,
+        notes: Optional[str] = None,
+    ) -> dict[str, Any]:
+        """Update classification and threat metadata for an enrolled person without re-uploading."""
+        with self.lock:
+            person = next((p for p in self.known_persons if p["id"] == person_id), None)
+            if not person:
+                return {"success": False, "error": "Person ID not found"}
+
+            if is_suspect is not None:
+                person["is_suspect"] = bool(is_suspect)
+            if threat_level is not None:
+                person["threat_level"] = str(threat_level).upper()
+            if category is not None:
+                person["category"] = str(category).strip()
+            if notes is not None:
+                person["notes"] = str(notes).strip()
+
+            self._save_database()
+            return {
+                "success": True,
+                "person": {
+                    "id": person["id"],
+                    "name": person["name"],
+                    "image_url": person["image_url"],
+                    "created_at": person["created_at"],
+                    "sample_count": len(person.get("features", [1])),
+                    "is_suspect": person.get("is_suspect", False),
+                    "threat_level": person.get("threat_level", "HIGH" if person.get("is_suspect") else "LOW"),
+                    "category": person.get("category", "Wanted / BOLO" if person.get("is_suspect") else "Authorized Personnel"),
+                    "notes": person.get("notes", ""),
+                },
+                "message": f"Updated classification for {person['name']}",
+            }
 
     def register_face(self, image_bgr: np.ndarray, name: str) -> dict[str, Any]:
         """
