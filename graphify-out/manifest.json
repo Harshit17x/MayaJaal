@@ -162,9 +162,9 @@
     "semantic_hash": "51fe8a063a7216e3a2df9d4774e8d700"
   },
   "backend/app/main.py": {
-    "mtime": 1789027294.6447625,
-    "seen": 1789027506.2565556,
-    "ast_hash": "9380f3c71bac5e490d007ff1fa87c49f",
+    "mtime": 1789037595.9828184,
+    "seen": 1789037832.6034193,
+    "ast_hash": "e2ba2d356512e974116b6b7c2d77440d",
     "semantic_hash": ""
   },
   "backend/app/pipeline/anpr_service.py": {
@@ -384,10 +384,10 @@
     "semantic_hash": "d1283e7566e136247b268494a6a545eb"
   },
   "frontend/src/app/(operator)/alerts/page.tsx": {
-    "mtime": 1788946168.8121557,
-    "seen": 1789026248.1501014,
-    "ast_hash": "cc993da6db538e57dfebd233affe1478",
-    "semantic_hash": "cc993da6db538e57dfebd233affe1478"
+    "mtime": 1789037674.3659418,
+    "seen": 1789037832.6034958,
+    "ast_hash": "10ffe318cd17d3d58874fe2d08a96ad3",
+    "semantic_hash": ""
   },
   "frontend/src/app/(operator)/anpr/page.tsx": {
     "mtime": 1788993924.7488325,
@@ -522,10 +522,10 @@
     "semantic_hash": "b6da7f5d4b1dbc5c81e658bac9732080"
   },
   "frontend/src/components/dashboard/recentalerts.tsx": {
-    "mtime": 1788946168.830822,
-    "seen": 1789026248.1501372,
-    "ast_hash": "054abefb48a049ebd3a259bbc38ff646",
-    "semantic_hash": "054abefb48a049ebd3a259bbc38ff646"
+    "mtime": 1789037692.1839223,
+    "seen": 1789037832.6035419,
+    "ast_hash": "69daa6adf4d963d6a2a93bda32f67164",
+    "semantic_hash": ""
   },
   "frontend/src/components/dashboard/systemstatus.tsx": {
     "mtime": 1788946168.830822,
@@ -624,15 +624,15 @@
     "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
   },
   "frontend/src/lib/alertsStore.ts": {
-    "mtime": 1788946168.848961,
-    "seen": 1789026248.1501615,
-    "ast_hash": "554ed7d7bf1855f49dd0470825469063",
-    "semantic_hash": "554ed7d7bf1855f49dd0470825469063"
+    "mtime": 1789037645.013286,
+    "seen": 1789037832.6035733,
+    "ast_hash": "d8a48b1677a5f73aba1f4fb7ae06f2f2",
+    "semantic_hash": ""
   },
   "frontend/src/lib/api.ts": {
-    "mtime": 1789030935.5231345,
-    "seen": 1789031028.2029433,
-    "ast_hash": "f04b65ffa0bbc80722667d3d4ae07cea",
+    "mtime": 1789037612.546885,
+    "seen": 1789037832.603575,
+    "ast_hash": "39dbdc35c580430f8b217213e8c2cb8d",
     "semantic_hash": ""
   },
   "frontend/src/lib/authStore.ts": {
@@ -666,10 +666,10 @@
     "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
   },
   "frontend/src/types/alert.ts": {
-    "mtime": 1788946168.8560262,
-    "seen": 1789026248.1501718,
-    "ast_hash": "5a76dc74e517187e124796fb6dccbec4",
-    "semantic_hash": "5a76dc74e517187e124796fb6dccbec4"
+    "mtime": 1789037602.000022,
+    "seen": 1789037832.6035857,
+    "ast_hash": "7fe7d5a2c29ebc3124090ea7f51ed870",
+    "semantic_hash": ""
   },
   "frontend/src/types/anpr.ts": {
     "mtime": 1788993924.7523518,
@@ -966,39 +966,39 @@
     "semantic_hash": ""
   },
   "backend/app/api/faces.py": {
-    "mtime": 1789033631.022655,
-    "seen": 1789033802.8174014,
-    "ast_hash": "77fe21431d61f88b55bae625c9f955be",
+    "mtime": 1789035611.1550448,
+    "seen": 1789035866.258455,
+    "ast_hash": "38fc0374c2f7ada78305d8bed68011ad",
     "semantic_hash": ""
   },
   "backend/app/data/faces/known_faces.json": {
-    "mtime": 1789031812.911472,
-    "seen": 1789032148.9268868,
-    "ast_hash": "59446ce0d502f8dc1a99f186d8d46cda",
+    "mtime": 1789037818.833319,
+    "seen": 1789037832.6034117,
+    "ast_hash": "175a346dee2d2bf25e1cead2fe19fde8",
     "semantic_hash": ""
   },
   "backend/app/pipeline/face_service.py": {
-    "mtime": 1789027260.0123405,
-    "seen": 1789027506.2565584,
-    "ast_hash": "dbb776ff2cee32644405f208489da12b",
+    "mtime": 1789035584.0695882,
+    "seen": 1789035866.2584782,
+    "ast_hash": "f9479e13534ee2274ab24cbc542bdfae",
     "semantic_hash": ""
   },
   "backend/tests/test_facial_recognition.py": {
-    "mtime": 1789027455.2842495,
-    "seen": 1789027506.2565913,
-    "ast_hash": "a11dd6bba5ad2d833b9f84b389420f05",
+    "mtime": 1789035621.5735483,
+    "seen": 1789035866.2585046,
+    "ast_hash": "829ffe2b5cfa6becdb5699a583ee8219",
     "semantic_hash": ""
   },
   "frontend/src/app/(operator)/facial-recognition/page.tsx": {
-    "mtime": 1789033763.7404761,
-    "seen": 1789033802.8175166,
-    "ast_hash": "e461fe1b2ab76c35825b9ac3433a3026",
+    "mtime": 1789035821.4529579,
+    "seen": 1789035866.2585292,
+    "ast_hash": "a2d5586ccd079c69e7af840f4705e7db",
     "semantic_hash": ""
   },
   "frontend/src/types/face.ts": {
-    "mtime": 1789027360.214959,
-    "seen": 1789027506.2567139,
-    "ast_hash": "645088fcce65b710c9d7c9efc0cf87db",
+    "mtime": 1789035649.8691704,
+    "seen": 1789035866.2585876,
+    "ast_hash": "d263bf068c1789ed9dc36e11012f66f7",
     "semantic_hash": ""
   },
   "backend/app/data/faces/thumbnails/person_1788701662_e0faf3.jpg": {
@@ -1017,6 +1017,48 @@
     "mtime": 1789031812.907207,
     "seen": 1789032148.9271045,
     "ast_hash": "530f9b74a6ef356663d2c148a0c4089d",
+    "semantic_hash": ""
+  },
+  "frontend/public/images/officer-rathore.png": {
+    "mtime": 1789035419.121051,
+    "seen": 1789035540.6486428,
+    "ast_hash": "c3d9cd5a01e357b56e1f5449dc068528",
+    "semantic_hash": ""
+  },
+  "frontend/public/images/turnstile-gate-demo.png": {
+    "mtime": 1789035419.121051,
+    "seen": 1789035540.648649,
+    "ast_hash": "02f282b1e480d09dc1e1548f02abfe0c",
+    "semantic_hash": ""
+  },
+  "backend/app/api/alerts.py": {
+    "mtime": 1789037583.8558922,
+    "seen": 1789037832.6033788,
+    "ast_hash": "5f515ef6750260813096713b6403bbea",
+    "semantic_hash": ""
+  },
+  "backend/app/data/alerts.json": {
+    "mtime": 1789037747.1187234,
+    "seen": 1789037832.6034076,
+    "ast_hash": "957db89b958be12b3b5c19d4d39d73ff",
+    "semantic_hash": ""
+  },
+  "backend/app/pipeline/alert_service.py": {
+    "mtime": 1789037502.6175396,
+    "seen": 1789037832.6034212,
+    "ast_hash": "f120fdf9d81260fc77805070751bc46d",
+    "semantic_hash": ""
+  },
+  "backend/app/pipeline/feed_scanner.py": {
+    "mtime": 1789037561.3431058,
+    "seen": 1789037832.6034262,
+    "ast_hash": "caf372c2876e1f91aea02d6714ac08aa",
+    "semantic_hash": ""
+  },
+  "backend/tests/test_alerts_and_scanner.py": {
+    "mtime": 1789037709.8348374,
+    "seen": 1789037832.60346,
+    "ast_hash": "153581a513b431c688c6d29d79593a6a",
     "semantic_hash": ""
   }
 }

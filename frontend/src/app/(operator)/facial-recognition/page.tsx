@@ -194,6 +194,11 @@ export default function FacialRecognitionPage() {
   const [isEnrollModalOpen, setIsEnrollModalOpen] = useState(false);
   const [enrollMode, setEnrollMode] = useState<"webcam" | "upload">("webcam");
   const [enrollName, setEnrollName] = useState("");
+  const [enrollIsSuspect, setEnrollIsSuspect] = useState<boolean>(true);
+  const [enrollThreatLevel, setEnrollThreatLevel] = useState<"CRITICAL" | "HIGH" | "MEDIUM" | "LOW">("HIGH");
+  const [enrollCategory, setEnrollCategory] = useState<string>("Wanted / BOLO");
+  const [enrollNotes, setEnrollNotes] = useState<string>("");
+  const [directoryFilter, setDirectoryFilter] = useState<"all" | "suspects" | "authorized">("all");
   const [enrollFile, setEnrollFile] = useState<File | null>(null);
   const [enrollPreview, setEnrollPreview] = useState<string | null>(null);
   const [isEnrolling, setIsEnrolling] = useState(false);
@@ -368,10 +373,19 @@ export default function FacialRecognitionPage() {
           setEnrollError(res.error || "Failed to add sample");
         }
       } else {
-        // Register new person
-        const res = await api.registerFace(enrollName.trim(), payloadImage);
+        // Register new person with suspect metadata
+        const res = await api.registerFace(enrollName.trim(), payloadImage, {
+          is_suspect: enrollIsSuspect,
+          threat_level: enrollThreatLevel,
+          category: enrollCategory,
+          notes: enrollNotes,
+        });
         if (res.success) {
-          setEnrollSuccess(`Successfully registered ${res.person?.name || enrollName}!`);
+          setEnrollSuccess(
+            `Successfully registered ${res.person?.name || enrollName} as ${
+              enrollIsSuspect ? "Wanted Suspect" : "Authorized Personnel"
+            }!`
+          );
           await fetchEnrolled();
           setTimeout(() => {
             closeEnrollModal();
@@ -385,6 +399,20 @@ export default function FacialRecognitionPage() {
       setEnrollError(msg || "Enrolment failed");
     } finally {
       setIsEnrolling(false);
+    }
+  };
+
+  const handleToggleSuspect = async (person: EnrolledPerson) => {
+    const newStatus = !person.is_suspect;
+    try {
+      await api.updateFaceMetadata(person.id, {
+        is_suspect: newStatus,
+        threat_level: newStatus ? (person.threat_level || "HIGH") : "LOW",
+        category: newStatus ? "Wanted / BOLO" : "Authorized Personnel",
+      });
+      await fetchEnrolled();
+    } catch {
+      alert("Failed to update status");
     }
   };
 
@@ -403,6 +431,10 @@ export default function FacialRecognitionPage() {
   const openEnrollModal = (targetPerson: EnrolledPerson | null = null) => {
     setTargetPersonForSample(targetPerson);
     setEnrollName(targetPerson ? targetPerson.name : "");
+    setEnrollIsSuspect(targetPerson ? (targetPerson.is_suspect ?? false) : true);
+    setEnrollThreatLevel(targetPerson ? (targetPerson.threat_level || "HIGH") : "HIGH");
+    setEnrollCategory(targetPerson ? (targetPerson.category || "Wanted / BOLO") : "Wanted / BOLO");
+    setEnrollNotes(targetPerson ? (targetPerson.notes || "") : "");
     setEnrollPreview(null);
     setEnrollFile(null);
     setEnrollError(null);
@@ -414,6 +446,10 @@ export default function FacialRecognitionPage() {
     stopWebcam();
     setIsEnrollModalOpen(false);
     setTargetPersonForSample(null);
+    setEnrollIsSuspect(true);
+    setEnrollThreatLevel("HIGH");
+    setEnrollCategory("Wanted / BOLO");
+    setEnrollNotes("");
     setEnrollPreview(null);
     setEnrollFile(null);
     setEnrollError(null);
@@ -440,9 +476,23 @@ export default function FacialRecognitionPage() {
     }
   };
 
-  const filteredPersons = enrolledPersons.filter((p) =>
-    p.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const suspectCount = enrolledPersons.filter((p) => p.is_suspect).length;
+  const authorizedCount = enrolledPersons.filter((p) => !p.is_suspect).length;
+
+  const filteredPersons = enrolledPersons.filter((p) => {
+    const q = searchQuery.toLowerCase().trim();
+    const matchesSearch =
+      !q ||
+      p.name.toLowerCase().includes(q) ||
+      p.id.toLowerCase().includes(q) ||
+      (p.notes && p.notes.toLowerCase().includes(q)) ||
+      (p.category && p.category.toLowerCase().includes(q));
+
+    if (!matchesSearch) return false;
+    if (directoryFilter === "suspects") return !!p.is_suspect;
+    if (directoryFilter === "authorized") return !p.is_suspect;
+    return true;
+  });
 
   return (
     <div className="space-y-6 pb-16">
@@ -539,11 +589,17 @@ export default function FacialRecognitionPage() {
             <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
               Enrolled Identities
             </span>
-            <div className="text-2xl font-black text-slate-900 mt-0.5">
-              {enrolledPersons.length}
+            <div className="text-2xl font-black text-slate-900 mt-0.5 flex items-baseline gap-2">
+              <span>{enrolledPersons.length}</span>
+              {suspectCount > 0 && (
+                <span className="text-xs font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-200 flex items-center gap-1">
+                  <ShieldAlert className="w-3 h-3" />
+                  {suspectCount} Wanted
+                </span>
+              )}
             </div>
             <span className="text-[11px] text-slate-500 font-medium">
-              Active personnel roster
+              {authorizedCount} Authorized Personnel
             </span>
           </div>
           <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-700">
@@ -613,7 +669,14 @@ export default function FacialRecognitionPage() {
           }`}
         >
           <UserCheck className="w-4 h-4" />
-          <span>Personnel Roster ({enrolledPersons.length})</span>
+          <span>
+            Personnel Roster ({enrolledPersons.length})
+            {suspectCount > 0 && (
+              <span className="ml-1.5 px-1.5 py-0.5 rounded-full bg-rose-600 text-white text-[10px] font-bold">
+                {suspectCount}
+              </span>
+            )}
+          </span>
         </button>
 
         <button
@@ -873,7 +936,9 @@ export default function FacialRecognitionPage() {
                   <div
                     key={evt.id}
                     className={`p-3 rounded-xl border transition-all ${
-                      evt.is_known
+                      evt.is_threat
+                        ? "bg-rose-50/80 border-rose-300 shadow-xs hover:border-rose-400"
+                        : evt.is_known
                         ? "bg-emerald-50/60 border-emerald-200/80 hover:border-emerald-300"
                         : "bg-amber-50/60 border-amber-200/80 hover:border-amber-300"
                     }`}
@@ -882,23 +947,38 @@ export default function FacialRecognitionPage() {
                       <div className="flex items-center gap-2.5 min-w-0">
                         <div
                           className={`p-1.5 rounded-lg shrink-0 ${
-                            evt.is_known
+                            evt.is_threat
+                              ? "bg-rose-600 text-white"
+                              : evt.is_known
                               ? "bg-emerald-100 text-emerald-800"
                               : "bg-amber-100 text-amber-800"
                           }`}
                         >
-                          {evt.is_known ? (
+                          {evt.is_threat ? (
+                            <ShieldAlert className="w-4 h-4 animate-pulse" />
+                          ) : evt.is_known ? (
                             <UserCheck className="w-4 h-4" />
                           ) : (
                             <UserX className="w-4 h-4" />
                           )}
                         </div>
                         <div className="min-w-0">
-                          <p className="text-xs font-bold text-slate-900 truncate leading-tight">
-                            {evt.name}
-                          </p>
+                          <div className="flex items-center gap-1.5">
+                            <p className="text-xs font-bold text-slate-900 truncate leading-tight">
+                              {evt.name}
+                            </p>
+                            {evt.is_threat && (
+                              <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-rose-600 text-white shrink-0">
+                                {evt.threat_level || "WANTED"}
+                              </span>
+                            )}
+                          </div>
                           <p className="text-[10px] font-mono text-slate-500 mt-0.5">
-                            {evt.is_known ? `Match: ${evt.calibrated_conf}%` : "Unregistered Face"}
+                            {evt.is_threat
+                              ? `🚨 High Threat Target (${evt.calibrated_conf}%)`
+                              : evt.is_known
+                              ? `Match: ${evt.calibrated_conf}%`
+                              : "Unregistered Face"}
                           </p>
                         </div>
                       </div>
@@ -915,22 +995,63 @@ export default function FacialRecognitionPage() {
       {/* TAB 2: PERSONNEL DIRECTORY */}
       {activeTab === "directory" && (
         <div className="space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-              <input
-                type="text"
-                placeholder="Search registered personnel..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 text-xs rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-700/20 focus:border-emerald-700 shadow-xs text-slate-900 placeholder:text-slate-400"
-              />
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <div className="flex flex-wrap items-center gap-3 flex-1">
+              <div className="relative flex-1 min-w-[220px] max-w-md">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Search name, category, FIR notes..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2.5 text-xs rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-700/20 focus:border-emerald-700 shadow-xs text-slate-900 placeholder:text-slate-400"
+                />
+              </div>
+
+              {/* Filter Pills */}
+              <div className="flex items-center gap-1 p-1 rounded-xl bg-slate-100 border border-slate-200 text-xs font-semibold">
+                <button
+                  type="button"
+                  onClick={() => setDirectoryFilter("all")}
+                  className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
+                    directoryFilter === "all"
+                      ? "bg-white text-slate-900 shadow-xs"
+                      : "text-slate-500 hover:text-slate-800"
+                  }`}
+                >
+                  All ({enrolledPersons.length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDirectoryFilter("suspects")}
+                  className={`px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 cursor-pointer ${
+                    directoryFilter === "suspects"
+                      ? "bg-rose-600 text-white shadow-xs"
+                      : "text-rose-700 hover:bg-rose-50"
+                  }`}
+                >
+                  <ShieldAlert className="w-3.5 h-3.5" />
+                  <span>Wanted Suspects ({suspectCount})</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDirectoryFilter("authorized")}
+                  className={`px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 cursor-pointer ${
+                    directoryFilter === "authorized"
+                      ? "bg-emerald-700 text-white shadow-xs"
+                      : "text-emerald-700 hover:bg-emerald-50"
+                  }`}
+                >
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                  <span>Authorized ({authorizedCount})</span>
+                </button>
+              </div>
             </div>
 
             <button
               type="button"
               onClick={() => openEnrollModal(null)}
-              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#143724] hover:bg-[#1a472f] text-white text-xs font-bold transition-all shadow-xs cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#143724] hover:bg-[#1a472f] text-white text-xs font-bold transition-all shadow-xs cursor-pointer self-start lg:self-center"
             >
               <Plus className="w-4 h-4 text-emerald-400" />
               <span>Register New Identity</span>
@@ -944,7 +1065,11 @@ export default function FacialRecognitionPage() {
               </div>
               <h3 className="text-sm font-bold text-slate-900">No personnel found</h3>
               <p className="text-xs text-slate-500 max-w-sm">
-                Enroll known operators, team members, or authorized border personnel using webcam or photo upload.
+                {directoryFilter === "suspects"
+                  ? "No suspects or BOLO profiles match your current search criteria."
+                  : directoryFilter === "authorized"
+                  ? "No authorized personnel profiles match your current search criteria."
+                  : "Enroll known operators, authorized personnel, or wanted suspects to monitor feeds."}
               </p>
               <button
                 type="button"
@@ -959,7 +1084,11 @@ export default function FacialRecognitionPage() {
               {filteredPersons.map((person) => (
                 <div
                   key={person.id}
-                  className="group relative flex flex-col rounded-2xl bg-white border border-slate-200/90 overflow-hidden shadow-xs hover:shadow-md hover:border-emerald-600/40 transition-all duration-200"
+                  className={`group relative flex flex-col rounded-2xl bg-white border overflow-hidden shadow-xs hover:shadow-md transition-all duration-200 ${
+                    person.is_suspect
+                      ? "border-rose-200 hover:border-rose-400 ring-1 ring-rose-200/50"
+                      : "border-slate-200/90 hover:border-emerald-600/40"
+                  }`}
                 >
                   <div className="relative aspect-square w-full bg-slate-100 overflow-hidden flex items-center justify-center">
                     <img
@@ -970,41 +1099,87 @@ export default function FacialRecognitionPage() {
                         (e.target as HTMLElement).style.display = "none";
                       }}
                     />
-                    <div className="absolute top-3 right-3 flex items-center gap-1 px-2 py-0.5 rounded-md bg-white/95 border border-slate-200 text-emerald-800 text-[10px] font-mono font-bold shadow-2xs">
-                      <span>{person.sample_count} samples</span>
+
+                    {/* Top status badges */}
+                    <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5">
+                      {person.is_suspect ? (
+                        <span className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-rose-600 text-white text-[10px] font-bold shadow-xs tracking-wider uppercase">
+                          <ShieldAlert className="w-3 h-3" />
+                          {person.threat_level || "HIGH"} THREAT
+                        </span>
+                      ) : (
+                        <span className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-700/90 text-white text-[10px] font-bold shadow-xs">
+                          <ShieldCheck className="w-3 h-3" />
+                          AUTHORIZED
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="absolute top-2.5 right-2.5 flex items-center gap-1 px-2 py-0.5 rounded-md bg-white/95 border border-slate-200 text-slate-700 text-[10px] font-mono font-bold shadow-2xs">
+                      <span>{person.sample_count} sample{person.sample_count > 1 ? "s" : ""}</span>
                     </div>
                   </div>
 
                   <div className="p-4 flex flex-col justify-between flex-1 gap-3">
                     <div>
-                      <h3 className="font-bold text-slate-900 text-sm group-hover:text-emerald-800 transition-colors">
-                        {person.name}
-                      </h3>
-                      <p className="text-[11px] font-mono text-slate-400 mt-0.5">ID: {person.id}</p>
-                      <p className="text-[11px] text-slate-500 mt-1 flex items-center gap-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <h3
+                          className={`font-bold text-sm transition-colors ${
+                            person.is_suspect
+                              ? "text-rose-950 group-hover:text-rose-700"
+                              : "text-slate-900 group-hover:text-emerald-800"
+                          }`}
+                        >
+                          {person.name}
+                        </h3>
+                        <span className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 truncate max-w-[120px]">
+                          {person.category || (person.is_suspect ? "Wanted / BOLO" : "Personnel")}
+                        </span>
+                      </div>
+                      <p className="text-[11px] font-mono text-slate-400 mt-0.5 truncate">ID: {person.id}</p>
+                      {person.notes && (
+                        <p className="text-[11px] text-slate-600 mt-1 line-clamp-1 italic bg-slate-50 px-2 py-0.5 rounded border border-slate-100">
+                          &quot;{person.notes}&quot;
+                        </p>
+                      )}
+                      <p className="text-[11px] text-slate-500 mt-1.5 flex items-center gap-1">
                         <Clock className="w-3 h-3 text-slate-400" />
                         {person.created_at || "Registered"}
                       </p>
                     </div>
 
-                    <div className="flex items-center justify-between pt-3 border-t border-slate-100">
+                    <div className="flex items-center justify-between pt-3 border-t border-slate-100 gap-2">
                       <button
                         type="button"
-                        onClick={() => openEnrollModal(person)}
-                        className="text-xs text-emerald-700 hover:text-emerald-800 font-semibold flex items-center gap-1 cursor-pointer"
+                        onClick={() => handleToggleSuspect(person)}
+                        className={`text-[11px] font-semibold px-2 py-1 rounded-lg border transition-colors cursor-pointer ${
+                          person.is_suspect
+                            ? "border-emerald-200 text-emerald-700 hover:bg-emerald-50"
+                            : "border-rose-200 text-rose-700 hover:bg-rose-50"
+                        }`}
+                        title={person.is_suspect ? "Mark as Authorized Personnel" : "Mark as Wanted Suspect"}
                       >
-                        <Plus className="w-3 h-3" />
-                        Add Angle
+                        {person.is_suspect ? "Mark Authorized" : "Flag Suspect"}
                       </button>
 
-                      <button
-                        type="button"
-                        onClick={() => handleDeletePerson(person)}
-                        className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
-                        title="Delete Identity"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      <div className="flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() => openEnrollModal(person)}
+                          className="p-1.5 rounded-lg text-emerald-700 hover:bg-emerald-50 transition-colors cursor-pointer"
+                          title="Add Angle Sample"
+                        >
+                          <Plus className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeletePerson(person)}
+                          className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+                          title="Delete Identity"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1215,6 +1390,147 @@ export default function FacialRecognitionPage() {
                   onChange={(e) => setEnrollName(e.target.value)}
                   className="px-3 py-2 text-xs rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-700/20 focus:border-emerald-700 text-slate-900"
                 />
+              </div>
+            )}
+
+            {/* Classification Selector: Wanted Suspect vs Authorized */}
+            {!targetPersonForSample && (
+              <div className="flex flex-col gap-3 p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                    <ShieldAlert className="w-4 h-4 text-rose-600" />
+                    Security Classification
+                  </label>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEnrollIsSuspect(true);
+                        setEnrollCategory("Wanted / BOLO");
+                        setEnrollThreatLevel("HIGH");
+                      }}
+                      className={`px-3 py-1 text-xs font-bold rounded-lg transition cursor-pointer ${
+                        enrollIsSuspect
+                          ? "bg-rose-600 text-white shadow-xs"
+                          : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-100"
+                      }`}
+                    >
+                      🚨 Wanted Suspect
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEnrollIsSuspect(false);
+                        setEnrollCategory("Authorized Personnel");
+                        setEnrollThreatLevel("LOW");
+                      }}
+                      className={`px-3 py-1 text-xs font-bold rounded-lg transition cursor-pointer ${
+                        !enrollIsSuspect
+                          ? "bg-emerald-700 text-white shadow-xs"
+                          : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-100"
+                      }`}
+                    >
+                      🛡️ Authorized
+                    </button>
+                  </div>
+                </div>
+
+                {/* If Suspect: Threat Level & Category */}
+                {enrollIsSuspect ? (
+                  <div className="space-y-2.5 pt-2 border-t border-slate-200">
+                    <div>
+                      <label className="text-[11px] font-semibold text-slate-700 block mb-1">
+                        Threat Priority Level
+                      </label>
+                      <div className="grid grid-cols-4 gap-2">
+                        {(["CRITICAL", "HIGH", "MEDIUM", "LOW"] as const).map((lvl) => (
+                          <button
+                            key={lvl}
+                            type="button"
+                            onClick={() => setEnrollThreatLevel(lvl)}
+                            className={`py-1.5 text-xs font-bold rounded-lg border transition cursor-pointer ${
+                              enrollThreatLevel === lvl
+                                ? lvl === "CRITICAL"
+                                  ? "bg-rose-700 border-rose-800 text-white shadow-xs"
+                                  : lvl === "HIGH"
+                                  ? "bg-rose-600 border-rose-700 text-white shadow-xs"
+                                  : lvl === "MEDIUM"
+                                  ? "bg-amber-600 border-amber-700 text-white shadow-xs"
+                                  : "bg-slate-700 border-slate-800 text-white shadow-xs"
+                                : "bg-white border-slate-200 text-slate-700 hover:bg-slate-100"
+                            }`}
+                          >
+                            {lvl}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      <div>
+                        <label className="text-[11px] font-semibold text-slate-700 block mb-1">
+                          Suspect Category
+                        </label>
+                        <select
+                          value={enrollCategory}
+                          onChange={(e) => setEnrollCategory(e.target.value)}
+                          className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 bg-white text-slate-900 outline-none"
+                        >
+                          <option value="Wanted / BOLO">Wanted / BOLO</option>
+                          <option value="Infiltrator / Poacher">Infiltrator / Poacher</option>
+                          <option value="Smuggling Suspect">Smuggling Suspect</option>
+                          <option value="Missing Person">Missing Person</option>
+                          <option value="Person of Interest">Person of Interest</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="text-[11px] font-semibold text-slate-700 block mb-1">
+                          Case / FIR / Reference ID
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="e.g. FIR #402/26 - Sector 4"
+                          value={enrollNotes}
+                          onChange={(e) => setEnrollNotes(e.target.value)}
+                          className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 bg-white text-slate-900 outline-none"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2 border-t border-slate-200">
+                    <div>
+                      <label className="text-[11px] font-semibold text-slate-700 block mb-1">
+                        Authorized Role
+                      </label>
+                      <select
+                        value={enrollCategory}
+                        onChange={(e) => setEnrollCategory(e.target.value)}
+                        className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 bg-white text-slate-900 outline-none"
+                      >
+                        <option value="Authorized Personnel">Authorized Personnel</option>
+                        <option value="Border Security Force (BSF)">Border Security Force (BSF)</option>
+                        <option value="Command Staff">Command Staff</option>
+                        <option value="Technician / Operator">Technician / Operator</option>
+                        <option value="VIP / Official Visitor">VIP / Official Visitor</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="text-[11px] font-semibold text-slate-700 block mb-1">
+                        Department / Badge / Unit Notes
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. Outpost Beta Team Alpha"
+                        value={enrollNotes}
+                        onChange={(e) => setEnrollNotes(e.target.value)}
+                        className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 bg-white text-slate-900 outline-none"
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 

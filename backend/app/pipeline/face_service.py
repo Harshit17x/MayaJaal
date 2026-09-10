@@ -251,7 +251,15 @@ class FaceService:
                 "message": f"Updated classification for {person['name']}",
             }
 
-    def register_face(self, image_bgr: np.ndarray, name: str) -> dict[str, Any]:
+    def register_face(
+        self,
+        image_bgr: np.ndarray,
+        name: str,
+        is_suspect: bool = True,
+        threat_level: str = "HIGH",
+        category: str = "Wanted / BOLO",
+        notes: str = "",
+    ) -> dict[str, Any]:
         """
         Enroll a new person or add a sample if person already exists.
         Performs quality gating:
@@ -322,6 +330,13 @@ class FaceService:
                 else:
                     existing["features"][0] = feature
 
+                # Update metadata if explicitly provided
+                existing["is_suspect"] = bool(is_suspect)
+                existing["threat_level"] = str(threat_level).upper()
+                existing["category"] = str(category).strip() or existing.get("category", "Wanted / BOLO")
+                if notes:
+                    existing["notes"] = str(notes).strip()
+
                 # Update thumbnail to latest capture
                 thumb_path = self.thumbnails_dir / f"{existing['id']}.jpg"
                 cv2.imwrite(str(thumb_path), aligned_face)
@@ -336,8 +351,12 @@ class FaceService:
                         "image_url": existing["image_url"],
                         "created_at": existing["created_at"],
                         "sample_count": len(existing["features"]),
+                        "is_suspect": existing["is_suspect"],
+                        "threat_level": existing["threat_level"],
+                        "category": existing["category"],
+                        "notes": existing.get("notes", ""),
                     },
-                    "message": f"Added new sample to existing profile for {existing['name']}! (Total samples: {len(existing['features'])})",
+                    "message": f"Added new sample to profile for {existing['name']}! (Total samples: {len(existing['features'])})",
                 }
             else:
                 person_id = f"person_{int(time.time())}_{uuid.uuid4().hex[:6]}"
@@ -353,6 +372,10 @@ class FaceService:
                     "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                     "features": [feature],
                     "feature": feature,
+                    "is_suspect": bool(is_suspect),
+                    "threat_level": str(threat_level).upper(),
+                    "category": str(category).strip() or "Wanted / BOLO",
+                    "notes": str(notes).strip(),
                 }
 
                 self.known_persons.append(new_record)
@@ -366,6 +389,10 @@ class FaceService:
                         "image_url": new_record["image_url"],
                         "created_at": new_record["created_at"],
                         "sample_count": 1,
+                        "is_suspect": new_record["is_suspect"],
+                        "threat_level": new_record["threat_level"],
+                        "category": new_record["category"],
+                        "notes": new_record["notes"],
                     },
                     "message": f"Successfully enrolled face profile for {name}!",
                 }
@@ -377,8 +404,19 @@ class FaceService:
             if not person:
                 return {"success": False, "error": "Person ID not found"}
             name = person["name"]
+            is_suspect = person.get("is_suspect", False)
+            threat_level = person.get("threat_level", "HIGH" if is_suspect else "LOW")
+            category = person.get("category", "Wanted / BOLO" if is_suspect else "Authorized Personnel")
+            notes = person.get("notes", "")
 
-        return self.register_face(image_bgr, name)
+        return self.register_face(
+            image_bgr,
+            name,
+            is_suspect=is_suspect,
+            threat_level=threat_level,
+            category=category,
+            notes=notes,
+        )
 
     def delete_person(self, person_id: str) -> dict[str, Any]:
         """Delete an enrolled person and remove their thumbnail."""
@@ -465,6 +503,9 @@ class FaceService:
                 best_score = -1.0
                 best_l2 = 999.0
                 is_known = False
+                best_is_suspect = False
+                best_threat_level = "LOW"
+                best_category = "Unknown"
 
                 for p in known_list:
                     p_features = p.get("features", [p["feature"]])
@@ -483,8 +524,13 @@ class FaceService:
                         if p_best_score >= min_match_score and p_best_l2 <= 1.128:
                             best_name = p["name"]
                             is_known = True
+                            best_is_suspect = p.get("is_suspect", False)
+                            best_threat_level = p.get("threat_level", "HIGH" if best_is_suspect else "LOW")
+                            best_category = p.get("category", "Wanted / BOLO" if best_is_suspect else "Authorized Personnel")
 
             calibrated_conf = calibrate_match_confidence(max(0.0, best_score), threshold=min_match_score)
+            is_threat = bool(is_known and best_is_suspect)
+            class_name = f"🚨 SUSPECT: {best_name}" if is_threat else (f"Face: {best_name}" if is_known else "Face: Unknown")
 
             raw_detections.append({
                 "name": best_name,
@@ -495,8 +541,10 @@ class FaceService:
                 "calibrated_conf": calibrated_conf,
                 "bbox": [round(x1, 2), round(y1, 2), round(x2, 2), round(y2, 2)],
                 "type": "face",
-                "class_name": f"Face: {best_name}" if is_known else "Face: Unknown",
-                "is_threat": False,
+                "class_name": class_name,
+                "is_threat": is_threat,
+                "threat_level": best_threat_level if is_threat else "NONE",
+                "category": best_category if is_known else "Unknown",
             })
 
         # Exclusive 1-to-1 Identity Assignment:
@@ -507,6 +555,8 @@ class FaceService:
                     claimed_identities.add(det["name"])
                 else:
                     det["is_known"] = False
+                    det["is_threat"] = False
+                    det["threat_level"] = "NONE"
                     det["name"] = "Unknown"
                     det["class_name"] = "Face: Unknown"
                     det["calibrated_conf"] = calibrate_match_confidence(
@@ -567,14 +617,24 @@ class FaceService:
                     avg_score = max(h["score"] for h in known_votes)
                     avg_calibrated = max(h["calibrated"] for h in known_votes)
 
+                    known_match = next((p for p in self.known_persons if p["name"].lower() == stabilized_name.lower()), None)
+                    is_suspect_val = known_match.get("is_suspect", False) if known_match else False
+                    threat_lvl_val = known_match.get("threat_level", "HIGH" if is_suspect_val else "LOW") if known_match else "NONE"
+                    cat_val = known_match.get("category", "Wanted / BOLO" if is_suspect_val else "Authorized Personnel") if known_match else "Unknown"
+
                     det["name"] = stabilized_name
                     det["is_known"] = True
+                    det["is_threat"] = is_suspect_val
+                    det["threat_level"] = threat_lvl_val if is_suspect_val else "NONE"
+                    det["category"] = cat_val
                     det["match_score"] = round(avg_score, 4)
                     det["calibrated_conf"] = round(avg_calibrated, 1)
-                    det["class_name"] = f"Face: {stabilized_name}"
+                    det["class_name"] = f"🚨 SUSPECT: {stabilized_name}" if is_suspect_val else f"Face: {stabilized_name}"
                 else:
                     det["name"] = "Unknown"
                     det["is_known"] = False
+                    det["is_threat"] = False
+                    det["threat_level"] = "NONE"
                     det["class_name"] = "Face: Unknown"
             else:
                 tid = self.next_track_id
@@ -599,6 +659,8 @@ class FaceService:
                     smoothed_claimed.add(det["name"])
                 else:
                     det["is_known"] = False
+                    det["is_threat"] = False
+                    det["threat_level"] = "NONE"
                     det["name"] = "Unknown"
                     det["class_name"] = "Face: Unknown"
 
@@ -619,6 +681,9 @@ class FaceService:
                 "id": f"face_evt_{int(time.time() * 1000)}_{uuid.uuid4().hex[:4]}",
                 "name": det["name"],
                 "is_known": det["is_known"],
+                "is_threat": det.get("is_threat", False),
+                "threat_level": det.get("threat_level", "NONE"),
+                "category": det.get("category", ""),
                 "calibrated_conf": det["calibrated_conf"],
                 "timestamp": now_str,
                 "bbox": det["bbox"],
@@ -636,52 +701,76 @@ class FaceService:
     def draw_faces(self, image_bgr: np.ndarray, face_detections: list[dict[str, Any]]) -> np.ndarray:
         """
         Draw high-visibility tactical bounding boxes and names directly onto image_bgr.
-        Shows calibrated confidence percentage (e.g. 92%) rather than raw cosine distance.
+        Shows calibrated confidence percentage and emphasizes suspect detections in tactical red.
         """
         annotated = image_bgr.copy()
         for f in face_detections:
             x1, y1, x2, y2 = [int(v) for v in f["bbox"]]
             is_known = f.get("is_known", False)
+            is_threat = f.get("is_threat", False)
             name = f.get("name", "Unknown")
+            threat_level = f.get("threat_level", "HIGH")
             calibrated_conf = f.get("calibrated_conf", 0.0)
 
-            # Color: Vibrant emerald green for recognized person, Amber for unknown
-            color = (0, 230, 115) if is_known else (0, 165, 255)
+            # Color scheme:
+            # - Suspect: Tactical Alert Crimson (BGR: 25, 25, 240)
+            # - Authorized: Emerald Green (BGR: 0, 230, 115)
+            # - Unknown: Tactical Amber (BGR: 0, 165, 255)
+            if is_threat:
+                color = (25, 25, 240)
+                accent_color = (0, 0, 255)
+                tag_bg = (18, 18, 38)
+            elif is_known:
+                color = (0, 230, 115)
+                accent_color = (0, 255, 140)
+                tag_bg = (18, 26, 22)
+            else:
+                color = (0, 165, 255)
+                accent_color = (0, 195, 255)
+                tag_bg = (20, 24, 28)
 
             # Bounding box
-            cv2.rectangle(annotated, (x1, y1), (x2, y2), color, 2)
+            box_thickness = 3 if is_threat else 2
+            cv2.rectangle(annotated, (x1, y1), (x2, y2), color, box_thickness)
 
             # Corner accents
-            corner_len = max(6, min(18, int(min(x2 - x1, y2 - y1) * 0.22)))
-            cv2.line(annotated, (x1, y1), (x1 + corner_len, y1), color, 3)
-            cv2.line(annotated, (x1, y1), (x1, y1 + corner_len), color, 3)
-            cv2.line(annotated, (x2, y1), (x2 - corner_len, y1), color, 3)
-            cv2.line(annotated, (x2, y1), (x2, y1 + corner_len), color, 3)
-            cv2.line(annotated, (x1, y2), (x1 + corner_len, y2), color, 3)
-            cv2.line(annotated, (x1, y2), (x1, y2 - corner_len), color, 3)
-            cv2.line(annotated, (x2, y2), (x2 - corner_len, y2), color, 3)
-            cv2.line(annotated, (x2, y2), (x2, y2 - corner_len), color, 3)
+            corner_len = max(8, min(22, int(min(x2 - x1, y2 - y1) * 0.25)))
+            accent_thickness = 4 if is_threat else 3
+            cv2.line(annotated, (x1, y1), (x1 + corner_len, y1), accent_color, accent_thickness)
+            cv2.line(annotated, (x1, y1), (x1, y1 + corner_len), accent_color, accent_thickness)
+            cv2.line(annotated, (x2, y1), (x2 - corner_len, y1), accent_color, accent_thickness)
+            cv2.line(annotated, (x2, y1), (x2, y1 + corner_len), accent_color, accent_thickness)
+            cv2.line(annotated, (x1, y2), (x1 + corner_len, y2), accent_color, accent_thickness)
+            cv2.line(annotated, (x1, y2), (x1, y2 - corner_len), accent_color, accent_thickness)
+            cv2.line(annotated, (x2, y2), (x2 - corner_len, y2), accent_color, accent_thickness)
+            cv2.line(annotated, (x2, y2), (x2, y2 - corner_len), accent_color, accent_thickness)
 
-            # High-visibility tag
-            label_text = f"{name} {calibrated_conf:.0f}%" if is_known else f"Unknown ({calibrated_conf:.0f}%)"
+            # High-visibility tactical tag
+            if is_threat:
+                label_text = f"SUSPECT: {name} [{threat_level}] {calibrated_conf:.0f}%"
+            elif is_known:
+                label_text = f"{name} {calibrated_conf:.0f}%"
+            else:
+                label_text = f"Unknown ({calibrated_conf:.0f}%)"
+
             font = cv2.FONT_HERSHEY_SIMPLEX
-            font_scale = 0.5
-            thickness = 1
+            font_scale = 0.52 if is_threat else 0.5
+            thickness = 2 if is_threat else 1
             (tw, th), baseline = cv2.getTextSize(label_text, font, font_scale, thickness)
 
             tag_y1 = max(0, y1 - th - 10)
             tag_y2 = y1
-            tag_x2 = min(annotated.shape[1], x1 + tw + 12)
+            tag_x2 = min(annotated.shape[1], x1 + tw + 14)
 
-            cv2.rectangle(annotated, (x1, tag_y1), (tag_x2, tag_y2), (20, 24, 28), -1)
-            cv2.rectangle(annotated, (x1, tag_y1), (tag_x2, tag_y2), color, 1)
+            cv2.rectangle(annotated, (x1, tag_y1), (tag_x2, tag_y2), tag_bg, -1)
+            cv2.rectangle(annotated, (x1, tag_y1), (tag_x2, tag_y2), color, 2 if is_threat else 1)
             cv2.putText(
                 annotated,
                 label_text,
                 (x1 + 6, tag_y2 - 5),
                 font,
                 font_scale,
-                color,
+                (255, 255, 255) if is_threat else color,
                 thickness,
                 cv2.LINE_AA,
             )

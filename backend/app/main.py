@@ -1,3 +1,4 @@
+import asyncio
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
@@ -5,6 +6,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+from app.api.alerts import router as alerts_router
 from app.api.anpr import router as anpr_router
 from app.api.cameras import router as cameras_router
 from app.api.faces import router as faces_router
@@ -37,10 +39,29 @@ async def lifespan(app: FastAPI):
         except Exception as exc:
             logger.warning("Could not auto-load primary model 'best': %s", exc)
 
+    # Initialize alert broadcaster event loop and launch background continuous scanner
+    try:
+        from app.pipeline.alert_service import alert_service
+        from app.pipeline.feed_scanner import feed_scanner_service
+
+        alert_service.broadcaster.set_event_loop(asyncio.get_running_loop())
+        feed_scanner_service.start()
+        logger.info("ContinuousFaceScanner multi-feed scanner started.")
+    except Exception as exc:
+        logger.warning("Could not start ContinuousFaceScanner on startup: %s", exc)
+
     try:
         yield
     finally:
         logger.info("SIH26187 backend shutting down.")
+        # Stop background continuous face scanner
+        try:
+            from app.pipeline.feed_scanner import feed_scanner_service
+            feed_scanner_service.stop()
+            logger.info("ContinuousFaceScanner stopped.")
+        except Exception as exc:
+            logger.warning("Could not stop ContinuousFaceScanner on shutdown: %s", exc)
+
         # Clean up all active ByteTracker sessions
         try:
             from app.tracking.session_store import tracker_session_store
@@ -123,6 +144,7 @@ app.include_router(stream_router)
 app.include_router(tracking_router)
 app.include_router(anpr_router)
 app.include_router(faces_router)
+app.include_router(alerts_router)
 
 
 @app.get("/")

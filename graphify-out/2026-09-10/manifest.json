@@ -630,9 +630,9 @@
     "semantic_hash": "554ed7d7bf1855f49dd0470825469063"
   },
   "frontend/src/lib/api.ts": {
-    "mtime": 1789030935.5231345,
-    "seen": 1789031028.2029433,
-    "ast_hash": "f04b65ffa0bbc80722667d3d4ae07cea",
+    "mtime": 1789035663.6979935,
+    "seen": 1789035866.2585752,
+    "ast_hash": "7c258e3b77d310e4a6aa9912b3b42b89",
     "semantic_hash": ""
   },
   "frontend/src/lib/authStore.ts": {
@@ -966,39 +966,39 @@
     "semantic_hash": ""
   },
   "backend/app/api/faces.py": {
-    "mtime": 1789033631.022655,
-    "seen": 1789033802.8174014,
-    "ast_hash": "77fe21431d61f88b55bae625c9f955be",
+    "mtime": 1789035611.1550448,
+    "seen": 1789035866.258455,
+    "ast_hash": "38fc0374c2f7ada78305d8bed68011ad",
     "semantic_hash": ""
   },
   "backend/app/data/faces/known_faces.json": {
-    "mtime": 1789031812.911472,
-    "seen": 1789032148.9268868,
-    "ast_hash": "59446ce0d502f8dc1a99f186d8d46cda",
+    "mtime": 1789035655.177145,
+    "seen": 1789035866.2584693,
+    "ast_hash": "175a346dee2d2bf25e1cead2fe19fde8",
     "semantic_hash": ""
   },
   "backend/app/pipeline/face_service.py": {
-    "mtime": 1789027260.0123405,
-    "seen": 1789027506.2565584,
-    "ast_hash": "dbb776ff2cee32644405f208489da12b",
+    "mtime": 1789035584.0695882,
+    "seen": 1789035866.2584782,
+    "ast_hash": "f9479e13534ee2274ab24cbc542bdfae",
     "semantic_hash": ""
   },
   "backend/tests/test_facial_recognition.py": {
-    "mtime": 1789027455.2842495,
-    "seen": 1789027506.2565913,
-    "ast_hash": "a11dd6bba5ad2d833b9f84b389420f05",
+    "mtime": 1789035621.5735483,
+    "seen": 1789035866.2585046,
+    "ast_hash": "829ffe2b5cfa6becdb5699a583ee8219",
     "semantic_hash": ""
   },
   "frontend/src/app/(operator)/facial-recognition/page.tsx": {
-    "mtime": 1789033763.7404761,
-    "seen": 1789033802.8175166,
-    "ast_hash": "e461fe1b2ab76c35825b9ac3433a3026",
+    "mtime": 1789035821.4529579,
+    "seen": 1789035866.2585292,
+    "ast_hash": "a2d5586ccd079c69e7af840f4705e7db",
     "semantic_hash": ""
   },
   "frontend/src/types/face.ts": {
-    "mtime": 1789027360.214959,
-    "seen": 1789027506.2567139,
-    "ast_hash": "645088fcce65b710c9d7c9efc0cf87db",
+    "mtime": 1789035649.8691704,
+    "seen": 1789035866.2585876,
+    "ast_hash": "d263bf068c1789ed9dc36e11012f66f7",
     "semantic_hash": ""
   },
   "backend/app/data/faces/thumbnails/person_1788701662_e0faf3.jpg": {
@@ -1017,6 +1017,18 @@
     "mtime": 1789031812.907207,
     "seen": 1789032148.9271045,
     "ast_hash": "530f9b74a6ef356663d2c148a0c4089d",
+    "semantic_hash": ""
+  },
+  "frontend/public/images/officer-rathore.png": {
+    "mtime": 1789035419.121051,
+    "seen": 1789035540.6486428,
+    "ast_hash": "c3d9cd5a01e357b56e1f5449dc068528",
+    "semantic_hash": ""
+  },
+  "frontend/public/images/turnstile-gate-demo.png": {
+    "mtime": 1789035419.121051,
+    "seen": 1789035540.648649,
+    "ast_hash": "02f282b1e480d09dc1e1548f02abfe0c",
     "semantic_hash": ""
   }
 }

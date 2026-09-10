@@ -13,11 +13,26 @@ import {
   Maximize2,
   Minimize2,
   Radio,
+  Navigation,
 } from "lucide-react";
+import { useAlerts } from "@/lib/alertsStore";
+import { SuspectTrajectoryModal } from "@/components/map/SuspectTrajectoryModal";
 
 export default function GisMapPage() {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [activeLayer, setActiveLayer] = useState<"hybrid" | "satellite" | "terrain" | "roadmap">("hybrid");
+  const [selectedTrajectorySuspect, setSelectedTrajectorySuspect] = useState<string | null>(null);
+
+  const { alerts, suspectsCount } = useAlerts();
+
+  // Find suspects with alerts
+  const detectedSuspects = Array.from(
+    new Set(
+      alerts
+        .filter((a) => Boolean(a.suspectName))
+        .map((a) => a.suspectName!)
+    )
+  );
 
   return (
     <div className="space-y-6 pb-12">
@@ -46,6 +61,18 @@ export default function GisMapPage() {
             <Crosshair className="w-3.5 h-3.5 text-emerald-600" />
             <span>Survey of India • 14,348 km Border Grid</span>
           </div>
+
+          {/* Suspect Trajectory Quick Action */}
+          {detectedSuspects.length > 0 && (
+            <button
+              type="button"
+              onClick={() => setSelectedTrajectorySuspect(detectedSuspects[0])}
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-rose-500/80 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-xs transition-all animate-pulse cursor-pointer"
+            >
+              <Navigation className="w-3.5 h-3.5" />
+              <span>Suspect Trajectory ({detectedSuspects.length})</span>
+            </button>
+          )}
 
           {/* Google Maps Layer Toggle */}
           <div className="inline-flex p-1 rounded-xl bg-slate-100 border border-slate-200">
@@ -129,6 +156,14 @@ export default function GisMapPage() {
       {/* System Status & Camera Feed Strip */}
       <SystemStatus />
       <CameraFeedStrip />
+
+      {/* Suspect Multi-Camera Trajectory Modal */}
+      {selectedTrajectorySuspect && (
+        <SuspectTrajectoryModal
+          suspectName={selectedTrajectorySuspect}
+          onClose={() => setSelectedTrajectorySuspect(null)}
+        />
+      )}
     </div>
   );
 }

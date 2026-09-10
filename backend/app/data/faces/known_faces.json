@@ -525,7 +525,11 @@
       0.05983620509505272,
       -0.033835772424936295,
       0.09477993845939636
-    ]
+    ],
+    "is_suspect": false,
+    "threat_level": "LOW",
+    "category": "Authorized Personnel",
+    "notes": ""
   },
   {
     "id": "person_1789030367_5b83a4",
@@ -793,7 +797,11 @@
       0.19279848039150238,
       -0.0669642761349678,
       0.11226629465818405
-    ]
+    ],
+    "is_suspect": false,
+    "threat_level": "LOW",
+    "category": "Authorized Personnel",
+    "notes": ""
   },
   {
     "id": "person_1789031811_e9deff",
@@ -1191,6 +1199,10 @@
       1.1282062530517578,
       0.9023099541664124,
       1.6710046529769897
-    ]
+    ],
+    "is_suspect": false,
+    "threat_level": "LOW",
+    "category": "Authorized Personnel",
+    "notes": ""
   }
 ]
