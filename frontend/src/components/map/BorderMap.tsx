@@ -8,6 +8,7 @@ import {
   RefreshCw,
   Layers,
   Shield,
+  ShieldAlert,
   Flag,
   Compass,
   Check,
@@ -82,6 +83,56 @@ export const NEIGHBOR_BORDERS: NeighborBorder[] = [
   { name: "Bhutan", code: "BTN", lengthKm: 757.7, color: "#059669", center: { lat: 27.0, lng: 90.5 }, zoom: 7.8 },
   { name: "Bangladesh", code: "BGD", lengthKm: 4126.0, color: "#3b82f6", center: { lat: 24.5, lng: 89.5 }, zoom: 6.6 },
   { name: "Myanmar", code: "MMR", lengthKm: 1659.4, color: "#8b5cf6", center: { lat: 25.0, lng: 95.0 }, zoom: 6.2 },
+];
+
+export const TACTICAL_GIS_GEOFENCES = [
+  {
+    id: "gis-zone-01",
+    name: "RS Pura Buffer Zone (Zero Line Strip)",
+    color: "#ef4444",
+    severity: "CRITICAL",
+    paths: [
+      { lat: 32.735, lng: 74.655 },
+      { lat: 32.738, lng: 74.685 },
+      { lat: 32.715, lng: 74.690 },
+      { lat: 32.712, lng: 74.660 },
+    ],
+  },
+  {
+    id: "gis-zone-02",
+    name: "Joint Check Post Restricted Perimeter",
+    color: "#f59e0b",
+    severity: "HIGH",
+    paths: [
+      { lat: 32.728, lng: 74.668 },
+      { lat: 32.731, lng: 74.678 },
+      { lat: 32.722, lng: 74.681 },
+      { lat: 32.719, lng: 74.671 },
+    ],
+  },
+];
+
+export const TACTICAL_GIS_TRIPWIRES = [
+  {
+    id: "gis-wire-01",
+    name: "Zero Line Infiltration Tripwire (West to East)",
+    color: "#dc2626",
+    direction: "FORWARD",
+    path: [
+      { lat: 32.742, lng: 74.650 },
+      { lat: 32.710, lng: 74.700 },
+    ],
+  },
+  {
+    id: "gis-wire-02",
+    name: "Gate Approach Directional Tripwire",
+    color: "#3b82f6",
+    direction: "BIDIRECTIONAL",
+    path: [
+      { lat: 32.720, lng: 74.665 },
+      { lat: 32.730, lng: 74.685 },
+    ],
+  },
 ];
 
 
@@ -165,6 +216,10 @@ export function BorderMap({
   const [is3DMode, setIs3DMode] = useState<boolean>(false);
   const [showHeatmaps, setShowHeatmaps] = useState<boolean>(true);
   const [showFilters, setShowFilters] = useState<boolean>(true);
+
+  // Virtual Geofences & Directional Tripwires layer state
+  const [showGeofences, setShowGeofences] = useState<boolean>(true);
+  const geofenceOverlaysRef = useRef<any[]>([]);
 
   // Active Selected Camera for Easy-Access Quick Inspection Drawer
   const [inspectedCamera, setInspectedCamera] = useState<CameraEntity | null>(null);
@@ -506,6 +561,91 @@ export function BorderMap({
       }
     };
   }, [onMapClick, isLoaded]);
+
+  // Render & Synchronize Tactical Perimeter Geofences and Directional Tripwires
+  useEffect(() => {
+    if (!mapInstanceRef.current || !isLoaded || !(window as any).google?.maps) return;
+    const google = (window as any).google;
+    const map = mapInstanceRef.current;
+
+    geofenceOverlaysRef.current.forEach((o) => o.setMap(null));
+    geofenceOverlaysRef.current = [];
+
+    if (!showGeofences) return;
+
+    TACTICAL_GIS_GEOFENCES.forEach((zone) => {
+      const polygon = new google.maps.Polygon({
+        paths: zone.paths,
+        strokeColor: zone.color,
+        strokeOpacity: 0.85,
+        strokeWeight: 2,
+        fillColor: zone.color,
+        fillOpacity: 0.2,
+        map,
+      });
+
+      const infoWindow = new google.maps.InfoWindow({
+        content: `
+          <div style="font-family:sans-serif; padding:4px; font-size:12px;">
+            <strong style="color:${zone.color}; font-size:13px;">${zone.name}</strong>
+            <div style="color:#64748b; font-size:11px; margin-top:2px;">Threat Level: <strong style="color:#ef4444;">${zone.severity}</strong></div>
+            <div style="color:#0f172a; font-size:11px; margin-top:1px;">Active Perimeter Exclusion Zone • Zero Line Strip</div>
+          </div>
+        `,
+      });
+
+      polygon.addListener("click", (e: any) => {
+        infoWindow.setPosition(e.latLng);
+        infoWindow.open(map);
+      });
+
+      geofenceOverlaysRef.current.push(polygon);
+    });
+
+    TACTICAL_GIS_TRIPWIRES.forEach((wire) => {
+      const polyline = new google.maps.Polyline({
+        path: wire.path,
+        strokeColor: wire.color,
+        strokeOpacity: 0.95,
+        strokeWeight: 3.5,
+        icons: [
+          {
+            icon: {
+              path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+              scale: 3,
+              fillColor: wire.color,
+              fillOpacity: 1,
+              strokeWeight: 1,
+            },
+            offset: "50%",
+          },
+        ],
+        map,
+      });
+
+      const infoWindow = new google.maps.InfoWindow({
+        content: `
+          <div style="font-family:sans-serif; padding:4px; font-size:12px;">
+            <strong style="color:${wire.color}; font-size:13px;">${wire.name}</strong>
+            <div style="color:#64748b; font-size:11px; margin-top:2px;">Enforcement Direction: <strong>${wire.direction}</strong></div>
+            <div style="color:#0f172a; font-size:11px; margin-top:1px;">High-Sensitivity Directional Tripwire Barrier</div>
+          </div>
+        `,
+      });
+
+      polyline.addListener("click", (e: any) => {
+        infoWindow.setPosition(e.latLng);
+        infoWindow.open(map);
+      });
+
+      geofenceOverlaysRef.current.push(polyline);
+    });
+
+    return () => {
+      geofenceOverlaysRef.current.forEach((o) => o.setMap(null));
+      geofenceOverlaysRef.current = [];
+    };
+  }, [showGeofences, isLoaded]);
 
   // Color helper for 3D Camera Pins & Ground Heatmaps
   const getCameraVisuals = useCallback((cam: CameraEntity) => {
@@ -1277,6 +1417,24 @@ export function BorderMap({
                 <span>Filters</span>
               </button>
 
+              {/* Geofence & Tripwire Layer Toggle */}
+              <button
+                type="button"
+                onClick={() => {
+                  setShowGeofences((prev) => !prev);
+                  showToast(!showGeofences ? "Perimeter Geofences & Tripwires Active" : "Perimeter Geofences Hidden");
+                }}
+                className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                  showGeofences
+                    ? "bg-rose-700 text-white shadow-xs"
+                    : "text-slate-300 hover:text-white hover:bg-slate-800"
+                }`}
+                title="Toggle Virtual Geofences & Directional Tripwire Barriers"
+              >
+                <ShieldAlert className={`w-3.5 h-3.5 ${showGeofences ? "text-rose-300" : "text-slate-400"}`} />
+                <span>{showGeofences ? "Fences Active" : "Geofences"}</span>
+              </button>
+
               {/* Layer Switcher */}
               <div className="flex items-center gap-0.5 border-l border-slate-700 pl-1.5 pr-0.5">
                 {(["hybrid", "satellite", "terrain"] as const).map((layer) => (
@@ -1398,7 +1556,11 @@ export function BorderMap({
               </div>
               <div className="flex items-center gap-2 pt-1 border-t border-slate-100">
                 <span className="w-4 h-0.5 border-t-2 border-dashed border-[#ef4444] shrink-0" />
-                <span>Border Perimeter</span>
+                <span>Perimeter Geofence</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] text-blue-500 font-bold shrink-0">➔</span>
+                <span>Directional Tripwire</span>
               </div>
             </div>
           </div>

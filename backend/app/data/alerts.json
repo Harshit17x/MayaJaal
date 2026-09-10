@@ -1,6 +1,5 @@
 [
   {
-<<<<<<< HEAD
     "id": "alert-1789067156632-4a03",
     "title": "Tripwire Breach: Api Test Infiltration Wire [FORWARD]",
     "location": "Camera bop-jk-01",
@@ -71,7 +70,8 @@
     "threatLevel": "HIGH",
     "category": "tripwire_violation",
     "notes": "Target PERSON (Track #101) crossed Unit Test Directional Tripwire on Test Camera."
-=======
+  },
+  {
     "id": "alert-1789074007760-2b44",
     "title": "\ud83d\udea8 SUSPECT SIGHTING: HARIOM [LOW]",
     "location": "Audi 3 \u2014 Observation Bunker B-12",
@@ -2518,6 +2518,5 @@
     "threatLevel": "LOW",
     "category": "Wanted / BOLO",
     "notes": "Automatic biometric match on feed Chak Lahori Forward Outpost Thermal"
->>>>>>> 6e87b7d9dbe5cebb34f9175e77051c0e33682df0
   }
 ]
