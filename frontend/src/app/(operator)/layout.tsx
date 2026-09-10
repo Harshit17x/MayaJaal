@@ -65,7 +65,7 @@ export default function OperatorLayout({
   // Restore saved sidebar preference
   useEffect(() => {
     try {
-      const saved = localStorage.getItem("mayajaal_sidebar_mode");
+      const saved = localStorage.getItem("maatrix_sidebar_mode");
       if (saved === "rail" || saved === "hidden" || saved === "pinned") {
         setSidebarMode(saved);
       }
@@ -77,7 +77,7 @@ export default function OperatorLayout({
   const handleModeChange = (newMode: "rail" | "hidden" | "pinned") => {
     setSidebarMode(newMode);
     try {
-      localStorage.setItem("mayajaal_sidebar_mode", newMode);
+      localStorage.setItem("maatrix_sidebar_mode", newMode);
     } catch {}
   };
 
@@ -235,19 +235,19 @@ export default function OperatorLayout({
             : "w-[68px] shadow-xs"
         }`}
       >
-        {/* Top Header: MayaJaal Logo, Status & Controls */}
+        {/* Top Header: MAATRIX Logo, Status & Controls */}
         <div className="p-3.5 border-b border-[#d2dfd6] bg-[#e4ede6]/60">
           <div className="flex items-center justify-between gap-2">
             <Link
               href="/dashboard"
               className="flex items-center gap-3 group min-w-0"
-              title="MayaJaal - Border Video Analytics"
+              title="MAATRIX - Border Video Analytics"
             >
-              {/* Official MayaJaal Brand Emblem */}
+              {/* Official MAATRIX Brand Emblem */}
               <div className="w-10 h-10 rounded-xl bg-white border border-[#bcd3c4] flex items-center justify-center flex-shrink-0 shadow-2xs group-hover:border-[#1e4b38]/60 transition-all p-1.5 overflow-hidden">
                 <img
-                  src="/images/logo/mayajaal-emblem.png"
-                  alt="MayaJaal Logo"
+                  src="/images/logo/maatrix-emblem.png"
+                  alt="MAATRIX Logo"
                   className="w-full h-full object-contain filter drop-shadow-xs"
                 />
               </div>
@@ -255,7 +255,7 @@ export default function OperatorLayout({
               {isExpanded && (
                 <div className="overflow-hidden min-w-0 animate-in fade-in duration-200">
                   <h1 className="text-base font-extrabold tracking-wider text-[#143924] uppercase truncate leading-tight">
-                    MAYAJAAL
+                    MAATRIX
                   </h1>
                   <p className="text-[11px] font-semibold text-[#2b593d] truncate">
                     Border Video Analytics

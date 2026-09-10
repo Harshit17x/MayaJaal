@@ -215,7 +215,7 @@ def find_ffmpeg_executable() -> str | None:
     if found:
         return found
 
-    # 3. Check MayaJaal project's local bin directory
+    # 3. Check MAATRIX project's local bin directory
     project_bin = Path(__file__).resolve().parents[2] / "bin"
     for name in ("ffmpeg.exe", "ffmpeg"):
         candidate = project_bin / name

@@ -25,7 +25,7 @@ DEFAULT_MODEL_NAME = "osnet_x0_25_msmt17.onnx"
 
 class ReIDService:
     """
-    Person Re-Identification Service for MayaJaal.
+    Person Re-Identification Service for MAATRIX.
     Extracts 512-dimensional appearance feature embeddings from full-body person crops
     using the lightweight OSNet-x0.25 model (trained on MSMT17).
 

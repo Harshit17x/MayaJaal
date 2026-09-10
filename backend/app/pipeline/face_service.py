@@ -86,7 +86,7 @@ def calibrate_match_confidence(cosine_score: float, threshold: float = 0.34) -> 
 
 class FaceService:
     """
-    Production-grade facial recognition service for MayaJaal.
+    Production-grade facial recognition service for MAATRIX.
     Leverages OpenCV DNN YuNet (detection) and SFace (128-D cosine embedding recognition).
     Thread-safe and optimized for real-time video streams and REST APIs.
     """

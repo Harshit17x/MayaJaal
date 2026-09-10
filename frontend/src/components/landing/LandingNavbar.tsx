@@ -10,17 +10,17 @@ export function LandingNavbar() {
 
   return (
     <header className="w-full z-30 pt-6 px-6 sm:px-10 lg:px-16 flex items-center justify-between">
-      {/* Left Branding: MayaJaal Logo & Official Seal */}
+      {/* Left Branding: MAATRIX Logo & Official Seal */}
       <div className="flex items-center gap-4">
         <Link href="/" className="flex items-center gap-3 group">
           <img
-            src="/images/logo/mayajaal-emblem.png"
-            alt="MayaJaal Logo"
+            src="/images/logo/maatrix-emblem.png"
+            alt="MAATRIX Logo"
             className="w-10 h-10 object-contain drop-shadow-xs group-hover:scale-105 transition-transform"
           />
           <div className="flex flex-col">
             <span className="text-base sm:text-lg font-extrabold tracking-wider text-slate-950 leading-tight">
-              MAYAJAAL
+              MAATRIX
             </span>
             <span className="text-[10px] font-bold tracking-[0.18em] text-[#1b4332] uppercase">
               BORDER VIDEO ANALYTICS

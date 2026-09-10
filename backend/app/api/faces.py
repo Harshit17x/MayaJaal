@@ -50,7 +50,7 @@ def decode_image_input(
 
 @router.get("")
 def list_enrolled_faces() -> dict:
-    """Retrieve all enrolled personnel in the MayaJaal Face Recognition database."""
+    """Retrieve all enrolled personnel in the MAATRIX Face Recognition database."""
     persons = face_service.list_persons()
     return {
         "success": True,
@@ -378,7 +378,7 @@ def _generate_face_stream(
                     now_str = datetime.now().strftime("%H:%M:%S")
                     cv2.putText(
                         standby,
-                        f"MAYAJAAL FACE HUD | {now_str} IST",
+                        f"MAATRIX FACE HUD | {now_str} IST",
                         (20, 30),
                         cv2.FONT_HERSHEY_SIMPLEX,
                         0.5,
@@ -421,7 +421,7 @@ def _generate_face_stream(
                 now_str = datetime.now().strftime("%H:%M:%S")
                 cv2.putText(
                     annotated,
-                    f"MAYAJAAL FACE HUD | {now_str} IST",
+                    f"MAATRIX FACE HUD | {now_str} IST",
                     (20, 30),
                     cv2.FONT_HERSHEY_SIMPLEX,
                     0.55,
@@ -536,7 +536,7 @@ async def face_websocket_stream(websocket: WebSocket):
                 now_str = datetime.now().strftime("%H:%M:%S")
                 cv2.putText(
                     annotated,
-                    f"MAYAJAAL FACE HUD | {now_str} IST",
+                    f"MAATRIX FACE HUD | {now_str} IST",
                     (20, 30),
                     cv2.FONT_HERSHEY_SIMPLEX,
                     0.55,

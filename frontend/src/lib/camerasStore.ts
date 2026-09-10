@@ -10,7 +10,7 @@ import {
 import { api } from "@/lib/api";
 import { ALL_BORDER_CAMERAS } from "@/lib/borderCameras";
 
-const STORAGE_KEY = "mayajaal_operator_cameras_v4";
+const STORAGE_KEY = "maatrix_operator_cameras_v4";
 
 export const INITIAL_CAMERAS: Camera[] = ALL_BORDER_CAMERAS;
 
@@ -35,9 +35,9 @@ function loadInitialData(): Camera[] {
   try {
     // Clear out any old legacy cache keys that contained central India dummy coordinates
     try {
-      localStorage.removeItem("mayajaal_operator_cameras_v1");
-      localStorage.removeItem("mayajaal_operator_cameras_v2");
-      localStorage.removeItem("mayajaal_operator_cameras_v3");
+      localStorage.removeItem("maatrix_operator_cameras_v1");
+      localStorage.removeItem("maatrix_operator_cameras_v2");
+      localStorage.removeItem("maatrix_operator_cameras_v3");
     } catch {}
 
     const raw = localStorage.getItem(STORAGE_KEY);
