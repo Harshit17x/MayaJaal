@@ -82,9 +82,60 @@ def test_face_api_endpoints():
     print("[PASS] POST /api/faces/scan executed successfully.")
 
 
+def test_suspect_classification():
+    """Test suspect classification, threat levels, and PATCH metadata updates."""
+    client = TestClient(app)
+    resp = client.get("/api/faces")
+    assert resp.status_code == 200
+    data = resp.json()
+    persons = data.get("persons", [])
+    assert len(persons) >= 1
+    p = persons[0]
+    pid = p["id"]
+
+    # Verify suspect fields exist on enrolled person
+    assert "is_suspect" in p
+    assert "threat_level" in p
+    assert "category" in p
+
+    # Test PATCH metadata update
+    patch_resp = client.patch(
+        f"/api/faces/{pid}",
+        json={
+            "is_suspect": True,
+            "threat_level": "CRITICAL",
+            "category": "Wanted / BOLO",
+            "notes": "Test BOLO incident"
+        },
+    )
+    assert patch_resp.status_code == 200
+    patch_data = patch_resp.json()
+    assert patch_data.get("success") is True
+    updated_p = patch_data["person"]
+    assert updated_p["is_suspect"] is True
+    assert updated_p["threat_level"] == "CRITICAL"
+    assert updated_p["category"] == "Wanted / BOLO"
+    assert updated_p["notes"] == "Test BOLO incident"
+
+    # Reset back to non-suspect for test safety
+    reset_resp = client.patch(
+        f"/api/faces/{pid}",
+        json={
+            "is_suspect": False,
+            "threat_level": "LOW",
+            "category": "Authorized Personnel",
+            "notes": ""
+        },
+    )
+    assert reset_resp.status_code == 200
+    assert reset_resp.json()["person"]["is_suspect"] is False
+    print("[PASS] Suspect classification and PATCH metadata update verified successfully.")
+
+
 if __name__ == "__main__":
     print("Running Facial Recognition Integration Tests...")
     test_model_preservation()
     test_face_service_initialization()
     test_face_api_endpoints()
+    test_suspect_classification()
     print("ALL TESTS PASSED!")

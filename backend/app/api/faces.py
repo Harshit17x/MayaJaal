@@ -11,6 +11,7 @@ import cv2
 from fastapi import APIRouter, File, Form, HTTPException, Query, Request, Response, UploadFile, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 import numpy as np
+from pydantic import BaseModel
 
 from app.core.config import settings
 from app.pipeline.face_service import face_service
@@ -82,14 +83,25 @@ def get_recent_face_events(limit: int = Query(30, ge=1, le=100)) -> dict:
     }
 
 
+class PersonMetadataUpdate(BaseModel):
+    is_suspect: Optional[bool] = None
+    threat_level: Optional[str] = None
+    category: Optional[str] = None
+    notes: Optional[str] = None
+
+
 @router.post("/register")
 async def register_face(
     name: str = Form(None),
+    is_suspect: bool = Form(True),
+    threat_level: str = Form("HIGH"),
+    category: str = Form("Wanted / BOLO"),
+    notes: Optional[str] = Form(""),
     file: Optional[UploadFile] = File(None),
     image_base64: Optional[str] = Form(None),
 ) -> dict:
     """
-    Enroll a new person or add an identity profile with name and face image.
+    Enroll a new person or add an identity profile with name, face image, and suspect metadata.
     Accepts multipart file upload OR base64 data string.
     """
     if not name or not name.strip():
@@ -106,11 +118,36 @@ async def register_face(
     if image_bgr is None:
         raise HTTPException(status_code=400, detail="A valid face image file or base64 data is required.")
 
-    result = face_service.register_face(image_bgr, name.strip())
+    result = face_service.register_face(
+        image_bgr,
+        name.strip(),
+        is_suspect=is_suspect,
+        threat_level=threat_level,
+        category=category,
+        notes=notes or "",
+    )
     if not result.get("success"):
         raise HTTPException(status_code=400, detail=result.get("error", "Failed to register face"))
 
     return result
+
+
+@router.patch("/{person_id}")
+def update_face_metadata(
+    person_id: str,
+    payload: PersonMetadataUpdate,
+) -> dict:
+    """Update suspect status, threat level, category, or notes for an enrolled identity."""
+    res = face_service.update_person_metadata(
+        person_id,
+        is_suspect=payload.is_suspect,
+        threat_level=payload.threat_level,
+        category=payload.category,
+        notes=payload.notes,
+    )
+    if not res.get("success"):
+        raise HTTPException(status_code=404, detail=res.get("error", "Failed to update metadata"))
+    return res
 
 
 @router.post("/add-sample")

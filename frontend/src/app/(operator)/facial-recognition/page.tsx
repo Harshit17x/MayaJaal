@@ -194,6 +194,11 @@ export default function FacialRecognitionPage() {
   const [isEnrollModalOpen, setIsEnrollModalOpen] = useState(false);
   const [enrollMode, setEnrollMode] = useState<"webcam" | "upload">("webcam");
   const [enrollName, setEnrollName] = useState("");
+  const [enrollIsSuspect, setEnrollIsSuspect] = useState<boolean>(true);
+  const [enrollThreatLevel, setEnrollThreatLevel] = useState<"CRITICAL" | "HIGH" | "MEDIUM" | "LOW">("HIGH");
+  const [enrollCategory, setEnrollCategory] = useState<string>("Wanted / BOLO");
+  const [enrollNotes, setEnrollNotes] = useState<string>("");
+  const [directoryFilter, setDirectoryFilter] = useState<"all" | "suspects" | "authorized">("all");
   const [enrollFile, setEnrollFile] = useState<File | null>(null);
   const [enrollPreview, setEnrollPreview] = useState<string | null>(null);
   const [isEnrolling, setIsEnrolling] = useState(false);
@@ -368,10 +373,19 @@ export default function FacialRecognitionPage() {
           setEnrollError(res.error || "Failed to add sample");
         }
       } else {
-        // Register new person
-        const res = await api.registerFace(enrollName.trim(), payloadImage);
+        // Register new person with suspect metadata
+        const res = await api.registerFace(enrollName.trim(), payloadImage, {
+          is_suspect: enrollIsSuspect,
+          threat_level: enrollThreatLevel,
+          category: enrollCategory,
+          notes: enrollNotes,
+        });
         if (res.success) {
-          setEnrollSuccess(`Successfully registered ${res.person?.name || enrollName}!`);
+          setEnrollSuccess(
+            `Successfully registered ${res.person?.name || enrollName} as ${
+              enrollIsSuspect ? "Wanted Suspect" : "Authorized Personnel"
+            }!`
+          );
           await fetchEnrolled();
           setTimeout(() => {
             closeEnrollModal();
@@ -385,6 +399,20 @@ export default function FacialRecognitionPage() {
       setEnrollError(msg || "Enrolment failed");
     } finally {
       setIsEnrolling(false);
+    }
+  };
+
+  const handleToggleSuspect = async (person: EnrolledPerson) => {
+    const newStatus = !person.is_suspect;
+    try {
+      await api.updateFaceMetadata(person.id, {
+        is_suspect: newStatus,
+        threat_level: newStatus ? (person.threat_level || "HIGH") : "LOW",
+        category: newStatus ? "Wanted / BOLO" : "Authorized Personnel",
+      });
+      await fetchEnrolled();
+    } catch {
+      alert("Failed to update status");
     }
   };
 
@@ -403,6 +431,10 @@ export default function FacialRecognitionPage() {
   const openEnrollModal = (targetPerson: EnrolledPerson | null = null) => {
     setTargetPersonForSample(targetPerson);
     setEnrollName(targetPerson ? targetPerson.name : "");
+    setEnrollIsSuspect(targetPerson ? (targetPerson.is_suspect ?? false) : true);
+    setEnrollThreatLevel(targetPerson ? (targetPerson.threat_level || "HIGH") : "HIGH");
+    setEnrollCategory(targetPerson ? (targetPerson.category || "Wanted / BOLO") : "Wanted / BOLO");
+    setEnrollNotes(targetPerson ? (targetPerson.notes || "") : "");
     setEnrollPreview(null);
     setEnrollFile(null);
     setEnrollError(null);
@@ -414,6 +446,10 @@ export default function FacialRecognitionPage() {
     stopWebcam();
     setIsEnrollModalOpen(false);
     setTargetPersonForSample(null);
+    setEnrollIsSuspect(true);
+    setEnrollThreatLevel("HIGH");
+    setEnrollCategory("Wanted / BOLO");
+    setEnrollNotes("");
     setEnrollPreview(null);
     setEnrollFile(null);
     setEnrollError(null);
@@ -440,230 +476,275 @@ export default function FacialRecognitionPage() {
     }
   };
 
-  const filteredPersons = enrolledPersons.filter((p) =>
-    p.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const suspectCount = enrolledPersons.filter((p) => p.is_suspect).length;
+  const authorizedCount = enrolledPersons.filter((p) => !p.is_suspect).length;
+
+  const filteredPersons = enrolledPersons.filter((p) => {
+    const q = searchQuery.toLowerCase().trim();
+    const matchesSearch =
+      !q ||
+      p.name.toLowerCase().includes(q) ||
+      p.id.toLowerCase().includes(q) ||
+      (p.notes && p.notes.toLowerCase().includes(q)) ||
+      (p.category && p.category.toLowerCase().includes(q));
+
+    if (!matchesSearch) return false;
+    if (directoryFilter === "suspects") return !!p.is_suspect;
+    if (directoryFilter === "authorized") return !p.is_suspect;
+    return true;
+  });
 
   return (
-    <div className="flex flex-col gap-6 p-4 sm:p-6 lg:p-8 min-h-screen bg-slate-950 text-slate-100">
+    <div className="space-y-6 pb-16">
       {/* Hidden elements for webcam frame capture and streaming */}
       <canvas ref={canvasRef} className="hidden" />
       <video ref={clientVideoRef} className="hidden" playsInline muted autoPlay />
       <canvas ref={clientCanvasRef} className="hidden" />
 
       {/* TOP COMMAND HEADER */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 rounded-2xl bg-slate-900/80 border border-slate-800 shadow-2xl backdrop-blur-xl">
-        <div className="flex items-center gap-4">
-          <div className="p-3.5 rounded-xl bg-gradient-to-br from-emerald-500/20 via-teal-500/10 to-transparent border border-emerald-500/30 text-emerald-400 shadow-lg shadow-emerald-500/10">
-            <ScanFace className="w-8 h-8" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2.5">
-              <h1 className="text-xl sm:text-2xl font-bold tracking-wider text-slate-100 uppercase">
-                Facial Recognition Command Center
-              </h1>
-              <span className="px-2.5 py-0.5 text-xs font-mono font-semibold rounded-full bg-emerald-500/20 border border-emerald-500/30 text-emerald-400">
-                BIOMETRIC SEC // DUAL-METRIC
-              </span>
+      <div className="bg-white rounded-2xl border border-slate-200/90 p-5 md:p-6 shadow-xs flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-[#143724] text-white flex items-center justify-center shadow-xs">
+              <ScanFace className="w-5 h-5 text-emerald-400" />
             </div>
-            <p className="text-xs sm:text-sm text-slate-400 mt-0.5">
-              YuNet High-Res Face Detector & SFace 128-D Cosine Matching with Temporal Smoothing
-            </p>
+            <div>
+              <div className="flex items-center gap-2">
+                <h1 className="text-xl md:text-2xl font-black tracking-tight text-slate-900">
+                  Facial Recognition
+                </h1>
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-[11px] font-semibold text-emerald-800">
+                  <span
+                    className={`w-1.5 h-1.5 rounded-full ${
+                      engineStatus?.status === "ready"
+                        ? "bg-emerald-500 animate-pulse"
+                        : "bg-rose-500"
+                    }`}
+                  />
+                  {engineStatus?.status === "ready" ? "Engine Active" : "Engine Offline"}
+                </span>
+                <span className="hidden sm:inline-flex items-center px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 text-[10px] font-mono font-semibold">
+                  YuNet + SFace
+                </span>
+              </div>
+              <p className="text-xs md:text-sm font-medium text-slate-500 mt-0.5">
+                YuNet High-Res Face Detector & SFace 128-D Cosine Matching with Temporal Smoothing
+              </p>
+            </div>
           </div>
         </div>
 
-        {/* Live Status Indicators */}
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-950/80 border border-slate-800 text-xs">
-            <span
-              className={`w-2.5 h-2.5 rounded-full ${
-                engineStatus?.status === "ready" ? "bg-emerald-500 animate-pulse" : "bg-rose-500"
-              }`}
-            />
-            <span className="font-mono text-slate-300">
-              ENGINE: {engineStatus?.status === "ready" ? "ACTIVE" : "OFFLINE"}
-            </span>
-          </div>
-
-          <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-950/80 border border-slate-800 text-xs">
-            <UserCheck className="w-4 h-4 text-emerald-400" />
-            <span className="font-mono text-slate-300">
-              ENROLLED: <strong className="text-emerald-400 font-bold">{enrolledPersons.length}</strong>
-            </span>
-          </div>
-
+        {/* Action buttons */}
+        <div className="flex flex-wrap items-center gap-2.5">
           <button
+            type="button"
             onClick={refreshAllData}
             disabled={isLoading}
-            className="p-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white transition border border-slate-700 disabled:opacity-50"
-            title="Refresh System Data"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors shadow-xs cursor-pointer disabled:opacity-50"
+            title="Sync System Data"
           >
-            <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`} />
+            <RefreshCw className={`w-3.5 h-3.5 text-slate-500 ${isLoading ? "animate-spin" : ""}`} />
+            <span>Sync</span>
           </button>
 
           <button
+            type="button"
             onClick={() => openEnrollModal(null)}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold text-xs uppercase tracking-wider shadow-lg shadow-emerald-600/20 transition transform active:scale-95"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#143724] hover:bg-[#1a472f] text-white text-xs font-bold transition-all shadow-xs hover:shadow-emerald-900/10 cursor-pointer"
           >
-            <UserPlus className="w-4 h-4 text-slate-950" />
-            Enroll Identity
+            <UserPlus className="w-4 h-4 text-emerald-400" />
+            <span>Enroll Identity</span>
           </button>
         </div>
       </div>
 
+      {/* METRICS RIBBON (4 CARDS) */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Card 1: Engine Status */}
+        <div className="bg-white rounded-2xl border border-slate-200/90 p-4 shadow-xs flex items-center justify-between">
+          <div>
+            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+              Biometric Engine
+            </span>
+            <div className="text-2xl font-black text-slate-900 mt-0.5 flex items-center gap-2">
+              <span
+                className={`w-2.5 h-2.5 rounded-full ${
+                  engineStatus?.status === "ready" ? "bg-emerald-500 animate-pulse" : "bg-rose-500"
+                }`}
+              />
+              {engineStatus?.status === "ready" ? "Active" : "Offline"}
+            </div>
+            <span className="text-[11px] text-slate-500 font-medium">
+              YuNet & SFace 128-D
+            </span>
+          </div>
+          <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-700">
+            <Cpu className="w-5 h-5" />
+          </div>
+        </div>
+
+        {/* Card 2: Enrolled Roster */}
+        <div className="bg-white rounded-2xl border border-slate-200/90 p-4 shadow-xs flex items-center justify-between">
+          <div>
+            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+              Enrolled Identities
+            </span>
+            <div className="text-2xl font-black text-slate-900 mt-0.5 flex items-baseline gap-2">
+              <span>{enrolledPersons.length}</span>
+              {suspectCount > 0 && (
+                <span className="text-xs font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-200 flex items-center gap-1">
+                  <ShieldAlert className="w-3 h-3" />
+                  {suspectCount} Wanted
+                </span>
+              )}
+            </div>
+            <span className="text-[11px] text-slate-500 font-medium">
+              {authorizedCount} Authorized Personnel
+            </span>
+          </div>
+          <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-700">
+            <UserCheck className="w-5 h-5" />
+          </div>
+        </div>
+
+        {/* Card 3: Events Logged */}
+        <div className="bg-white rounded-2xl border border-slate-200/90 p-4 shadow-xs flex items-center justify-between">
+          <div>
+            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+              Recent Matches
+            </span>
+            <div className="text-2xl font-black text-slate-900 mt-0.5">
+              {recentEvents.length}
+            </div>
+            <span className="text-[11px] text-slate-500 font-medium">
+              Realtime detections logged
+            </span>
+          </div>
+          <div className="w-10 h-10 rounded-xl bg-cyan-50 flex items-center justify-center text-cyan-700">
+            <Activity className="w-5 h-5" />
+          </div>
+        </div>
+
+        {/* Card 4: Match Sensitivity */}
+        <div className="bg-white rounded-2xl border border-slate-200/90 p-4 shadow-xs flex items-center justify-between">
+          <div>
+            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+              Match Sensitivity
+            </span>
+            <div className="text-2xl font-black text-slate-900 mt-0.5 font-mono">
+              {minMatchThreshold.toFixed(2)}
+            </div>
+            <span className="text-[11px] text-slate-500 font-medium">
+              Cosine similarity cutoff
+            </span>
+          </div>
+          <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center text-amber-700">
+            <Sparkles className="w-5 h-5" />
+          </div>
+        </div>
+      </div>
+
       {/* NAVIGATION TABS */}
-      <div className="flex items-center gap-2 border-b border-slate-800/80 pb-3">
+      <div className="flex items-center gap-2 border-b border-slate-200">
         <button
+          type="button"
           onClick={() => setActiveTab("stream")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium text-xs sm:text-sm transition ${
+          className={`px-4 py-2.5 text-xs font-bold rounded-t-xl transition-all flex items-center gap-2 cursor-pointer ${
             activeTab === "stream"
-              ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 font-semibold"
-              : "text-slate-400 hover:text-slate-200 hover:bg-slate-900"
+              ? "bg-white text-emerald-800 border-t-2 border-emerald-600 border-x border-slate-200 shadow-xs"
+              : "text-slate-600 hover:text-slate-900"
           }`}
         >
           <Video className="w-4 h-4" />
-          Live Recognition HUD
+          <span>Live Recognition HUD</span>
         </button>
 
         <button
+          type="button"
           onClick={() => setActiveTab("directory")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium text-xs sm:text-sm transition ${
+          className={`px-4 py-2.5 text-xs font-bold rounded-t-xl transition-all flex items-center gap-2 cursor-pointer ${
             activeTab === "directory"
-              ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 font-semibold"
-              : "text-slate-400 hover:text-slate-200 hover:bg-slate-900"
+              ? "bg-white text-emerald-800 border-t-2 border-emerald-600 border-x border-slate-200 shadow-xs"
+              : "text-slate-600 hover:text-slate-900"
           }`}
         >
           <UserCheck className="w-4 h-4" />
-          Personnel Roster ({enrolledPersons.length})
+          <span>
+            Personnel Roster ({enrolledPersons.length})
+            {suspectCount > 0 && (
+              <span className="ml-1.5 px-1.5 py-0.5 rounded-full bg-rose-600 text-white text-[10px] font-bold">
+                {suspectCount}
+              </span>
+            )}
+          </span>
         </button>
 
         <button
+          type="button"
           onClick={() => setActiveTab("scan")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium text-xs sm:text-sm transition ${
+          className={`px-4 py-2.5 text-xs font-bold rounded-t-xl transition-all flex items-center gap-2 cursor-pointer ${
             activeTab === "scan"
-              ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 font-semibold"
-              : "text-slate-400 hover:text-slate-200 hover:bg-slate-900"
+              ? "bg-white text-emerald-800 border-t-2 border-emerald-600 border-x border-slate-200 shadow-xs"
+              : "text-slate-600 hover:text-slate-900"
           }`}
         >
           <Upload className="w-4 h-4" />
-          Photo Forensic Scanner
+          <span>Photo Forensic Scanner</span>
         </button>
       </div>
 
       {/* TAB 1: LIVE RECOGNITION HUD */}
       {activeTab === "stream" && (
-        <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
-          {/* Main Video Screen */}
-          <div className="xl:col-span-3 flex flex-col gap-4">
-            <div className="relative rounded-2xl overflow-hidden bg-slate-950 border border-slate-800 shadow-2xl aspect-video flex items-center justify-center">
-              {isStreamPlaying ? (
-                <>
-                  {streamSource === "browser" ? (
-                    clientAnnotatedUrl ? (
-                      /* eslint-disable-next-line @next/next/no-img-element */
-                      <img
-                        src={clientAnnotatedUrl}
-                        alt="Live Client Biometric Stream"
-                        className="w-full h-full object-contain"
-                      />
-                    ) : (
-                      <div className="flex flex-col items-center gap-3 text-slate-400 p-6 text-center">
-                        <Camera className="w-12 h-12 text-emerald-400 animate-pulse" />
-                        <p className="text-sm font-medium">Connecting Local Webcam to Backend AI...</p>
-                        <p className="text-xs text-slate-500 max-w-sm">
-                          Streaming your device&apos;s camera frames to {BACKEND_BASE_URL} for real-time YuNet & SFace biometric identification.
-                        </p>
-                      </div>
-                    )
-                  ) : (
-                    /* eslint-disable-next-line @next/next/no-img-element */
-                    <img
-                      ref={streamImgRef}
-                      key={streamKey}
-                      src={`${BACKEND_BASE_URL}/api/faces/stream?source=${encodeURIComponent(
-                        streamSource === "custom" ? customStreamUrl || "sample" : streamSource
-                      )}&fps=20${streamKey > 0 ? `&t=${streamKey}` : ""}`}
-                      alt="Live Facial Recognition Stream"
-                      className="w-full h-full object-contain"
-                      onLoad={() => setStreamError(false)}
-                      onError={() => {
-                        setStreamError(true);
-                      }}
-                      suppressHydrationWarning
-                    />
-                  )}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Main Video Screen Container (2 cols) */}
+          <div className="lg:col-span-2 space-y-4">
+            <div className="bg-slate-900 rounded-2xl overflow-hidden border border-slate-800 shadow-lg relative">
+              {/* Top Stream Control Bar */}
+              <div className="bg-slate-950/80 backdrop-blur-md px-4 py-3 border-b border-slate-800 flex flex-wrap items-center justify-between gap-3">
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
+                  <span className="text-xs font-bold font-mono text-emerald-400">BIOMETRIC STREAM</span>
+                  <span className="text-xs text-slate-500">|</span>
+                  <span className="text-xs text-slate-300 font-mono">{streamSource.toUpperCase()}</span>
+                </div>
 
-                  {streamError && (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-950/85 backdrop-blur-sm z-20 p-6 text-center gap-3">
-                      <AlertTriangle className="w-10 h-10 text-amber-400 animate-bounce" />
-                      <p className="text-sm text-slate-200 font-medium">
-                        Unable to connect to feed ({streamSource === "browser" ? "This Device (Browser Webcam)" : (streamSource === "0" ? "Server Host Camera 0" : streamSource)})
-                      </p>
-                      <p className="text-xs text-slate-400 max-w-sm">
-                        {streamSource === "0" || streamSource === "1"
-                          ? `The backend server at ${BACKEND_BASE_URL} does not have a physical webcam attached. Switch to "This Device (Browser Webcam)" to use your local camera.`
-                          : "Please verify camera permissions or ensure the feed source is online."}
-                      </p>
-                      <div className="flex flex-wrap items-center justify-center gap-3 mt-2">
-                        <button
-                          onClick={() => {
-                            setStreamError(false);
-                            if (streamSource === "browser") {
-                              startClientStreaming();
-                            } else {
-                              setStreamKey(Date.now());
-                            }
-                          }}
-                          className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold text-xs uppercase tracking-wider transition"
-                        >
-                          Retry Reconnect
-                        </button>
-                        <button
-                          onClick={() => handleSourceChange("browser")}
-                          className="px-4 py-2 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-semibold hover:bg-emerald-500/30 transition"
-                        >
-                          Use This Device&apos;s Webcam
-                        </button>
-                        <button
-                          onClick={() => handleSourceChange("sample")}
-                          className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition"
-                        >
-                          Switch to Demo Video
-                        </button>
-                      </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <select
+                    value={streamSource}
+                    onChange={(e) => handleSourceChange(e.target.value)}
+                    className="bg-slate-800 text-slate-200 text-xs px-2.5 py-1 rounded-lg border border-slate-700 outline-none cursor-pointer"
+                  >
+                    <option value="browser">This Device (Browser Webcam)</option>
+                    <option value="sample">Demo Surveillance Feed (Server)</option>
+                    <option value="0">Server Host Camera 0</option>
+                    <option value="1">Server Host Camera 1</option>
+                    <option value="custom">Custom RTSP / IP URL...</option>
+                  </select>
+
+                  {streamSource === "custom" && (
+                    <div className="flex items-center gap-1.5">
+                      <input
+                        type="text"
+                        placeholder="rtsp://... or http://..."
+                        value={customStreamUrl}
+                        onChange={(e) => setCustomStreamUrl(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") setStreamKey(Date.now());
+                        }}
+                        className="bg-slate-800 text-slate-200 text-xs px-2.5 py-1 rounded-lg border border-slate-700 w-36 sm:w-48 outline-none"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setStreamKey(Date.now())}
+                        className="px-2.5 py-1 rounded-lg bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-bold cursor-pointer"
+                      >
+                        Go
+                      </button>
                     </div>
                   )}
-                </>
-              ) : (
-                <div className="flex flex-col items-center gap-3 text-slate-500">
-                  <Video className="w-12 h-12 text-slate-600" />
-                  <p className="text-sm">Stream paused</p>
-                  <button
-                    onClick={handleToggleStream}
-                    className="px-4 py-1.5 rounded-lg bg-emerald-600 text-slate-950 font-bold text-xs uppercase"
-                  >
-                    Resume Stream
-                  </button>
-                </div>
-              )}
-
-              {/* Top Left Feed Badge */}
-              <div className="absolute top-4 left-4 flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-900/90 border border-slate-700/80 backdrop-blur text-xs font-mono">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
-                <span className="text-slate-200 font-semibold">FEED: {streamSource.toUpperCase()}</span>
-              </div>
-
-              {/* Bottom Stream Controls Bar */}
-              <div className="absolute bottom-4 left-4 right-4 flex flex-wrap items-center justify-between gap-3 p-3 rounded-xl bg-slate-900/90 border border-slate-700/80 backdrop-blur">
-                <div className="flex flex-wrap items-center gap-3">
-                  <button
-                    onClick={handleToggleStream}
-                    className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 transition"
-                  >
-                    {isStreamPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-                  </button>
 
                   <button
+                    type="button"
                     onClick={() => {
                       if (streamSource === "browser") {
                         startClientStreaming();
@@ -671,141 +752,238 @@ export default function FacialRecognitionPage() {
                         setStreamKey(Date.now());
                       }
                     }}
-                    className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 transition"
+                    className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs transition-colors cursor-pointer"
                     title="Reconnect"
                   >
-                    <RefreshCw className="w-4 h-4" />
+                    <RefreshCw className="w-3.5 h-3.5" />
                   </button>
 
-                  <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400">
-                    <span>Source:</span>
-                    <select
-                      value={streamSource}
-                      onChange={(e) => handleSourceChange(e.target.value)}
-                      className="bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1 text-slate-200 text-xs focus:outline-none focus:border-emerald-500"
-                    >
-                      <option value="browser">This Device (Browser Webcam) - For Remote Backend</option>
-                      <option value="sample">Demo Surveillance Feed (Server)</option>
-                      <option value="0">Server Host Camera 0 (Physical USB on Server)</option>
-                      <option value="1">Server Host Camera 1 (Physical USB on Server)</option>
-                      <option value="custom">Custom RTSP / IP Camera URL...</option>
-                    </select>
+                  <button
+                    type="button"
+                    onClick={handleToggleStream}
+                    className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs transition-colors cursor-pointer"
+                    title={isStreamPlaying ? "Pause Stream" : "Resume Stream"}
+                  >
+                    {isStreamPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
+                  </button>
+                </div>
+              </div>
 
-                    {streamSource === "custom" && (
-                      <div className="flex items-center gap-1.5">
-                        <input
-                          type="text"
-                          placeholder="http://ip:8080/video or rtsp://..."
-                          value={customStreamUrl}
-                          onChange={(e) => setCustomStreamUrl(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") setStreamKey(Date.now());
-                          }}
-                          className="bg-slate-950 border border-slate-700 rounded-lg px-2 py-1 text-slate-200 text-xs w-48 focus:outline-none focus:border-emerald-500"
+              {/* Stream Feed Viewport */}
+              <div className="relative aspect-video w-full bg-black flex items-center justify-center overflow-hidden">
+                {isStreamPlaying ? (
+                  <>
+                    {streamSource === "browser" ? (
+                      clientAnnotatedUrl ? (
+                        /* eslint-disable-next-line @next/next/no-img-element */
+                        <img
+                          src={clientAnnotatedUrl}
+                          alt="Live Client Biometric Stream"
+                          className="w-full h-full object-contain"
                         />
-                        <button
-                          onClick={() => setStreamKey(Date.now())}
-                          className="px-2 py-1 rounded bg-emerald-600 text-slate-950 font-bold text-xs hover:bg-emerald-500"
-                        >
-                          Go
-                        </button>
+                      ) : (
+                        <div className="flex flex-col items-center gap-3 text-slate-400 p-6 text-center">
+                          <Camera className="w-10 h-10 text-emerald-400 animate-pulse" />
+                          <p className="text-sm font-medium text-slate-200">Connecting Local Webcam to AI Engine...</p>
+                          <p className="text-xs text-slate-400 max-w-sm">
+                            Streaming browser webcam frames to {BACKEND_BASE_URL} for real-time YuNet & SFace biometric identification.
+                          </p>
+                        </div>
+                      )
+                    ) : (
+                      /* eslint-disable-next-line @next/next/no-img-element */
+                      <img
+                        ref={streamImgRef}
+                        key={streamKey}
+                        src={`${BACKEND_BASE_URL}/api/faces/stream?source=${encodeURIComponent(
+                          streamSource === "custom" ? customStreamUrl || "sample" : streamSource
+                        )}&fps=20${streamKey > 0 ? `&t=${streamKey}` : ""}`}
+                        alt="Live Facial Recognition Stream"
+                        className="w-full h-full object-contain"
+                        onLoad={() => setStreamError(false)}
+                        onError={() => {
+                          setStreamError(true);
+                        }}
+                        suppressHydrationWarning
+                      />
+                    )}
+
+                    {streamError && (
+                      <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-950/85 backdrop-blur-sm z-20 p-6 text-center gap-3">
+                        <AlertTriangle className="w-10 h-10 text-amber-400 animate-bounce" />
+                        <p className="text-sm text-slate-200 font-medium">
+                          Unable to connect to feed ({streamSource === "browser" ? "This Device Webcam" : (streamSource === "0" ? "Server Host Camera 0" : streamSource)})
+                        </p>
+                        <p className="text-xs text-slate-400 max-w-sm">
+                          {streamSource === "0" || streamSource === "1"
+                            ? `The backend at ${BACKEND_BASE_URL} does not have a physical USB camera connected. Switch to "This Device (Browser Webcam)" to use your local camera.`
+                            : "Please check camera permissions or ensure the RTSP/video source is online."}
+                        </p>
+                        <div className="flex flex-wrap items-center justify-center gap-3 mt-2">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setStreamError(false);
+                              if (streamSource === "browser") {
+                                startClientStreaming();
+                              } else {
+                                setStreamKey(Date.now());
+                              }
+                            }}
+                            className="px-4 py-2 rounded-xl bg-[#143724] hover:bg-[#1a472f] text-white font-bold text-xs uppercase tracking-wider transition cursor-pointer"
+                          >
+                            Retry Reconnect
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleSourceChange("browser")}
+                            className="px-4 py-2 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-semibold hover:bg-emerald-500/30 transition cursor-pointer"
+                          >
+                            Use This Device&apos;s Webcam
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleSourceChange("sample")}
+                            className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition cursor-pointer"
+                          >
+                            Switch to Demo Video
+                          </button>
+                        </div>
                       </div>
                     )}
+                  </>
+                ) : (
+                  <div className="flex flex-col items-center gap-3 text-slate-400">
+                    <Video className="w-10 h-10 text-slate-500" />
+                    <p className="text-xs">Stream paused</p>
+                    <button
+                      type="button"
+                      onClick={handleToggleStream}
+                      className="px-4 py-1.5 rounded-lg bg-[#143724] text-white font-bold text-xs uppercase tracking-wider hover:bg-[#1a472f] cursor-pointer"
+                    >
+                      Resume Stream
+                    </button>
                   </div>
-                </div>
+                )}
+              </div>
 
-                <div className="flex items-center gap-4 text-xs font-mono text-slate-400">
-                  <span className="hidden sm:inline">SMOOTHING: TEMPORAL 5-FRAME</span>
-                  <span className="text-emerald-400 font-bold">YuNet + SFace</span>
-                </div>
+              {/* Bottom Stream Status Bar */}
+              <div className="bg-slate-950/80 backdrop-blur-md px-4 py-2.5 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400 font-mono">
+                <span className="hidden sm:inline">SMOOTHING: TEMPORAL 5-FRAME</span>
+                <span className="text-emerald-400 font-bold">YuNet Detector + SFace 128-D Cosine</span>
               </div>
             </div>
 
-            {/* Server Hardware Camera Notice when user selected server camera 0 or 1 */}
+            {/* Server Hardware Camera Notice */}
             {(streamSource === "0" || streamSource === "1") && (
-              <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-amber-300">
+              <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-amber-900">
                 <div className="flex items-start sm:items-center gap-2.5">
-                  <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5 sm:mt-0" />
+                  <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5 sm:mt-0" />
                   <div>
-                    <span className="font-bold text-amber-200">Server Hardware Camera Mode:</span>{" "}
-                    The backend at <code className="px-1.5 py-0.5 rounded bg-slate-950 font-mono text-amber-300">{BACKEND_BASE_URL}</code> is querying a physical USB webcam plugged directly into <em>that</em> machine. If you want to use the webcam on <strong>this</strong> computer, switch source to <strong>&quot;This Device (Browser Webcam)&quot;</strong>.
+                    <span className="font-bold text-amber-950">Server Hardware Camera Mode:</span>{" "}
+                    The backend at <code className="px-1.5 py-0.5 rounded bg-amber-100 font-mono text-amber-900">{BACKEND_BASE_URL}</code> is querying a physical USB webcam attached directly to that server machine. To stream your computer&apos;s webcam, switch to <strong>&quot;This Device (Browser Webcam)&quot;</strong>.
                   </div>
                 </div>
                 <button
+                  type="button"
                   onClick={() => handleSourceChange("browser")}
-                  className="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold text-xs whitespace-nowrap transition self-start sm:self-center"
+                  className="px-3.5 py-1.5 rounded-lg bg-[#143724] hover:bg-[#1a472f] text-white font-bold text-xs whitespace-nowrap transition cursor-pointer self-start sm:self-center"
                 >
-                  Use This Device&apos;s Webcam
+                  Use This Device
                 </button>
               </div>
             )}
 
-            {/* Quick Helper Banner */}
-            <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800 flex items-center justify-between text-xs text-slate-400">
+            {/* Tactical Guidelines Bar (Matches ANPR style) */}
+            <div className="bg-white rounded-xl border border-slate-200/90 p-3.5 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-600 shadow-xs">
               <div className="flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                <span>
-                  <strong>Emerald Reticles:</strong> Verified registered personnel with calibrated match score.
-                </span>
+                <span className="w-2.5 h-2.5 rounded-sm bg-emerald-500" />
+                <span>Green Reticle: Verified Identity Match</span>
               </div>
               <div className="flex items-center gap-2">
-                <AlertTriangle className="w-4 h-4 text-amber-400" />
-                <span>
-                  <strong>Amber Reticles:</strong> Unregistered or unknown individuals.
-                </span>
+                <span className="w-2.5 h-2.5 rounded-sm bg-amber-500" />
+                <span>Amber Reticle: Unregistered / Unknown Face</span>
+              </div>
+              <div className="hidden sm:flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-sm bg-cyan-600" />
+                <span>128-D Cosine Metric Smoothing</span>
               </div>
             </div>
           </div>
 
-          {/* Right Column: Live Detection Event Ticker */}
-          <div className="flex flex-col gap-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-sm font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
-                <Activity className="w-4 h-4 text-emerald-400" />
-                Live Recognition Log
-              </h2>
-              <span className="text-xs font-mono text-slate-500">REALTIME</span>
+          {/* Side Panel: Live Recognition Log (Matches ANPR side panel style) */}
+          <div className="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-xs flex flex-col h-[580px]">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-3">
+              <div className="flex items-center gap-2">
+                <Activity className="w-4 h-4 text-emerald-800" />
+                <h3 className="text-sm font-bold text-slate-900">Live Recognition Log</h3>
+              </div>
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-semibold">
+                Realtime
+              </span>
             </div>
 
-            <div className="flex flex-col gap-2.5 max-h-[600px] overflow-y-auto pr-1">
+            {/* Scrollable Event List */}
+            <div className="flex-1 overflow-y-auto space-y-2.5 pr-1">
               {recentEvents.length === 0 ? (
-                <div className="p-8 rounded-2xl bg-slate-900/40 border border-dashed border-slate-800 text-center text-slate-500 text-xs">
-                  No detection events logged yet. Faces appearing in the stream will automatically register here.
+                <div className="h-full flex flex-col items-center justify-center text-center p-6 text-slate-400">
+                  <UserX className="w-8 h-8 mb-2 opacity-40" />
+                  <p className="text-xs">No face detections logged yet.</p>
+                  <p className="text-[11px] text-slate-400 mt-1">Faces appearing in the stream will automatically register here.</p>
                 </div>
               ) : (
                 recentEvents.map((evt) => (
                   <div
                     key={evt.id}
-                    className={`p-3.5 rounded-xl border transition flex items-center justify-between ${
-                      evt.is_known
-                        ? "bg-slate-900/80 border-emerald-500/30 text-emerald-300"
-                        : "bg-slate-900/80 border-amber-500/30 text-amber-300"
+                    className={`p-3 rounded-xl border transition-all ${
+                      evt.is_threat
+                        ? "bg-rose-50/80 border-rose-300 shadow-xs hover:border-rose-400"
+                        : evt.is_known
+                        ? "bg-emerald-50/60 border-emerald-200/80 hover:border-emerald-300"
+                        : "bg-amber-50/60 border-amber-200/80 hover:border-amber-300"
                     }`}
                   >
-                    <div className="flex items-center gap-3">
-                      <div
-                        className={`p-2 rounded-lg ${
-                          evt.is_known
-                            ? "bg-emerald-500/20 text-emerald-400"
-                            : "bg-amber-500/20 text-amber-400"
-                        }`}
-                      >
-                        {evt.is_known ? (
-                          <UserCheck className="w-4 h-4" />
-                        ) : (
-                          <UserX className="w-4 h-4" />
-                        )}
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div
+                          className={`p-1.5 rounded-lg shrink-0 ${
+                            evt.is_threat
+                              ? "bg-rose-600 text-white"
+                              : evt.is_known
+                              ? "bg-emerald-100 text-emerald-800"
+                              : "bg-amber-100 text-amber-800"
+                          }`}
+                        >
+                          {evt.is_threat ? (
+                            <ShieldAlert className="w-4 h-4 animate-pulse" />
+                          ) : evt.is_known ? (
+                            <UserCheck className="w-4 h-4" />
+                          ) : (
+                            <UserX className="w-4 h-4" />
+                          )}
+                        </div>
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-1.5">
+                            <p className="text-xs font-bold text-slate-900 truncate leading-tight">
+                              {evt.name}
+                            </p>
+                            {evt.is_threat && (
+                              <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-rose-600 text-white shrink-0">
+                                {evt.threat_level || "WANTED"}
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-[10px] font-mono text-slate-500 mt-0.5">
+                            {evt.is_threat
+                              ? `🚨 High Threat Target (${evt.calibrated_conf}%)`
+                              : evt.is_known
+                              ? `Match: ${evt.calibrated_conf}%`
+                              : "Unregistered Face"}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-xs font-bold text-slate-100 leading-tight">
-                          {evt.name}
-                        </p>
-                        <p className="text-[10px] font-mono text-slate-400">
-                          {evt.is_known ? `Match: ${evt.calibrated_conf}%` : "Unregistered Face"}
-                        </p>
-                      </div>
+                      <span className="text-[10px] font-mono text-slate-400 shrink-0">{evt.timestamp}</span>
                     </div>
-                    <span className="text-[10px] font-mono text-slate-500">{evt.timestamp}</span>
                   </div>
                 ))
               )}
@@ -816,38 +994,87 @@ export default function FacialRecognitionPage() {
 
       {/* TAB 2: PERSONNEL DIRECTORY */}
       {activeTab === "directory" && (
-        <div className="flex flex-col gap-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-              <input
-                type="text"
-                placeholder="Search registered personnel..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-200 text-sm focus:outline-none focus:border-emerald-500"
-              />
+        <div className="space-y-6">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <div className="flex flex-wrap items-center gap-3 flex-1">
+              <div className="relative flex-1 min-w-[220px] max-w-md">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Search name, category, FIR notes..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2.5 text-xs rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-700/20 focus:border-emerald-700 shadow-xs text-slate-900 placeholder:text-slate-400"
+                />
+              </div>
+
+              {/* Filter Pills */}
+              <div className="flex items-center gap-1 p-1 rounded-xl bg-slate-100 border border-slate-200 text-xs font-semibold">
+                <button
+                  type="button"
+                  onClick={() => setDirectoryFilter("all")}
+                  className={`px-3 py-1.5 rounded-lg transition cursor-pointer ${
+                    directoryFilter === "all"
+                      ? "bg-white text-slate-900 shadow-xs"
+                      : "text-slate-500 hover:text-slate-800"
+                  }`}
+                >
+                  All ({enrolledPersons.length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDirectoryFilter("suspects")}
+                  className={`px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 cursor-pointer ${
+                    directoryFilter === "suspects"
+                      ? "bg-rose-600 text-white shadow-xs"
+                      : "text-rose-700 hover:bg-rose-50"
+                  }`}
+                >
+                  <ShieldAlert className="w-3.5 h-3.5" />
+                  <span>Wanted Suspects ({suspectCount})</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDirectoryFilter("authorized")}
+                  className={`px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 cursor-pointer ${
+                    directoryFilter === "authorized"
+                      ? "bg-emerald-700 text-white shadow-xs"
+                      : "text-emerald-700 hover:bg-emerald-50"
+                  }`}
+                >
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                  <span>Authorized ({authorizedCount})</span>
+                </button>
+              </div>
             </div>
 
             <button
+              type="button"
               onClick={() => openEnrollModal(null)}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold text-xs uppercase tracking-wider shadow-lg shadow-emerald-600/20 transition"
+              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#143724] hover:bg-[#1a472f] text-white text-xs font-bold transition-all shadow-xs cursor-pointer self-start lg:self-center"
             >
-              <Plus className="w-4 h-4" />
-              Register New Identity
+              <Plus className="w-4 h-4 text-emerald-400" />
+              <span>Register New Identity</span>
             </button>
           </div>
 
           {filteredPersons.length === 0 ? (
-            <div className="p-16 rounded-2xl bg-slate-900/40 border border-dashed border-slate-800 text-center flex flex-col items-center gap-3">
-              <UserX className="w-12 h-12 text-slate-600" />
-              <h3 className="text-base font-bold text-slate-300">No personnel found</h3>
+            <div className="bg-white rounded-2xl border border-dashed border-slate-200 p-16 text-center flex flex-col items-center gap-3 shadow-xs">
+              <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400">
+                <UserX className="w-6 h-6" />
+              </div>
+              <h3 className="text-sm font-bold text-slate-900">No personnel found</h3>
               <p className="text-xs text-slate-500 max-w-sm">
-                Enroll known operators, team members, or authorized border personnel using webcam or photo upload.
+                {directoryFilter === "suspects"
+                  ? "No suspects or BOLO profiles match your current search criteria."
+                  : directoryFilter === "authorized"
+                  ? "No authorized personnel profiles match your current search criteria."
+                  : "Enroll known operators, authorized personnel, or wanted suspects to monitor feeds."}
               </p>
               <button
+                type="button"
                 onClick={() => openEnrollModal(null)}
-                className="mt-2 px-4 py-2 rounded-xl bg-emerald-600 text-slate-950 font-bold text-xs uppercase"
+                className="mt-2 px-4 py-2 rounded-xl bg-[#143724] text-white font-bold text-xs uppercase tracking-wider hover:bg-[#1a472f] cursor-pointer"
               >
                 Enroll First Person
               </button>
@@ -857,50 +1084,102 @@ export default function FacialRecognitionPage() {
               {filteredPersons.map((person) => (
                 <div
                   key={person.id}
-                  className="group relative flex flex-col rounded-2xl bg-slate-900/80 border border-slate-800 overflow-hidden shadow-xl hover:border-emerald-500/50 transition duration-300"
+                  className={`group relative flex flex-col rounded-2xl bg-white border overflow-hidden shadow-xs hover:shadow-md transition-all duration-200 ${
+                    person.is_suspect
+                      ? "border-rose-200 hover:border-rose-400 ring-1 ring-rose-200/50"
+                      : "border-slate-200/90 hover:border-emerald-600/40"
+                  }`}
                 >
-                  <div className="relative aspect-square w-full bg-slate-950 overflow-hidden flex items-center justify-center">
+                  <div className="relative aspect-square w-full bg-slate-100 overflow-hidden flex items-center justify-center">
                     <img
                       src={`${BACKEND_BASE_URL}${person.image_url}`}
                       alt={person.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+                      className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
                       onError={(e) => {
                         (e.target as HTMLElement).style.display = "none";
                       }}
                     />
-                    <div className="absolute top-3 right-3 flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-950/80 border border-emerald-500/40 text-emerald-400 text-[10px] font-mono">
-                      <span>{person.sample_count} samples</span>
+
+                    {/* Top status badges */}
+                    <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5">
+                      {person.is_suspect ? (
+                        <span className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-rose-600 text-white text-[10px] font-bold shadow-xs tracking-wider uppercase">
+                          <ShieldAlert className="w-3 h-3" />
+                          {person.threat_level || "HIGH"} THREAT
+                        </span>
+                      ) : (
+                        <span className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-700/90 text-white text-[10px] font-bold shadow-xs">
+                          <ShieldCheck className="w-3 h-3" />
+                          AUTHORIZED
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="absolute top-2.5 right-2.5 flex items-center gap-1 px-2 py-0.5 rounded-md bg-white/95 border border-slate-200 text-slate-700 text-[10px] font-mono font-bold shadow-2xs">
+                      <span>{person.sample_count} sample{person.sample_count > 1 ? "s" : ""}</span>
                     </div>
                   </div>
 
-                  <div className="p-4 flex flex-col gap-3">
+                  <div className="p-4 flex flex-col justify-between flex-1 gap-3">
                     <div>
-                      <h3 className="font-bold text-slate-100 text-sm group-hover:text-emerald-400 transition">
-                        {person.name}
-                      </h3>
-                      <p className="text-[11px] font-mono text-slate-500">ID: {person.id}</p>
-                      <p className="text-[11px] text-slate-400 mt-1 flex items-center gap-1">
-                        <Clock className="w-3 h-3 text-slate-500" />
+                      <div className="flex items-center justify-between gap-2">
+                        <h3
+                          className={`font-bold text-sm transition-colors ${
+                            person.is_suspect
+                              ? "text-rose-950 group-hover:text-rose-700"
+                              : "text-slate-900 group-hover:text-emerald-800"
+                          }`}
+                        >
+                          {person.name}
+                        </h3>
+                        <span className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 truncate max-w-[120px]">
+                          {person.category || (person.is_suspect ? "Wanted / BOLO" : "Personnel")}
+                        </span>
+                      </div>
+                      <p className="text-[11px] font-mono text-slate-400 mt-0.5 truncate">ID: {person.id}</p>
+                      {person.notes && (
+                        <p className="text-[11px] text-slate-600 mt-1 line-clamp-1 italic bg-slate-50 px-2 py-0.5 rounded border border-slate-100">
+                          &quot;{person.notes}&quot;
+                        </p>
+                      )}
+                      <p className="text-[11px] text-slate-500 mt-1.5 flex items-center gap-1">
+                        <Clock className="w-3 h-3 text-slate-400" />
                         {person.created_at || "Registered"}
                       </p>
                     </div>
 
-                    <div className="flex items-center justify-between pt-2 border-t border-slate-800">
+                    <div className="flex items-center justify-between pt-3 border-t border-slate-100 gap-2">
                       <button
-                        onClick={() => openEnrollModal(person)}
-                        className="text-xs text-emerald-400 hover:text-emerald-300 font-semibold flex items-center gap-1"
+                        type="button"
+                        onClick={() => handleToggleSuspect(person)}
+                        className={`text-[11px] font-semibold px-2 py-1 rounded-lg border transition-colors cursor-pointer ${
+                          person.is_suspect
+                            ? "border-emerald-200 text-emerald-700 hover:bg-emerald-50"
+                            : "border-rose-200 text-rose-700 hover:bg-rose-50"
+                        }`}
+                        title={person.is_suspect ? "Mark as Authorized Personnel" : "Mark as Wanted Suspect"}
                       >
-                        <Plus className="w-3 h-3" />
-                        Add Angle
+                        {person.is_suspect ? "Mark Authorized" : "Flag Suspect"}
                       </button>
 
-                      <button
-                        onClick={() => handleDeletePerson(person)}
-                        className="p-1.5 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition"
-                        title="Delete Identity"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      <div className="flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() => openEnrollModal(person)}
+                          className="p-1.5 rounded-lg text-emerald-700 hover:bg-emerald-50 transition-colors cursor-pointer"
+                          title="Add Angle Sample"
+                        >
+                          <Plus className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeletePerson(person)}
+                          className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+                          title="Delete Identity"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -913,14 +1192,14 @@ export default function FacialRecognitionPage() {
       {/* TAB 3: FORENSIC PHOTO SCAN */}
       {activeTab === "scan" && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Upload & Controls */}
-          <div className="flex flex-col gap-5 p-6 rounded-2xl bg-slate-900/80 border border-slate-800">
-            <h2 className="text-sm font-bold uppercase tracking-wider text-slate-200 flex items-center gap-2">
-              <Upload className="w-4 h-4 text-emerald-400" />
+          {/* Upload & Controls Card */}
+          <div className="bg-white rounded-2xl border border-slate-200/90 p-6 shadow-xs flex flex-col gap-5">
+            <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+              <Upload className="w-4 h-4 text-emerald-800" />
               Upload Photo for Inspection
             </h2>
 
-            <label className="flex flex-col items-center justify-center p-8 rounded-xl border-2 border-dashed border-slate-700 hover:border-emerald-500 cursor-pointer bg-slate-950/60 transition group">
+            <label className="flex flex-col items-center justify-center p-8 rounded-xl border-2 border-dashed border-slate-300 hover:border-emerald-600 cursor-pointer bg-slate-50/60 hover:bg-emerald-50/20 transition-all group">
               <input
                 type="file"
                 accept="image/*"
@@ -931,16 +1210,16 @@ export default function FacialRecognitionPage() {
                   }
                 }}
               />
-              <Upload className="w-10 h-10 text-slate-500 group-hover:text-emerald-400 transition" />
-              <p className="mt-3 text-xs font-semibold text-slate-300">Click or Drag Image Here</p>
-              <p className="text-[10px] text-slate-500 mt-1">Supports JPG, PNG, WEBP</p>
+              <Upload className="w-10 h-10 text-slate-400 group-hover:text-emerald-700 transition-colors" />
+              <p className="mt-3 text-xs font-bold text-slate-700">Click or Drag Image Here</p>
+              <p className="text-[10px] text-slate-400 mt-0.5">Supports JPG, PNG, WEBP</p>
             </label>
 
             {/* Threshold Slider */}
             <div className="flex flex-col gap-2">
               <div className="flex justify-between text-xs">
-                <span className="text-slate-400">Match Sensitivity Threshold:</span>
-                <span className="font-mono text-emerald-400 font-bold">
+                <span className="text-slate-600 font-medium">Match Sensitivity Cutoff:</span>
+                <span className="font-mono text-emerald-800 font-bold">
                   {minMatchThreshold.toFixed(2)}
                 </span>
               </div>
@@ -951,46 +1230,46 @@ export default function FacialRecognitionPage() {
                 step="0.05"
                 value={minMatchThreshold}
                 onChange={(e) => setMinMatchThreshold(parseFloat(e.target.value))}
-                className="w-full accent-emerald-500 bg-slate-800"
+                className="w-full accent-emerald-700 cursor-pointer"
               />
-              <span className="text-[10px] text-slate-500">
-                Default 0.40 recommended for SFace cosine similarity.
+              <span className="text-[10px] text-slate-400">
+                Default 0.40 recommended for calibrated SFace cosine similarity.
               </span>
             </div>
 
             {scanError && (
-              <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs">
+              <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs">
                 {scanError}
               </div>
             )}
           </div>
 
           {/* Results Display */}
-          <div className="lg:col-span-2 flex flex-col gap-5">
+          <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200/90 p-6 shadow-xs flex flex-col gap-5">
             {isScanning ? (
-              <div className="p-16 rounded-2xl bg-slate-900/60 border border-slate-800 flex flex-col items-center justify-center gap-3 text-slate-400">
-                <RefreshCw className="w-8 h-8 animate-spin text-emerald-400" />
-                <p className="text-xs">Extracting YuNet face anchors and computing SFace embeddings...</p>
+              <div className="p-16 flex flex-col items-center justify-center gap-3 text-slate-500">
+                <RefreshCw className="w-8 h-8 animate-spin text-emerald-700" />
+                <p className="text-xs font-medium">Extracting YuNet face anchors and computing SFace embeddings...</p>
               </div>
             ) : scanResult ? (
               <div className="flex flex-col gap-5">
                 {/* Annotated Output Preview */}
-                <div className="relative rounded-2xl overflow-hidden bg-slate-950 border border-slate-800 shadow-2xl">
+                <div className="relative rounded-xl overflow-hidden bg-slate-950 border border-slate-800 shadow-md">
                   {scanResult.annotated_image ? (
                     <img
                       src={scanResult.annotated_image}
                       alt="Annotated Inspection Result"
-                      className="w-full max-h-[500px] object-contain mx-auto"
+                      className="w-full max-h-[480px] object-contain mx-auto"
                     />
                   ) : scanPreview ? (
                     <img
                       src={scanPreview}
                       alt="Source Preview"
-                      className="w-full max-h-[500px] object-contain mx-auto"
+                      className="w-full max-h-[480px] object-contain mx-auto"
                     />
                   ) : null}
 
-                  <div className="absolute top-4 left-4 px-3 py-1 rounded-lg bg-slate-900/90 border border-slate-700 text-xs font-mono text-emerald-400">
+                  <div className="absolute top-3 left-3 px-2.5 py-1 rounded-lg bg-slate-900/90 border border-slate-700 text-[11px] font-mono text-emerald-400">
                     FACES DETECTED: {scanResult.face_count} • LATENCY: {scanResult.latency_ms}ms
                   </div>
                 </div>
@@ -1000,38 +1279,38 @@ export default function FacialRecognitionPage() {
                   {scanResult.faces.map((f, idx) => (
                     <div
                       key={idx}
-                      className={`p-4 rounded-xl border flex items-center justify-between ${
+                      className={`p-3.5 rounded-xl border flex items-center justify-between ${
                         f.is_known
-                          ? "bg-slate-900/80 border-emerald-500/30 text-slate-100"
-                          : "bg-slate-900/80 border-amber-500/30 text-slate-100"
+                          ? "bg-emerald-50/60 border-emerald-200 text-slate-900"
+                          : "bg-amber-50/60 border-amber-200 text-slate-900"
                       }`}
                     >
                       <div className="flex items-center gap-3">
                         <div
-                          className={`p-2.5 rounded-xl ${
+                          className={`p-2 rounded-xl ${
                             f.is_known
-                              ? "bg-emerald-500/20 text-emerald-400"
-                              : "bg-amber-500/20 text-amber-400"
+                              ? "bg-emerald-100 text-emerald-800"
+                              : "bg-amber-100 text-amber-800"
                           }`}
                         >
-                          {f.is_known ? <UserCheck className="w-5 h-5" /> : <UserX className="w-5 h-5" />}
+                          {f.is_known ? <UserCheck className="w-4 h-4" /> : <UserX className="w-4 h-4" />}
                         </div>
                         <div>
-                          <p className="font-bold text-sm text-slate-100">{f.name}</p>
-                          <p className="text-xs font-mono text-slate-400">
+                          <p className="font-bold text-xs text-slate-900">{f.name}</p>
+                          <p className="text-[11px] font-mono text-slate-500">
                             Confidence: {f.calibrated_conf}%
                           </p>
-                          <p className="text-[10px] font-mono text-slate-500">
+                          <p className="text-[10px] font-mono text-slate-400">
                             Cosine: {f.match_score} | L2: {f.l2_distance ?? "N/A"}
                           </p>
                         </div>
                       </div>
 
                       <span
-                        className={`px-2.5 py-1 text-xs font-bold rounded-lg ${
+                        className={`px-2.5 py-1 text-[11px] font-bold rounded-lg ${
                           f.is_known
-                            ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
-                            : "bg-amber-500/20 text-amber-400 border border-amber-500/30"
+                            ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
+                            : "bg-amber-100 text-amber-800 border border-amber-300"
                         }`}
                       >
                         {f.is_known ? "VERIFIED" : "UNKNOWN"}
@@ -1041,8 +1320,8 @@ export default function FacialRecognitionPage() {
                 </div>
               </div>
             ) : (
-              <div className="p-20 rounded-2xl bg-slate-900/40 border border-dashed border-slate-800 text-center text-slate-500 text-xs">
-                Upload or drop an image on the left to scan for registered personnel.
+              <div className="p-20 rounded-xl bg-slate-50 border border-dashed border-slate-200 text-center text-slate-400 text-xs">
+                Upload or drop a photo on the left to scan for registered personnel.
               </div>
             )}
           </div>
@@ -1051,46 +1330,49 @@ export default function FacialRecognitionPage() {
 
       {/* ENROLLMENT MODAL */}
       {isEnrollModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fadeIn">
-          <div className="relative w-full max-w-lg rounded-3xl bg-slate-900 border border-slate-800 shadow-2xl p-6 flex flex-col gap-5">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs animate-in fade-in">
+          <div className="relative w-full max-w-lg rounded-2xl bg-white border border-slate-200 shadow-2xl p-6 flex flex-col gap-5">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <div className="p-2 rounded-xl bg-emerald-500/20 text-emerald-400">
+                <div className="p-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800">
                   <UserPlus className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-slate-100 text-base">
+                  <h3 className="font-bold text-slate-900 text-base">
                     {targetPersonForSample
                       ? `Add Face Sample for ${targetPersonForSample.name}`
-                      : "Enroll New Face Identity"}
+                      : "Enroll New Identity"}
                   </h3>
-                  <p className="text-xs text-slate-400">
+                  <p className="text-xs text-slate-500">
                     Quality requirements: Face &gt; 65x65 px, unblurred, good lighting
                   </p>
                 </div>
               </div>
               <button
+                type="button"
                 onClick={closeEnrollModal}
-                className="p-2 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800"
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {/* Mode Switcher */}
-            <div className="flex rounded-xl bg-slate-950 p-1 border border-slate-800 text-xs">
+            <div className="flex rounded-xl bg-slate-100 p-1 border border-slate-200 text-xs font-semibold">
               <button
+                type="button"
                 onClick={() => setEnrollMode("webcam")}
-                className={`flex-1 py-2 rounded-lg font-medium transition ${
-                  enrollMode === "webcam" ? "bg-emerald-600 text-slate-950 font-bold" : "text-slate-400"
+                className={`flex-1 py-2 rounded-lg transition cursor-pointer ${
+                  enrollMode === "webcam" ? "bg-white text-emerald-800 shadow-xs" : "text-slate-600 hover:text-slate-900"
                 }`}
               >
                 Direct Webcam Snap
               </button>
               <button
+                type="button"
                 onClick={() => setEnrollMode("upload")}
-                className={`flex-1 py-2 rounded-lg font-medium transition ${
-                  enrollMode === "upload" ? "bg-emerald-600 text-slate-950 font-bold" : "text-slate-400"
+                className={`flex-1 py-2 rounded-lg transition cursor-pointer ${
+                  enrollMode === "upload" ? "bg-white text-emerald-800 shadow-xs" : "text-slate-600 hover:text-slate-900"
                 }`}
               >
                 Upload Photo File
@@ -1100,21 +1382,162 @@ export default function FacialRecognitionPage() {
             {/* Name Input (hidden if adding sample to existing) */}
             {!targetPersonForSample && (
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold text-slate-300">Personnel Full Name</label>
+                <label className="text-xs font-semibold text-slate-700">Personnel Full Name</label>
                 <input
                   type="text"
                   placeholder="e.g. Hariom"
                   value={enrollName}
                   onChange={(e) => setEnrollName(e.target.value)}
-                  className="px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-slate-200 text-sm focus:outline-none focus:border-emerald-500"
+                  className="px-3 py-2 text-xs rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-700/20 focus:border-emerald-700 text-slate-900"
                 />
+              </div>
+            )}
+
+            {/* Classification Selector: Wanted Suspect vs Authorized */}
+            {!targetPersonForSample && (
+              <div className="flex flex-col gap-3 p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                    <ShieldAlert className="w-4 h-4 text-rose-600" />
+                    Security Classification
+                  </label>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEnrollIsSuspect(true);
+                        setEnrollCategory("Wanted / BOLO");
+                        setEnrollThreatLevel("HIGH");
+                      }}
+                      className={`px-3 py-1 text-xs font-bold rounded-lg transition cursor-pointer ${
+                        enrollIsSuspect
+                          ? "bg-rose-600 text-white shadow-xs"
+                          : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-100"
+                      }`}
+                    >
+                      🚨 Wanted Suspect
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEnrollIsSuspect(false);
+                        setEnrollCategory("Authorized Personnel");
+                        setEnrollThreatLevel("LOW");
+                      }}
+                      className={`px-3 py-1 text-xs font-bold rounded-lg transition cursor-pointer ${
+                        !enrollIsSuspect
+                          ? "bg-emerald-700 text-white shadow-xs"
+                          : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-100"
+                      }`}
+                    >
+                      🛡️ Authorized
+                    </button>
+                  </div>
+                </div>
+
+                {/* If Suspect: Threat Level & Category */}
+                {enrollIsSuspect ? (
+                  <div className="space-y-2.5 pt-2 border-t border-slate-200">
+                    <div>
+                      <label className="text-[11px] font-semibold text-slate-700 block mb-1">
+                        Threat Priority Level
+                      </label>
+                      <div className="grid grid-cols-4 gap-2">
+                        {(["CRITICAL", "HIGH", "MEDIUM", "LOW"] as const).map((lvl) => (
+                          <button
+                            key={lvl}
+                            type="button"
+                            onClick={() => setEnrollThreatLevel(lvl)}
+                            className={`py-1.5 text-xs font-bold rounded-lg border transition cursor-pointer ${
+                              enrollThreatLevel === lvl
+                                ? lvl === "CRITICAL"
+                                  ? "bg-rose-700 border-rose-800 text-white shadow-xs"
+                                  : lvl === "HIGH"
+                                  ? "bg-rose-600 border-rose-700 text-white shadow-xs"
+                                  : lvl === "MEDIUM"
+                                  ? "bg-amber-600 border-amber-700 text-white shadow-xs"
+                                  : "bg-slate-700 border-slate-800 text-white shadow-xs"
+                                : "bg-white border-slate-200 text-slate-700 hover:bg-slate-100"
+                            }`}
+                          >
+                            {lvl}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      <div>
+                        <label className="text-[11px] font-semibold text-slate-700 block mb-1">
+                          Suspect Category
+                        </label>
+                        <select
+                          value={enrollCategory}
+                          onChange={(e) => setEnrollCategory(e.target.value)}
+                          className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 bg-white text-slate-900 outline-none"
+                        >
+                          <option value="Wanted / BOLO">Wanted / BOLO</option>
+                          <option value="Infiltrator / Poacher">Infiltrator / Poacher</option>
+                          <option value="Smuggling Suspect">Smuggling Suspect</option>
+                          <option value="Missing Person">Missing Person</option>
+                          <option value="Person of Interest">Person of Interest</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="text-[11px] font-semibold text-slate-700 block mb-1">
+                          Case / FIR / Reference ID
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="e.g. FIR #402/26 - Sector 4"
+                          value={enrollNotes}
+                          onChange={(e) => setEnrollNotes(e.target.value)}
+                          className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 bg-white text-slate-900 outline-none"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2 border-t border-slate-200">
+                    <div>
+                      <label className="text-[11px] font-semibold text-slate-700 block mb-1">
+                        Authorized Role
+                      </label>
+                      <select
+                        value={enrollCategory}
+                        onChange={(e) => setEnrollCategory(e.target.value)}
+                        className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 bg-white text-slate-900 outline-none"
+                      >
+                        <option value="Authorized Personnel">Authorized Personnel</option>
+                        <option value="Border Security Force (BSF)">Border Security Force (BSF)</option>
+                        <option value="Command Staff">Command Staff</option>
+                        <option value="Technician / Operator">Technician / Operator</option>
+                        <option value="VIP / Official Visitor">VIP / Official Visitor</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="text-[11px] font-semibold text-slate-700 block mb-1">
+                        Department / Badge / Unit Notes
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. Outpost Beta Team Alpha"
+                        value={enrollNotes}
+                        onChange={(e) => setEnrollNotes(e.target.value)}
+                        className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 bg-white text-slate-900 outline-none"
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
             {/* Mode 1: Webcam Snap */}
             {enrollMode === "webcam" && (
               <div className="flex flex-col gap-3">
-                <div className="relative rounded-2xl overflow-hidden bg-slate-950 border border-slate-800 aspect-video flex items-center justify-center">
+                <div className="relative rounded-xl overflow-hidden bg-slate-950 border border-slate-800 aspect-video flex items-center justify-center">
                   {enrollPreview ? (
                     <img
                       src={enrollPreview}
@@ -1133,8 +1556,9 @@ export default function FacialRecognitionPage() {
 
                   {enrollPreview && (
                     <button
+                      type="button"
                       onClick={() => setEnrollPreview(null)}
-                      className="absolute top-3 right-3 px-2.5 py-1 rounded-lg bg-slate-900/90 text-xs text-slate-300 border border-slate-700 hover:bg-slate-800"
+                      className="absolute top-3 right-3 px-2.5 py-1 rounded-lg bg-slate-900/90 text-xs text-slate-200 border border-slate-700 hover:bg-slate-800 cursor-pointer"
                     >
                       Retake
                     </button>
@@ -1142,14 +1566,15 @@ export default function FacialRecognitionPage() {
                 </div>
 
                 {webcamError && (
-                  <p className="text-xs text-rose-400">{webcamError}</p>
+                  <p className="text-xs text-rose-600">{webcamError}</p>
                 )}
 
                 {!enrollPreview && (
                   <button
+                    type="button"
                     onClick={captureWebcamSnapshot}
                     disabled={!isWebcamActive}
-                    className="py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 disabled:opacity-50"
+                    className="py-2.5 rounded-xl bg-[#143724] hover:bg-[#1a472f] text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer shadow-xs"
                   >
                     <Camera className="w-4 h-4 text-emerald-400" />
                     Snap Face Photo
@@ -1161,7 +1586,7 @@ export default function FacialRecognitionPage() {
             {/* Mode 2: File Upload */}
             {enrollMode === "upload" && (
               <div className="flex flex-col gap-3">
-                <label className="flex flex-col items-center justify-center p-8 rounded-2xl border-2 border-dashed border-slate-700 hover:border-emerald-500 cursor-pointer bg-slate-950/60 transition">
+                <label className="flex flex-col items-center justify-center p-8 rounded-xl border-2 border-dashed border-slate-300 hover:border-emerald-600 cursor-pointer bg-slate-50/50 hover:bg-emerald-50/20 transition-all">
                   <input
                     type="file"
                     accept="image/*"
@@ -1182,9 +1607,9 @@ export default function FacialRecognitionPage() {
                     />
                   ) : (
                     <>
-                      <Upload className="w-8 h-8 text-slate-500" />
-                      <p className="mt-2 text-xs text-slate-300 font-semibold">Select Clear Face Photo</p>
-                      <p className="text-[10px] text-slate-500">JPG, PNG up to 10MB</p>
+                      <Upload className="w-8 h-8 text-slate-400" />
+                      <p className="mt-2 text-xs text-slate-700 font-semibold">Select Clear Face Photo</p>
+                      <p className="text-[10px] text-slate-400">JPG, PNG up to 10MB</p>
                     </>
                   )}
                 </label>
@@ -1192,29 +1617,31 @@ export default function FacialRecognitionPage() {
             )}
 
             {enrollError && (
-              <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs">
+              <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs">
                 {enrollError}
               </div>
             )}
 
             {enrollSuccess && (
-              <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4" />
+              <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2 font-medium">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                 {enrollSuccess}
               </div>
             )}
 
             <div className="flex items-center justify-end gap-3 pt-2">
               <button
+                type="button"
                 onClick={closeEnrollModal}
-                className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-slate-200"
+                className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
               >
                 Cancel
               </button>
               <button
+                type="button"
                 onClick={handleEnrollSubmit}
                 disabled={isEnrolling || !enrollPreview}
-                className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold text-xs uppercase tracking-wider shadow-lg shadow-emerald-600/20 disabled:opacity-50 transition"
+                className="px-5 py-2.5 rounded-xl bg-[#143724] hover:bg-[#102d1d] text-white font-bold text-xs uppercase tracking-wider shadow-xs disabled:opacity-50 transition cursor-pointer"
               >
                 {isEnrolling ? "Verifying & Enrolling..." : "Complete Enrollment"}
               </button>
