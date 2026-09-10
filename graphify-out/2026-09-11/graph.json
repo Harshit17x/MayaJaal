@@ -69,6 +69,19 @@
       "source_location": "L42"
     },
     {
+      "id": "backend_app_tracking_tracker_bytetrackererror",
+      "label": "ByteTrackerError",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "ByteTrackerWrapper",
+      "file_type": "code",
+      "norm_label": "bytetrackererror",
+      "source_file": "backend/app/tracking/tracker.py",
+      "source_location": "L37"
+    },
+    {
       "id": "backend_app_tracking_tracker_bytetrackerwrapper",
       "label": "ByteTrackerWrapper",
       "_callable": true,
@@ -145,32 +158,6 @@
       "norm_label": "tensorvalidationerror",
       "source_file": "backend/app/pipeline/preprocessor.py",
       "source_location": "L25"
-    },
-    {
-      "id": "frontend_src_app_operator_layout_navitem",
-      "label": "NavItem",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 11,
-      "community_name": "alertsStore.ts",
-      "file_type": "code",
-      "norm_label": "navitem",
-      "source_file": "frontend/src/app/(operator)/layout.tsx",
-      "source_location": "L31"
-    },
-    {
-      "id": "frontend_src_components_dashboard_metriccard_metriccardprops",
-      "label": "MetricCardProps",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 11,
-      "community_name": "alertsStore.ts",
-      "file_type": "code",
-      "norm_label": "metriccardprops",
-      "source_file": "frontend/src/components/dashboard/metriccard.tsx",
-      "source_location": "L3"
     },
     {
       "id": "frontend_src_lib_alertsstore_alertlistener",
@@ -326,7 +313,7 @@
       "file_type": "code",
       "norm_label": "outpostitem",
       "source_file": "frontend/src/components/dashboard/CameraOutpostGrid.tsx",
-      "source_location": "L6"
+      "source_location": "L3"
     },
     {
       "id": "frontend_src_components_dashboard_detectionbreakdowncard_categorystat",
@@ -426,11 +413,24 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 23,
-      "community_name": "logging.py",
+      "community_name": "stream.py",
       "file_type": "code",
       "norm_label": "continuousfacescanner",
       "source_file": "backend/app/pipeline/feed_scanner.py",
       "source_location": "L21"
+    },
+    {
+      "id": "frontend_src_app_operator_layout_navitem",
+      "label": "NavItem",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 24,
+      "community_name": "react",
+      "file_type": "code",
+      "norm_label": "navitem",
+      "source_file": "frontend/src/app/(operator)/layout.tsx",
+      "source_location": "L31"
     },
     {
       "id": "frontend_src_components_map_suspecttrajectorymodal_suspecttrajectorymodalprops",
@@ -439,7 +439,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 24,
-      "community_name": "alerts/page.tsx",
+      "community_name": "react",
       "file_type": "code",
       "norm_label": "suspecttrajectorymodalprops",
       "source_file": "frontend/src/components/map/SuspectTrajectoryModal.tsx",
@@ -452,7 +452,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 24,
-      "community_name": "alerts/page.tsx",
+      "community_name": "react",
       "file_type": "code",
       "norm_label": "alertfilter",
       "source_file": "frontend/src/types/alert.ts",
@@ -465,11 +465,24 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 24,
-      "community_name": "alerts/page.tsx",
+      "community_name": "react",
       "file_type": "code",
       "norm_label": "alertitem",
       "source_file": "frontend/src/types/alert.ts",
       "source_location": "L10"
+    },
+    {
+      "id": "frontend_src_types_alert_alertseverity",
+      "label": "AlertSeverity",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 24,
+      "community_name": "react",
+      "file_type": "code",
+      "norm_label": "alertseverity",
+      "source_file": "frontend/src/types/alert.ts",
+      "source_location": "L1"
     },
     {
       "id": "frontend_src_types_alert_globaltraceitem",
@@ -478,7 +491,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 24,
-      "community_name": "alerts/page.tsx",
+      "community_name": "react",
       "file_type": "code",
       "norm_label": "globaltraceitem",
       "source_file": "frontend/src/types/alert.ts",
@@ -491,7 +504,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 24,
-      "community_name": "alerts/page.tsx",
+      "community_name": "react",
       "file_type": "code",
       "norm_label": "qrtdispatchrecord",
       "source_file": "frontend/src/types/alert.ts",
@@ -504,7 +517,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 24,
-      "community_name": "alerts/page.tsx",
+      "community_name": "react",
       "file_type": "code",
       "norm_label": "scannerstatus",
       "source_file": "frontend/src/types/alert.ts",
@@ -517,7 +530,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 24,
-      "community_name": "alerts/page.tsx",
+      "community_name": "react",
       "file_type": "code",
       "norm_label": "suspecttrajectory",
       "source_file": "frontend/src/types/alert.ts",
@@ -530,7 +543,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 24,
-      "community_name": "alerts/page.tsx",
+      "community_name": "react",
       "file_type": "code",
       "norm_label": "suspectwaypoint",
       "source_file": "frontend/src/types/alert.ts",
@@ -563,32 +576,6 @@
       "source_location": "L63"
     },
     {
-      "id": "backend_app_pipeline_postprocessor_postprocessorconfig",
-      "label": "PostprocessorConfig",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 26,
-      "community_name": "Postprocessor",
-      "file_type": "code",
-      "norm_label": "postprocessorconfig",
-      "source_file": "backend/app/pipeline/postprocessor.py",
-      "source_location": "L53"
-    },
-    {
-      "id": "backend_app_pipeline_postprocessor_postprocessorerror",
-      "label": "PostprocessorError",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 26,
-      "community_name": "Postprocessor",
-      "file_type": "code",
-      "norm_label": "postprocessorerror",
-      "source_file": "backend/app/pipeline/postprocessor.py",
-      "source_location": "L29"
-    },
-    {
       "id": "anpr_hf_inference_copy_hfinference",
       "label": "HFInference",
       "_callable": true,
@@ -602,108 +589,30 @@
       "source_location": "L14"
     },
     {
-      "id": "frontend_src_lib_api_apierror",
-      "label": "ApiError",
+      "id": "frontend_src_components_surveillance_detectioncanvas_detectioncanvasprops",
+      "label": "DetectionCanvasProps",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "api.ts",
+      "community_name": "liveworkspace.tsx",
       "file_type": "code",
-      "norm_label": "apierror",
-      "source_file": "frontend/src/lib/api.ts",
-      "source_location": "L35"
-    },
-    {
-      "id": "frontend_src_lib_api_streamvalidationresult",
-      "label": "StreamValidationResult",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 29,
-      "community_name": "api.ts",
-      "file_type": "code",
-      "norm_label": "streamvalidationresult",
-      "source_file": "frontend/src/lib/api.ts",
-      "source_location": "L86"
-    },
-    {
-      "id": "frontend_src_lib_hooks_usebackendstatus_backendstatusstate",
-      "label": "BackendStatusState",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 29,
-      "community_name": "api.ts",
-      "file_type": "code",
-      "norm_label": "backendstatusstate",
-      "source_file": "frontend/src/lib/hooks/useBackendStatus.ts",
+      "norm_label": "detectioncanvasprops",
+      "source_file": "frontend/src/components/surveillance/detectioncanvas.tsx",
       "source_location": "L7"
     },
     {
-      "id": "frontend_src_types_anpr_anprrecord",
-      "label": "AnprRecord",
+      "id": "frontend_src_types_backend_detection",
+      "label": "Detection",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "api.ts",
+      "community_name": "liveworkspace.tsx",
       "file_type": "code",
-      "norm_label": "anprrecord",
-      "source_file": "frontend/src/types/anpr.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "frontend_src_types_anpr_anprscanresponse",
-      "label": "AnprScanResponse",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 29,
-      "community_name": "api.ts",
-      "file_type": "code",
-      "norm_label": "anprscanresponse",
-      "source_file": "frontend/src/types/anpr.ts",
-      "source_location": "L15"
-    },
-    {
-      "id": "frontend_src_types_anpr_anprvideoresponse",
-      "label": "AnprVideoResponse",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 29,
-      "community_name": "api.ts",
-      "file_type": "code",
-      "norm_label": "anprvideoresponse",
-      "source_file": "frontend/src/types/anpr.ts",
-      "source_location": "L26"
-    },
-    {
-      "id": "frontend_src_types_anpr_watchlistentry",
-      "label": "WatchlistEntry",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 29,
-      "community_name": "api.ts",
-      "file_type": "code",
-      "norm_label": "watchlistentry",
-      "source_file": "frontend/src/types/anpr.ts",
-      "source_location": "L36"
-    },
-    {
-      "id": "frontend_src_types_backend_healthresponse",
-      "label": "HealthResponse",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 29,
-      "community_name": "api.ts",
-      "file_type": "code",
-      "norm_label": "healthresponse",
+      "norm_label": "detection",
       "source_file": "frontend/src/types/backend.ts",
-      "source_location": "L1"
+      "source_location": "L46"
     },
     {
       "id": "frontend_src_types_backend_inferenceresponse",
@@ -712,24 +621,11 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "api.ts",
+      "community_name": "liveworkspace.tsx",
       "file_type": "code",
       "norm_label": "inferenceresponse",
       "source_file": "frontend/src/types/backend.ts",
       "source_location": "L75"
-    },
-    {
-      "id": "frontend_src_types_backend_inferencestatusresponse",
-      "label": "InferenceStatusResponse",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 29,
-      "community_name": "api.ts",
-      "file_type": "code",
-      "norm_label": "inferencestatusresponse",
-      "source_file": "frontend/src/types/backend.ts",
-      "source_location": "L40"
     },
     {
       "id": "frontend_src_types_backend_modelmetadata",
@@ -738,7 +634,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "api.ts",
+      "community_name": "liveworkspace.tsx",
       "file_type": "code",
       "norm_label": "modelmetadata",
       "source_file": "frontend/src/types/backend.ts",
@@ -751,7 +647,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "api.ts",
+      "community_name": "liveworkspace.tsx",
       "file_type": "code",
       "norm_label": "modelstatusresponse",
       "source_file": "frontend/src/types/backend.ts",
@@ -764,7 +660,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "api.ts",
+      "community_name": "liveworkspace.tsx",
       "file_type": "code",
       "norm_label": "modeltensorinfo",
       "source_file": "frontend/src/types/backend.ts",
@@ -777,7 +673,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "api.ts",
+      "community_name": "liveworkspace.tsx",
       "file_type": "code",
       "norm_label": "outputtensormetadata",
       "source_file": "frontend/src/types/backend.ts",
@@ -790,7 +686,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "api.ts",
+      "community_name": "liveworkspace.tsx",
       "file_type": "code",
       "norm_label": "resourcestatus",
       "source_file": "frontend/src/types/backend.ts",
@@ -803,7 +699,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "api.ts",
+      "community_name": "liveworkspace.tsx",
       "file_type": "code",
       "norm_label": "rtspinferenceresponse",
       "source_file": "frontend/src/types/backend.ts",
@@ -816,7 +712,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "api.ts",
+      "community_name": "liveworkspace.tsx",
       "file_type": "code",
       "norm_label": "rtsptrackingresponse",
       "source_file": "frontend/src/types/backend.ts",
@@ -829,7 +725,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "api.ts",
+      "community_name": "liveworkspace.tsx",
       "file_type": "code",
       "norm_label": "suspectsummary",
       "source_file": "frontend/src/types/backend.ts",
@@ -842,7 +738,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "api.ts",
+      "community_name": "liveworkspace.tsx",
       "file_type": "code",
       "norm_label": "trackedobject",
       "source_file": "frontend/src/types/backend.ts",
@@ -855,7 +751,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "api.ts",
+      "community_name": "liveworkspace.tsx",
       "file_type": "code",
       "norm_label": "trackingvideoresponse",
       "source_file": "frontend/src/types/backend.ts",
@@ -868,11 +764,24 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "api.ts",
+      "community_name": "liveworkspace.tsx",
       "file_type": "code",
       "norm_label": "videoframeinference",
       "source_file": "frontend/src/types/backend.ts",
       "source_location": "L110"
+    },
+    {
+      "id": "frontend_src_types_backend_videoframeresult",
+      "label": "VideoFrameResult",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "liveworkspace.tsx",
+      "file_type": "code",
+      "norm_label": "videoframeresult",
+      "source_file": "frontend/src/types/backend.ts",
+      "source_location": "L94"
     },
     {
       "id": "frontend_src_types_backend_videoinferenceresponse",
@@ -881,11 +790,24 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "api.ts",
+      "community_name": "liveworkspace.tsx",
       "file_type": "code",
       "norm_label": "videoinferenceresponse",
       "source_file": "frontend/src/types/backend.ts",
       "source_location": "L112"
+    },
+    {
+      "id": "frontend_src_types_backend_videometadata",
+      "label": "VideoMetadata",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "liveworkspace.tsx",
+      "file_type": "code",
+      "norm_label": "videometadata",
+      "source_file": "frontend/src/types/backend.ts",
+      "source_location": "L85"
     },
     {
       "id": "backend_app_inference_model_manager_modelalreadyloadederror",
@@ -951,19 +873,6 @@
       "norm_label": "globaltracemanager",
       "source_file": "backend/app/tracking/global_tracker.py",
       "source_location": "L157"
-    },
-    {
-      "id": "frontend_src_types_alert_alertseverity",
-      "label": "AlertSeverity",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 36,
-      "community_name": "lucide-react",
-      "file_type": "code",
-      "norm_label": "alertseverity",
-      "source_file": "frontend/src/types/alert.ts",
-      "source_location": "L1"
     },
     {
       "id": "frontend_src_components_map_bordermap_bordermapprops",
@@ -1180,11 +1089,50 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "ONNXEngine",
+      "community_name": "logging.py",
       "file_type": "code",
       "norm_label": "onnxengine",
       "source_file": "backend/app/inference/onnx_engine.py",
       "source_location": "L40"
+    },
+    {
+      "id": "backend_app_inference_onnx_engine_onnxengineerror",
+      "label": "ONNXEngineError",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "logging.py",
+      "file_type": "code",
+      "norm_label": "onnxengineerror",
+      "source_file": "backend/app/inference/onnx_engine.py",
+      "source_location": "L28"
+    },
+    {
+      "id": "backend_app_inference_onnx_engine_onnxinferenceerror",
+      "label": "ONNXInferenceError",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "logging.py",
+      "file_type": "code",
+      "norm_label": "onnxinferenceerror",
+      "source_file": "backend/app/inference/onnx_engine.py",
+      "source_location": "L36"
+    },
+    {
+      "id": "backend_app_inference_onnx_engine_onnxmodelerror",
+      "label": "ONNXModelError",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "logging.py",
+      "file_type": "code",
+      "norm_label": "onnxmodelerror",
+      "source_file": "backend/app/inference/onnx_engine.py",
+      "source_location": "L32"
     },
     {
       "id": "backend_app_pipeline_anpr_service_anprpipeline",
@@ -1239,13 +1187,91 @@
       "source_location": "L81"
     },
     {
+      "id": "frontend_src_lib_api_apierror",
+      "label": "ApiError",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 61,
+      "community_name": "api.ts",
+      "file_type": "code",
+      "norm_label": "apierror",
+      "source_file": "frontend/src/lib/api.ts",
+      "source_location": "L35"
+    },
+    {
+      "id": "frontend_src_lib_api_streamvalidationresult",
+      "label": "StreamValidationResult",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 61,
+      "community_name": "api.ts",
+      "file_type": "code",
+      "norm_label": "streamvalidationresult",
+      "source_file": "frontend/src/lib/api.ts",
+      "source_location": "L86"
+    },
+    {
+      "id": "frontend_src_types_anpr_anprrecord",
+      "label": "AnprRecord",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 61,
+      "community_name": "api.ts",
+      "file_type": "code",
+      "norm_label": "anprrecord",
+      "source_file": "frontend/src/types/anpr.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "frontend_src_types_anpr_anprscanresponse",
+      "label": "AnprScanResponse",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 61,
+      "community_name": "api.ts",
+      "file_type": "code",
+      "norm_label": "anprscanresponse",
+      "source_file": "frontend/src/types/anpr.ts",
+      "source_location": "L15"
+    },
+    {
+      "id": "frontend_src_types_anpr_anprvideoresponse",
+      "label": "AnprVideoResponse",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 61,
+      "community_name": "api.ts",
+      "file_type": "code",
+      "norm_label": "anprvideoresponse",
+      "source_file": "frontend/src/types/anpr.ts",
+      "source_location": "L26"
+    },
+    {
+      "id": "frontend_src_types_anpr_watchlistentry",
+      "label": "WatchlistEntry",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 61,
+      "community_name": "api.ts",
+      "file_type": "code",
+      "norm_label": "watchlistentry",
+      "source_file": "frontend/src/types/anpr.ts",
+      "source_location": "L36"
+    },
+    {
       "id": "frontend_src_types_face_enrolledperson",
       "label": "EnrolledPerson",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 61,
-      "community_name": "facial-recognition/page.tsx",
+      "community_name": "api.ts",
       "file_type": "code",
       "norm_label": "enrolledperson",
       "source_file": "frontend/src/types/face.ts",
@@ -1258,7 +1284,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 61,
-      "community_name": "facial-recognition/page.tsx",
+      "community_name": "api.ts",
       "file_type": "code",
       "norm_label": "facedetection",
       "source_file": "frontend/src/types/face.ts",
@@ -1271,7 +1297,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 61,
-      "community_name": "facial-recognition/page.tsx",
+      "community_name": "api.ts",
       "file_type": "code",
       "norm_label": "faceenginestatus",
       "source_file": "frontend/src/types/face.ts",
@@ -1284,7 +1310,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 61,
-      "community_name": "facial-recognition/page.tsx",
+      "community_name": "api.ts",
       "file_type": "code",
       "norm_label": "faceevent",
       "source_file": "frontend/src/types/face.ts",
@@ -1297,7 +1323,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 61,
-      "community_name": "facial-recognition/page.tsx",
+      "community_name": "api.ts",
       "file_type": "code",
       "norm_label": "facescanresponse",
       "source_file": "frontend/src/types/face.ts",
@@ -1310,7 +1336,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 61,
-      "community_name": "facial-recognition/page.tsx",
+      "community_name": "api.ts",
       "file_type": "code",
       "norm_label": "registerfaceresponse",
       "source_file": "frontend/src/types/face.ts",
@@ -1323,7 +1349,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 61,
-      "community_name": "facial-recognition/page.tsx",
+      "community_name": "api.ts",
       "file_type": "code",
       "norm_label": "threatlevel",
       "source_file": "frontend/src/types/face.ts",
@@ -1473,95 +1499,82 @@
       "source_location": "L25"
     },
     {
-      "id": "frontend_src_components_surveillance_detectioncanvas_detectioncanvasprops",
-      "label": "DetectionCanvasProps",
+      "id": "frontend_src_components_dashboard_metriccard_metriccardprops",
+      "label": "MetricCardProps",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 77,
-      "community_name": "liveworkspace.tsx",
+      "community_name": "useBackendStatus.ts",
       "file_type": "code",
-      "norm_label": "detectioncanvasprops",
-      "source_file": "frontend/src/components/surveillance/detectioncanvas.tsx",
+      "norm_label": "metriccardprops",
+      "source_file": "frontend/src/components/dashboard/metriccard.tsx",
+      "source_location": "L3"
+    },
+    {
+      "id": "frontend_src_lib_hooks_usebackendstatus_backendstatusstate",
+      "label": "BackendStatusState",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 77,
+      "community_name": "useBackendStatus.ts",
+      "file_type": "code",
+      "norm_label": "backendstatusstate",
+      "source_file": "frontend/src/lib/hooks/useBackendStatus.ts",
       "source_location": "L7"
     },
     {
-      "id": "frontend_src_types_backend_detection",
-      "label": "Detection",
+      "id": "frontend_src_types_backend_healthresponse",
+      "label": "HealthResponse",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 77,
-      "community_name": "liveworkspace.tsx",
+      "community_name": "useBackendStatus.ts",
       "file_type": "code",
-      "norm_label": "detection",
+      "norm_label": "healthresponse",
       "source_file": "frontend/src/types/backend.ts",
-      "source_location": "L46"
+      "source_location": "L1"
     },
     {
-      "id": "frontend_src_types_backend_videoframeresult",
-      "label": "VideoFrameResult",
+      "id": "frontend_src_types_backend_inferencestatusresponse",
+      "label": "InferenceStatusResponse",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 77,
-      "community_name": "liveworkspace.tsx",
+      "community_name": "useBackendStatus.ts",
       "file_type": "code",
-      "norm_label": "videoframeresult",
+      "norm_label": "inferencestatusresponse",
       "source_file": "frontend/src/types/backend.ts",
-      "source_location": "L94"
+      "source_location": "L40"
     },
     {
-      "id": "frontend_src_types_backend_videometadata",
-      "label": "VideoMetadata",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 77,
-      "community_name": "liveworkspace.tsx",
-      "file_type": "code",
-      "norm_label": "videometadata",
-      "source_file": "frontend/src/types/backend.ts",
-      "source_location": "L85"
-    },
-    {
-      "id": "backend_app_inference_onnx_engine_onnxengineerror",
-      "label": "ONNXEngineError",
+      "id": "backend_app_pipeline_postprocessor_postprocessorconfig",
+      "label": "PostprocessorConfig",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 78,
-      "community_name": "ONNXModelError",
+      "community_name": "PostprocessorConfig",
       "file_type": "code",
-      "norm_label": "onnxengineerror",
-      "source_file": "backend/app/inference/onnx_engine.py",
-      "source_location": "L28"
+      "norm_label": "postprocessorconfig",
+      "source_file": "backend/app/pipeline/postprocessor.py",
+      "source_location": "L53"
     },
     {
-      "id": "backend_app_inference_onnx_engine_onnxinferenceerror",
-      "label": "ONNXInferenceError",
+      "id": "backend_app_pipeline_postprocessor_postprocessorerror",
+      "label": "PostprocessorError",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 78,
-      "community_name": "ONNXModelError",
+      "community_name": "PostprocessorConfig",
       "file_type": "code",
-      "norm_label": "onnxinferenceerror",
-      "source_file": "backend/app/inference/onnx_engine.py",
-      "source_location": "L36"
-    },
-    {
-      "id": "backend_app_inference_onnx_engine_onnxmodelerror",
-      "label": "ONNXModelError",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 78,
-      "community_name": "ONNXModelError",
-      "file_type": "code",
-      "norm_label": "onnxmodelerror",
-      "source_file": "backend/app/inference/onnx_engine.py",
-      "source_location": "L32"
+      "norm_label": "postprocessorerror",
+      "source_file": "backend/app/pipeline/postprocessor.py",
+      "source_location": "L29"
     },
     {
       "id": "backend_app_pipeline_reid_service_reidservice",
@@ -1655,19 +1668,6 @@
       "source_location": "L30"
     },
     {
-      "id": "backend_app_tracking_tracker_bytetrackererror",
-      "label": "ByteTrackerError",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 9,
-      "community_name": "tracking.py",
-      "file_type": "code",
-      "norm_label": "bytetrackererror",
-      "source_file": "backend/app/tracking/tracker.py",
-      "source_location": "L37"
-    },
-    {
       "id": "frontend_src_app_login_page_loginformcard",
       "label": "LoginFormCard()",
       "_callable": true,
@@ -1689,7 +1689,7 @@
       "file_type": "code",
       "norm_label": "loginpage()",
       "source_file": "frontend/src/app/login/page.tsx",
-      "source_location": "L183"
+      "source_location": "L162"
     },
     {
       "id": "frontend_src_app_page_homepage",
@@ -1749,7 +1749,7 @@
       "file_type": "code",
       "norm_label": "getstoredoperator()",
       "source_file": "frontend/src/lib/authStore.ts",
-      "source_location": "L60"
+      "source_location": "L59"
     },
     {
       "id": "frontend_src_lib_authstore_useauth",
@@ -1761,7 +1761,7 @@
       "file_type": "code",
       "norm_label": "useauth()",
       "source_file": "frontend/src/lib/authStore.ts",
-      "source_location": "L78"
+      "source_location": "L70"
     },
     {
       "id": "backend_app_tracking_config_trackerconfig_post_init",
@@ -2028,66 +2028,6 @@
       "source_location": "L232"
     },
     {
-      "id": "frontend_src_app_operator_layout_operatorlayout",
-      "label": "OperatorLayout()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 11,
-      "community_name": "alertsStore.ts",
-      "file_type": "code",
-      "norm_label": "operatorlayout()",
-      "source_file": "frontend/src/app/(operator)/layout.tsx",
-      "source_location": "L39"
-    },
-    {
-      "id": "frontend_src_components_alerts_tacticalthreattoast_tacticalthreattoast",
-      "label": "TacticalThreatToast()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 11,
-      "community_name": "alertsStore.ts",
-      "file_type": "code",
-      "norm_label": "tacticalthreattoast()",
-      "source_file": "frontend/src/components/alerts/TacticalThreatToast.tsx",
-      "source_location": "L19"
-    },
-    {
-      "id": "frontend_src_components_dashboard_dashboardheader_dashboardheader",
-      "label": "DashboardHeader()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 11,
-      "community_name": "alertsStore.ts",
-      "file_type": "code",
-      "norm_label": "dashboardheader()",
-      "source_file": "frontend/src/components/dashboard/dashboardheader.tsx",
-      "source_location": "L5"
-    },
-    {
-      "id": "frontend_src_components_dashboard_metriccard_metriccard",
-      "label": "MetricCard()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 11,
-      "community_name": "alertsStore.ts",
-      "file_type": "code",
-      "norm_label": "metriccard()",
-      "source_file": "frontend/src/components/dashboard/metriccard.tsx",
-      "source_location": "L10"
-    },
-    {
-      "id": "frontend_src_components_dashboard_metricsrow_metricsrow",
-      "label": "MetricsRow()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 11,
-      "community_name": "alertsStore.ts",
-      "file_type": "code",
-      "norm_label": "metricsrow()",
-      "source_file": "frontend/src/components/dashboard/metricsrow.tsx",
-      "source_location": "L14"
-    },
-    {
       "id": "frontend_src_lib_alertsstore_getalertswsurl",
       "label": "getAlertsWsUrl()",
       "_callable": true,
@@ -2158,18 +2098,6 @@
       "norm_label": "syncwithbackend()",
       "source_file": "frontend/src/lib/alertsStore.ts",
       "source_location": "L132"
-    },
-    {
-      "id": "frontend_src_lib_alertsstore_usealerts",
-      "label": "useAlerts()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 11,
-      "community_name": "alertsStore.ts",
-      "file_type": "code",
-      "norm_label": "usealerts()",
-      "source_file": "frontend/src/lib/alertsStore.ts",
-      "source_location": "L215"
     },
     {
       "id": "backend_app_inference_model_manager_modelmanager_enter",
@@ -2421,7 +2349,7 @@
       "file_type": "code",
       "norm_label": "analyticsdashboard()",
       "source_file": "frontend/src/components/dashboard/AnalyticsDashboard.tsx",
-      "source_location": "L20"
+      "source_location": "L10"
     },
     {
       "id": "frontend_src_components_dashboard_cameraoutpostgrid_cameraoutpostgrid",
@@ -2433,7 +2361,7 @@
       "file_type": "code",
       "norm_label": "cameraoutpostgrid()",
       "source_file": "frontend/src/components/dashboard/CameraOutpostGrid.tsx",
-      "source_location": "L57"
+      "source_location": "L49"
     },
     {
       "id": "frontend_src_components_dashboard_detectionbreakdowncard_detectionbreakdowncard",
@@ -2457,7 +2385,7 @@
       "file_type": "code",
       "norm_label": "needsattentioncard()",
       "source_file": "frontend/src/components/dashboard/NeedsAttentionCard.tsx",
-      "source_location": "L6"
+      "source_location": "L3"
     },
     {
       "id": "backend_app_pipeline_rtsp_loader_rtspstream_connect",
@@ -2481,7 +2409,7 @@
       "file_type": "code",
       "norm_label": ".__enter__()",
       "source_file": "backend/app/pipeline/rtsp_loader.py",
-      "source_location": "L256"
+      "source_location": "L250"
     },
     {
       "id": "backend_app_pipeline_rtsp_loader_rtspstream_exit",
@@ -2493,7 +2421,7 @@
       "file_type": "code",
       "norm_label": ".__exit__()",
       "source_file": "backend/app/pipeline/rtsp_loader.py",
-      "source_location": "L260"
+      "source_location": "L254"
     },
     {
       "id": "backend_app_pipeline_rtsp_loader_rtspstream_get_status",
@@ -2505,7 +2433,7 @@
       "file_type": "code",
       "norm_label": ".get_status()",
       "source_file": "backend/app/pipeline/rtsp_loader.py",
-      "source_location": "L229"
+      "source_location": "L223"
     },
     {
       "id": "backend_app_pipeline_rtsp_loader_rtspstream_read_frame",
@@ -2517,7 +2445,7 @@
       "file_type": "code",
       "norm_label": ".read_frame()",
       "source_file": "backend/app/pipeline/rtsp_loader.py",
-      "source_location": "L154"
+      "source_location": "L148"
     },
     {
       "id": "backend_app_pipeline_rtsp_loader_rtspstream_reconnect",
@@ -2529,7 +2457,7 @@
       "file_type": "code",
       "norm_label": ".reconnect()",
       "source_file": "backend/app/pipeline/rtsp_loader.py",
-      "source_location": "L186"
+      "source_location": "L180"
     },
     {
       "id": "backend_app_pipeline_rtsp_loader_rtspstream_release",
@@ -2541,7 +2469,7 @@
       "file_type": "code",
       "norm_label": ".release()",
       "source_file": "backend/app/pipeline/rtsp_loader.py",
-      "source_location": "L245"
+      "source_location": "L239"
     },
     {
       "id": "backend_app_api_faces_add_face_sample",
@@ -2793,7 +2721,7 @@
       "file_type": "code",
       "norm_label": "._age_tracks()",
       "source_file": "backend/app/pipeline/face_service.py",
-      "source_location": "L738"
+      "source_location": "L716"
     },
     {
       "id": "backend_app_pipeline_face_service_faceservice_apply_temporal_smoothing",
@@ -2805,7 +2733,7 @@
       "file_type": "code",
       "norm_label": "._apply_temporal_smoothing()",
       "source_file": "backend/app/pipeline/face_service.py",
-      "source_location": "L621"
+      "source_location": "L599"
     },
     {
       "id": "backend_app_pipeline_face_service_faceservice_delete_person",
@@ -2841,7 +2769,7 @@
       "file_type": "code",
       "norm_label": ".draw_faces()",
       "source_file": "backend/app/pipeline/face_service.py",
-      "source_location": "L770"
+      "source_location": "L748"
     },
     {
       "id": "backend_app_pipeline_face_service_faceservice_init",
@@ -2901,7 +2829,7 @@
       "file_type": "code",
       "norm_label": "._log_events()",
       "source_file": "backend/app/pipeline/face_service.py",
-      "source_location": "L745"
+      "source_location": "L723"
     },
     {
       "id": "backend_app_pipeline_face_service_faceservice_register_face",
@@ -3161,7 +3089,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 23,
-      "community_name": "logging.py",
+      "community_name": "stream.py",
       "file_type": "code",
       "norm_label": "create_standby_frame()",
       "source_file": "backend/app/api/stream.py",
@@ -3173,11 +3101,11 @@
       "_callable": true,
       "_origin": "ast",
       "community": 23,
-      "community_name": "logging.py",
+      "community_name": "stream.py",
       "file_type": "code",
       "norm_label": "draw_bounding_boxes()",
       "source_file": "backend/app/api/stream.py",
-      "source_location": "L302"
+      "source_location": "L291"
     },
     {
       "id": "backend_app_api_stream_draw_tactical_hud",
@@ -3185,11 +3113,11 @@
       "_callable": true,
       "_origin": "ast",
       "community": 23,
-      "community_name": "logging.py",
+      "community_name": "stream.py",
       "file_type": "code",
       "norm_label": "draw_tactical_hud()",
       "source_file": "backend/app/api/stream.py",
-      "source_location": "L257"
+      "source_location": "L246"
     },
     {
       "id": "backend_app_api_stream_get_live_stream",
@@ -3197,11 +3125,11 @@
       "_callable": true,
       "_origin": "ast",
       "community": 23,
-      "community_name": "logging.py",
+      "community_name": "stream.py",
       "file_type": "code",
       "norm_label": "get_live_stream()",
       "source_file": "backend/app/api/stream.py",
-      "source_location": "L661"
+      "source_location": "L632"
     },
     {
       "id": "backend_app_api_stream_get_snapshot",
@@ -3209,11 +3137,11 @@
       "_callable": true,
       "_origin": "ast",
       "community": 23,
-      "community_name": "logging.py",
+      "community_name": "stream.py",
       "file_type": "code",
       "norm_label": "get_snapshot()",
       "source_file": "backend/app/api/stream.py",
-      "source_location": "L725"
+      "source_location": "L696"
     },
     {
       "id": "backend_app_api_stream_is_host_reachable",
@@ -3221,7 +3149,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 23,
-      "community_name": "logging.py",
+      "community_name": "stream.py",
       "file_type": "code",
       "norm_label": "is_host_reachable()",
       "source_file": "backend/app/api/stream.py",
@@ -3233,7 +3161,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 23,
-      "community_name": "logging.py",
+      "community_name": "stream.py",
       "file_type": "code",
       "norm_label": "is_rtsp_host_reachable()",
       "source_file": "backend/app/api/stream.py",
@@ -3245,7 +3173,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 23,
-      "community_name": "logging.py",
+      "community_name": "stream.py",
       "file_type": "code",
       "norm_label": "normalize_stream_url()",
       "source_file": "backend/app/api/stream.py",
@@ -3257,7 +3185,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 23,
-      "community_name": "logging.py",
+      "community_name": "stream.py",
       "file_type": "code",
       "norm_label": "open_video_source()",
       "source_file": "backend/app/api/stream.py",
@@ -3269,11 +3197,11 @@
       "_callable": true,
       "_origin": "ast",
       "community": 23,
-      "community_name": "logging.py",
+      "community_name": "stream.py",
       "file_type": "code",
       "norm_label": "stream_generator()",
       "source_file": "backend/app/api/stream.py",
-      "source_location": "L368"
+      "source_location": "L357"
     },
     {
       "id": "backend_app_api_stream_validate_stream",
@@ -3281,11 +3209,11 @@
       "_callable": true,
       "_origin": "ast",
       "community": 23,
-      "community_name": "logging.py",
+      "community_name": "stream.py",
       "file_type": "code",
       "norm_label": "validate_stream()",
       "source_file": "backend/app/api/stream.py",
-      "source_location": "L619"
+      "source_location": "L590"
     },
     {
       "id": "backend_app_pipeline_anpr_service_mock_check_torch_load_is_safe",
@@ -3293,7 +3221,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 23,
-      "community_name": "logging.py",
+      "community_name": "stream.py",
       "file_type": "code",
       "norm_label": "_mock_check_torch_load_is_safe()",
       "source_file": "backend/app/pipeline/anpr_service.py",
@@ -3305,7 +3233,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 23,
-      "community_name": "logging.py",
+      "community_name": "stream.py",
       "file_type": "code",
       "norm_label": ".get_status()",
       "source_file": "backend/app/pipeline/feed_scanner.py",
@@ -3317,7 +3245,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 23,
-      "community_name": "logging.py",
+      "community_name": "stream.py",
       "file_type": "code",
       "norm_label": ".__init__()",
       "source_file": "backend/app/pipeline/feed_scanner.py",
@@ -3329,7 +3257,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 23,
-      "community_name": "logging.py",
+      "community_name": "stream.py",
       "file_type": "code",
       "norm_label": "._scan_camera_worker()",
       "source_file": "backend/app/pipeline/feed_scanner.py",
@@ -3341,7 +3269,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 23,
-      "community_name": "logging.py",
+      "community_name": "stream.py",
       "file_type": "code",
       "norm_label": ".start()",
       "source_file": "backend/app/pipeline/feed_scanner.py",
@@ -3353,23 +3281,11 @@
       "_callable": true,
       "_origin": "ast",
       "community": 23,
-      "community_name": "logging.py",
+      "community_name": "stream.py",
       "file_type": "code",
       "norm_label": ".stop()",
       "source_file": "backend/app/pipeline/feed_scanner.py",
       "source_location": "L86"
-    },
-    {
-      "id": "backend_app_utils_logging_setup_logging",
-      "label": "setup_logging()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 23,
-      "community_name": "logging.py",
-      "file_type": "code",
-      "norm_label": "setup_logging()",
-      "source_file": "backend/app/utils/logging.py",
-      "source_location": "L10"
     },
     {
       "id": "frontend_src_app_operator_alerts_page_alertspage",
@@ -3377,11 +3293,95 @@
       "_callable": true,
       "_origin": "ast",
       "community": 24,
-      "community_name": "alerts/page.tsx",
+      "community_name": "react",
       "file_type": "code",
       "norm_label": "alertspage()",
       "source_file": "frontend/src/app/(operator)/alerts/page.tsx",
       "source_location": "L29"
+    },
+    {
+      "id": "frontend_src_app_operator_gis_map_page_gismappage",
+      "label": "GisMapPage()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 24,
+      "community_name": "react",
+      "file_type": "code",
+      "norm_label": "gismappage()",
+      "source_file": "frontend/src/app/(operator)/gis-map/page.tsx",
+      "source_location": "L24"
+    },
+    {
+      "id": "frontend_src_app_operator_gis_map_page_gismappage_fetchtraces",
+      "label": "fetchTraces()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 24,
+      "community_name": "react",
+      "file_type": "code",
+      "norm_label": "fetchtraces()",
+      "source_file": "frontend/src/app/(operator)/gis-map/page.tsx",
+      "source_location": "L35"
+    },
+    {
+      "id": "frontend_src_app_operator_layout_operatorlayout",
+      "label": "OperatorLayout()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 24,
+      "community_name": "react",
+      "file_type": "code",
+      "norm_label": "operatorlayout()",
+      "source_file": "frontend/src/app/(operator)/layout.tsx",
+      "source_location": "L39"
+    },
+    {
+      "id": "frontend_src_components_alerts_tacticalthreattoast_tacticalthreattoast",
+      "label": "TacticalThreatToast()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 24,
+      "community_name": "react",
+      "file_type": "code",
+      "norm_label": "tacticalthreattoast()",
+      "source_file": "frontend/src/components/alerts/TacticalThreatToast.tsx",
+      "source_location": "L19"
+    },
+    {
+      "id": "frontend_src_components_dashboard_dashboardheader_dashboardheader",
+      "label": "DashboardHeader()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 24,
+      "community_name": "react",
+      "file_type": "code",
+      "norm_label": "dashboardheader()",
+      "source_file": "frontend/src/components/dashboard/dashboardheader.tsx",
+      "source_location": "L5"
+    },
+    {
+      "id": "frontend_src_components_dashboard_recentalerts_recentalerts",
+      "label": "RecentAlerts()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 24,
+      "community_name": "react",
+      "file_type": "code",
+      "norm_label": "recentalerts()",
+      "source_file": "frontend/src/components/dashboard/recentalerts.tsx",
+      "source_location": "L38"
+    },
+    {
+      "id": "frontend_src_components_dashboard_recentalerts_severitybadge",
+      "label": "SeverityBadge()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 24,
+      "community_name": "react",
+      "file_type": "code",
+      "norm_label": "severitybadge()",
+      "source_file": "frontend/src/components/dashboard/recentalerts.tsx",
+      "source_location": "L9"
     },
     {
       "id": "frontend_src_components_map_suspecttrajectorymodal_suspecttrajectorymodal",
@@ -3389,7 +3389,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 24,
-      "community_name": "alerts/page.tsx",
+      "community_name": "react",
       "file_type": "code",
       "norm_label": "suspecttrajectorymodal()",
       "source_file": "frontend/src/components/map/SuspectTrajectoryModal.tsx",
@@ -3401,11 +3401,35 @@
       "_callable": true,
       "_origin": "ast",
       "community": 24,
-      "community_name": "alerts/page.tsx",
+      "community_name": "react",
       "file_type": "code",
       "norm_label": "loadtrajectory()",
       "source_file": "frontend/src/components/map/SuspectTrajectoryModal.tsx",
       "source_location": "L41"
+    },
+    {
+      "id": "frontend_src_lib_alertsstore_usealerts",
+      "label": "useAlerts()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 24,
+      "community_name": "react",
+      "file_type": "code",
+      "norm_label": "usealerts()",
+      "source_file": "frontend/src/lib/alertsStore.ts",
+      "source_location": "L215"
+    },
+    {
+      "id": "frontend_src_lib_utils_formatconfidence",
+      "label": "formatConfidence()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 24,
+      "community_name": "react",
+      "file_type": "code",
+      "norm_label": "formatconfidence()",
+      "source_file": "frontend/src/lib/utils.ts",
+      "source_location": "L15"
     },
     {
       "id": "backend_app_tracking_annotator_convert_video_to_h264",
@@ -3552,18 +3576,6 @@
       "source_location": "L77"
     },
     {
-      "id": "backend_app_pipeline_postprocessor_postprocessor_init",
-      "label": ".__init__()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 26,
-      "community_name": "Postprocessor",
-      "file_type": "code",
-      "norm_label": ".__init__()",
-      "source_file": "backend/app/pipeline/postprocessor.py",
-      "source_location": "L73"
-    },
-    {
       "id": "backend_app_pipeline_postprocessor_postprocessor_rescale_boxes",
       "label": "._rescale_boxes()",
       "_callable": true,
@@ -3636,28 +3648,52 @@
       "source_location": "L10"
     },
     {
-      "id": "frontend_src_lib_api_apierror_constructor",
-      "label": ".constructor()",
+      "id": "frontend_src_components_surveillance_detectioncanvas_detectioncanvas",
+      "label": "DetectionCanvas()",
       "_callable": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "api.ts",
+      "community_name": "liveworkspace.tsx",
       "file_type": "code",
-      "norm_label": ".constructor()",
-      "source_file": "frontend/src/lib/api.ts",
-      "source_location": "L36"
+      "norm_label": "detectioncanvas()",
+      "source_file": "frontend/src/components/surveillance/detectioncanvas.tsx",
+      "source_location": "L37"
     },
     {
-      "id": "frontend_src_lib_api_request",
-      "label": "request()",
+      "id": "frontend_src_components_surveillance_liveworkspace_buildstreamurl",
+      "label": "buildStreamUrl()",
       "_callable": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "api.ts",
+      "community_name": "liveworkspace.tsx",
       "file_type": "code",
-      "norm_label": "request()",
-      "source_file": "frontend/src/lib/api.ts",
-      "source_location": "L46"
+      "norm_label": "buildstreamurl()",
+      "source_file": "frontend/src/components/surveillance/liveworkspace.tsx",
+      "source_location": "L44"
+    },
+    {
+      "id": "frontend_src_components_surveillance_liveworkspace_liveworkspace",
+      "label": "LiveWorkspace()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "liveworkspace.tsx",
+      "file_type": "code",
+      "norm_label": "liveworkspace()",
+      "source_file": "frontend/src/components/surveillance/liveworkspace.tsx",
+      "source_location": "L55"
+    },
+    {
+      "id": "frontend_src_lib_utils_normalizeconfidence",
+      "label": "normalizeConfidence()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "liveworkspace.tsx",
+      "file_type": "code",
+      "norm_label": "normalizeconfidence()",
+      "source_file": "frontend/src/lib/utils.ts",
+      "source_location": "L5"
     },
     {
       "id": "backend_app_api_anpr_add_to_watchlist",
@@ -3670,30 +3706,6 @@
       "norm_label": "add_to_watchlist()",
       "source_file": "backend/app/api/anpr.py",
       "source_location": "L112"
-    },
-    {
-      "id": "backend_app_api_anpr_get_records",
-      "label": "get_records()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "anpr.py",
-      "file_type": "code",
-      "norm_label": "get_records()",
-      "source_file": "backend/app/api/anpr.py",
-      "source_location": "L71"
-    },
-    {
-      "id": "backend_app_api_anpr_get_watchlist",
-      "label": "get_watchlist()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "anpr.py",
-      "file_type": "code",
-      "norm_label": "get_watchlist()",
-      "source_file": "backend/app/api/anpr.py",
-      "source_location": "L88"
     },
     {
       "id": "backend_app_api_anpr_remove_from_watchlist",
@@ -3730,18 +3742,6 @@
       "norm_label": "scan_video()",
       "source_file": "backend/app/api/anpr.py",
       "source_location": "L47"
-    },
-    {
-      "id": "backend_app_api_anpr_stream_anpr",
-      "label": "stream_anpr()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "anpr.py",
-      "file_type": "code",
-      "norm_label": "stream_anpr()",
-      "source_file": "backend/app/api/anpr.py",
-      "source_location": "L147"
     },
     {
       "id": "anpr_app_current_predict_image",
@@ -4044,30 +4044,6 @@
       "source_location": "L5"
     },
     {
-      "id": "frontend_src_app_operator_gis_map_page_gismappage",
-      "label": "GisMapPage()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 36,
-      "community_name": "lucide-react",
-      "file_type": "code",
-      "norm_label": "gismappage()",
-      "source_file": "frontend/src/app/(operator)/gis-map/page.tsx",
-      "source_location": "L24"
-    },
-    {
-      "id": "frontend_src_app_operator_gis_map_page_gismappage_fetchtraces",
-      "label": "fetchTraces()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 36,
-      "community_name": "lucide-react",
-      "file_type": "code",
-      "norm_label": "fetchtraces()",
-      "source_file": "frontend/src/app/(operator)/gis-map/page.tsx",
-      "source_location": "L35"
-    },
-    {
       "id": "frontend_src_app_operator_settings_page_settingspage",
       "label": "SettingsPage()",
       "_callable": true,
@@ -4090,30 +4066,6 @@
       "norm_label": "camerafeedstrip()",
       "source_file": "frontend/src/components/dashboard/camerafeedstrip.tsx",
       "source_location": "L10"
-    },
-    {
-      "id": "frontend_src_components_dashboard_recentalerts_recentalerts",
-      "label": "RecentAlerts()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 36,
-      "community_name": "lucide-react",
-      "file_type": "code",
-      "norm_label": "recentalerts()",
-      "source_file": "frontend/src/components/dashboard/recentalerts.tsx",
-      "source_location": "L38"
-    },
-    {
-      "id": "frontend_src_components_dashboard_recentalerts_severitybadge",
-      "label": "SeverityBadge()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 36,
-      "community_name": "lucide-react",
-      "file_type": "code",
-      "norm_label": "severitybadge()",
-      "source_file": "frontend/src/components/dashboard/recentalerts.tsx",
-      "source_location": "L9"
     },
     {
       "id": "frontend_src_components_landing_livesurveillancecard_livesurveillancecard",
@@ -4553,7 +4505,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "ONNXEngine",
+      "community_name": "logging.py",
       "file_type": "code",
       "norm_label": ".close()",
       "source_file": "backend/app/inference/onnx_engine.py",
@@ -4565,7 +4517,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "ONNXEngine",
+      "community_name": "logging.py",
       "file_type": "code",
       "norm_label": "._create_session()",
       "source_file": "backend/app/inference/onnx_engine.py",
@@ -4577,7 +4529,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "ONNXEngine",
+      "community_name": "logging.py",
       "file_type": "code",
       "norm_label": ".__enter__()",
       "source_file": "backend/app/inference/onnx_engine.py",
@@ -4589,7 +4541,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "ONNXEngine",
+      "community_name": "logging.py",
       "file_type": "code",
       "norm_label": ".__exit__()",
       "source_file": "backend/app/inference/onnx_engine.py",
@@ -4601,7 +4553,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "ONNXEngine",
+      "community_name": "logging.py",
       "file_type": "code",
       "norm_label": "._extract_metadata()",
       "source_file": "backend/app/inference/onnx_engine.py",
@@ -4613,7 +4565,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "ONNXEngine",
+      "community_name": "logging.py",
       "file_type": "code",
       "norm_label": "._get_execution_providers()",
       "source_file": "backend/app/inference/onnx_engine.py",
@@ -4625,7 +4577,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "ONNXEngine",
+      "community_name": "logging.py",
       "file_type": "code",
       "norm_label": ".get_inputs()",
       "source_file": "backend/app/inference/onnx_engine.py",
@@ -4637,7 +4589,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "ONNXEngine",
+      "community_name": "logging.py",
       "file_type": "code",
       "norm_label": ".get_model_info()",
       "source_file": "backend/app/inference/onnx_engine.py",
@@ -4649,7 +4601,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "ONNXEngine",
+      "community_name": "logging.py",
       "file_type": "code",
       "norm_label": ".get_outputs()",
       "source_file": "backend/app/inference/onnx_engine.py",
@@ -4661,11 +4613,23 @@
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "ONNXEngine",
+      "community_name": "logging.py",
       "file_type": "code",
       "norm_label": ".__init__()",
       "source_file": "backend/app/inference/onnx_engine.py",
       "source_location": "L53"
+    },
+    {
+      "id": "backend_app_inference_onnx_engine_onnxengine_predict",
+      "label": ".predict()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "logging.py",
+      "file_type": "code",
+      "norm_label": ".predict()",
+      "source_file": "backend/app/inference/onnx_engine.py",
+      "source_location": "L265"
     },
     {
       "id": "backend_app_inference_onnx_engine_onnxengine_validate_model_path",
@@ -4673,11 +4637,23 @@
       "_callable": true,
       "_origin": "ast",
       "community": 5,
-      "community_name": "ONNXEngine",
+      "community_name": "logging.py",
       "file_type": "code",
       "norm_label": "._validate_model_path()",
       "source_file": "backend/app/inference/onnx_engine.py",
       "source_location": "L72"
+    },
+    {
+      "id": "backend_app_utils_logging_setup_logging",
+      "label": "setup_logging()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "logging.py",
+      "file_type": "code",
+      "norm_label": "setup_logging()",
+      "source_file": "backend/app/utils/logging.py",
+      "source_location": "L10"
     },
     {
       "id": "backend_app_api_inference_create_preprocessor",
@@ -4714,6 +4690,18 @@
       "norm_label": "image_inference()",
       "source_file": "backend/app/api/inference.py",
       "source_location": "L92"
+    },
+    {
+      "id": "backend_app_api_inference_inference_status",
+      "label": "inference_status()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 59,
+      "community_name": "inference.py",
+      "file_type": "code",
+      "norm_label": "inference_status()",
+      "source_file": "backend/app/api/inference.py",
+      "source_location": "L74"
     },
     {
       "id": "backend_app_api_inference_rtsp_inference",
@@ -4968,16 +4956,16 @@
       "source_location": "L140"
     },
     {
-      "id": "backend_app_api_alerts_list_alerts",
-      "label": "list_alerts()",
+      "id": "backend_app_api_alerts_get_suspect_trajectory",
+      "label": "get_suspect_trajectory()",
       "_callable": true,
       "_origin": "ast",
       "community": 60,
       "community_name": "alerts.py",
       "file_type": "code",
-      "norm_label": "list_alerts()",
+      "norm_label": "get_suspect_trajectory()",
       "source_file": "backend/app/api/alerts.py",
-      "source_location": "L35"
+      "source_location": "L87"
     },
     {
       "id": "backend_app_api_alerts_start_scanner",
@@ -5009,11 +4997,35 @@
       "_callable": true,
       "_origin": "ast",
       "community": 61,
-      "community_name": "facial-recognition/page.tsx",
+      "community_name": "api.ts",
       "file_type": "code",
       "norm_label": "facialrecognitionpage()",
       "source_file": "frontend/src/app/(operator)/facial-recognition/page.tsx",
       "source_location": "L44"
+    },
+    {
+      "id": "frontend_src_lib_api_apierror_constructor",
+      "label": ".constructor()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 61,
+      "community_name": "api.ts",
+      "file_type": "code",
+      "norm_label": ".constructor()",
+      "source_file": "frontend/src/lib/api.ts",
+      "source_location": "L36"
+    },
+    {
+      "id": "frontend_src_lib_api_request",
+      "label": "request()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 61,
+      "community_name": "api.ts",
+      "file_type": "code",
+      "norm_label": "request()",
+      "source_file": "frontend/src/lib/api.ts",
+      "source_location": "L46"
     },
     {
       "id": "anpr_app_get",
@@ -5040,28 +5052,40 @@
       "source_location": "L116"
     },
     {
-      "id": "backend_app_api_alerts_get_suspect_trajectory",
-      "label": "get_suspect_trajectory()",
+      "id": "backend_app_api_alerts_list_alerts",
+      "label": "list_alerts()",
       "_callable": true,
       "_origin": "ast",
       "community": 68,
       "community_name": "get",
       "file_type": "code",
-      "norm_label": "get_suspect_trajectory()",
+      "norm_label": "list_alerts()",
       "source_file": "backend/app/api/alerts.py",
-      "source_location": "L87"
+      "source_location": "L35"
     },
     {
-      "id": "backend_app_api_inference_inference_status",
-      "label": "inference_status()",
+      "id": "backend_app_api_anpr_get_records",
+      "label": "get_records()",
       "_callable": true,
       "_origin": "ast",
       "community": 68,
       "community_name": "get",
       "file_type": "code",
-      "norm_label": "inference_status()",
-      "source_file": "backend/app/api/inference.py",
-      "source_location": "L74"
+      "norm_label": "get_records()",
+      "source_file": "backend/app/api/anpr.py",
+      "source_location": "L71"
+    },
+    {
+      "id": "backend_app_api_anpr_get_watchlist",
+      "label": "get_watchlist()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 68,
+      "community_name": "get",
+      "file_type": "code",
+      "norm_label": "get_watchlist()",
+      "source_file": "backend/app/api/anpr.py",
+      "source_location": "L88"
     },
     {
       "id": "backend_app_api_tracking_get_global_trace_trajectory",
@@ -5074,18 +5098,6 @@
       "norm_label": "get_global_trace_trajectory()",
       "source_file": "backend/app/api/tracking.py",
       "source_location": "L832"
-    },
-    {
-      "id": "backend_app_api_tracking_list_global_traces",
-      "label": "list_global_traces()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 68,
-      "community_name": "get",
-      "file_type": "code",
-      "norm_label": "list_global_traces()",
-      "source_file": "backend/app/api/tracking.py",
-      "source_location": "L821"
     },
     {
       "id": "backend_app_api_tracking_list_rtsp_sessions",
@@ -5501,11 +5513,35 @@
       "_callable": true,
       "_origin": "ast",
       "community": 77,
-      "community_name": "liveworkspace.tsx",
+      "community_name": "useBackendStatus.ts",
       "file_type": "code",
       "norm_label": "livepage()",
       "source_file": "frontend/src/app/(operator)/live/page.tsx",
       "source_location": "L4"
+    },
+    {
+      "id": "frontend_src_components_dashboard_metriccard_metriccard",
+      "label": "MetricCard()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 77,
+      "community_name": "useBackendStatus.ts",
+      "file_type": "code",
+      "norm_label": "metriccard()",
+      "source_file": "frontend/src/components/dashboard/metriccard.tsx",
+      "source_location": "L10"
+    },
+    {
+      "id": "frontend_src_components_dashboard_metricsrow_metricsrow",
+      "label": "MetricsRow()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 77,
+      "community_name": "useBackendStatus.ts",
+      "file_type": "code",
+      "norm_label": "metricsrow()",
+      "source_file": "frontend/src/components/dashboard/metricsrow.tsx",
+      "source_location": "L14"
     },
     {
       "id": "frontend_src_components_dashboard_systemstatus_systemstatus",
@@ -5513,7 +5549,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 77,
-      "community_name": "liveworkspace.tsx",
+      "community_name": "useBackendStatus.ts",
       "file_type": "code",
       "norm_label": "systemstatus()",
       "source_file": "frontend/src/components/dashboard/systemstatus.tsx",
@@ -5525,47 +5561,11 @@
       "_callable": true,
       "_origin": "ast",
       "community": 77,
-      "community_name": "liveworkspace.tsx",
+      "community_name": "useBackendStatus.ts",
       "file_type": "code",
       "norm_label": "connectionstatus()",
       "source_file": "frontend/src/components/status/connectionstatus.tsx",
       "source_location": "L6"
-    },
-    {
-      "id": "frontend_src_components_surveillance_detectioncanvas_detectioncanvas",
-      "label": "DetectionCanvas()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 77,
-      "community_name": "liveworkspace.tsx",
-      "file_type": "code",
-      "norm_label": "detectioncanvas()",
-      "source_file": "frontend/src/components/surveillance/detectioncanvas.tsx",
-      "source_location": "L37"
-    },
-    {
-      "id": "frontend_src_components_surveillance_liveworkspace_buildstreamurl",
-      "label": "buildStreamUrl()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 77,
-      "community_name": "liveworkspace.tsx",
-      "file_type": "code",
-      "norm_label": "buildstreamurl()",
-      "source_file": "frontend/src/components/surveillance/liveworkspace.tsx",
-      "source_location": "L44"
-    },
-    {
-      "id": "frontend_src_components_surveillance_liveworkspace_liveworkspace",
-      "label": "LiveWorkspace()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 77,
-      "community_name": "liveworkspace.tsx",
-      "file_type": "code",
-      "norm_label": "liveworkspace()",
-      "source_file": "frontend/src/components/surveillance/liveworkspace.tsx",
-      "source_location": "L55"
     },
     {
       "id": "frontend_src_lib_hooks_usebackendstatus_usebackendstatus",
@@ -5573,47 +5573,23 @@
       "_callable": true,
       "_origin": "ast",
       "community": 77,
-      "community_name": "liveworkspace.tsx",
+      "community_name": "useBackendStatus.ts",
       "file_type": "code",
       "norm_label": "usebackendstatus()",
       "source_file": "frontend/src/lib/hooks/useBackendStatus.ts",
       "source_location": "L19"
     },
     {
-      "id": "frontend_src_lib_utils_formatconfidence",
-      "label": "formatConfidence()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 77,
-      "community_name": "liveworkspace.tsx",
-      "file_type": "code",
-      "norm_label": "formatconfidence()",
-      "source_file": "frontend/src/lib/utils.ts",
-      "source_location": "L15"
-    },
-    {
-      "id": "frontend_src_lib_utils_normalizeconfidence",
-      "label": "normalizeConfidence()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 77,
-      "community_name": "liveworkspace.tsx",
-      "file_type": "code",
-      "norm_label": "normalizeconfidence()",
-      "source_file": "frontend/src/lib/utils.ts",
-      "source_location": "L5"
-    },
-    {
-      "id": "backend_app_inference_onnx_engine_onnxengine_predict",
-      "label": ".predict()",
+      "id": "backend_app_pipeline_postprocessor_postprocessor_init",
+      "label": ".__init__()",
       "_callable": true,
       "_origin": "ast",
       "community": 78,
-      "community_name": "ONNXModelError",
+      "community_name": "PostprocessorConfig",
       "file_type": "code",
-      "norm_label": ".predict()",
-      "source_file": "backend/app/inference/onnx_engine.py",
-      "source_location": "L265"
+      "norm_label": ".__init__()",
+      "source_file": "backend/app/pipeline/postprocessor.py",
+      "source_location": "L73"
     },
     {
       "id": "backend_app_pipeline_reid_service_reidservice_compute_similarity",
@@ -5916,40 +5892,16 @@
       "source_location": "L162"
     },
     {
-      "id": "backend_app_api_tracking_get_annotated_frame",
-      "label": "get_annotated_frame()",
+      "id": "backend_app_api_anpr_stream_anpr",
+      "label": "stream_anpr()",
       "_callable": true,
       "_origin": "ast",
       "community": 85,
-      "community_name": "get_annotated_frame",
+      "community_name": "stream_anpr",
       "file_type": "code",
-      "norm_label": "get_annotated_frame()",
-      "source_file": "backend/app/api/tracking.py",
-      "source_location": "L798"
-    },
-    {
-      "id": "backend_app_api_tracking_get_annotated_video",
-      "label": "get_annotated_video()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 85,
-      "community_name": "get_annotated_frame",
-      "file_type": "code",
-      "norm_label": "get_annotated_video()",
-      "source_file": "backend/app/api/tracking.py",
-      "source_location": "L777"
-    },
-    {
-      "id": "backend_scripts_quantize_model_quantize_all",
-      "label": "quantize_all()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 87,
-      "community_name": "quantize_model.py",
-      "file_type": "code",
-      "norm_label": "quantize_all()",
-      "source_file": "backend/scripts/quantize_model.py",
-      "source_location": "L11"
+      "norm_label": "stream_anpr()",
+      "source_file": "backend/app/api/anpr.py",
+      "source_location": "L147"
     },
     {
       "id": "backend_app_api_tracking_build_tracker_config",
@@ -5976,6 +5928,30 @@
       "source_location": "L81"
     },
     {
+      "id": "backend_app_api_tracking_get_annotated_frame",
+      "label": "get_annotated_frame()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 9,
+      "community_name": "tracking.py",
+      "file_type": "code",
+      "norm_label": "get_annotated_frame()",
+      "source_file": "backend/app/api/tracking.py",
+      "source_location": "L798"
+    },
+    {
+      "id": "backend_app_api_tracking_get_annotated_video",
+      "label": "get_annotated_video()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 9,
+      "community_name": "tracking.py",
+      "file_type": "code",
+      "norm_label": "get_annotated_video()",
+      "source_file": "backend/app/api/tracking.py",
+      "source_location": "L777"
+    },
+    {
       "id": "backend_app_api_tracking_get_model_input_size",
       "label": "_get_model_input_size()",
       "_callable": true,
@@ -5986,6 +5962,18 @@
       "norm_label": "_get_model_input_size()",
       "source_file": "backend/app/api/tracking.py",
       "source_location": "L70"
+    },
+    {
+      "id": "backend_app_api_tracking_list_global_traces",
+      "label": "list_global_traces()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 9,
+      "community_name": "tracking.py",
+      "file_type": "code",
+      "norm_label": "list_global_traces()",
+      "source_file": "backend/app/api/tracking.py",
+      "source_location": "L821"
     },
     {
       "id": "backend_app_api_tracking_rtsp_tracking",
@@ -6162,6 +6150,17 @@
       "community_name": "ByteTrackerWrapper",
       "file_type": "code",
       "norm_label": "any",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "backend_app_tracking_tracker_py_exception",
+      "label": "Exception",
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "ByteTrackerWrapper",
+      "file_type": "code",
+      "norm_label": "exception",
       "source_file": "",
       "source_location": ""
     },
@@ -6375,6 +6374,17 @@
       "source_location": "L204"
     },
     {
+      "id": "backend_app_tracking_tracker_rationale_38",
+      "label": "Raised when the ByteTracker dependency is unavailable or fails.",
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "ByteTrackerWrapper",
+      "file_type": "rationale",
+      "norm_label": "raised when the bytetracker dependency is unavailable or fails.",
+      "source_file": "backend/app/tracking/tracker.py",
+      "source_location": "L38"
+    },
+    {
       "id": "backend_app_tracking_tracker_rationale_42",
       "label": "Thin stateful wrapper around supervision.ByteTracker. Accepts the raw detection\u2026",
       "_origin": "ast",
@@ -6540,61 +6550,6 @@
       "source_location": "L82"
     },
     {
-      "id": "frontend_src_app_operator_layout",
-      "label": "(operator)/layout.tsx",
-      "_origin": "ast",
-      "community": 11,
-      "community_name": "alertsStore.ts",
-      "file_type": "code",
-      "norm_label": "(operator)/layout.tsx",
-      "source_file": "frontend/src/app/(operator)/layout.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "frontend_src_components_alerts_tacticalthreattoast",
-      "label": "TacticalThreatToast.tsx",
-      "_origin": "ast",
-      "community": 11,
-      "community_name": "alertsStore.ts",
-      "file_type": "code",
-      "norm_label": "tacticalthreattoast.tsx",
-      "source_file": "frontend/src/components/alerts/TacticalThreatToast.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "frontend_src_components_dashboard_dashboardheader",
-      "label": "dashboardheader.tsx",
-      "_origin": "ast",
-      "community": 11,
-      "community_name": "alertsStore.ts",
-      "file_type": "code",
-      "norm_label": "dashboardheader.tsx",
-      "source_file": "frontend/src/components/dashboard/dashboardheader.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "frontend_src_components_dashboard_metriccard",
-      "label": "metriccard.tsx",
-      "_origin": "ast",
-      "community": 11,
-      "community_name": "alertsStore.ts",
-      "file_type": "code",
-      "norm_label": "metriccard.tsx",
-      "source_file": "frontend/src/components/dashboard/metriccard.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "frontend_src_components_dashboard_metricsrow",
-      "label": "metricsrow.tsx",
-      "_origin": "ast",
-      "community": 11,
-      "community_name": "alertsStore.ts",
-      "file_type": "code",
-      "norm_label": "metricsrow.tsx",
-      "source_file": "frontend/src/components/dashboard/metricsrow.tsx",
-      "source_location": "L1"
-    },
-    {
       "id": "frontend_src_lib_alertsstore",
       "label": "alertsStore.ts",
       "_origin": "ast",
@@ -6604,17 +6559,6 @@
       "norm_label": "alertsstore.ts",
       "source_file": "frontend/src/lib/alertsStore.ts",
       "source_location": "L1"
-    },
-    {
-      "id": "frontend_src_lib_alertsstore_alertsstore",
-      "label": "alertsStore",
-      "_origin": "ast",
-      "community": 11,
-      "community_name": "alertsStore.ts",
-      "file_type": "code",
-      "norm_label": "alertsstore",
-      "source_file": "frontend/src/lib/alertsStore.ts",
-      "source_location": "L144"
     },
     {
       "id": "frontend_src_lib_alertsstore_connectionlisteners",
@@ -6658,17 +6602,6 @@
       "file_type": "code",
       "norm_label": "memoryalerts",
       "source_file": "frontend/src/lib/alertsStore.ts",
-      "source_location": "L16"
-    },
-    {
-      "id": "ref_react",
-      "label": "react",
-      "_origin": "ast",
-      "community": 11,
-      "community_name": "alertsStore.ts",
-      "file_type": "concept",
-      "norm_label": "react",
-      "source_file": "frontend/package.json",
       "source_location": "L16"
     },
     {
@@ -7787,7 +7720,7 @@
       "file_type": "code",
       "norm_label": "outposts",
       "source_file": "frontend/src/components/dashboard/CameraOutpostGrid.tsx",
-      "source_location": "L17"
+      "source_location": "L13"
     },
     {
       "id": "frontend_src_components_dashboard_detectionbreakdowncard",
@@ -7867,7 +7800,7 @@
       "source_location": "L101"
     },
     {
-      "id": "backend_app_pipeline_rtsp_loader_rationale_155",
+      "id": "backend_app_pipeline_rtsp_loader_rationale_149",
       "label": "Read one frame from the RTSP stream.",
       "_origin": "ast",
       "community": 18,
@@ -7875,10 +7808,10 @@
       "file_type": "rationale",
       "norm_label": "read one frame from the rtsp stream.",
       "source_file": "backend/app/pipeline/rtsp_loader.py",
-      "source_location": "L155"
+      "source_location": "L149"
     },
     {
-      "id": "backend_app_pipeline_rtsp_loader_rationale_187",
+      "id": "backend_app_pipeline_rtsp_loader_rationale_181",
       "label": "Attempt bounded reconnection attempts. Returns: True if reconnection succeeds.\u2026",
       "_origin": "ast",
       "community": 18,
@@ -7886,7 +7819,7 @@
       "file_type": "rationale",
       "norm_label": "attempt bounded reconnection attempts. returns: true if reconnection succeeds....",
       "source_file": "backend/app/pipeline/rtsp_loader.py",
-      "source_location": "L187"
+      "source_location": "L181"
     },
     {
       "id": "backend_app_pipeline_rtsp_loader_rationale_22",
@@ -7900,7 +7833,7 @@
       "source_location": "L22"
     },
     {
-      "id": "backend_app_pipeline_rtsp_loader_rationale_230",
+      "id": "backend_app_pipeline_rtsp_loader_rationale_224",
       "label": "Return current RTSP stream status.",
       "_origin": "ast",
       "community": 18,
@@ -7908,10 +7841,10 @@
       "file_type": "rationale",
       "norm_label": "return current rtsp stream status.",
       "source_file": "backend/app/pipeline/rtsp_loader.py",
-      "source_location": "L230"
+      "source_location": "L224"
     },
     {
-      "id": "backend_app_pipeline_rtsp_loader_rationale_246",
+      "id": "backend_app_pipeline_rtsp_loader_rationale_240",
       "label": "Release the RTSP capture resource.",
       "_origin": "ast",
       "community": 18,
@@ -7919,7 +7852,7 @@
       "file_type": "rationale",
       "norm_label": "release the rtsp capture resource.",
       "source_file": "backend/app/pipeline/rtsp_loader.py",
-      "source_location": "L246"
+      "source_location": "L240"
     },
     {
       "id": "backend_app_pipeline_rtsp_loader_rationale_30",
@@ -8813,7 +8746,7 @@
       "source_location": "L442"
     },
     {
-      "id": "backend_app_pipeline_face_service_rationale_466",
+      "id": "backend_app_pipeline_face_service_rationale_465",
       "label": "Detect faces in image_bgr and match against enrolled persons. Features: -\u2026",
       "_origin": "ast",
       "community": 20,
@@ -8821,7 +8754,7 @@
       "file_type": "rationale",
       "norm_label": "detect faces in image_bgr and match against enrolled persons. features: -...",
       "source_file": "backend/app/pipeline/face_service.py",
-      "source_location": "L466"
+      "source_location": "L465"
     },
     {
       "id": "backend_app_pipeline_face_service_rationale_56",
@@ -8835,7 +8768,7 @@
       "source_location": "L56"
     },
     {
-      "id": "backend_app_pipeline_face_service_rationale_746",
+      "id": "backend_app_pipeline_face_service_rationale_724",
       "label": "Keep a ring buffer of recent detection events for the frontend operations\u2026",
       "_origin": "ast",
       "community": 20,
@@ -8843,10 +8776,10 @@
       "file_type": "rationale",
       "norm_label": "keep a ring buffer of recent detection events for the frontend operations...",
       "source_file": "backend/app/pipeline/face_service.py",
-      "source_location": "L746"
+      "source_location": "L724"
     },
     {
-      "id": "backend_app_pipeline_face_service_rationale_771",
+      "id": "backend_app_pipeline_face_service_rationale_749",
       "label": "Draw high-visibility tactical bounding boxes and names directly onto image_bgr.\u2026",
       "_origin": "ast",
       "community": 20,
@@ -8854,7 +8787,7 @@
       "file_type": "rationale",
       "norm_label": "draw high-visibility tactical bounding boxes and names directly onto image_bgr....",
       "source_file": "backend/app/pipeline/face_service.py",
-      "source_location": "L771"
+      "source_location": "L749"
     },
     {
       "id": "backend_app_pipeline_face_service_rationale_88",
@@ -9037,7 +8970,7 @@
       "label": "stream.py",
       "_origin": "ast",
       "community": 23,
-      "community_name": "logging.py",
+      "community_name": "stream.py",
       "file_type": "code",
       "norm_label": "stream.py",
       "source_file": "backend/app/api/stream.py",
@@ -9048,9 +8981,31 @@
       "label": "ndarray",
       "_origin": "ast",
       "community": 23,
-      "community_name": "logging.py",
+      "community_name": "stream.py",
       "file_type": "code",
       "norm_label": "ndarray",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "backend_app_api_stream_py_response",
+      "label": "Response",
+      "_origin": "ast",
+      "community": 23,
+      "community_name": "stream.py",
+      "file_type": "code",
+      "norm_label": "response",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "backend_app_api_stream_py_streamingresponse",
+      "label": "StreamingResponse",
+      "_origin": "ast",
+      "community": 23,
+      "community_name": "stream.py",
+      "file_type": "code",
+      "norm_label": "streamingresponse",
       "source_file": "",
       "source_location": ""
     },
@@ -9059,7 +9014,7 @@
       "label": "anpr_service.py",
       "_origin": "ast",
       "community": 23,
-      "community_name": "logging.py",
+      "community_name": "stream.py",
       "file_type": "code",
       "norm_label": "anpr_service.py",
       "source_file": "backend/app/pipeline/anpr_service.py",
@@ -9070,7 +9025,7 @@
       "label": "feed_scanner.py",
       "_origin": "ast",
       "community": 23,
-      "community_name": "logging.py",
+      "community_name": "stream.py",
       "file_type": "code",
       "norm_label": "feed_scanner.py",
       "source_file": "backend/app/pipeline/feed_scanner.py",
@@ -9081,64 +9036,20 @@
       "label": "Any",
       "_origin": "ast",
       "community": 23,
-      "community_name": "logging.py",
+      "community_name": "stream.py",
       "file_type": "code",
       "norm_label": "any",
       "source_file": "",
       "source_location": ""
     },
     {
-      "id": "backend_app_utils_logging",
-      "label": "logging.py",
-      "_origin": "ast",
-      "community": 23,
-      "community_name": "logging.py",
-      "file_type": "code",
-      "norm_label": "logging.py",
-      "source_file": "backend/app/utils/logging.py",
-      "source_location": "L1"
-    },
-    {
       "id": "event",
       "label": "Event",
       "_origin": "ast",
       "community": 23,
-      "community_name": "logging.py",
+      "community_name": "stream.py",
       "file_type": "code",
       "norm_label": "event",
-      "source_file": "",
-      "source_location": ""
-    },
-    {
-      "id": "get",
-      "label": "get",
-      "_origin": "ast",
-      "community": 23,
-      "community_name": "logging.py",
-      "file_type": "code",
-      "norm_label": "get",
-      "source_file": "",
-      "source_location": ""
-    },
-    {
-      "id": "response",
-      "label": "Response",
-      "_origin": "ast",
-      "community": 23,
-      "community_name": "logging.py",
-      "file_type": "code",
-      "norm_label": "response",
-      "source_file": "",
-      "source_location": ""
-    },
-    {
-      "id": "streamingresponse",
-      "label": "StreamingResponse",
-      "_origin": "ast",
-      "community": 23,
-      "community_name": "logging.py",
-      "file_type": "code",
-      "norm_label": "streamingresponse",
       "source_file": "",
       "source_location": ""
     },
@@ -9147,7 +9058,7 @@
       "label": "VideoCapture",
       "_origin": "ast",
       "community": 23,
-      "community_name": "logging.py",
+      "community_name": "stream.py",
       "file_type": "code",
       "norm_label": "videocapture",
       "source_file": "",
@@ -9158,7 +9069,7 @@
       "label": "Normalizes any video source input (RTSP, HTTP IP Webcam, bare host:port, or\u2026",
       "_origin": "ast",
       "community": 23,
-      "community_name": "logging.py",
+      "community_name": "stream.py",
       "file_type": "rationale",
       "norm_label": "normalizes any video source input (rtsp, http ip webcam, bare host:port, or...",
       "source_file": "backend/app/api/stream.py",
@@ -9169,7 +9080,7 @@
       "label": "Fast TCP probe to verify host and port reachability with clear diagnostics.",
       "_origin": "ast",
       "community": 23,
-      "community_name": "logging.py",
+      "community_name": "stream.py",
       "file_type": "rationale",
       "norm_label": "fast tcp probe to verify host and port reachability with clear diagnostics.",
       "source_file": "backend/app/api/stream.py",
@@ -9180,7 +9091,7 @@
       "label": "Backward-compatible probe wrapper.",
       "_origin": "ast",
       "community": 23,
-      "community_name": "logging.py",
+      "community_name": "stream.py",
       "file_type": "rationale",
       "norm_label": "backward-compatible probe wrapper.",
       "source_file": "backend/app/api/stream.py",
@@ -9191,95 +9102,95 @@
       "label": "Open any supported video source: RTSP, HTTP IP Webcam Pro, local file, or\u2026",
       "_origin": "ast",
       "community": 23,
-      "community_name": "logging.py",
+      "community_name": "stream.py",
       "file_type": "rationale",
       "norm_label": "open any supported video source: rtsp, http ip webcam pro, local file, or...",
       "source_file": "backend/app/api/stream.py",
       "source_location": "L187"
     },
     {
-      "id": "backend_app_api_stream_rationale_265",
+      "id": "backend_app_api_stream_rationale_254",
       "label": "Draw tactical border surveillance HUD on top of live video.",
       "_origin": "ast",
       "community": 23,
-      "community_name": "logging.py",
+      "community_name": "stream.py",
       "file_type": "rationale",
       "norm_label": "draw tactical border surveillance hud on top of live video.",
       "source_file": "backend/app/api/stream.py",
-      "source_location": "L265"
+      "source_location": "L254"
     },
     {
-      "id": "backend_app_api_stream_rationale_306",
+      "id": "backend_app_api_stream_rationale_295",
       "label": "Draw tactical AI threat detection boxes and labels on frame.",
       "_origin": "ast",
       "community": 23,
-      "community_name": "logging.py",
+      "community_name": "stream.py",
       "file_type": "rationale",
       "norm_label": "draw tactical ai threat detection boxes and labels on frame.",
       "source_file": "backend/app/api/stream.py",
-      "source_location": "L306"
+      "source_location": "L295"
     },
     {
-      "id": "backend_app_api_stream_rationale_379",
+      "id": "backend_app_api_stream_rationale_368",
       "label": "Generator yielding multipart JPEG frames from RTSP or IP Webcam Pro stream.\u2026",
       "_origin": "ast",
       "community": 23,
-      "community_name": "logging.py",
+      "community_name": "stream.py",
       "file_type": "rationale",
       "norm_label": "generator yielding multipart jpeg frames from rtsp or ip webcam pro stream....",
       "source_file": "backend/app/api/stream.py",
-      "source_location": "L379"
+      "source_location": "L368"
     },
     {
       "id": "backend_app_api_stream_rationale_51",
       "label": "Generate a tactical dark placeholder frame with status telemetry.",
       "_origin": "ast",
       "community": 23,
-      "community_name": "logging.py",
+      "community_name": "stream.py",
       "file_type": "rationale",
       "norm_label": "generate a tactical dark placeholder frame with status telemetry.",
       "source_file": "backend/app/api/stream.py",
       "source_location": "L51"
     },
     {
-      "id": "backend_app_api_stream_rationale_625",
+      "id": "backend_app_api_stream_rationale_596",
       "label": "Pre-flight validation of stream reachability, protocol detection, and endpoint\u2026",
       "_origin": "ast",
       "community": 23,
-      "community_name": "logging.py",
+      "community_name": "stream.py",
       "file_type": "rationale",
       "norm_label": "pre-flight validation of stream reachability, protocol detection, and endpoint...",
       "source_file": "backend/app/api/stream.py",
-      "source_location": "L625"
+      "source_location": "L596"
     },
     {
-      "id": "backend_app_api_stream_rationale_699",
+      "id": "backend_app_api_stream_rationale_670",
       "label": "Stream live RTSP or IP Webcam CCTV camera feed as multipart/x-mixed-replace\u2026",
       "_origin": "ast",
       "community": 23,
-      "community_name": "logging.py",
+      "community_name": "stream.py",
       "file_type": "rationale",
       "norm_label": "stream live rtsp or ip webcam cctv camera feed as multipart/x-mixed-replace...",
       "source_file": "backend/app/api/stream.py",
-      "source_location": "L699"
+      "source_location": "L670"
     },
     {
-      "id": "backend_app_api_stream_rationale_729",
+      "id": "backend_app_api_stream_rationale_700",
       "label": "Capture a single frame snapshot from an RTSP or IP Webcam camera stream.",
       "_origin": "ast",
       "community": 23,
-      "community_name": "logging.py",
+      "community_name": "stream.py",
       "file_type": "rationale",
       "norm_label": "capture a single frame snapshot from an rtsp or ip webcam camera stream.",
       "source_file": "backend/app/api/stream.py",
-      "source_location": "L729"
+      "source_location": "L700"
     },
     {
       "id": "backend_app_pipeline_feed_scanner_rationale_107",
       "label": "Return operational telemetry for the feed scanner.",
       "_origin": "ast",
       "community": 23,
-      "community_name": "logging.py",
+      "community_name": "stream.py",
       "file_type": "rationale",
       "norm_label": "return operational telemetry for the feed scanner.",
       "source_file": "backend/app/pipeline/feed_scanner.py",
@@ -9290,7 +9201,7 @@
       "label": "Dedicated worker loop for an individual camera stream.",
       "_origin": "ast",
       "community": 23,
-      "community_name": "logging.py",
+      "community_name": "stream.py",
       "file_type": "rationale",
       "norm_label": "dedicated worker loop for an individual camera stream.",
       "source_file": "backend/app/pipeline/feed_scanner.py",
@@ -9301,7 +9212,7 @@
       "label": "Continuous Multi-Feed Background Video Scanner for MAATRIX. Monitors registered\u2026",
       "_origin": "ast",
       "community": 23,
-      "community_name": "logging.py",
+      "community_name": "stream.py",
       "file_type": "rationale",
       "norm_label": "continuous multi-feed background video scanner for maatrix. monitors registered...",
       "source_file": "backend/app/pipeline/feed_scanner.py",
@@ -9312,7 +9223,7 @@
       "label": "Start continuous scanning across all active camera feeds.",
       "_origin": "ast",
       "community": 23,
-      "community_name": "logging.py",
+      "community_name": "stream.py",
       "file_type": "rationale",
       "norm_label": "start continuous scanning across all active camera feeds.",
       "source_file": "backend/app/pipeline/feed_scanner.py",
@@ -9323,32 +9234,76 @@
       "label": "Gracefully stop all camera feed scanner worker threads.",
       "_origin": "ast",
       "community": 23,
-      "community_name": "logging.py",
+      "community_name": "stream.py",
       "file_type": "rationale",
       "norm_label": "gracefully stop all camera feed scanner worker threads.",
       "source_file": "backend/app/pipeline/feed_scanner.py",
       "source_location": "L87"
     },
     {
-      "id": "backend_app_utils_logging_rationale_11",
-      "label": "Configure application-wide logging. Logs are written to both: - the console - a\u2026",
-      "_origin": "ast",
-      "community": 23,
-      "community_name": "logging.py",
-      "file_type": "rationale",
-      "norm_label": "configure application-wide logging. logs are written to both: - the console - a...",
-      "source_file": "backend/app/utils/logging.py",
-      "source_location": "L11"
-    },
-    {
       "id": "frontend_src_app_operator_alerts_page",
       "label": "alerts/page.tsx",
       "_origin": "ast",
       "community": 24,
-      "community_name": "alerts/page.tsx",
+      "community_name": "react",
       "file_type": "code",
       "norm_label": "alerts/page.tsx",
       "source_file": "frontend/src/app/(operator)/alerts/page.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "frontend_src_app_operator_gis_map_page",
+      "label": "gis-map/page.tsx",
+      "_origin": "ast",
+      "community": 24,
+      "community_name": "react",
+      "file_type": "code",
+      "norm_label": "gis-map/page.tsx",
+      "source_file": "frontend/src/app/(operator)/gis-map/page.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "frontend_src_app_operator_layout",
+      "label": "(operator)/layout.tsx",
+      "_origin": "ast",
+      "community": 24,
+      "community_name": "react",
+      "file_type": "code",
+      "norm_label": "(operator)/layout.tsx",
+      "source_file": "frontend/src/app/(operator)/layout.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "frontend_src_components_alerts_tacticalthreattoast",
+      "label": "TacticalThreatToast.tsx",
+      "_origin": "ast",
+      "community": 24,
+      "community_name": "react",
+      "file_type": "code",
+      "norm_label": "tacticalthreattoast.tsx",
+      "source_file": "frontend/src/components/alerts/TacticalThreatToast.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "frontend_src_components_dashboard_dashboardheader",
+      "label": "dashboardheader.tsx",
+      "_origin": "ast",
+      "community": 24,
+      "community_name": "react",
+      "file_type": "code",
+      "norm_label": "dashboardheader.tsx",
+      "source_file": "frontend/src/components/dashboard/dashboardheader.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "frontend_src_components_dashboard_recentalerts",
+      "label": "recentalerts.tsx",
+      "_origin": "ast",
+      "community": 24,
+      "community_name": "react",
+      "file_type": "code",
+      "norm_label": "recentalerts.tsx",
+      "source_file": "frontend/src/components/dashboard/recentalerts.tsx",
       "source_location": "L1"
     },
     {
@@ -9356,7 +9311,7 @@
       "label": "SuspectTrajectoryModal.tsx",
       "_origin": "ast",
       "community": 24,
-      "community_name": "alerts/page.tsx",
+      "community_name": "react",
       "file_type": "code",
       "norm_label": "suspecttrajectorymodal.tsx",
       "source_file": "frontend/src/components/map/SuspectTrajectoryModal.tsx",
@@ -9367,22 +9322,44 @@
       "label": "api",
       "_origin": "ast",
       "community": 24,
-      "community_name": "alerts/page.tsx",
+      "community_name": "react",
       "file_type": "code",
       "norm_label": "api",
       "source_file": "frontend/src/lib/api.ts",
       "source_location": "L100"
     },
     {
+      "id": "frontend_src_lib_utils",
+      "label": "utils.ts",
+      "_origin": "ast",
+      "community": 24,
+      "community_name": "react",
+      "file_type": "code",
+      "norm_label": "utils.ts",
+      "source_file": "frontend/src/lib/utils.ts",
+      "source_location": "L1"
+    },
+    {
       "id": "frontend_src_types_alert",
       "label": "alert.ts",
       "_origin": "ast",
       "community": 24,
-      "community_name": "alerts/page.tsx",
+      "community_name": "react",
       "file_type": "code",
       "norm_label": "alert.ts",
       "source_file": "frontend/src/types/alert.ts",
       "source_location": "L1"
+    },
+    {
+      "id": "ref_react",
+      "label": "react",
+      "_origin": "ast",
+      "community": 24,
+      "community_name": "react",
+      "file_type": "concept",
+      "norm_label": "react",
+      "source_file": "frontend/package.json",
+      "source_location": "L16"
     },
     {
       "id": "backend_app_tracking_annotator",
@@ -9495,17 +9472,6 @@
       "source_location": "L1"
     },
     {
-      "id": "backend_app_pipeline_postprocessor",
-      "label": "postprocessor.py",
-      "_origin": "ast",
-      "community": 26,
-      "community_name": "Postprocessor",
-      "file_type": "code",
-      "norm_label": "postprocessor.py",
-      "source_file": "backend/app/pipeline/postprocessor.py",
-      "source_location": "L1"
-    },
-    {
       "id": "backend_app_pipeline_postprocessor_py_any",
       "label": "Any",
       "_origin": "ast",
@@ -9513,17 +9479,6 @@
       "community_name": "Postprocessor",
       "file_type": "code",
       "norm_label": "any",
-      "source_file": "",
-      "source_location": ""
-    },
-    {
-      "id": "backend_app_pipeline_postprocessor_py_exception",
-      "label": "Exception",
-      "_origin": "ast",
-      "community": 26,
-      "community_name": "Postprocessor",
-      "file_type": "code",
-      "norm_label": "exception",
       "source_file": "",
       "source_location": ""
     },
@@ -9594,17 +9549,6 @@
       "source_location": "L251"
     },
     {
-      "id": "backend_app_pipeline_postprocessor_rationale_30",
-      "label": "Base exception for postprocessing errors.",
-      "_origin": "ast",
-      "community": 26,
-      "community_name": "Postprocessor",
-      "file_type": "rationale",
-      "norm_label": "base exception for postprocessing errors.",
-      "source_file": "backend/app/pipeline/postprocessor.py",
-      "source_location": "L30"
-    },
-    {
       "id": "backend_app_pipeline_postprocessor_rationale_310",
       "label": "Rescale bounding boxes from model input dimensions to original frame dimensions.",
       "_origin": "ast",
@@ -9625,17 +9569,6 @@
       "norm_label": "structured object detection representation.",
       "source_file": "backend/app/pipeline/postprocessor.py",
       "source_location": "L35"
-    },
-    {
-      "id": "backend_app_pipeline_postprocessor_rationale_54",
-      "label": "Configuration for bounding box decoding and NMS.",
-      "_origin": "ast",
-      "community": 26,
-      "community_name": "Postprocessor",
-      "file_type": "rationale",
-      "norm_label": "configuration for bounding box decoding and nms.",
-      "source_file": "backend/app/pipeline/postprocessor.py",
-      "source_location": "L54"
     },
     {
       "id": "backend_app_pipeline_postprocessor_rationale_64",
@@ -9803,55 +9736,55 @@
       "source_location": "L1"
     },
     {
-      "id": "frontend_src_app_operator_anpr_page",
-      "label": "anpr/page.tsx",
+      "id": "frontend_src_components_surveillance_detectioncanvas",
+      "label": "detectioncanvas.tsx",
       "_origin": "ast",
       "community": 29,
-      "community_name": "api.ts",
+      "community_name": "liveworkspace.tsx",
       "file_type": "code",
-      "norm_label": "anpr/page.tsx",
-      "source_file": "frontend/src/app/(operator)/anpr/page.tsx",
+      "norm_label": "detectioncanvas.tsx",
+      "source_file": "frontend/src/components/surveillance/detectioncanvas.tsx",
       "source_location": "L1"
     },
     {
-      "id": "frontend_src_lib_api",
-      "label": "api.ts",
+      "id": "frontend_src_components_surveillance_detectioncanvas_class_colors",
+      "label": "CLASS_COLORS",
       "_origin": "ast",
       "community": 29,
-      "community_name": "api.ts",
+      "community_name": "liveworkspace.tsx",
       "file_type": "code",
-      "norm_label": "api.ts",
-      "source_file": "frontend/src/lib/api.ts",
+      "norm_label": "class_colors",
+      "source_file": "frontend/src/components/surveillance/detectioncanvas.tsx",
+      "source_location": "L14"
+    },
+    {
+      "id": "frontend_src_components_surveillance_liveworkspace",
+      "label": "liveworkspace.tsx",
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "liveworkspace.tsx",
+      "file_type": "code",
+      "norm_label": "liveworkspace.tsx",
+      "source_file": "frontend/src/components/surveillance/liveworkspace.tsx",
       "source_location": "L1"
     },
     {
-      "id": "frontend_src_lib_hooks_usebackendstatus",
-      "label": "useBackendStatus.ts",
+      "id": "frontend_src_lib_alertsstore_alertsstore",
+      "label": "alertsStore",
       "_origin": "ast",
       "community": 29,
-      "community_name": "api.ts",
+      "community_name": "liveworkspace.tsx",
       "file_type": "code",
-      "norm_label": "usebackendstatus.ts",
-      "source_file": "frontend/src/lib/hooks/useBackendStatus.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "frontend_src_types_anpr",
-      "label": "anpr.ts",
-      "_origin": "ast",
-      "community": 29,
-      "community_name": "api.ts",
-      "file_type": "code",
-      "norm_label": "anpr.ts",
-      "source_file": "frontend/src/types/anpr.ts",
-      "source_location": "L1"
+      "norm_label": "alertsstore",
+      "source_file": "frontend/src/lib/alertsStore.ts",
+      "source_location": "L144"
     },
     {
       "id": "frontend_src_types_backend",
       "label": "backend.ts",
       "_origin": "ast",
       "community": 29,
-      "community_name": "api.ts",
+      "community_name": "liveworkspace.tsx",
       "file_type": "code",
       "norm_label": "backend.ts",
       "source_file": "frontend/src/types/backend.ts",
@@ -9891,17 +9824,6 @@
       "source_location": ""
     },
     {
-      "id": "backend_app_api_anpr_py_streamingresponse",
-      "label": "StreamingResponse",
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "anpr.py",
-      "file_type": "code",
-      "norm_label": "streamingresponse",
-      "source_file": "",
-      "source_location": ""
-    },
-    {
       "id": "backend_app_api_anpr_py_uploadfile",
       "label": "UploadFile",
       "_origin": "ast",
@@ -9935,17 +9857,6 @@
       "source_location": "L138"
     },
     {
-      "id": "backend_app_api_anpr_rationale_152",
-      "label": "Live MJPEG stream with real-time green plate reticles and vehicle\u2026",
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "anpr.py",
-      "file_type": "rationale",
-      "norm_label": "live mjpeg stream with real-time green plate reticles and vehicle...",
-      "source_file": "backend/app/api/anpr.py",
-      "source_location": "L152"
-    },
-    {
       "id": "backend_app_api_anpr_rationale_30",
       "label": "Scan an uploaded static image for vehicles, license plates, and text.",
       "_origin": "ast",
@@ -9966,28 +9877,6 @@
       "norm_label": "process an uploaded video clip, tracking and recording unique license plates.",
       "source_file": "backend/app/api/anpr.py",
       "source_location": "L52"
-    },
-    {
-      "id": "backend_app_api_anpr_rationale_76",
-      "label": "Retrieve history of recently captured vehicle license plate detections.",
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "anpr.py",
-      "file_type": "rationale",
-      "norm_label": "retrieve history of recently captured vehicle license plate detections.",
-      "source_file": "backend/app/api/anpr.py",
-      "source_location": "L76"
-    },
-    {
-      "id": "backend_app_api_anpr_rationale_89",
-      "label": "Get the current tactical watchlist / BOLO vehicle list.",
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "anpr.py",
-      "file_type": "rationale",
-      "norm_label": "get the current tactical watchlist / bolo vehicle list.",
-      "source_file": "backend/app/api/anpr.py",
-      "source_location": "L89"
     },
     {
       "id": "backend_readme_34_recommended_final_model_integration_process",
@@ -10410,17 +10299,6 @@
       "source_location": "L1"
     },
     {
-      "id": "frontend_src_app_operator_gis_map_page",
-      "label": "gis-map/page.tsx",
-      "_origin": "ast",
-      "community": 36,
-      "community_name": "lucide-react",
-      "file_type": "code",
-      "norm_label": "gis-map/page.tsx",
-      "source_file": "frontend/src/app/(operator)/gis-map/page.tsx",
-      "source_location": "L1"
-    },
-    {
       "id": "frontend_src_app_operator_settings_page",
       "label": "settings/page.tsx",
       "_origin": "ast",
@@ -10452,17 +10330,6 @@
       "norm_label": "cameras",
       "source_file": "frontend/src/components/dashboard/camerafeedstrip.tsx",
       "source_location": "L3"
-    },
-    {
-      "id": "frontend_src_components_dashboard_recentalerts",
-      "label": "recentalerts.tsx",
-      "_origin": "ast",
-      "community": 36,
-      "community_name": "lucide-react",
-      "file_type": "code",
-      "norm_label": "recentalerts.tsx",
-      "source_file": "frontend/src/components/dashboard/recentalerts.tsx",
-      "source_location": "L1"
     },
     {
       "id": "frontend_src_components_landing_livesurveillancecard",
@@ -10894,13 +10761,57 @@
       "source_location": "L1"
     },
     {
+      "id": "backend_app_inference_model_manager",
+      "label": "model_manager.py",
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "logging.py",
+      "file_type": "code",
+      "norm_label": "model_manager.py",
+      "source_file": "backend/app/inference/model_manager.py",
+      "source_location": "L1"
+    },
+    {
+      "id": "backend_app_inference_onnx_engine",
+      "label": "onnx_engine.py",
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "logging.py",
+      "file_type": "code",
+      "norm_label": "onnx_engine.py",
+      "source_file": "backend/app/inference/onnx_engine.py",
+      "source_location": "L1"
+    },
+    {
       "id": "backend_app_inference_onnx_engine_py_any",
       "label": "Any",
       "_origin": "ast",
       "community": 5,
-      "community_name": "ONNXEngine",
+      "community_name": "logging.py",
       "file_type": "code",
       "norm_label": "any",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "backend_app_inference_onnx_engine_py_exception",
+      "label": "Exception",
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "logging.py",
+      "file_type": "code",
+      "norm_label": "exception",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "backend_app_inference_onnx_engine_py_ndarray",
+      "label": "ndarray",
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "logging.py",
+      "file_type": "code",
+      "norm_label": "ndarray",
       "source_file": "",
       "source_location": ""
     },
@@ -10909,18 +10820,29 @@
       "label": "Path",
       "_origin": "ast",
       "community": 5,
-      "community_name": "ONNXEngine",
+      "community_name": "logging.py",
       "file_type": "code",
       "norm_label": "path",
       "source_file": "",
       "source_location": ""
     },
     {
+      "id": "backend_app_utils_logging",
+      "label": "logging.py",
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "logging.py",
+      "file_type": "code",
+      "norm_label": "logging.py",
+      "source_file": "backend/app/utils/logging.py",
+      "source_location": "L1"
+    },
+    {
       "id": "backend_app_inference_onnx_engine_rationale_118",
       "label": "Create the ONNX Runtime session.",
       "_origin": "ast",
       "community": 5,
-      "community_name": "ONNXEngine",
+      "community_name": "logging.py",
       "file_type": "rationale",
       "norm_label": "create the onnx runtime session.",
       "source_file": "backend/app/inference/onnx_engine.py",
@@ -10931,7 +10853,7 @@
       "label": "Extract embedded model metadata, class labels, and input image size.",
       "_origin": "ast",
       "community": 5,
-      "community_name": "ONNXEngine",
+      "community_name": "logging.py",
       "file_type": "rationale",
       "norm_label": "extract embedded model metadata, class labels, and input image size.",
       "source_file": "backend/app/inference/onnx_engine.py",
@@ -10942,7 +10864,7 @@
       "label": "Return information about model inputs.",
       "_origin": "ast",
       "community": 5,
-      "community_name": "ONNXEngine",
+      "community_name": "logging.py",
       "file_type": "rationale",
       "norm_label": "return information about model inputs.",
       "source_file": "backend/app/inference/onnx_engine.py",
@@ -10953,40 +10875,84 @@
       "label": "Return information about model outputs.",
       "_origin": "ast",
       "community": 5,
-      "community_name": "ONNXEngine",
+      "community_name": "logging.py",
       "file_type": "rationale",
       "norm_label": "return information about model outputs.",
       "source_file": "backend/app/inference/onnx_engine.py",
       "source_location": "L247"
     },
     {
+      "id": "backend_app_inference_onnx_engine_rationale_270",
+      "label": "Run inference using a NumPy array. Preprocessing is intentionally kept outside\u2026",
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "logging.py",
+      "file_type": "rationale",
+      "norm_label": "run inference using a numpy array. preprocessing is intentionally kept outside...",
+      "source_file": "backend/app/inference/onnx_engine.py",
+      "source_location": "L270"
+    },
+    {
+      "id": "backend_app_inference_onnx_engine_rationale_29",
+      "label": "Base exception for ONNX engine errors.",
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "logging.py",
+      "file_type": "rationale",
+      "norm_label": "base exception for onnx engine errors.",
+      "source_file": "backend/app/inference/onnx_engine.py",
+      "source_location": "L29"
+    },
+    {
       "id": "backend_app_inference_onnx_engine_rationale_324",
       "label": "Return useful information about the loaded model.",
       "_origin": "ast",
       "community": 5,
-      "community_name": "ONNXEngine",
+      "community_name": "logging.py",
       "file_type": "rationale",
       "norm_label": "return useful information about the loaded model.",
       "source_file": "backend/app/inference/onnx_engine.py",
       "source_location": "L324"
     },
     {
+      "id": "backend_app_inference_onnx_engine_rationale_33",
+      "label": "Raised when an ONNX model cannot be loaded or is invalid.",
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "logging.py",
+      "file_type": "rationale",
+      "norm_label": "raised when an onnx model cannot be loaded or is invalid.",
+      "source_file": "backend/app/inference/onnx_engine.py",
+      "source_location": "L33"
+    },
+    {
       "id": "backend_app_inference_onnx_engine_rationale_343",
       "label": "Release the ONNX Runtime session.",
       "_origin": "ast",
       "community": 5,
-      "community_name": "ONNXEngine",
+      "community_name": "logging.py",
       "file_type": "rationale",
       "norm_label": "release the onnx runtime session.",
       "source_file": "backend/app/inference/onnx_engine.py",
       "source_location": "L343"
     },
     {
+      "id": "backend_app_inference_onnx_engine_rationale_37",
+      "label": "Raised when inference fails.",
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "logging.py",
+      "file_type": "rationale",
+      "norm_label": "raised when inference fails.",
+      "source_file": "backend/app/inference/onnx_engine.py",
+      "source_location": "L37"
+    },
+    {
       "id": "backend_app_inference_onnx_engine_rationale_41",
       "label": "Safe, reusable ONNX Runtime inference engine. Designed for: - GPU acceleration\u2026",
       "_origin": "ast",
       "community": 5,
-      "community_name": "ONNXEngine",
+      "community_name": "logging.py",
       "file_type": "rationale",
       "norm_label": "safe, reusable onnx runtime inference engine. designed for: - gpu acceleration...",
       "source_file": "backend/app/inference/onnx_engine.py",
@@ -10997,7 +10963,7 @@
       "label": "Validate the ONNX model path before loading.",
       "_origin": "ast",
       "community": 5,
-      "community_name": "ONNXEngine",
+      "community_name": "logging.py",
       "file_type": "rationale",
       "norm_label": "validate the onnx model path before loading.",
       "source_file": "backend/app/inference/onnx_engine.py",
@@ -11008,11 +10974,22 @@
       "label": "Detect and return preferred execution providers (GPU / CPU).",
       "_origin": "ast",
       "community": 5,
-      "community_name": "ONNXEngine",
+      "community_name": "logging.py",
       "file_type": "rationale",
       "norm_label": "detect and return preferred execution providers (gpu / cpu).",
       "source_file": "backend/app/inference/onnx_engine.py",
       "source_location": "L96"
+    },
+    {
+      "id": "backend_app_utils_logging_rationale_11",
+      "label": "Configure application-wide logging. Logs are written to both: - the console - a\u2026",
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "logging.py",
+      "file_type": "rationale",
+      "norm_label": "configure application-wide logging. logs are written to both: - the console - a...",
+      "source_file": "backend/app/utils/logging.py",
+      "source_location": "L11"
     },
     {
       "id": "anpr_patch_speed",
@@ -11189,6 +11166,17 @@
       "norm_label": "run bounded inference on an rtsp cctv stream. the endpoint processes a limited...",
       "source_file": "backend/app/api/inference.py",
       "source_location": "L705"
+    },
+    {
+      "id": "backend_app_api_inference_rationale_75",
+      "label": "Return inference service and resource status.",
+      "_origin": "ast",
+      "community": 59,
+      "community_name": "inference.py",
+      "file_type": "rationale",
+      "norm_label": "return inference service and resource status.",
+      "source_file": "backend/app/api/inference.py",
+      "source_location": "L75"
     },
     {
       "id": "backend_app_api_inference_rationale_99",
@@ -11444,17 +11432,6 @@
       "source_location": "L153"
     },
     {
-      "id": "backend_app_api_alerts_rationale_41",
-      "label": "Retrieve security and suspect sighting alerts with optional filtering.",
-      "_origin": "ast",
-      "community": 60,
-      "community_name": "alerts.py",
-      "file_type": "rationale",
-      "norm_label": "retrieve security and suspect sighting alerts with optional filtering.",
-      "source_file": "backend/app/api/alerts.py",
-      "source_location": "L41"
-    },
-    {
       "id": "backend_app_api_alerts_rationale_52",
       "label": "Manually dispatch a security alert to the system and WebSocket subscribers.",
       "_origin": "ast",
@@ -11464,6 +11441,17 @@
       "norm_label": "manually dispatch a security alert to the system and websocket subscribers.",
       "source_file": "backend/app/api/alerts.py",
       "source_location": "L52"
+    },
+    {
+      "id": "backend_app_api_alerts_rationale_88",
+      "label": "Retrieve chronological multi-camera trajectory and movement telemetry for a\u2026",
+      "_origin": "ast",
+      "community": 60,
+      "community_name": "alerts.py",
+      "file_type": "rationale",
+      "norm_label": "retrieve chronological multi-camera trajectory and movement telemetry for a...",
+      "source_file": "backend/app/api/alerts.py",
+      "source_location": "L88"
     },
     {
       "id": "backend_app_api_alerts_rationale_94",
@@ -11477,14 +11465,47 @@
       "source_location": "L94"
     },
     {
+      "id": "frontend_src_app_operator_anpr_page",
+      "label": "anpr/page.tsx",
+      "_origin": "ast",
+      "community": 61,
+      "community_name": "api.ts",
+      "file_type": "code",
+      "norm_label": "anpr/page.tsx",
+      "source_file": "frontend/src/app/(operator)/anpr/page.tsx",
+      "source_location": "L1"
+    },
+    {
       "id": "frontend_src_app_operator_facial_recognition_page",
       "label": "facial-recognition/page.tsx",
       "_origin": "ast",
       "community": 61,
-      "community_name": "facial-recognition/page.tsx",
+      "community_name": "api.ts",
       "file_type": "code",
       "norm_label": "facial-recognition/page.tsx",
       "source_file": "frontend/src/app/(operator)/facial-recognition/page.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "frontend_src_lib_api",
+      "label": "api.ts",
+      "_origin": "ast",
+      "community": 61,
+      "community_name": "api.ts",
+      "file_type": "code",
+      "norm_label": "api.ts",
+      "source_file": "frontend/src/lib/api.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "frontend_src_types_anpr",
+      "label": "anpr.ts",
+      "_origin": "ast",
+      "community": 61,
+      "community_name": "api.ts",
+      "file_type": "code",
+      "norm_label": "anpr.ts",
+      "source_file": "frontend/src/types/anpr.ts",
       "source_location": "L1"
     },
     {
@@ -11492,7 +11513,7 @@
       "label": "face.ts",
       "_origin": "ast",
       "community": 61,
-      "community_name": "facial-recognition/page.tsx",
+      "community_name": "api.ts",
       "file_type": "code",
       "norm_label": "face.ts",
       "source_file": "frontend/src/types/face.ts",
@@ -11794,26 +11815,37 @@
       "source_location": "L117"
     },
     {
-      "id": "backend_app_api_alerts_rationale_88",
-      "label": "Retrieve chronological multi-camera trajectory and movement telemetry for a\u2026",
+      "id": "backend_app_api_alerts_rationale_41",
+      "label": "Retrieve security and suspect sighting alerts with optional filtering.",
       "_origin": "ast",
       "community": 68,
       "community_name": "get",
       "file_type": "rationale",
-      "norm_label": "retrieve chronological multi-camera trajectory and movement telemetry for a...",
+      "norm_label": "retrieve security and suspect sighting alerts with optional filtering.",
       "source_file": "backend/app/api/alerts.py",
-      "source_location": "L88"
+      "source_location": "L41"
     },
     {
-      "id": "backend_app_api_inference_rationale_75",
-      "label": "Return inference service and resource status.",
+      "id": "backend_app_api_anpr_rationale_76",
+      "label": "Retrieve history of recently captured vehicle license plate detections.",
       "_origin": "ast",
       "community": 68,
       "community_name": "get",
       "file_type": "rationale",
-      "norm_label": "return inference service and resource status.",
-      "source_file": "backend/app/api/inference.py",
-      "source_location": "L75"
+      "norm_label": "retrieve history of recently captured vehicle license plate detections.",
+      "source_file": "backend/app/api/anpr.py",
+      "source_location": "L76"
+    },
+    {
+      "id": "backend_app_api_anpr_rationale_89",
+      "label": "Get the current tactical watchlist / BOLO vehicle list.",
+      "_origin": "ast",
+      "community": 68,
+      "community_name": "get",
+      "file_type": "rationale",
+      "norm_label": "get the current tactical watchlist / bolo vehicle list.",
+      "source_file": "backend/app/api/anpr.py",
+      "source_location": "L89"
     },
     {
       "id": "backend_app_api_tracking_rationale_733",
@@ -11825,17 +11857,6 @@
       "norm_label": "list all active per-camera bytetracker sessions.",
       "source_file": "backend/app/api/tracking.py",
       "source_location": "L733"
-    },
-    {
-      "id": "backend_app_api_tracking_rationale_822",
-      "label": "List all active cross-camera person traces with recent sightings and trajectory\u2026",
-      "_origin": "ast",
-      "community": 68,
-      "community_name": "get",
-      "file_type": "rationale",
-      "norm_label": "list all active cross-camera person traces with recent sightings and trajectory...",
-      "source_file": "backend/app/api/tracking.py",
-      "source_location": "L822"
     },
     {
       "id": "backend_app_api_tracking_rationale_833",
@@ -12355,6 +12376,17 @@
       "source_location": ""
     },
     {
+      "id": "get",
+      "label": "get",
+      "_origin": "ast",
+      "community": 73,
+      "community_name": "FastAPI",
+      "file_type": "code",
+      "norm_label": "get",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
       "id": "backend_app_api_tracking_py_delete",
       "label": "delete",
       "_origin": "ast",
@@ -12421,6 +12453,17 @@
       "source_location": "L1"
     },
     {
+      "id": "backend_app_pipeline_rtsp_loader_py_exception",
+      "label": "Exception",
+      "_origin": "ast",
+      "community": 76,
+      "community_name": "RTSPError",
+      "file_type": "code",
+      "norm_label": "exception",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
       "id": "backend_tests_test_rtsp_errors",
       "label": "test_rtsp_errors.py",
       "_origin": "ast",
@@ -12469,10 +12512,32 @@
       "label": "live/page.tsx",
       "_origin": "ast",
       "community": 77,
-      "community_name": "liveworkspace.tsx",
+      "community_name": "useBackendStatus.ts",
       "file_type": "code",
       "norm_label": "live/page.tsx",
       "source_file": "frontend/src/app/(operator)/live/page.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "frontend_src_components_dashboard_metriccard",
+      "label": "metriccard.tsx",
+      "_origin": "ast",
+      "community": 77,
+      "community_name": "useBackendStatus.ts",
+      "file_type": "code",
+      "norm_label": "metriccard.tsx",
+      "source_file": "frontend/src/components/dashboard/metriccard.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "frontend_src_components_dashboard_metricsrow",
+      "label": "metricsrow.tsx",
+      "_origin": "ast",
+      "community": 77,
+      "community_name": "useBackendStatus.ts",
+      "file_type": "code",
+      "norm_label": "metricsrow.tsx",
+      "source_file": "frontend/src/components/dashboard/metricsrow.tsx",
       "source_location": "L1"
     },
     {
@@ -12480,7 +12545,7 @@
       "label": "systemstatus.tsx",
       "_origin": "ast",
       "community": 77,
-      "community_name": "liveworkspace.tsx",
+      "community_name": "useBackendStatus.ts",
       "file_type": "code",
       "norm_label": "systemstatus.tsx",
       "source_file": "frontend/src/components/dashboard/systemstatus.tsx",
@@ -12491,143 +12556,66 @@
       "label": "connectionstatus.tsx",
       "_origin": "ast",
       "community": 77,
-      "community_name": "liveworkspace.tsx",
+      "community_name": "useBackendStatus.ts",
       "file_type": "code",
       "norm_label": "connectionstatus.tsx",
       "source_file": "frontend/src/components/status/connectionstatus.tsx",
       "source_location": "L1"
     },
     {
-      "id": "frontend_src_components_surveillance_detectioncanvas",
-      "label": "detectioncanvas.tsx",
+      "id": "frontend_src_lib_hooks_usebackendstatus",
+      "label": "useBackendStatus.ts",
       "_origin": "ast",
       "community": 77,
-      "community_name": "liveworkspace.tsx",
+      "community_name": "useBackendStatus.ts",
       "file_type": "code",
-      "norm_label": "detectioncanvas.tsx",
-      "source_file": "frontend/src/components/surveillance/detectioncanvas.tsx",
+      "norm_label": "usebackendstatus.ts",
+      "source_file": "frontend/src/lib/hooks/useBackendStatus.ts",
       "source_location": "L1"
     },
     {
-      "id": "frontend_src_components_surveillance_detectioncanvas_class_colors",
-      "label": "CLASS_COLORS",
-      "_origin": "ast",
-      "community": 77,
-      "community_name": "liveworkspace.tsx",
-      "file_type": "code",
-      "norm_label": "class_colors",
-      "source_file": "frontend/src/components/surveillance/detectioncanvas.tsx",
-      "source_location": "L14"
-    },
-    {
-      "id": "frontend_src_components_surveillance_liveworkspace",
-      "label": "liveworkspace.tsx",
-      "_origin": "ast",
-      "community": 77,
-      "community_name": "liveworkspace.tsx",
-      "file_type": "code",
-      "norm_label": "liveworkspace.tsx",
-      "source_file": "frontend/src/components/surveillance/liveworkspace.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "frontend_src_lib_utils",
-      "label": "utils.ts",
-      "_origin": "ast",
-      "community": 77,
-      "community_name": "liveworkspace.tsx",
-      "file_type": "code",
-      "norm_label": "utils.ts",
-      "source_file": "frontend/src/lib/utils.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "backend_app_inference_model_manager",
-      "label": "model_manager.py",
+      "id": "backend_app_pipeline_postprocessor",
+      "label": "postprocessor.py",
       "_origin": "ast",
       "community": 78,
-      "community_name": "ONNXModelError",
+      "community_name": "PostprocessorConfig",
       "file_type": "code",
-      "norm_label": "model_manager.py",
-      "source_file": "backend/app/inference/model_manager.py",
+      "norm_label": "postprocessor.py",
+      "source_file": "backend/app/pipeline/postprocessor.py",
       "source_location": "L1"
     },
     {
-      "id": "backend_app_inference_onnx_engine",
-      "label": "onnx_engine.py",
-      "_origin": "ast",
-      "community": 78,
-      "community_name": "ONNXModelError",
-      "file_type": "code",
-      "norm_label": "onnx_engine.py",
-      "source_file": "backend/app/inference/onnx_engine.py",
-      "source_location": "L1"
-    },
-    {
-      "id": "backend_app_inference_onnx_engine_py_exception",
+      "id": "backend_app_pipeline_postprocessor_py_exception",
       "label": "Exception",
       "_origin": "ast",
       "community": 78,
-      "community_name": "ONNXModelError",
+      "community_name": "PostprocessorConfig",
       "file_type": "code",
       "norm_label": "exception",
       "source_file": "",
       "source_location": ""
     },
     {
-      "id": "backend_app_inference_onnx_engine_py_ndarray",
-      "label": "ndarray",
+      "id": "backend_app_pipeline_postprocessor_rationale_30",
+      "label": "Base exception for postprocessing errors.",
       "_origin": "ast",
       "community": 78,
-      "community_name": "ONNXModelError",
-      "file_type": "code",
-      "norm_label": "ndarray",
-      "source_file": "",
-      "source_location": ""
+      "community_name": "PostprocessorConfig",
+      "file_type": "rationale",
+      "norm_label": "base exception for postprocessing errors.",
+      "source_file": "backend/app/pipeline/postprocessor.py",
+      "source_location": "L30"
     },
     {
-      "id": "backend_app_inference_onnx_engine_rationale_270",
-      "label": "Run inference using a NumPy array. Preprocessing is intentionally kept outside\u2026",
+      "id": "backend_app_pipeline_postprocessor_rationale_54",
+      "label": "Configuration for bounding box decoding and NMS.",
       "_origin": "ast",
       "community": 78,
-      "community_name": "ONNXModelError",
+      "community_name": "PostprocessorConfig",
       "file_type": "rationale",
-      "norm_label": "run inference using a numpy array. preprocessing is intentionally kept outside...",
-      "source_file": "backend/app/inference/onnx_engine.py",
-      "source_location": "L270"
-    },
-    {
-      "id": "backend_app_inference_onnx_engine_rationale_29",
-      "label": "Base exception for ONNX engine errors.",
-      "_origin": "ast",
-      "community": 78,
-      "community_name": "ONNXModelError",
-      "file_type": "rationale",
-      "norm_label": "base exception for onnx engine errors.",
-      "source_file": "backend/app/inference/onnx_engine.py",
-      "source_location": "L29"
-    },
-    {
-      "id": "backend_app_inference_onnx_engine_rationale_33",
-      "label": "Raised when an ONNX model cannot be loaded or is invalid.",
-      "_origin": "ast",
-      "community": 78,
-      "community_name": "ONNXModelError",
-      "file_type": "rationale",
-      "norm_label": "raised when an onnx model cannot be loaded or is invalid.",
-      "source_file": "backend/app/inference/onnx_engine.py",
-      "source_location": "L33"
-    },
-    {
-      "id": "backend_app_inference_onnx_engine_rationale_37",
-      "label": "Raised when inference fails.",
-      "_origin": "ast",
-      "community": 78,
-      "community_name": "ONNXModelError",
-      "file_type": "rationale",
-      "norm_label": "raised when inference fails.",
-      "source_file": "backend/app/inference/onnx_engine.py",
-      "source_location": "L37"
+      "norm_label": "configuration for bounding box decoding and nms.",
+      "source_file": "backend/app/pipeline/postprocessor.py",
+      "source_location": "L54"
     },
     {
       "id": "backend_app_pipeline_reid_service",
@@ -13103,37 +13091,26 @@
       "source_location": "L163"
     },
     {
-      "id": "api_route",
-      "label": "api_route",
+      "id": "backend_app_api_anpr_py_streamingresponse",
+      "label": "StreamingResponse",
       "_origin": "ast",
       "community": 85,
-      "community_name": "get_annotated_frame",
+      "community_name": "stream_anpr",
       "file_type": "code",
-      "norm_label": "api_route",
+      "norm_label": "streamingresponse",
       "source_file": "",
       "source_location": ""
     },
     {
-      "id": "backend_app_api_tracking_rationale_778",
-      "label": "Serve a server-annotated ByteTrack video with burned-in bounding boxes (H.264\u2026",
+      "id": "backend_app_api_anpr_rationale_152",
+      "label": "Live MJPEG stream with real-time green plate reticles and vehicle\u2026",
       "_origin": "ast",
       "community": 85,
-      "community_name": "get_annotated_frame",
+      "community_name": "stream_anpr",
       "file_type": "rationale",
-      "norm_label": "serve a server-annotated bytetrack video with burned-in bounding boxes (h.264...",
-      "source_file": "backend/app/api/tracking.py",
-      "source_location": "L778"
-    },
-    {
-      "id": "backend_app_api_tracking_rationale_799",
-      "label": "Serve a single server-annotated JPEG frame from tracked video.",
-      "_origin": "ast",
-      "community": 85,
-      "community_name": "get_annotated_frame",
-      "file_type": "rationale",
-      "norm_label": "serve a single server-annotated jpeg frame from tracked video.",
-      "source_file": "backend/app/api/tracking.py",
-      "source_location": "L799"
+      "norm_label": "live mjpeg stream with real-time green plate reticles and vehicle...",
+      "source_file": "backend/app/api/anpr.py",
+      "source_location": "L152"
     },
     {
       "id": "backend_app_main_py_exception",
@@ -13147,46 +13124,13 @@
       "source_location": ""
     },
     {
-      "id": "backend_scripts_quantize_model",
-      "label": "quantize_model.py",
+      "id": "api_route",
+      "label": "api_route",
       "_origin": "ast",
-      "community": 87,
-      "community_name": "quantize_model.py",
+      "community": 9,
+      "community_name": "tracking.py",
       "file_type": "code",
-      "norm_label": "quantize_model.py",
-      "source_file": "backend/scripts/quantize_model.py",
-      "source_location": "L1"
-    },
-    {
-      "id": "backend_scripts_quantize_model_rationale_1",
-      "label": "backend/scripts/quantize_model.py Quantizes FP32 ONNX models in backend/models\u2026",
-      "_origin": "ast",
-      "community": 87,
-      "community_name": "quantize_model.py",
-      "file_type": "rationale",
-      "norm_label": "backend/scripts/quantize_model.py quantizes fp32 onnx models in backend/models...",
-      "source_file": "backend/scripts/quantize_model.py",
-      "source_location": "L1"
-    },
-    {
-      "id": "backend_app_api_stream_py_response",
-      "label": "Response",
-      "_origin": "ast",
-      "community": 88,
-      "community_name": "Response",
-      "file_type": "code",
-      "norm_label": "response",
-      "source_file": "",
-      "source_location": ""
-    },
-    {
-      "id": "backend_app_api_stream_py_streamingresponse",
-      "label": "StreamingResponse",
-      "_origin": "ast",
-      "community": 89,
-      "community_name": "StreamingResponse",
-      "file_type": "code",
-      "norm_label": "streamingresponse",
+      "norm_label": "api_route",
       "source_file": "",
       "source_location": ""
     },
@@ -13235,17 +13179,6 @@
       "source_location": ""
     },
     {
-      "id": "backend_app_tracking_tracker_py_exception",
-      "label": "Exception",
-      "_origin": "ast",
-      "community": 9,
-      "community_name": "tracking.py",
-      "file_type": "code",
-      "norm_label": "exception",
-      "source_file": "",
-      "source_location": ""
-    },
-    {
       "id": "backend_app_api_tracking_rationale_1",
       "label": "/api/tracking \u2014 ByteTrack multi-object tracking endpoints. Endpoints ---------\u2026",
       "_origin": "ast",
@@ -13290,6 +13223,39 @@
       "source_location": "L71"
     },
     {
+      "id": "backend_app_api_tracking_rationale_778",
+      "label": "Serve a server-annotated ByteTrack video with burned-in bounding boxes (H.264\u2026",
+      "_origin": "ast",
+      "community": 9,
+      "community_name": "tracking.py",
+      "file_type": "rationale",
+      "norm_label": "serve a server-annotated bytetrack video with burned-in bounding boxes (h.264...",
+      "source_file": "backend/app/api/tracking.py",
+      "source_location": "L778"
+    },
+    {
+      "id": "backend_app_api_tracking_rationale_799",
+      "label": "Serve a single server-annotated JPEG frame from tracked video.",
+      "_origin": "ast",
+      "community": 9,
+      "community_name": "tracking.py",
+      "file_type": "rationale",
+      "norm_label": "serve a single server-annotated jpeg frame from tracked video.",
+      "source_file": "backend/app/api/tracking.py",
+      "source_location": "L799"
+    },
+    {
+      "id": "backend_app_api_tracking_rationale_822",
+      "label": "List all active cross-camera person traces with recent sightings and trajectory\u2026",
+      "_origin": "ast",
+      "community": 9,
+      "community_name": "tracking.py",
+      "file_type": "rationale",
+      "norm_label": "list all active cross-camera person traces with recent sightings and trajectory...",
+      "source_file": "backend/app/api/tracking.py",
+      "source_location": "L822"
+    },
+    {
       "id": "backend_app_pipeline_preprocessor_rationale_31",
       "label": "Generic preprocessing configuration. Model-specific values can be changed later\u2026",
       "_origin": "ast",
@@ -13299,28 +13265,6 @@
       "norm_label": "generic preprocessing configuration. model-specific values can be changed later...",
       "source_file": "backend/app/pipeline/preprocessor.py",
       "source_location": "L31"
-    },
-    {
-      "id": "backend_app_tracking_tracker_rationale_38",
-      "label": "Raised when the ByteTracker dependency is unavailable or fails.",
-      "_origin": "ast",
-      "community": 9,
-      "community_name": "tracking.py",
-      "file_type": "rationale",
-      "norm_label": "raised when the bytetracker dependency is unavailable or fails.",
-      "source_file": "backend/app/tracking/tracker.py",
-      "source_location": "L38"
-    },
-    {
-      "id": "backend_app_pipeline_rtsp_loader_py_exception",
-      "label": "Exception",
-      "_origin": "ast",
-      "community": 90,
-      "community_name": "Exception",
-      "file_type": "code",
-      "norm_label": "exception",
-      "source_file": "",
-      "source_location": ""
     }
   ],
   "links": [
@@ -13734,14 +13678,14 @@
     },
     {
       "source": "backend_app_api_stream_get_live_stream",
-      "target": "streamingresponse",
+      "target": "backend_app_api_stream_py_streamingresponse",
       "relation": "calls",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/app/api/stream.py",
-      "source_location": "L703",
+      "source_location": "L674",
       "weight": 1.0
     },
     {
@@ -13753,7 +13697,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/app/api/stream.py",
-      "source_location": "L704",
+      "source_location": "L675",
       "weight": 1.0
     },
     {
@@ -13765,7 +13709,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/app/api/stream.py",
-      "source_location": "L731",
+      "source_location": "L701",
       "weight": 1.0
     },
     {
@@ -13777,7 +13721,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/app/api/stream.py",
-      "source_location": "L750",
+      "source_location": "L711",
       "weight": 1.0
     },
     {
@@ -13789,7 +13733,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/app/api/stream.py",
-      "source_location": "L767",
+      "source_location": "L728",
       "weight": 1.0
     },
     {
@@ -13837,7 +13781,43 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/app/api/stream.py",
-      "source_location": "L384",
+      "source_location": "L373",
+      "weight": 1.0
+    },
+    {
+      "source": "backend_app_api_stream_stream_generator",
+      "target": "backend_app_pipeline_preprocessor_preprocessor",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "backend/app/api/stream.py",
+      "source_location": "L388",
+      "weight": 1.0
+    },
+    {
+      "source": "backend_app_api_stream_stream_generator",
+      "target": "backend_app_pipeline_preprocessor_preprocessingconfig",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "backend/app/api/stream.py",
+      "source_location": "L389",
+      "weight": 1.0
+    },
+    {
+      "source": "backend_app_api_stream_stream_generator",
+      "target": "backend_app_tracking_tracker_bytetrackerwrapper",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "backend/app/api/stream.py",
+      "source_location": "L407",
       "weight": 1.0
     },
     {
@@ -13849,7 +13829,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/app/api/stream.py",
-      "source_location": "L452",
+      "source_location": "L440",
       "weight": 1.0
     },
     {
@@ -13861,7 +13841,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/app/api/stream.py",
-      "source_location": "L572",
+      "source_location": "L528",
       "weight": 1.0
     },
     {
@@ -13873,7 +13853,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/app/api/stream.py",
-      "source_location": "L582",
+      "source_location": "L553",
       "weight": 1.0
     },
     {
@@ -13885,7 +13865,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/app/api/stream.py",
-      "source_location": "L629",
+      "source_location": "L600",
       "weight": 1.0
     },
     {
@@ -13897,7 +13877,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/app/api/stream.py",
-      "source_location": "L642",
+      "source_location": "L613",
       "weight": 1.0
     },
     {
@@ -14797,7 +14777,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/app/pipeline/face_service.py",
-      "source_location": "L627",
+      "source_location": "L605",
       "weight": 1.0
     },
     {
@@ -14809,7 +14789,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/app/pipeline/face_service.py",
-      "source_location": "L647",
+      "source_location": "L625",
       "weight": 1.0
     },
     {
@@ -14833,7 +14813,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/app/pipeline/face_service.py",
-      "source_location": "L502",
+      "source_location": "L489",
       "weight": 1.0
     },
     {
@@ -14845,7 +14825,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/app/pipeline/face_service.py",
-      "source_location": "L543",
+      "source_location": "L521",
       "weight": 1.0
     },
     {
@@ -14857,7 +14837,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/app/pipeline/face_service.py",
-      "source_location": "L577",
+      "source_location": "L555",
       "weight": 1.0
     },
     {
@@ -14869,7 +14849,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/app/pipeline/face_service.py",
-      "source_location": "L614",
+      "source_location": "L592",
       "weight": 1.0
     },
     {
@@ -14881,7 +14861,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/app/pipeline/face_service.py",
-      "source_location": "L617",
+      "source_location": "L595",
       "weight": 1.0
     },
     {
@@ -15361,7 +15341,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/app/pipeline/rtsp_loader.py",
-      "source_location": "L146",
+      "source_location": "L140",
       "weight": 1.0
     },
     {
@@ -15373,7 +15353,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/app/pipeline/rtsp_loader.py",
-      "source_location": "L257",
+      "source_location": "L251",
       "weight": 1.0
     },
     {
@@ -15385,7 +15365,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/app/pipeline/rtsp_loader.py",
-      "source_location": "L266",
+      "source_location": "L260",
       "weight": 1.0
     },
     {
@@ -15409,7 +15389,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/app/pipeline/rtsp_loader.py",
-      "source_location": "L158",
+      "source_location": "L152",
       "weight": 1.0
     },
     {
@@ -15421,7 +15401,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/app/pipeline/rtsp_loader.py",
-      "source_location": "L170",
+      "source_location": "L164",
       "weight": 1.0
     },
     {
@@ -15433,7 +15413,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/app/pipeline/rtsp_loader.py",
-      "source_location": "L195",
+      "source_location": "L189",
       "weight": 1.0
     },
     {
@@ -15445,7 +15425,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/app/pipeline/rtsp_loader.py",
-      "source_location": "L208",
+      "source_location": "L202",
       "weight": 1.0
     },
     {
@@ -16369,7 +16349,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "frontend/src/lib/authStore.ts",
-      "source_location": "L85",
+      "source_location": "L77",
       "weight": 1.0
     },
     {
@@ -16986,38 +16966,38 @@
     },
     {
       "source": "backend_app_api_stream_get_live_stream",
-      "target": "get",
+      "target": "anpr_app_get",
       "relation": "references",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "context": "decorator",
       "source_file": "backend/app/api/stream.py",
-      "source_location": "L660",
+      "source_location": "L631",
       "weight": 1.0
     },
     {
       "source": "backend_app_api_stream_get_snapshot",
-      "target": "get",
+      "target": "anpr_app_get",
       "relation": "references",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "context": "decorator",
       "source_file": "backend/app/api/stream.py",
-      "source_location": "L724",
+      "source_location": "L695",
       "weight": 1.0
     },
     {
       "source": "backend_app_api_stream_validate_stream",
-      "target": "get",
+      "target": "anpr_app_get",
       "relation": "references",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "context": "decorator",
       "source_file": "backend/app/api/stream.py",
-      "source_location": "L618",
+      "source_location": "L589",
       "weight": 1.0
     },
     {
@@ -17857,7 +17837,7 @@
       "confidence_score": 1.0,
       "context": "generic_arg",
       "source_file": "backend/app/pipeline/face_service.py",
-      "source_location": "L621",
+      "source_location": "L599",
       "weight": 1.0
     },
     {
@@ -17893,7 +17873,7 @@
       "confidence_score": 1.0,
       "context": "generic_arg",
       "source_file": "backend/app/pipeline/face_service.py",
-      "source_location": "L770",
+      "source_location": "L748",
       "weight": 1.0
     },
     {
@@ -17917,7 +17897,7 @@
       "confidence_score": 1.0,
       "context": "generic_arg",
       "source_file": "backend/app/pipeline/face_service.py",
-      "source_location": "L745",
+      "source_location": "L723",
       "weight": 1.0
     },
     {
@@ -18097,7 +18077,7 @@
       "confidence_score": 1.0,
       "context": "generic_arg",
       "source_file": "backend/app/pipeline/rtsp_loader.py",
-      "source_location": "L229",
+      "source_location": "L223",
       "weight": 1.0
     },
     {
@@ -18386,6 +18366,42 @@
       "context": "import",
       "source_file": "backend/app/api/inference.py",
       "source_location": "L58",
+      "weight": 1.0
+    },
+    {
+      "source": "backend_app_api_stream",
+      "target": "backend_app_pipeline_preprocessor_preprocessingconfig",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "backend/app/api/stream.py",
+      "source_location": "L18",
+      "weight": 1.0
+    },
+    {
+      "source": "backend_app_api_stream",
+      "target": "backend_app_pipeline_preprocessor_preprocessor",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "backend/app/api/stream.py",
+      "source_location": "L18",
+      "weight": 1.0
+    },
+    {
+      "source": "backend_app_api_stream",
+      "target": "backend_app_tracking_tracker_bytetrackerwrapper",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "backend/app/api/stream.py",
+      "source_location": "L406",
       "weight": 1.0
     },
     {
@@ -20329,7 +20345,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "frontend/src/components/dashboard/AnalyticsDashboard.tsx",
-      "source_location": "L15",
+      "source_location": "L5",
       "weight": 1.0
     },
     {
@@ -20341,7 +20357,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "frontend/src/components/dashboard/AnalyticsDashboard.tsx",
-      "source_location": "L16",
+      "source_location": "L6",
       "weight": 1.0
     },
     {
@@ -20353,7 +20369,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "frontend/src/components/dashboard/AnalyticsDashboard.tsx",
-      "source_location": "L17",
+      "source_location": "L7",
       "weight": 1.0
     },
     {
@@ -20365,7 +20381,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "frontend/src/components/dashboard/AnalyticsDashboard.tsx",
-      "source_location": "L18",
+      "source_location": "L8",
       "weight": 1.0
     },
     {
@@ -22208,54 +22224,6 @@
     },
     {
       "source": "frontend_src_components_dashboard_analyticsdashboard",
-      "target": "frontend_src_components_dashboard_activityoverviewchart",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "frontend/src/components/dashboard/AnalyticsDashboard.tsx",
-      "source_location": "L15",
-      "weight": 1.0
-    },
-    {
-      "source": "frontend_src_components_dashboard_analyticsdashboard",
-      "target": "frontend_src_components_dashboard_detectionbreakdowncard",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "frontend/src/components/dashboard/AnalyticsDashboard.tsx",
-      "source_location": "L16",
-      "weight": 1.0
-    },
-    {
-      "source": "frontend_src_components_dashboard_analyticsdashboard",
-      "target": "frontend_src_components_dashboard_cameraoutpostgrid",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "frontend/src/components/dashboard/AnalyticsDashboard.tsx",
-      "source_location": "L17",
-      "weight": 1.0
-    },
-    {
-      "source": "frontend_src_components_dashboard_analyticsdashboard",
-      "target": "frontend_src_components_dashboard_needsattentioncard",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "frontend/src/components/dashboard/AnalyticsDashboard.tsx",
-      "source_location": "L18",
-      "weight": 1.0
-    },
-    {
-      "source": "frontend_src_components_dashboard_analyticsdashboard",
       "target": "ref_react",
       "relation": "imports_from",
       "_origin": "ast",
@@ -22275,7 +22243,55 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "frontend/src/components/dashboard/AnalyticsDashboard.tsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_components_dashboard_analyticsdashboard",
+      "target": "frontend_src_components_dashboard_activityoverviewchart",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "frontend/src/components/dashboard/AnalyticsDashboard.tsx",
       "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_components_dashboard_analyticsdashboard",
+      "target": "frontend_src_components_dashboard_detectionbreakdowncard",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "frontend/src/components/dashboard/AnalyticsDashboard.tsx",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_components_dashboard_analyticsdashboard",
+      "target": "frontend_src_components_dashboard_cameraoutpostgrid",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "frontend/src/components/dashboard/AnalyticsDashboard.tsx",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_components_dashboard_analyticsdashboard",
+      "target": "frontend_src_components_dashboard_needsattentioncard",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "frontend/src/components/dashboard/AnalyticsDashboard.tsx",
+      "source_location": "L8",
       "weight": 1.0
     },
     {
@@ -22288,18 +22304,6 @@
       "context": "import",
       "source_file": "frontend/src/components/dashboard/camerafeedstrip.tsx",
       "source_location": "L1",
-      "weight": 1.0
-    },
-    {
-      "source": "frontend_src_components_dashboard_cameraoutpostgrid",
-      "target": "ref_lucide_react",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "frontend/src/components/dashboard/CameraOutpostGrid.tsx",
-      "source_location": "L4",
       "weight": 1.0
     },
     {
@@ -22372,18 +22376,6 @@
       "context": "import",
       "source_file": "frontend/src/components/dashboard/metricsrow.tsx",
       "source_location": "L3",
-      "weight": 1.0
-    },
-    {
-      "source": "frontend_src_components_dashboard_needsattentioncard",
-      "target": "ref_lucide_react",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "frontend/src/components/dashboard/NeedsAttentionCard.tsx",
-      "source_location": "L4",
       "weight": 1.0
     },
     {
@@ -23368,7 +23360,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "backend/app/api/stream.py",
-      "source_location": "L302",
+      "source_location": "L291",
       "weight": 1.0
     },
     {
@@ -23380,7 +23372,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "backend/app/api/stream.py",
-      "source_location": "L257",
+      "source_location": "L246",
       "weight": 1.0
     },
     {
@@ -23824,7 +23816,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "backend/app/pipeline/rtsp_loader.py",
-      "source_location": "L260",
+      "source_location": "L254",
       "weight": 1.0
     },
     {
@@ -23973,14 +23965,14 @@
     },
     {
       "source": "backend_app_api_stream_get_snapshot",
-      "target": "response",
+      "target": "backend_app_api_stream_py_response",
       "relation": "references",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "context": "return_type",
       "source_file": "backend/app/api/stream.py",
-      "source_location": "L725",
+      "source_location": "L696",
       "weight": 1.0
     },
     {
@@ -24016,7 +24008,7 @@
       "confidence_score": 1.0,
       "context": "return_type",
       "source_file": "backend/app/pipeline/face_service.py",
-      "source_location": "L770",
+      "source_location": "L748",
       "weight": 1.0
     },
     {
@@ -24064,7 +24056,7 @@
       "confidence_score": 1.0,
       "context": "return_type",
       "source_file": "backend/app/pipeline/rtsp_loader.py",
-      "source_location": "L154",
+      "source_location": "L148",
       "weight": 1.0
     },
     {
@@ -24968,7 +24960,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/app/api/stream.py",
-      "source_location": "L257",
+      "source_location": "L246",
       "weight": 1.0
     },
     {
@@ -24979,7 +24971,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/app/api/stream.py",
-      "source_location": "L302",
+      "source_location": "L291",
       "weight": 1.0
     },
     {
@@ -24990,7 +24982,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/app/api/stream.py",
-      "source_location": "L368",
+      "source_location": "L357",
       "weight": 1.0
     },
     {
@@ -25012,7 +25004,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/app/api/stream.py",
-      "source_location": "L619",
+      "source_location": "L590",
       "weight": 1.0
     },
     {
@@ -25023,7 +25015,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/app/api/stream.py",
-      "source_location": "L661",
+      "source_location": "L632",
       "weight": 1.0
     },
     {
@@ -25034,7 +25026,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/app/api/stream.py",
-      "source_location": "L725",
+      "source_location": "L696",
       "weight": 1.0
     },
     {
@@ -26721,17 +26713,6 @@
       "weight": 1.0
     },
     {
-      "source": "backend_scripts_quantize_model",
-      "target": "backend_scripts_quantize_model_quantize_all",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "backend/scripts/quantize_model.py",
-      "source_location": "L11",
-      "weight": 1.0
-    },
-    {
       "source": "backend_tests_test_alerts_and_scanner",
       "target": "backend_tests_test_alerts_and_scanner_test_suspect_trajectory_and_qrt_dispatch",
       "relation": "contains",
@@ -27311,7 +27292,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "frontend/src/app/login/page.tsx",
-      "source_location": "L183",
+      "source_location": "L162",
       "weight": 1.0
     },
     {
@@ -27586,7 +27567,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "frontend/src/components/dashboard/AnalyticsDashboard.tsx",
-      "source_location": "L20",
+      "source_location": "L10",
       "weight": 1.0
     },
     {
@@ -27619,18 +27600,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "frontend/src/components/dashboard/CameraOutpostGrid.tsx",
-      "source_location": "L17",
-      "weight": 1.0
-    },
-    {
-      "source": "frontend_src_components_dashboard_cameraoutpostgrid",
-      "target": "frontend_src_components_dashboard_cameraoutpostgrid_cameraoutpostgrid",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "frontend/src/components/dashboard/CameraOutpostGrid.tsx",
-      "source_location": "L57",
+      "source_location": "L13",
       "weight": 1.0
     },
     {
@@ -27641,7 +27611,18 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "frontend/src/components/dashboard/CameraOutpostGrid.tsx",
-      "source_location": "L6",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "frontend_src_components_dashboard_cameraoutpostgrid",
+      "target": "frontend_src_components_dashboard_cameraoutpostgrid_cameraoutpostgrid",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "frontend/src/components/dashboard/CameraOutpostGrid.tsx",
+      "source_location": "L49",
       "weight": 1.0
     },
     {
@@ -27729,7 +27710,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "frontend/src/components/dashboard/NeedsAttentionCard.tsx",
-      "source_location": "L6",
+      "source_location": "L3",
       "weight": 1.0
     },
     {
@@ -28323,7 +28304,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "frontend/src/lib/authStore.ts",
-      "source_location": "L60",
+      "source_location": "L59",
       "weight": 1.0
     },
     {
@@ -28334,7 +28315,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "frontend/src/lib/authStore.ts",
-      "source_location": "L78",
+      "source_location": "L70",
       "weight": 1.0
     },
     {
@@ -29637,7 +29618,7 @@
     },
     {
       "source": "backend_app_pipeline_rtsp_loader_rtsperror",
-      "target": "exception",
+      "target": "backend_app_pipeline_rtsp_loader_py_exception",
       "relation": "inherits",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -30545,7 +30526,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/app/pipeline/face_service.py",
-      "source_location": "L621",
+      "source_location": "L599",
       "weight": 1.0
     },
     {
@@ -30556,7 +30537,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/app/pipeline/face_service.py",
-      "source_location": "L738",
+      "source_location": "L716",
       "weight": 1.0
     },
     {
@@ -30567,7 +30548,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/app/pipeline/face_service.py",
-      "source_location": "L745",
+      "source_location": "L723",
       "weight": 1.0
     },
     {
@@ -30578,7 +30559,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/app/pipeline/face_service.py",
-      "source_location": "L770",
+      "source_location": "L748",
       "weight": 1.0
     },
     {
@@ -30897,7 +30878,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/app/pipeline/rtsp_loader.py",
-      "source_location": "L154",
+      "source_location": "L148",
       "weight": 1.0
     },
     {
@@ -30908,7 +30889,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/app/pipeline/rtsp_loader.py",
-      "source_location": "L186",
+      "source_location": "L180",
       "weight": 1.0
     },
     {
@@ -30919,7 +30900,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/app/pipeline/rtsp_loader.py",
-      "source_location": "L229",
+      "source_location": "L223",
       "weight": 1.0
     },
     {
@@ -30930,7 +30911,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/app/pipeline/rtsp_loader.py",
-      "source_location": "L245",
+      "source_location": "L239",
       "weight": 1.0
     },
     {
@@ -30941,7 +30922,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/app/pipeline/rtsp_loader.py",
-      "source_location": "L256",
+      "source_location": "L250",
       "weight": 1.0
     },
     {
@@ -30952,7 +30933,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/app/pipeline/rtsp_loader.py",
-      "source_location": "L260",
+      "source_location": "L254",
       "weight": 1.0
     },
     {
@@ -32133,36 +32114,36 @@
       "weight": 1.0
     },
     {
-      "source": "backend_app_api_stream_rationale_265",
+      "source": "backend_app_api_stream_rationale_254",
       "target": "backend_app_api_stream_draw_tactical_hud",
       "relation": "rationale_for",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/app/api/stream.py",
-      "source_location": "L265",
+      "source_location": "L254",
       "weight": 1.0
     },
     {
-      "source": "backend_app_api_stream_rationale_306",
+      "source": "backend_app_api_stream_rationale_295",
       "target": "backend_app_api_stream_draw_bounding_boxes",
       "relation": "rationale_for",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/app/api/stream.py",
-      "source_location": "L306",
+      "source_location": "L295",
       "weight": 1.0
     },
     {
-      "source": "backend_app_api_stream_rationale_379",
+      "source": "backend_app_api_stream_rationale_368",
       "target": "backend_app_api_stream_stream_generator",
       "relation": "rationale_for",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/app/api/stream.py",
-      "source_location": "L379",
+      "source_location": "L368",
       "weight": 1.0
     },
     {
@@ -32177,36 +32158,36 @@
       "weight": 1.0
     },
     {
-      "source": "backend_app_api_stream_rationale_625",
+      "source": "backend_app_api_stream_rationale_596",
       "target": "backend_app_api_stream_validate_stream",
       "relation": "rationale_for",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/app/api/stream.py",
-      "source_location": "L625",
+      "source_location": "L596",
       "weight": 1.0
     },
     {
-      "source": "backend_app_api_stream_rationale_699",
+      "source": "backend_app_api_stream_rationale_670",
       "target": "backend_app_api_stream_get_live_stream",
       "relation": "rationale_for",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/app/api/stream.py",
-      "source_location": "L699",
+      "source_location": "L670",
       "weight": 1.0
     },
     {
-      "source": "backend_app_api_stream_rationale_729",
+      "source": "backend_app_api_stream_rationale_700",
       "target": "backend_app_api_stream_get_snapshot",
       "relation": "rationale_for",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/app/api/stream.py",
-      "source_location": "L729",
+      "source_location": "L700",
       "weight": 1.0
     },
     {
@@ -33013,14 +32994,14 @@
       "weight": 1.0
     },
     {
-      "source": "backend_app_pipeline_face_service_rationale_466",
+      "source": "backend_app_pipeline_face_service_rationale_465",
       "target": "backend_app_pipeline_face_service_faceservice_detect_and_recognize",
       "relation": "rationale_for",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/app/pipeline/face_service.py",
-      "source_location": "L466",
+      "source_location": "L465",
       "weight": 1.0
     },
     {
@@ -33035,25 +33016,25 @@
       "weight": 1.0
     },
     {
-      "source": "backend_app_pipeline_face_service_rationale_746",
+      "source": "backend_app_pipeline_face_service_rationale_724",
       "target": "backend_app_pipeline_face_service_faceservice_log_events",
       "relation": "rationale_for",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/app/pipeline/face_service.py",
-      "source_location": "L746",
+      "source_location": "L724",
       "weight": 1.0
     },
     {
-      "source": "backend_app_pipeline_face_service_rationale_771",
+      "source": "backend_app_pipeline_face_service_rationale_749",
       "target": "backend_app_pipeline_face_service_faceservice_draw_faces",
       "relation": "rationale_for",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/app/pipeline/face_service.py",
-      "source_location": "L771",
+      "source_location": "L749",
       "weight": 1.0
     },
     {
@@ -33519,14 +33500,14 @@
       "weight": 1.0
     },
     {
-      "source": "backend_app_pipeline_rtsp_loader_rationale_155",
+      "source": "backend_app_pipeline_rtsp_loader_rationale_149",
       "target": "backend_app_pipeline_rtsp_loader_rtspstream_read_frame",
       "relation": "rationale_for",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/app/pipeline/rtsp_loader.py",
-      "source_location": "L155",
+      "source_location": "L149",
       "weight": 1.0
     },
     {
@@ -33541,14 +33522,14 @@
       "weight": 1.0
     },
     {
-      "source": "backend_app_pipeline_rtsp_loader_rationale_187",
+      "source": "backend_app_pipeline_rtsp_loader_rationale_181",
       "target": "backend_app_pipeline_rtsp_loader_rtspstream_reconnect",
       "relation": "rationale_for",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/app/pipeline/rtsp_loader.py",
-      "source_location": "L187",
+      "source_location": "L181",
       "weight": 1.0
     },
     {
@@ -33563,25 +33544,25 @@
       "weight": 1.0
     },
     {
-      "source": "backend_app_pipeline_rtsp_loader_rationale_230",
+      "source": "backend_app_pipeline_rtsp_loader_rationale_224",
       "target": "backend_app_pipeline_rtsp_loader_rtspstream_get_status",
       "relation": "rationale_for",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/app/pipeline/rtsp_loader.py",
-      "source_location": "L230",
+      "source_location": "L224",
       "weight": 1.0
     },
     {
-      "source": "backend_app_pipeline_rtsp_loader_rationale_246",
+      "source": "backend_app_pipeline_rtsp_loader_rationale_240",
       "target": "backend_app_pipeline_rtsp_loader_rtspstream_release",
       "relation": "rationale_for",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/app/pipeline/rtsp_loader.py",
-      "source_location": "L246",
+      "source_location": "L240",
       "weight": 1.0
     },
     {
@@ -34113,17 +34094,6 @@
       "weight": 1.0
     },
     {
-      "source": "backend_scripts_quantize_model_rationale_1",
-      "target": "backend_scripts_quantize_model",
-      "relation": "rationale_for",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "backend/scripts/quantize_model.py",
-      "source_location": "L1",
-      "weight": 1.0
-    },
-    {
       "source": "backend_tests_test_alerts_and_scanner_rationale_159",
       "target": "backend_tests_test_alerts_and_scanner_test_suspect_trajectory_and_qrt_dispatch",
       "relation": "rationale_for",
@@ -34347,66 +34317,6 @@
       "weight": 1.0
     },
     {
-      "source": "backend_app_api_stream_get_snapshot",
-      "target": "backend_app_pipeline_preprocessor_preprocessor",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "context": "call",
-      "source_file": "backend/app/api/stream.py",
-      "source_location": "L754",
-      "weight": 1.0
-    },
-    {
-      "source": "backend_app_api_stream_get_snapshot",
-      "target": "backend_app_pipeline_preprocessor_preprocessingconfig",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "context": "call",
-      "source_file": "backend/app/api/stream.py",
-      "source_location": "L755",
-      "weight": 1.0
-    },
-    {
-      "source": "backend_app_api_stream_stream_generator",
-      "target": "backend_app_pipeline_preprocessor_preprocessor",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "context": "call",
-      "source_file": "backend/app/api/stream.py",
-      "source_location": "L399",
-      "weight": 1.0
-    },
-    {
-      "source": "backend_app_api_stream_stream_generator",
-      "target": "backend_app_pipeline_preprocessor_preprocessingconfig",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "context": "call",
-      "source_file": "backend/app/api/stream.py",
-      "source_location": "L400",
-      "weight": 1.0
-    },
-    {
-      "source": "backend_app_api_stream_stream_generator",
-      "target": "backend_app_tracking_tracker_bytetrackerwrapper",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "context": "call",
-      "source_file": "backend/app/api/stream.py",
-      "source_location": "L418",
-      "weight": 1.0
-    },
-    {
       "source": "backend_app_api_inference_image_inference",
       "target": "backend_app_pipeline_preprocessor_preprocessingerror",
       "relation": "uses",
@@ -34514,6 +34424,28 @@
       "confidence_score": 0.95,
       "source_file": "backend/app/api/inference.py",
       "source_location": "L536",
+      "weight": 0.8
+    },
+    {
+      "source": "backend_app_api_stream_get_snapshot",
+      "target": "backend_app_pipeline_preprocessor_preprocessor",
+      "relation": "uses",
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "backend/app/api/stream.py",
+      "source_location": "L715",
+      "weight": 0.8
+    },
+    {
+      "source": "backend_app_api_stream_get_snapshot",
+      "target": "backend_app_pipeline_preprocessor_preprocessingconfig",
+      "relation": "uses",
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "backend/app/api/stream.py",
+      "source_location": "L716",
       "weight": 0.8
     },
     {
@@ -34826,5 +34758,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "755aae3c7a3fe8ddbda891c5a8f8aca76806faa5"
+  "built_at_commit": "47617990371606d46b9844199ddc5da76c46de8b"
 }

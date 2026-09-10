@@ -1,5 +1,53 @@
 [
   {
+    "id": "alert-1789075752666-f858",
+    "title": "\ud83d\udea8 SUSPECT SIGHTING: HARIOM [LOW]",
+    "location": "SITAICS \u2014 Forward Trench Line #3",
+    "time": "Just now",
+    "timestamp": 1789075752666,
+    "severity": "Medium",
+    "cameraId": "bop-jk-04",
+    "cameraName": "SITAICS",
+    "className": "suspect",
+    "confidence": 0.82,
+    "acknowledged": false,
+    "box": [
+      433.15,
+      282.68,
+      535.93,
+      388.48
+    ],
+    "snapshotUrl": "/api/alerts/snapshots/alert_1789075752653_bop-jk-04.jpg",
+    "suspectName": "Hariom",
+    "threatLevel": "LOW",
+    "category": "Wanted / BOLO",
+    "notes": "Automatic biometric match on feed SITAICS"
+  },
+  {
+    "id": "alert-1789075691251-3f23",
+    "title": "\ud83d\udea8 SUSPECT SIGHTING: HARIOM [LOW]",
+    "location": "SITAICS \u2014 Forward Trench Line #3",
+    "time": "Just now",
+    "timestamp": 1789075691251,
+    "severity": "Medium",
+    "cameraId": "bop-jk-04",
+    "cameraName": "SITAICS",
+    "className": "suspect",
+    "confidence": 0.71,
+    "acknowledged": false,
+    "box": [
+      651.18,
+      361.41,
+      686.81,
+      406.11
+    ],
+    "snapshotUrl": "/api/alerts/snapshots/alert_1789075691241_bop-jk-04.jpg",
+    "suspectName": "Hariom",
+    "threatLevel": "LOW",
+    "category": "Wanted / BOLO",
+    "notes": "Automatic biometric match on feed SITAICS"
+  },
+  {
     "id": "alert-1789075631069-9782",
     "title": "\ud83d\udea8 SUSPECT SIGHTING: HARIOM [LOW]",
     "location": "SITAICS \u2014 Forward Trench Line #3",

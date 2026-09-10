@@ -39,16 +39,14 @@ async def lifespan(app: FastAPI):
         except Exception as exc:
             logger.warning("Could not auto-load primary model 'best': %s", exc)
 
-    # Initialize alert broadcaster event loop and launch background continuous scanner
+    # Initialize alert broadcaster event loop (ContinuousFaceScanner remains OFF by default)
     try:
         from app.pipeline.alert_service import alert_service
-        from app.pipeline.feed_scanner import feed_scanner_service
 
         alert_service.broadcaster.set_event_loop(asyncio.get_running_loop())
-        feed_scanner_service.start()
-        logger.info("ContinuousFaceScanner multi-feed scanner started.")
+        logger.info("Alert broadcaster initialized. ContinuousFaceScanner is OFF by default.")
     except Exception as exc:
-        logger.warning("Could not start ContinuousFaceScanner on startup: %s", exc)
+        logger.warning("Could not initialize alert broadcaster on startup: %s", exc)
 
     try:
         yield
