@@ -1,5 +1,77 @@
 [
   {
+<<<<<<< HEAD
+    "id": "alert-1789067156632-4a03",
+    "title": "Tripwire Breach: Api Test Infiltration Wire [FORWARD]",
+    "location": "Camera bop-jk-01",
+    "time": "Just now",
+    "timestamp": 1789067156632,
+    "severity": "CRITICAL",
+    "cameraId": "bop-jk-01",
+    "cameraName": "Camera bop-jk-01",
+    "className": "suspect",
+    "confidence": 0.94,
+    "acknowledged": false,
+    "box": [
+      340.0,
+      420.0,
+      480.0,
+      780.0
+    ],
+    "snapshotUrl": null,
+    "suspectName": null,
+    "threatLevel": "CRITICAL",
+    "category": "tripwire_violation",
+    "notes": "Target SUSPECT (Track #156) crossed Api Test Infiltration Wire on Camera bop-jk-01."
+  },
+  {
+    "id": "alert-1789067156349-73e5",
+    "title": "Geofence Intrusion: Unit Test Restricted Zone [ENTRY]",
+    "location": "Test Camera",
+    "time": "Just now",
+    "timestamp": 1789067156349,
+    "severity": "CRITICAL",
+    "cameraId": "cam-test-eval",
+    "cameraName": "Test Camera",
+    "className": "person",
+    "confidence": 0.95,
+    "acknowledged": false,
+    "box": [
+      450.0,
+      450.0,
+      550.0,
+      550.0
+    ],
+    "snapshotUrl": null,
+    "suspectName": null,
+    "threatLevel": "CRITICAL",
+    "category": "geofence_breach",
+    "notes": "Target PERSON (Track #101) crossed Unit Test Restricted Zone on Test Camera."
+  },
+  {
+    "id": "alert-1789067156345-4d92",
+    "title": "Tripwire Breach: Unit Test Directional Tripwire [FORWARD]",
+    "location": "Test Camera",
+    "time": "Just now",
+    "timestamp": 1789067156345,
+    "severity": "HIGH",
+    "cameraId": "cam-test-eval",
+    "cameraName": "Test Camera",
+    "className": "person",
+    "confidence": 0.95,
+    "acknowledged": false,
+    "box": [
+      450.0,
+      450.0,
+      550.0,
+      550.0
+    ],
+    "snapshotUrl": null,
+    "suspectName": null,
+    "threatLevel": "HIGH",
+    "category": "tripwire_violation",
+    "notes": "Target PERSON (Track #101) crossed Unit Test Directional Tripwire on Test Camera."
+=======
     "id": "alert-1789074007760-2b44",
     "title": "\ud83d\udea8 SUSPECT SIGHTING: HARIOM [LOW]",
     "location": "Audi 3 \u2014 Observation Bunker B-12",
@@ -2446,5 +2518,6 @@
     "threatLevel": "LOW",
     "category": "Wanted / BOLO",
     "notes": "Automatic biometric match on feed Chak Lahori Forward Outpost Thermal"
+>>>>>>> 6e87b7d9dbe5cebb34f9175e77051c0e33682df0
   }
 ]
