@@ -52,15 +52,123 @@ export default function FacialRecognitionPage() {
   const [isLoading, setIsLoading] = useState(false);
 
   // Live Stream State
-  const [streamSource, setStreamSource] = useState<string>("sample");
+  const [streamSource, setStreamSource] = useState<string>("browser");
   const [isStreamPlaying, setIsStreamPlaying] = useState<boolean>(true);
   const [streamKey, setStreamKey] = useState<number>(0);
   const [streamError, setStreamError] = useState<boolean>(false);
+  const [customStreamUrl, setCustomStreamUrl] = useState<string>("");
   const streamImgRef = useRef<HTMLImageElement | null>(null);
+
+  // Client-Side Browser Webcam WebSocket Streaming State
+  const clientVideoRef = useRef<HTMLVideoElement | null>(null);
+  const clientCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const clientWsRef = useRef<WebSocket | null>(null);
+  const clientIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const [clientAnnotatedUrl, setClientAnnotatedUrl] = useState<string | null>(null);
+  const [isClientStreaming, setIsClientStreaming] = useState<boolean>(false);
+
+  const stopClientStreaming = () => {
+    if (clientIntervalRef.current) {
+      clearInterval(clientIntervalRef.current);
+      clientIntervalRef.current = null;
+    }
+    if (clientWsRef.current) {
+      try {
+        clientWsRef.current.close();
+      } catch {}
+      clientWsRef.current = null;
+    }
+    if (clientVideoRef.current && clientVideoRef.current.srcObject) {
+      try {
+        const stream = clientVideoRef.current.srcObject as MediaStream;
+        stream.getTracks().forEach((track) => track.stop());
+      } catch {}
+      clientVideoRef.current.srcObject = null;
+    }
+    setIsClientStreaming(false);
+  };
+
+  const startClientStreaming = async () => {
+    stopClientStreaming();
+    setStreamError(false);
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: "user" },
+      });
+
+      if (clientVideoRef.current) {
+        clientVideoRef.current.srcObject = stream;
+        try {
+          await clientVideoRef.current.play();
+        } catch {}
+      }
+
+      const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+      const wsHost = BACKEND_BASE_URL.replace(/^https?:\/\//i, "");
+      const wsUrl = `${wsProtocol}//${wsHost}/api/faces/ws/stream`;
+      const ws = new WebSocket(wsUrl);
+      ws.binaryType = "blob";
+      clientWsRef.current = ws;
+
+      ws.onopen = () => {
+        setIsClientStreaming(true);
+        setStreamError(false);
+
+        clientIntervalRef.current = setInterval(() => {
+          if (!clientVideoRef.current || !clientCanvasRef.current || ws.readyState !== WebSocket.OPEN) {
+            return;
+          }
+          const video = clientVideoRef.current;
+          const canvas = clientCanvasRef.current;
+          if (!video.videoWidth || !video.videoHeight) return;
+
+          canvas.width = video.videoWidth;
+          canvas.height = video.videoHeight;
+          const ctx = canvas.getContext("2d");
+          if (ctx) {
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            canvas.toBlob(
+              (blob) => {
+                if (blob && ws.readyState === WebSocket.OPEN) {
+                  ws.send(blob);
+                }
+              },
+              "image/jpeg",
+              0.72
+            );
+          }
+        }, 66);
+      };
+
+      ws.onmessage = (event) => {
+        if (event.data instanceof Blob) {
+          const url = URL.createObjectURL(event.data);
+          setClientAnnotatedUrl((prev) => {
+            if (prev) URL.revokeObjectURL(prev);
+            return url;
+          });
+        }
+      };
+
+      ws.onerror = () => {
+        setStreamError(true);
+      };
+
+      ws.onclose = () => {
+        setIsClientStreaming(false);
+      };
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.warn("Client webcam stream error:", msg);
+      setStreamError(true);
+    }
+  };
 
   const handleToggleStream = async () => {
     if (isStreamPlaying) {
       setIsStreamPlaying(false);
+      stopClientStreaming();
       try {
         await api.stopFaceCamera();
       } catch {}
@@ -73,6 +181,7 @@ export default function FacialRecognitionPage() {
 
   const handleSourceChange = async (newSource: string) => {
     setStreamError(false);
+    stopClientStreaming();
     try {
       await api.stopFaceCamera();
     } catch {}
@@ -129,6 +238,7 @@ export default function FacialRecognitionPage() {
   // Release camera hardware on component unmount
   useEffect(() => {
     return () => {
+      stopClientStreaming();
       api.stopFaceCamera().catch(() => {});
     };
   }, []);
@@ -139,6 +249,16 @@ export default function FacialRecognitionPage() {
       handleToggleStream();
     }
   }, [activeTab]);
+
+  // Handle client browser webcam streaming vs server stream
+  useEffect(() => {
+    if (activeTab === "stream" && isStreamPlaying && streamSource === "browser") {
+      startClientStreaming();
+    } else {
+      stopClientStreaming();
+    }
+    return () => stopClientStreaming();
+  }, [activeTab, isStreamPlaying, streamSource, streamKey]);
 
   const refreshAllData = async () => {
     setIsLoading(true);
@@ -326,8 +446,10 @@ export default function FacialRecognitionPage() {
 
   return (
     <div className="flex flex-col gap-6 p-4 sm:p-6 lg:p-8 min-h-screen bg-slate-950 text-slate-100">
-      {/* Hidden canvas for webcam frame snapshotting */}
+      {/* Hidden elements for webcam frame capture and streaming */}
       <canvas ref={canvasRef} className="hidden" />
+      <video ref={clientVideoRef} className="hidden" playsInline muted autoPlay />
+      <canvas ref={clientCanvasRef} className="hidden" />
 
       {/* TOP COMMAND HEADER */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 rounded-2xl bg-slate-900/80 border border-slate-800 shadow-2xl backdrop-blur-xl">
@@ -436,39 +558,71 @@ export default function FacialRecognitionPage() {
             <div className="relative rounded-2xl overflow-hidden bg-slate-950 border border-slate-800 shadow-2xl aspect-video flex items-center justify-center">
               {isStreamPlaying ? (
                 <>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    ref={streamImgRef}
-                    key={streamKey}
-                    src={`${BACKEND_BASE_URL}/api/faces/stream?source=${encodeURIComponent(
-                      streamSource
-                    )}&fps=20${streamKey > 0 ? `&t=${streamKey}` : ""}`}
-                    alt="Live Facial Recognition Stream"
-                    className="w-full h-full object-contain"
-                    onLoad={() => setStreamError(false)}
-                    onError={() => {
-                      setStreamError(true);
-                    }}
-                    suppressHydrationWarning
-                  />
+                  {streamSource === "browser" ? (
+                    clientAnnotatedUrl ? (
+                      /* eslint-disable-next-line @next/next/no-img-element */
+                      <img
+                        src={clientAnnotatedUrl}
+                        alt="Live Client Biometric Stream"
+                        className="w-full h-full object-contain"
+                      />
+                    ) : (
+                      <div className="flex flex-col items-center gap-3 text-slate-400 p-6 text-center">
+                        <Camera className="w-12 h-12 text-emerald-400 animate-pulse" />
+                        <p className="text-sm font-medium">Connecting Local Webcam to Backend AI...</p>
+                        <p className="text-xs text-slate-500 max-w-sm">
+                          Streaming your device&apos;s camera frames to {BACKEND_BASE_URL} for real-time YuNet & SFace biometric identification.
+                        </p>
+                      </div>
+                    )
+                  ) : (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img
+                      ref={streamImgRef}
+                      key={streamKey}
+                      src={`${BACKEND_BASE_URL}/api/faces/stream?source=${encodeURIComponent(
+                        streamSource === "custom" ? customStreamUrl || "sample" : streamSource
+                      )}&fps=20${streamKey > 0 ? `&t=${streamKey}` : ""}`}
+                      alt="Live Facial Recognition Stream"
+                      className="w-full h-full object-contain"
+                      onLoad={() => setStreamError(false)}
+                      onError={() => {
+                        setStreamError(true);
+                      }}
+                      suppressHydrationWarning
+                    />
+                  )}
+
                   {streamError && (
                     <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-950/85 backdrop-blur-sm z-20 p-6 text-center gap-3">
                       <AlertTriangle className="w-10 h-10 text-amber-400 animate-bounce" />
                       <p className="text-sm text-slate-200 font-medium">
-                        Unable to connect to feed ({streamSource === "0" ? "Local Camera 0 (Webcam)" : streamSource})
+                        Unable to connect to feed ({streamSource === "browser" ? "This Device (Browser Webcam)" : (streamSource === "0" ? "Server Host Camera 0" : streamSource)})
                       </p>
                       <p className="text-xs text-slate-400 max-w-sm">
-                        Please verify that the webcam is connected and not locked by another software.
+                        {streamSource === "0" || streamSource === "1"
+                          ? `The backend server at ${BACKEND_BASE_URL} does not have a physical webcam attached. Switch to "This Device (Browser Webcam)" to use your local camera.`
+                          : "Please verify camera permissions or ensure the feed source is online."}
                       </p>
-                      <div className="flex items-center gap-3 mt-2">
+                      <div className="flex flex-wrap items-center justify-center gap-3 mt-2">
                         <button
                           onClick={() => {
                             setStreamError(false);
-                            setStreamKey(Date.now());
+                            if (streamSource === "browser") {
+                              startClientStreaming();
+                            } else {
+                              setStreamKey(Date.now());
+                            }
                           }}
                           className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold text-xs uppercase tracking-wider transition"
                         >
                           Retry Reconnect
+                        </button>
+                        <button
+                          onClick={() => handleSourceChange("browser")}
+                          className="px-4 py-2 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-semibold hover:bg-emerald-500/30 transition"
+                        >
+                          Use This Device&apos;s Webcam
                         </button>
                         <button
                           onClick={() => handleSourceChange("sample")}
@@ -500,8 +654,8 @@ export default function FacialRecognitionPage() {
               </div>
 
               {/* Bottom Stream Controls Bar */}
-              <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between p-3 rounded-xl bg-slate-900/90 border border-slate-700/80 backdrop-blur">
-                <div className="flex items-center gap-3">
+              <div className="absolute bottom-4 left-4 right-4 flex flex-wrap items-center justify-between gap-3 p-3 rounded-xl bg-slate-900/90 border border-slate-700/80 backdrop-blur">
+                <div className="flex flex-wrap items-center gap-3">
                   <button
                     onClick={handleToggleStream}
                     className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 transition"
@@ -510,24 +664,53 @@ export default function FacialRecognitionPage() {
                   </button>
 
                   <button
-                    onClick={() => setStreamKey(Date.now())}
+                    onClick={() => {
+                      if (streamSource === "browser") {
+                        startClientStreaming();
+                      } else {
+                        setStreamKey(Date.now());
+                      }
+                    }}
                     className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 transition"
                     title="Reconnect"
                   >
                     <RefreshCw className="w-4 h-4" />
                   </button>
 
-                  <div className="flex items-center gap-2 text-xs text-slate-400">
+                  <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400">
                     <span>Source:</span>
                     <select
                       value={streamSource}
                       onChange={(e) => handleSourceChange(e.target.value)}
                       className="bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1 text-slate-200 text-xs focus:outline-none focus:border-emerald-500"
                     >
-                      <option value="sample">Demo Video Loop</option>
-                      <option value="0">Local Camera 0 (Webcam)</option>
-                      <option value="1">External USB Camera 1</option>
+                      <option value="browser">This Device (Browser Webcam) - For Remote Backend</option>
+                      <option value="sample">Demo Surveillance Feed (Server)</option>
+                      <option value="0">Server Host Camera 0 (Physical USB on Server)</option>
+                      <option value="1">Server Host Camera 1 (Physical USB on Server)</option>
+                      <option value="custom">Custom RTSP / IP Camera URL...</option>
                     </select>
+
+                    {streamSource === "custom" && (
+                      <div className="flex items-center gap-1.5">
+                        <input
+                          type="text"
+                          placeholder="http://ip:8080/video or rtsp://..."
+                          value={customStreamUrl}
+                          onChange={(e) => setCustomStreamUrl(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") setStreamKey(Date.now());
+                          }}
+                          className="bg-slate-950 border border-slate-700 rounded-lg px-2 py-1 text-slate-200 text-xs w-48 focus:outline-none focus:border-emerald-500"
+                        />
+                        <button
+                          onClick={() => setStreamKey(Date.now())}
+                          className="px-2 py-1 rounded bg-emerald-600 text-slate-950 font-bold text-xs hover:bg-emerald-500"
+                        >
+                          Go
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -537,6 +720,25 @@ export default function FacialRecognitionPage() {
                 </div>
               </div>
             </div>
+
+            {/* Server Hardware Camera Notice when user selected server camera 0 or 1 */}
+            {(streamSource === "0" || streamSource === "1") && (
+              <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-amber-300">
+                <div className="flex items-start sm:items-center gap-2.5">
+                  <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5 sm:mt-0" />
+                  <div>
+                    <span className="font-bold text-amber-200">Server Hardware Camera Mode:</span>{" "}
+                    The backend at <code className="px-1.5 py-0.5 rounded bg-slate-950 font-mono text-amber-300">{BACKEND_BASE_URL}</code> is querying a physical USB webcam plugged directly into <em>that</em> machine. If you want to use the webcam on <strong>this</strong> computer, switch source to <strong>&quot;This Device (Browser Webcam)&quot;</strong>.
+                  </div>
+                </div>
+                <button
+                  onClick={() => handleSourceChange("browser")}
+                  className="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold text-xs whitespace-nowrap transition self-start sm:self-center"
+                >
+                  Use This Device&apos;s Webcam
+                </button>
+              </div>
+            )}
 
             {/* Quick Helper Banner */}
             <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800 flex items-center justify-between text-xs text-slate-400">
