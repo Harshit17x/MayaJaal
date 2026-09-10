@@ -52,6 +52,7 @@ from app.tracking.session_store import tracker_session_store
 from app.tracking.annotator import draw_tracked_boxes, convert_video_to_h264
 from app.pipeline.face_service import face_service
 from app.pipeline.alert_service import alert_service, SNAPSHOTS_DIR
+from app.tracking.global_tracker import global_trace_manager
 
 
 logger = logging.getLogger(__name__)
@@ -311,6 +312,25 @@ async def video_tracking(
                     raise HTTPException(status_code=500, detail=str(exc)) from exc
 
                 tracked_dicts = [t.to_dict() for t in tracked_objects]
+
+                # ── Global Person Re-ID Assignment across Cameras ────────
+                for td in tracked_dicts:
+                    c_name = str(td.get("class_name", "")).lower()
+                    if (c_name in ("person", "human", "pedestrian") or td.get("class_id") == 0) and td.get("track_id") is not None:
+                        try:
+                            gtid, is_cross, r_score = global_trace_manager.update_track(
+                                camera_id=f"video_upload_{session_video_id}",
+                                camera_name=f"Video Analysis ({file.filename or 'Upload'})",
+                                local_track_id=td["track_id"],
+                                box=td.get("box", []),
+                                frame_bgr=frame,
+                                confidence=float(td.get("confidence", 0.8)),
+                            )
+                            td["global_trace_id"] = gtid
+                            td["is_cross_camera"] = is_cross
+                            td["reid_score"] = r_score
+                        except Exception as reid_err:
+                            logger.debug("ReID update skip in video tracking: %s", reid_err)
 
                 # ── Periodic Biometric Suspect Facial Scan ───────────────
                 if frames_processed % face_scan_interval == 0:
@@ -648,10 +668,29 @@ async def rtsp_tracking(
             # Record touch so session store stats are accurate
             tracker_session_store.touch(camera_id)
 
+            tracked_dicts = [t.to_dict() for t in tracked_objects]
+            for td in tracked_dicts:
+                c_name = str(td.get("class_name", "")).lower()
+                if (c_name in ("person", "human", "pedestrian") or td.get("class_id") == 0) and td.get("track_id") is not None:
+                    try:
+                        gtid, is_cross, r_score = global_trace_manager.update_track(
+                            camera_id=camera_id,
+                            camera_name=f"Camera {camera_id}",
+                            local_track_id=td["track_id"],
+                            box=td.get("box", []),
+                            frame_bgr=frame,
+                            confidence=float(td.get("confidence", 0.8)),
+                        )
+                        td["global_trace_id"] = gtid
+                        td["is_cross_camera"] = is_cross
+                        td["reid_score"] = r_score
+                    except Exception as reid_err:
+                        logger.debug("ReID update skip in RTSP tracking: %s", reid_err)
+
             frame_results.append(
                 {
                     "frame_index": frames_processed,
-                    "tracked_objects": [t.to_dict() for t in tracked_objects],
+                    "tracked_objects": tracked_dicts,
                     "detections_count": len(raw_detections),
                     "tracks_count": len(tracked_objects),
                 }
@@ -772,4 +811,35 @@ async def get_annotated_frame(video_id: str, frame_index: int):
             "Cache-Control": "public, max-age=3600",
         },
     )
+
+
+# ---------------------------------------------------------------------------
+# Global Multi-Camera Person Re-ID Endpoints
+# ---------------------------------------------------------------------------
+
+@router.get("/global/traces")
+async def list_global_traces():
+    """List all active cross-camera person traces with recent sightings and trajectory counts."""
+    traces = global_trace_manager.list_active_traces()
+    return {
+        "status": "success",
+        "total_active": len(traces),
+        "traces": traces,
+    }
+
+
+@router.get("/global/traces/{trace_id}")
+async def get_global_trace_trajectory(trace_id: str):
+    """Retrieve full chronological GPS multi-camera trajectory for a specific Global Trace ID."""
+    traj = global_trace_manager.get_trace_trajectory(trace_id)
+    if not traj.get("found"):
+        raise HTTPException(status_code=404, detail=f"Global trace '{trace_id}' not found or expired.")
+    return traj
+
+
+@router.delete("/global/traces")
+async def reset_global_traces():
+    """Clear and reset all global cross-camera trace records."""
+    global_trace_manager.reset()
+    return {"status": "success", "message": "All global traces have been reset."}
 
