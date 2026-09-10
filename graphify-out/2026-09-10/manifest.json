@@ -966,15 +966,15 @@
     "semantic_hash": ""
   },
   "backend/app/api/faces.py": {
-    "mtime": 1789030926.397296,
-    "seen": 1789031028.2027617,
-    "ast_hash": "689c3099fe4cf716276da3d8ef9d1fdd",
+    "mtime": 1789032107.09505,
+    "seen": 1789032148.9268641,
+    "ast_hash": "5a8e96da8321dc394b05cea113bfda7d",
     "semantic_hash": ""
   },
   "backend/app/data/faces/known_faces.json": {
-    "mtime": 1789031386.1558833,
-    "seen": 1789031401.426093,
-    "ast_hash": "ec754e55d4d2d48cd4113bab7de0fb6c",
+    "mtime": 1789031812.911472,
+    "seen": 1789032148.9268868,
+    "ast_hash": "59446ce0d502f8dc1a99f186d8d46cda",
     "semantic_hash": ""
   },
   "backend/app/pipeline/face_service.py": {
@@ -990,9 +990,9 @@
     "semantic_hash": ""
   },
   "frontend/src/app/(operator)/facial-recognition/page.tsx": {
-    "mtime": 1789031373.4025998,
-    "seen": 1789031401.4262388,
-    "ast_hash": "32b48ab763e4d7d43667eb493ca48e4c",
+    "mtime": 1789031942.973491,
+    "seen": 1789032148.926974,
+    "ast_hash": "90a69b34729e04769d8f12d7894a53a4",
     "semantic_hash": ""
   },
   "frontend/src/types/face.ts": {
@@ -1011,6 +1011,12 @@
     "mtime": 1789030367.2878075,
     "seen": 1789030814.224435,
     "ast_hash": "5c350ccc292d0eaf3fcb6d1cafe52af6",
+    "semantic_hash": ""
+  },
+  "backend/app/data/faces/thumbnails/person_1789031811_e9deff.jpg": {
+    "mtime": 1789031812.907207,
+    "seen": 1789032148.9271045,
+    "ast_hash": "530f9b74a6ef356663d2c148a0c4089d",
     "semantic_hash": ""
   }
 }
