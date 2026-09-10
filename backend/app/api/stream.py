@@ -70,7 +70,7 @@ def create_standby_frame(
 
     # Header
     now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    header_title = f"MAYAJAAL • {protocol.upper()}"
+    header_title = f"MAATRIX • {protocol.upper()}"
     cv2.putText(frame, header_title, (30, 45), cv2.FONT_HERSHEY_SIMPLEX, 0.65, (0, 220, 120), 2)
     cv2.putText(frame, f"TIMESTAMP: {now_str} IST", (width - 280, 45), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (160, 175, 190), 1)
 

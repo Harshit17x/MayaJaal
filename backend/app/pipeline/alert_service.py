@@ -75,7 +75,7 @@ class AlertBroadcaster:
 
 class AlertService:
     """
-    Centralized Alert Management Service for MayaJaal.
+    Centralized Alert Management Service for MAATRIX.
     Maintains a persistent ring buffer of security triggers and suspect sightings,
     coordinates camera status changes, and manages real-time broadcast.
     """

@@ -2,7 +2,7 @@
 ByteTracker wrapper.
 
 Wraps supervision's ByteTrack class to integrate cleanly with the existing
-MayaJaal Postprocessor output format (list of Detection dicts).
+MAATRIX Postprocessor output format (list of Detection dicts).
 
 Compatibility:
     supervision 0.21 – 0.30:  ByteTrack class from supervision.tracker.byte_tracker.core

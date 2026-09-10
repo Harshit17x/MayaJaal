@@ -343,7 +343,7 @@ export function BorderMap({
                   <div style="font-size:11px; color:#475569; margin-bottom:8px; line-height:1.5;">
                     <div><strong>Frontier Length:</strong> <span style="font-weight:700; color:#0f172a;">${Number(lenKm).toLocaleString()} km</span></div>
                     <div><strong>Type:</strong> International Land Boundary</div>
-                    <div><strong>Status:</strong> MayaJaal Grid Active</div>
+                    <div><strong>Status:</strong> MAATRIX Grid Active</div>
                   </div>
                 </div>
               `;

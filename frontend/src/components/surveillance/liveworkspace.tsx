@@ -36,6 +36,8 @@ import {
   Compass,
   ShieldAlert,
   ScanFace,
+  UploadCloud,
+  Trash2,
 } from "lucide-react";
 
 /** Build the backend MJPEG stream URL (proxied Next.js → FastAPI). */
@@ -86,9 +88,8 @@ export function LiveWorkspace() {
 
   // Image source state
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
-  const [imagePreviewUrl, setImagePreviewUrl] = useState<string>(
-    "/images/himalayan-border-hero.jpg"
-  );
+  const [imagePreviewUrl, setImagePreviewUrl] = useState<string>("");
+  const [isDraggingOver, setIsDraggingOver] = useState<boolean>(false);
 
   // Video source state
   const [selectedVideoFile, setSelectedVideoFile] = useState<File | null>(null);
@@ -380,15 +381,21 @@ export function LiveWorkspace() {
 
     try {
       if (sourceMode === "upload-image") {
-        setStatusMessage("Executing dual-pipeline: ONNX threats + Biometric Face Scan...");
         let fileToSubmit = selectedImageFile;
         if (!fileToSubmit) {
+          if (!imagePreviewUrl) {
+            setStatusMessage("Please upload an image first.");
+            imageFileInputRef.current?.click();
+            setIsInferencing(false);
+            return;
+          }
           const res = await fetch(imagePreviewUrl);
           const blob = await res.blob();
           fileToSubmit = new File([blob], "surveillance_sample.jpg", {
             type: "image/jpeg",
           });
         }
+        setStatusMessage("Executing dual-pipeline: ONNX threats + Biometric Face Scan...");
 
         const [result, faceScanResult] = await Promise.all([
           api.runImageInference({
@@ -869,10 +876,14 @@ export function LiveWorkspace() {
             <button
               type="button"
               onClick={() => imageFileInputRef.current?.click()}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#eaf4ed] hover:bg-[#dceee1] text-[#1b5032] border border-[#bcdbc5] transition-colors cursor-pointer"
             >
               <Upload className="w-3.5 h-3.5" />
-              Upload Image
+              {selectedImageFile
+                ? `Image: ${selectedImageFile.name.slice(0, 16)}...`
+                : imagePreviewUrl
+                ? "Replace Image"
+                : "Upload Image"}
             </button>
           ) : sourceMode === "upload-video" ? (
             <button
@@ -1216,11 +1227,15 @@ export function LiveWorkspace() {
                   ? "VIDEO FEED • BORDER SURVEILLANCE"
                   : sourceMode === "rtsp"
                   ? `${streamProtocol.toUpperCase()} • LIVE STREAM`
-                  : "CAM-01 • SECTOR NORTH-EAST"}
+                  : selectedImageFile
+                  ? `IMAGE SCAN • ${selectedImageFile.name.toUpperCase()}`
+                  : imagePreviewUrl
+                  ? "IMAGE SCAN • SAMPLE FRAME"
+                  : "IMAGE SCAN • DIRECT UPLOAD"}
               </span>
             </div>
             <div className="font-mono text-[11px] text-slate-400">
-              RES: {sourceDims.width}x{sourceDims.height}
+              RES: {sourceMode === "upload-image" && !imagePreviewUrl ? "Awaiting Input" : `${sourceDims.width}x${sourceDims.height}`}
               {videoMetadata?.fps ? ` • ${Math.round(videoMetadata.fps)} FPS` : ""}
               {latencyMs !== null && ` • LATENCY: ${latencyMs}ms`}
             </div>
@@ -1326,19 +1341,142 @@ export function LiveWorkspace() {
                 onError={handleVideoError}
                 className="w-full h-full object-contain"
               />
+            ) : sourceMode === "upload-image" && !imagePreviewUrl ? (
+              /* DIRECT UPLOAD DROPZONE INSTEAD OF STATIC IMAGE */
+              <div
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  setIsDraggingOver(true);
+                }}
+                onDragLeave={() => setIsDraggingOver(false)}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  setIsDraggingOver(false);
+                  const file = e.dataTransfer.files?.[0];
+                  if (file && file.type.startsWith("image/")) {
+                    setSelectedImageFile(file);
+                    const url = URL.createObjectURL(file);
+                    setImagePreviewUrl(url);
+                    setDetections([]);
+                    setDetectedSuspectsInMedia([]);
+                    setStatusMessage(`Loaded image: ${file.name}`);
+                  }
+                }}
+                onClick={() => imageFileInputRef.current?.click()}
+                className={`w-full h-full min-h-[360px] flex flex-col items-center justify-center p-8 text-center cursor-pointer transition-all ${
+                  isDraggingOver
+                    ? "bg-[#13281c] border-2 border-dashed border-emerald-400"
+                    : "bg-[#0b1013] hover:bg-[#0f171b] border-2 border-dashed border-slate-700/80 hover:border-emerald-500/60"
+                }`}
+              >
+                <div className="w-16 h-16 rounded-2xl bg-emerald-950/60 border border-emerald-500/30 flex items-center justify-center text-emerald-400 mb-4 shadow-inner">
+                  <UploadCloud className="w-8 h-8 text-emerald-400" />
+                </div>
+                <h4 className="text-white font-bold text-base mb-1 tracking-tight">
+                  Upload Surveillance Image
+                </h4>
+                <p className="text-slate-400 text-xs max-w-sm mb-4 leading-relaxed">
+                  Drag and drop a tactical frame, checkpoint still, or border surveillance capture here, or click to browse
+                </p>
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      imageFileInputRef.current?.click();
+                    }}
+                    className="px-4 py-2 rounded-xl text-xs font-bold bg-[#1e4b38] hover:bg-[#163a2b] text-white flex items-center gap-2 shadow-xs transition-all cursor-pointer"
+                  >
+                    <Upload className="w-3.5 h-3.5" />
+                    Browse Image File
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setImagePreviewUrl("/images/himalayan-border-hero.jpg");
+                      setSelectedImageFile(null);
+                      setStatusMessage("Loaded demo border patrol sample frame.");
+                    }}
+                    className="px-3 py-2 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-colors cursor-pointer"
+                  >
+                    Use Demo Frame
+                  </button>
+                </div>
+                <span className="text-[10px] font-mono text-slate-500 mt-4 uppercase tracking-wider">
+                  Supports: JPG, PNG, WEBP, BMP (Max 25MB)
+                </span>
+              </div>
             ) : (
-              /* eslint-disable-next-line @next/next/no-img-element */
-              <img
-                ref={imageRef}
-                src={imagePreviewUrl}
-                alt="Surveillance Feed Frame"
-                onLoad={handleImageLoaded}
-                className="w-full h-full object-contain"
-              />
+              /* Image Loaded State with Replace / Clear Controls */
+              <div
+                className="relative w-full h-full flex items-center justify-center"
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  setIsDraggingOver(true);
+                }}
+                onDragLeave={() => setIsDraggingOver(false)}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  setIsDraggingOver(false);
+                  const file = e.dataTransfer.files?.[0];
+                  if (file && file.type.startsWith("image/")) {
+                    setSelectedImageFile(file);
+                    const url = URL.createObjectURL(file);
+                    setImagePreviewUrl(url);
+                    setDetections([]);
+                    setDetectedSuspectsInMedia([]);
+                    setStatusMessage(`Loaded image: ${file.name}`);
+                  }
+                }}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  ref={imageRef}
+                  src={imagePreviewUrl}
+                  alt="Surveillance Feed Frame"
+                  onLoad={handleImageLoaded}
+                  className="w-full h-full object-contain"
+                />
+
+                {/* Direct Upload / Replace Overlay Controls */}
+                <div className="absolute top-3 right-3 z-30 flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => imageFileInputRef.current?.click()}
+                    className="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-900/85 hover:bg-slate-800 text-white border border-slate-700 shadow-md flex items-center gap-1.5 transition-all cursor-pointer backdrop-blur-xs"
+                    title="Upload different image"
+                  >
+                    <Upload className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>Replace Image</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setImagePreviewUrl("");
+                      setSelectedImageFile(null);
+                      setDetections([]);
+                      setDetectedSuspectsInMedia([]);
+                      setStatusMessage("Image cleared. Upload a new image to scan.");
+                    }}
+                    className="p-1.5 rounded-lg text-xs font-semibold bg-slate-900/85 hover:bg-rose-900 text-slate-300 hover:text-rose-200 border border-slate-700 shadow-md transition-all cursor-pointer backdrop-blur-xs"
+                    title="Clear and show upload dropzone"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+
+                {isDraggingOver && (
+                  <div className="absolute inset-0 bg-black/75 border-2 border-dashed border-emerald-400 flex flex-col items-center justify-center z-40">
+                    <UploadCloud className="w-12 h-12 text-emerald-400 animate-bounce mb-2" />
+                    <p className="text-white text-sm font-bold">Drop Image to Load Frame</p>
+                  </div>
+                )}
+              </div>
             )}
 
             {/* Detection overlay canvas — strictly for image mode; video mode uses server-side burned-in rendering */}
-            {sourceMode === "upload-image" && (
+            {sourceMode === "upload-image" && imagePreviewUrl && (
               <DetectionCanvas
                 detections={detections}
                 sourceWidth={sourceDims.width}
@@ -1404,7 +1542,9 @@ export function LiveWorkspace() {
             <span className="font-mono text-[11px]">
               {statusMessage ||
                 (isOnline
-                  ? "Engine Ready — Trigger detection to scan feed."
+                  ? (sourceMode === "upload-image" && !imagePreviewUrl
+                      ? "Awaiting Image — Upload a surveillance image to scan."
+                      : "Engine Ready — Trigger detection to scan feed.")
                   : "AI Engine Offline — Start backend on port 8000.")}
             </span>
             {sourceMode === "rtsp" ? (
@@ -1415,7 +1555,9 @@ export function LiveWorkspace() {
               </span>
             ) : (
               <span className="font-semibold text-emerald-400 text-xs font-mono">
-                {detections.length} TARGETS ACQUIRED
+                {sourceMode === "upload-image" && !imagePreviewUrl
+                  ? "NO IMAGE LOADED"
+                  : `${detections.length} TARGETS ACQUIRED`}
               </span>
             )}
           </div>

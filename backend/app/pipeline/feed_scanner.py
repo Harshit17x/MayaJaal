@@ -20,7 +20,7 @@ logger = logging.getLogger("SIH26187.FeedScanner")
 
 class ContinuousFaceScanner:
     """
-    Continuous Multi-Feed Background Video Scanner for MayaJaal.
+    Continuous Multi-Feed Background Video Scanner for MAATRIX.
     Monitors registered camera streams, periodically decodes frames,
     performs YuNet + SFace biometric detection against enrolled suspects,
     and automatically triggers real-time security alerts with snapshot forensics.

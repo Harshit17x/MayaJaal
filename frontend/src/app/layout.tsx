@@ -10,7 +10,7 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "MayaJaal — Border Video Analytics",
+  title: "MAATRIX — Border Video Analytics",
   description: "Intelligent Border Video Analytics Platform • Real-time surveillance for a secure tomorrow",
   icons: {
     icon: [

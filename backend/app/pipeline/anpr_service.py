@@ -852,7 +852,7 @@ class ANPRPipeline:
                 # Header watermark (ASCII-safe, no ???)
                 cv2.putText(
                     annotated,
-                    f"MAYAJAAL | ANPR LIVE GATE MONITOR [{camera_id}]",
+                    f"MAATRIX | ANPR LIVE GATE MONITOR [{camera_id}]",
                     (20, 30),
                     cv2.FONT_HERSHEY_SIMPLEX,
                     0.55,

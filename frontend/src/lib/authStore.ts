@@ -54,12 +54,20 @@ export const DEMO_OPERATORS: OperatorUser[] = [
   },
 ];
 
-const AUTH_STORAGE_KEY = "mayajaal_operator_session_v1";
+const AUTH_STORAGE_KEY = "maatrix_operator_session_v1";
+const LEGACY_AUTH_STORAGE_KEY = "mayajaal_operator_session_v1";
 
 export function getStoredOperator(): OperatorUser | null {
   if (typeof window === "undefined") return null;
   try {
-    const raw = localStorage.getItem(AUTH_STORAGE_KEY);
+    let raw = localStorage.getItem(AUTH_STORAGE_KEY);
+    if (!raw) {
+      // Migrate from legacy session key if available
+      raw = localStorage.getItem(LEGACY_AUTH_STORAGE_KEY);
+      if (raw) {
+        localStorage.setItem(AUTH_STORAGE_KEY, raw);
+      }
+    }
     if (!raw) return null;
     return JSON.parse(raw);
   } catch {
@@ -92,11 +100,11 @@ export function useAuth() {
     };
 
     window.addEventListener("storage", handleStorageChange);
-    window.addEventListener("mayajaal_auth_change", handleCustomAuthChange);
+    window.addEventListener("maatrix_auth_change", handleCustomAuthChange);
 
     return () => {
       window.removeEventListener("storage", handleStorageChange);
-      window.removeEventListener("mayajaal_auth_change", handleCustomAuthChange);
+      window.removeEventListener("maatrix_auth_change", handleCustomAuthChange);
     };
   }, []);
 
@@ -108,7 +116,7 @@ export function useAuth() {
     try {
       localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(sessionUser));
       setOperator(sessionUser);
-      window.dispatchEvent(new Event("mayajaal_auth_change"));
+      window.dispatchEvent(new Event("maatrix_auth_change"));
     } catch (e) {
       console.error("Failed to store auth session:", e);
     }
@@ -124,7 +132,7 @@ export function useAuth() {
     try {
       localStorage.removeItem(AUTH_STORAGE_KEY);
       setOperator(null);
-      window.dispatchEvent(new Event("mayajaal_auth_change"));
+      window.dispatchEvent(new Event("maatrix_auth_change"));
     } catch (e) {
       console.error("Failed to clear auth session:", e);
     }
