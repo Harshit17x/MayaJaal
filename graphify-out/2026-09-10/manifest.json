@@ -138,9 +138,9 @@
     "semantic_hash": "fc1210cf128bc2f54fc65e8c0ad439ad"
   },
   "backend/app/data/cameras.json": {
-    "mtime": 1789038199.6327994,
-    "seen": 1789038236.7221594,
-    "ast_hash": "a800eff35edb8640ebb900e061f84375",
+    "mtime": 1789039414.2044907,
+    "seen": 1789039477.0000443,
+    "ast_hash": "ce2c601695c3c6b25e84531432b343d9",
     "semantic_hash": ""
   },
   "backend/app/inference/inference_service.py": {
@@ -624,9 +624,9 @@
     "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
   },
   "frontend/src/lib/alertsStore.ts": {
-    "mtime": 1789037645.013286,
-    "seen": 1789037832.6035733,
-    "ast_hash": "d8a48b1677a5f73aba1f4fb7ae06f2f2",
+    "mtime": 1789039363.1361718,
+    "seen": 1789039477.0001726,
+    "ast_hash": "9e357f7989ed9eb47eacb1ef86859c31",
     "semantic_hash": ""
   },
   "frontend/src/lib/api.ts": {
@@ -1038,9 +1038,9 @@
     "semantic_hash": ""
   },
   "backend/app/data/alerts.json": {
-    "mtime": 1789038199.6515012,
-    "seen": 1789038236.7221575,
-    "ast_hash": "cf75ad84d32b3870bc26fa1800dca399",
+    "mtime": 1789039414.2011988,
+    "seen": 1789039477.0000415,
+    "ast_hash": "d751713988987e9331980363e24189ce",
     "semantic_hash": ""
   },
   "backend/app/pipeline/alert_service.py": {
@@ -1056,9 +1056,9 @@
     "semantic_hash": ""
   },
   "backend/tests/test_alerts_and_scanner.py": {
-    "mtime": 1789038164.7143273,
-    "seen": 1789038236.7222006,
-    "ast_hash": "fac12b0f39b796664716f49e77b0de20",
+    "mtime": 1789039376.212123,
+    "seen": 1789039477.0000837,
+    "ast_hash": "16fd94bd9a18ce1ce525e0ac05d8be24",
     "semantic_hash": ""
   },
   "frontend/src/components/alerts/TacticalThreatToast.tsx": {
