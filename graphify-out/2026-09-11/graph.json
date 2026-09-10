@@ -5409,7 +5409,7 @@
       "file_type": "code",
       "norm_label": "root()",
       "source_file": "backend/app/main.py",
-      "source_location": "L151"
+      "source_location": "L149"
     },
     {
       "id": "backend_app_utils_logging_get_logger",
@@ -5877,7 +5877,7 @@
       "file_type": "code",
       "norm_label": "unexpected_exception_handler()",
       "source_file": "backend/app/main.py",
-      "source_location": "L119"
+      "source_location": "L117"
     },
     {
       "id": "backend_app_main_validation_exception_handler",
@@ -5889,7 +5889,7 @@
       "file_type": "code",
       "norm_label": "validation_exception_handler()",
       "source_file": "backend/app/main.py",
-      "source_location": "L96"
+      "source_location": "L94"
     },
     {
       "id": "backend_app_api_health_health",
@@ -14394,7 +14394,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/app/main.py",
-      "source_location": "L129",
+      "source_location": "L127",
       "weight": 1.0
     },
     {
@@ -14406,7 +14406,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "backend/app/main.py",
-      "source_location": "L107",
+      "source_location": "L105",
       "weight": 1.0
     },
     {
@@ -17106,7 +17106,7 @@
       "confidence_score": 1.0,
       "context": "decorator",
       "source_file": "backend/app/main.py",
-      "source_location": "L150",
+      "source_location": "L148",
       "weight": 1.0
     },
     {
@@ -17118,7 +17118,7 @@
       "confidence_score": 1.0,
       "context": "decorator",
       "source_file": "backend/app/main.py",
-      "source_location": "L118",
+      "source_location": "L116",
       "weight": 1.0
     },
     {
@@ -17130,7 +17130,7 @@
       "confidence_score": 1.0,
       "context": "decorator",
       "source_file": "backend/app/main.py",
-      "source_location": "L95",
+      "source_location": "L93",
       "weight": 1.0
     },
     {
@@ -23517,7 +23517,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "backend/app/main.py",
-      "source_location": "L119",
+      "source_location": "L117",
       "weight": 1.0
     },
     {
@@ -23529,7 +23529,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "backend/app/main.py",
-      "source_location": "L119",
+      "source_location": "L117",
       "weight": 1.0
     },
     {
@@ -23541,7 +23541,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "backend/app/main.py",
-      "source_location": "L96",
+      "source_location": "L94",
       "weight": 1.0
     },
     {
@@ -23553,7 +23553,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "backend/app/main.py",
-      "source_location": "L96",
+      "source_location": "L94",
       "weight": 1.0
     },
     {
@@ -25359,7 +25359,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/app/main.py",
-      "source_location": "L119",
+      "source_location": "L117",
       "weight": 1.0
     },
     {
@@ -25370,7 +25370,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/app/main.py",
-      "source_location": "L151",
+      "source_location": "L149",
       "weight": 1.0
     },
     {
@@ -25392,7 +25392,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "backend/app/main.py",
-      "source_location": "L96",
+      "source_location": "L94",
       "weight": 1.0
     },
     {

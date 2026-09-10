@@ -162,9 +162,9 @@
     "semantic_hash": "51fe8a063a7216e3a2df9d4774e8d700"
   },
   "backend/app/main.py": {
-    "mtime": 1789067166.6352527,
-    "seen": 1789072973.6512744,
-    "ast_hash": "e2ba2d356512e974116b6b7c2d77440d",
+    "mtime": 1789074818.6736245,
+    "seen": 1789074846.405389,
+    "ast_hash": "78277f37935179c6e7c32000d708d28a",
     "semantic_hash": ""
   },
   "backend/app/pipeline/anpr_service.py": {
