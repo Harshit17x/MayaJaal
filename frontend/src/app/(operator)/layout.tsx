@@ -189,7 +189,7 @@ export default function OperatorLayout({
   ];
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-[#f7f7f5] relative">
+    <div className="flex h-screen w-screen overflow-hidden bg-[#f4f7f5] relative">
       {/* Edge Hover Sensor for Pure Fullscreen Mode */}
       {sidebarMode === "hidden" && !isHovered && (
         <div
@@ -197,7 +197,7 @@ export default function OperatorLayout({
           className="fixed top-0 bottom-0 left-0 w-3 z-30 group cursor-pointer flex items-center"
           title="Move cursor here to reveal navigation menu"
         >
-          <div className="w-1.5 h-16 rounded-r-full bg-emerald-600/50 group-hover:bg-emerald-400 group-hover:w-2.5 transition-all shadow-md ml-0" />
+          <div className="w-1.5 h-16 rounded-r-full bg-[#1e4b38]/50 group-hover:bg-[#1e4b38] group-hover:w-2.5 transition-all shadow-sm ml-0" />
         </div>
       )}
 
@@ -217,36 +217,36 @@ export default function OperatorLayout({
       {sidebarMode !== "pinned" && isExpanded && (
         <div
           onClick={() => setIsHovered(false)}
-          className="fixed inset-0 bg-black/20 backdrop-blur-[0.5px] z-30 transition-opacity duration-300"
+          className="fixed inset-0 bg-slate-900/20 backdrop-blur-[0.5px] z-30 transition-opacity duration-300"
         />
       )}
 
-      {/* Army Green Left Sidebar (Auto-expand on hover, auto-collapse on mouse leave) */}
+      {/* Light Government Green Left Sidebar (Auto-expand on hover, auto-collapse on mouse leave) */}
       <aside
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
-        className={`fixed top-0 bottom-0 left-0 z-40 bg-[#133322] text-white flex flex-col border-r border-[#0e2619] select-none transition-all duration-300 ease-in-out ${
+        className={`fixed top-0 bottom-0 left-0 z-40 bg-[#edf3ef] text-[#1c3829] flex flex-col border-r border-[#d2dfd6] select-none transition-all duration-300 ease-in-out ${
           sidebarMode === "hidden"
             ? isExpanded
-              ? "w-64 translate-x-0 shadow-2xl shadow-black/70 ring-1 ring-emerald-500/20"
+              ? "w-64 translate-x-0 shadow-xl shadow-slate-900/10 ring-1 ring-[#1e4b38]/10"
               : "w-64 -translate-x-full shadow-none"
             : isExpanded
-            ? "w-64 shadow-2xl shadow-black/70 ring-1 ring-emerald-500/20"
-            : "w-[68px] shadow-sm"
+            ? "w-64 shadow-xl shadow-slate-900/10 ring-1 ring-[#1e4b38]/10"
+            : "w-[68px] shadow-xs"
         }`}
       >
         {/* Top Header: MayaJaal Logo, Status & Controls */}
-        <div className="p-3.5 border-b border-[#19402b]">
+        <div className="p-3.5 border-b border-[#d2dfd6] bg-[#e4ede6]/60">
           <div className="flex items-center justify-between gap-2">
             <Link
               href="/dashboard"
               className="flex items-center gap-3 group min-w-0"
               title="MayaJaal - Border Video Analytics"
             >
-              {/* Official MayaJaal Brand Emblem (High-visibility Army Green / Mint variant) */}
-              <div className="w-10 h-10 rounded-xl bg-[#1b442e] border border-emerald-400/40 ring-1 ring-emerald-400/20 flex items-center justify-center flex-shrink-0 shadow-xs group-hover:border-emerald-300/60 transition-all p-1.5 overflow-hidden">
+              {/* Official MayaJaal Brand Emblem */}
+              <div className="w-10 h-10 rounded-xl bg-white border border-[#bcd3c4] flex items-center justify-center flex-shrink-0 shadow-2xs group-hover:border-[#1e4b38]/60 transition-all p-1.5 overflow-hidden">
                 <img
-                  src="/images/logo/mayajaal-emblem-light.png"
+                  src="/images/logo/mayajaal-emblem.png"
                   alt="MayaJaal Logo"
                   className="w-full h-full object-contain filter drop-shadow-xs"
                 />
@@ -254,10 +254,10 @@ export default function OperatorLayout({
 
               {isExpanded && (
                 <div className="overflow-hidden min-w-0 animate-in fade-in duration-200">
-                  <h1 className="text-base font-extrabold tracking-wider text-white uppercase truncate leading-tight">
+                  <h1 className="text-base font-extrabold tracking-wider text-[#143924] uppercase truncate leading-tight">
                     MAYAJAAL
                   </h1>
-                  <p className="text-[11px] font-medium text-emerald-300/90 truncate">
+                  <p className="text-[11px] font-semibold text-[#2b593d] truncate">
                     Border Video Analytics
                   </p>
                 </div>
@@ -273,8 +273,8 @@ export default function OperatorLayout({
                   onClick={() =>
                     handleModeChange(sidebarMode === "hidden" ? "rail" : "hidden")
                   }
-                  className={`p-1.5 rounded-lg text-emerald-300/70 hover:text-white hover:bg-[#153a27] transition-colors cursor-pointer ${
-                    sidebarMode === "hidden" ? "text-emerald-400 bg-[#163b28]" : ""
+                  className={`p-1.5 rounded-lg text-[#325b42] hover:text-[#143924] hover:bg-[#d8e6db] transition-colors cursor-pointer ${
+                    sidebarMode === "hidden" ? "text-[#143924] bg-[#d8e6db]" : ""
                   }`}
                   title={
                     sidebarMode === "hidden"
@@ -295,9 +295,9 @@ export default function OperatorLayout({
                   onClick={() =>
                     handleModeChange(sidebarMode === "pinned" ? "rail" : "pinned")
                   }
-                  className={`p-1.5 rounded-lg text-emerald-300/70 hover:text-white hover:bg-[#153a27] transition-colors cursor-pointer ${
+                  className={`p-1.5 rounded-lg text-[#325b42] hover:text-[#143924] hover:bg-[#d8e6db] transition-colors cursor-pointer ${
                     sidebarMode === "pinned"
-                      ? "text-emerald-400 bg-[#17482f] ring-1 ring-emerald-500/30"
+                      ? "text-[#143924] bg-[#d3e3d7] ring-1 ring-[#1e4b38]/20"
                       : ""
                   }`}
                   title={
@@ -316,20 +316,6 @@ export default function OperatorLayout({
             )}
           </div>
 
-          {/* Node Active Sector Pill */}
-          {isExpanded ? (
-            <div className="mt-3 flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#183e29] border border-emerald-500/30 text-xs font-medium text-emerald-300 w-full animate-in fade-in duration-200">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse flex-shrink-0" />
-              <span className="truncate">Node Active • Sector-04</span>
-            </div>
-          ) : (
-            <div
-              className="mt-3 flex items-center justify-center w-10 h-8 mx-auto rounded-lg bg-[#183e29] border border-emerald-500/30 cursor-help"
-              title="Node Active • Sector-04"
-            >
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            </div>
-          )}
         </div>
 
         {/* Navigation Items */}
@@ -353,8 +339,8 @@ export default function OperatorLayout({
                       : "w-11 h-11 mx-auto justify-center"
                   } ${
                     isActive
-                      ? "bg-[#1c4832] text-white shadow-xs"
-                      : "text-emerald-100/75 hover:bg-[#143525] hover:text-white"
+                      ? "bg-[#d5e6db] text-[#123621] font-bold shadow-2xs border border-[#b8d1c1]"
+                      : "text-[#2e543d] hover:bg-[#e0ede4] hover:text-[#123621]"
                   }`}
                 >
                   <div className="flex items-center gap-3 min-w-0">
@@ -363,8 +349,8 @@ export default function OperatorLayout({
                         isExpanded ? "w-4 h-4" : "w-5 h-5"
                       } ${
                         isActive
-                          ? "text-emerald-400"
-                          : "text-emerald-300/70 group-hover:text-emerald-200"
+                          ? "text-[#18492d]"
+                          : "text-[#3d654f] group-hover:text-[#18492d]"
                       }`}
                     />
                     {isExpanded && (
@@ -378,14 +364,14 @@ export default function OperatorLayout({
                     (isExpanded ? (
                       <span
                         className={`px-2 py-0.5 text-[10px] font-bold rounded-full flex-shrink-0 ${
-                          item.badgeColor || "bg-emerald-500 text-white"
+                          item.badgeColor || "bg-[#1e4b38] text-white"
                         }`}
                       >
                         {item.badge}
                       </span>
                     ) : (
                       <span
-                        className={`absolute -top-1 -right-1 flex h-4 min-w-4 px-1 items-center justify-center text-[9px] font-bold rounded-full ring-2 ring-[#0e2218] ${
+                        className={`absolute -top-1 -right-1 flex h-4 min-w-4 px-1 items-center justify-center text-[9px] font-bold rounded-full ring-2 ring-[#edf3ef] ${
                           item.badgeColor || "bg-rose-600 text-white"
                         }`}
                       >
@@ -400,11 +386,11 @@ export default function OperatorLayout({
           {/* SYSTEM section */}
           <div>
             {isExpanded ? (
-              <div className="px-3 mb-2 text-[10px] font-bold tracking-wider uppercase text-emerald-400/50 animate-in fade-in duration-150">
+              <div className="px-3 mb-2 text-[10px] font-bold tracking-wider uppercase text-[#476e57] animate-in fade-in duration-150">
                 SYSTEM
               </div>
             ) : (
-              <div className="w-8 mx-auto h-px bg-[#163325] my-3" />
+              <div className="w-8 mx-auto h-px bg-[#cddcd2] my-3" />
             )}
             <nav className="space-y-1">
               {systemNavItems.map((item) => {
@@ -422,8 +408,8 @@ export default function OperatorLayout({
                         : "w-11 h-11 mx-auto justify-center"
                     } ${
                       isActive
-                        ? "bg-[#1c4832] text-white shadow-xs"
-                        : "text-emerald-100/75 hover:bg-[#143525] hover:text-white"
+                        ? "bg-[#d5e6db] text-[#123621] font-bold shadow-2xs border border-[#b8d1c1]"
+                        : "text-[#2e543d] hover:bg-[#e0ede4] hover:text-[#123621]"
                     }`}
                   >
                     <Icon
@@ -431,8 +417,8 @@ export default function OperatorLayout({
                         isExpanded ? "w-4 h-4" : "w-5 h-5"
                       } ${
                         isActive
-                          ? "text-emerald-400"
-                          : "text-emerald-300/70 group-hover:text-emerald-200"
+                          ? "text-[#18492d]"
+                          : "text-[#3d654f] group-hover:text-[#18492d]"
                       }`}
                     />
                     {isExpanded && (
@@ -449,28 +435,28 @@ export default function OperatorLayout({
 
         {/* Sidebar Footer */}
         <div
-          className={`border-t border-[#163325] transition-all ${
+          className={`border-t border-[#d2dfd6] bg-[#e4ede6]/40 transition-all ${
             isExpanded
-              ? "px-4 py-3.5 flex items-center justify-between text-xs text-emerald-300/60"
+              ? "px-4 py-3.5 flex items-center justify-between text-xs text-[#2e543d]"
               : "py-3 flex flex-col items-center justify-center"
           }`}
         >
           {isExpanded ? (
             <>
               <div className="overflow-hidden">
-                <p className="font-semibold text-emerald-200/90 text-[11px] truncate">
+                <p className="font-bold text-[#143924] text-[11px] truncate">
                   Sector HQ Command
                 </p>
-                <p className="text-[10px] text-emerald-400/60 truncate">Edge Inference v2.1</p>
+                <p className="text-[10px] text-[#476e57] truncate">Edge Inference v2.1</p>
               </div>
-              <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 flex-shrink-0" />
+              <span className="inline-block w-2 h-2 rounded-full bg-[#16a34a] flex-shrink-0" />
             </>
           ) : (
             <div
-              className="w-8 h-8 rounded-full bg-[#143525] flex items-center justify-center cursor-help"
+              className="w-8 h-8 rounded-full bg-[#dbe8df] flex items-center justify-center cursor-help"
               title="Sector HQ Command • Edge Inference v2.1"
             >
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="w-2 h-2 rounded-full bg-[#16a34a]" />
             </div>
           )}
         </div>
@@ -479,7 +465,7 @@ export default function OperatorLayout({
       {/* Main Area: Top Bar + Content Area */}
       <div className="flex-1 flex flex-col h-full overflow-hidden min-w-0">
         {/* Global Top Surveillance Bar */}
-        <header className="h-16 flex-shrink-0 bg-white border-b border-slate-200/80 px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-3 sm:gap-4 z-20">
+        <header className="h-16 flex-shrink-0 bg-white border-b border-[#dce5df] px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-3 sm:gap-4 z-20">
           {/* Left Outpost & Mesh Status + Sidebar Quick Toggle */}
           <div className="flex items-center gap-3 sm:gap-4 text-xs sm:text-sm min-w-0">
             {/* Sidebar quick mode toggle button */}
@@ -490,7 +476,7 @@ export default function OperatorLayout({
                 else if (sidebarMode === "hidden") handleModeChange("pinned");
                 else handleModeChange("rail");
               }}
-              className="p-2 rounded-xl text-slate-600 hover:text-emerald-800 hover:bg-emerald-50 border border-slate-200/70 transition-all flex items-center gap-1.5 group cursor-pointer shadow-2xs flex-shrink-0"
+              className="p-2 rounded-xl text-slate-600 hover:text-[#18492d] hover:bg-[#ebf2ed] border border-slate-200 transition-all flex items-center gap-1.5 group cursor-pointer shadow-2xs flex-shrink-0"
               title={`Sidebar Mode: ${
                 sidebarMode === "rail"
                   ? "Hover Rail (Click for 100% Pure Fullscreen)"
@@ -499,8 +485,8 @@ export default function OperatorLayout({
                   : "Pinned Open (Click for Hover Rail)"
               }`}
             >
-              <PanelLeft className="w-4 h-4 text-emerald-800 group-hover:scale-105 transition-transform" />
-              <span className="hidden xl:inline text-[11px] font-semibold text-slate-500 group-hover:text-emerald-800">
+              <PanelLeft className="w-4 h-4 text-[#1e4b38] group-hover:scale-105 transition-transform" />
+              <span className="hidden xl:inline text-[11px] font-semibold text-slate-600 group-hover:text-[#18492d]">
                 {sidebarMode === "rail"
                   ? "Hover Rail"
                   : sidebarMode === "hidden"
@@ -534,7 +520,7 @@ export default function OperatorLayout({
                 placeholder="Search cameras, zones, alert IDs..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-8 pr-3 py-1.5 w-44 lg:w-64 text-xs rounded-xl border border-slate-200 bg-slate-50/70 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-700/20 focus:border-emerald-700 transition-all placeholder:text-slate-400"
+                className="pl-8 pr-3 py-1.5 w-44 lg:w-64 text-xs rounded-xl border border-slate-200 bg-slate-50/70 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#1e4b38]/20 focus:border-[#1e4b38] transition-all placeholder:text-slate-400"
               />
             </div>
 
@@ -561,7 +547,7 @@ export default function OperatorLayout({
                 </div>
               </div>
               <div
-                className="w-8 h-8 rounded-full bg-[#143724] text-white flex items-center justify-center text-xs font-bold ring-2 ring-emerald-600/20 shadow-xs select-none"
+                className="w-8 h-8 rounded-full bg-[#1e4b38] text-white flex items-center justify-center text-xs font-bold ring-2 ring-[#1e4b38]/20 shadow-xs select-none"
                 title={operator ? `${operator.name} • ${operator.badgeNumber}` : "Shift Commander"}
               >
                 {operator?.avatarInitials || "KR"}
@@ -584,7 +570,7 @@ export default function OperatorLayout({
         </header>
 
         {/* Scrollable Page Body - Full screen utilization */}
-        <main className="flex-1 overflow-y-auto bg-[#f7f7f5] p-4 sm:p-6 lg:p-8 relative">
+        <main className="flex-1 overflow-y-auto bg-[#f4f7f5] p-4 sm:p-6 lg:p-8 relative">
           <TacticalThreatToast />
           <div className="w-full max-w-[1920px] mx-auto">{children}</div>
         </main>

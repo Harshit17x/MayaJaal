@@ -2,7 +2,7 @@
 
 export function NeedsAttentionCard() {
   return (
-    <div className="bg-white rounded-2xl border border-slate-200/90 p-6 shadow-xs flex flex-col justify-between h-full">
+    <div className="bg-white rounded-2xl border border-[#dce5df] p-6 shadow-xs flex flex-col justify-between h-full">
       {/* Header */}
       <div className="mb-4">
         <h2 className="text-base font-bold text-slate-900 tracking-tight">

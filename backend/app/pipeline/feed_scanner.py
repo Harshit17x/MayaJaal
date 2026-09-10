@@ -26,7 +26,7 @@ class ContinuousFaceScanner:
     and automatically triggers real-time security alerts with snapshot forensics.
     """
 
-    def __init__(self, frame_interval: float = 1.2, cooldown_seconds: float = 60.0) -> None:
+    def __init__(self, frame_interval: float = 0.6, cooldown_seconds: float = 60.0) -> None:
         self.frame_interval = frame_interval
         self.cooldown_seconds = cooldown_seconds
         self.running = False
@@ -166,19 +166,20 @@ class ContinuousFaceScanner:
                     self.total_scans_performed += 1
                     self.last_scan_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-                # Scale frame down for high-speed YuNet processing (640px wide)
+                # Preserve high-resolution details for distant CCTV faces (up to 1280px)
                 h, w = frame.shape[:2]
-                if w > 640:
-                    scale = 640.0 / w
-                    small_frame = cv2.resize(frame, (640, int(h * scale)))
+                if w > 1280:
+                    scale = 1280.0 / w
+                    small_frame = cv2.resize(frame, (1280, int(h * scale)))
                 else:
                     small_frame = frame
 
-                # Run YuNet + SFace recognition
+                # Run YuNet + SFace recognition with surveillance-calibrated parameters
                 faces = face_service.detect_and_recognize(
                     small_frame,
-                    min_match_score=0.40,
-                    min_face_size=35,
+                    min_match_score=0.34,
+                    min_face_size=24,
+                    det_score_thresh=0.45,
                     use_temporal_smoothing=False,
                 )
 

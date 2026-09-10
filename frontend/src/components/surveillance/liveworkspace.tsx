@@ -35,13 +35,15 @@ import {
   HelpCircle,
   Compass,
   ShieldAlert,
+  ScanFace,
 } from "lucide-react";
 
 /** Build the backend MJPEG stream URL (proxied Next.js → FastAPI). */
-function buildStreamUrl(rtspUrl: string, drawDetections = false): string {
+function buildStreamUrl(rtspUrl: string, drawDetections = false, enableFaceBiometrics = true): string {
   const params = new URLSearchParams({
     rtsp_url: rtspUrl,
     draw_detections: String(drawDetections),
+    enable_face_recognition: String(enableFaceBiometrics),
     fps: "20",
     _t: String(Date.now()),
   });
@@ -78,6 +80,7 @@ export function LiveWorkspace() {
   const [streamProtocol, setStreamProtocol] = useState<string>("Live Stream");
   const [detectedResolvedUrl, setDetectedResolvedUrl] = useState<string | null>(null);
   const [drawDetectionsOnStream, setDrawDetectionsOnStream] = useState<boolean>(false);
+  const [enableFaceBiometrics, setEnableFaceBiometrics] = useState<boolean>(true);
   const [selectedCamera, setSelectedCamera] = useState<CameraType | null>(null);
   const [activeMjpegSrc, setActiveMjpegSrc] = useState<string | null>(null);
 
@@ -144,15 +147,15 @@ export function LiveWorkspace() {
     }
   }, [sourceMode]);
 
-  // Rebuild stream URL when AI overlay toggle changes while stream is live
+  // Rebuild stream URL when AI overlay or Face Biometrics toggle changes while stream is live
   useEffect(() => {
     if (isStreamActive && rtspUrl) {
-      const src = buildStreamUrl(rtspUrl, drawDetectionsOnStream);
+      const src = buildStreamUrl(rtspUrl, drawDetectionsOnStream, enableFaceBiometrics);
       setActiveMjpegSrc(src);
       setStreamKey((k) => k + 1);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [drawDetectionsOnStream]);
+  }, [drawDetectionsOnStream, enableFaceBiometrics]);
 
   // Camera grid click → populate RTSP URL + auto-connect
   const handleCameraSelect = useCallback(
@@ -163,7 +166,7 @@ export function LiveWorkspace() {
       setRtspInputValue(url);
       setSourceMode("rtsp");
       if (url) {
-        const src = buildStreamUrl(url, drawDetectionsOnStream);
+        const src = buildStreamUrl(url, drawDetectionsOnStream, enableFaceBiometrics);
         setActiveMjpegSrc(src);
         setIsStreamActive(true);
         setStreamError(false);
@@ -173,7 +176,7 @@ export function LiveWorkspace() {
         setStreamKey((k) => k + 1);
       }
     },
-    [drawDetectionsOnStream]
+    [drawDetectionsOnStream, enableFaceBiometrics]
   );
 
   const handleConnectStream = useCallback(async (customUrl?: string) => {
@@ -198,7 +201,7 @@ export function LiveWorkspace() {
         setRtspUrl(rawUrl);
         setRtspInputValue(rawUrl);
         setStreamError(false);
-        const src = buildStreamUrl(rawUrl, drawDetectionsOnStream);
+        const src = buildStreamUrl(rawUrl, drawDetectionsOnStream, enableFaceBiometrics);
         setActiveMjpegSrc(src);
         setIsStreamActive(true);
         setStreamKey((k) => k + 1);
@@ -212,7 +215,7 @@ export function LiveWorkspace() {
         setStatusMessage(validation.message);
         setStreamDiagnostics(validation.message);
         // Start standby stream so tactical overlay with diagnostic text is displayed
-        const src = buildStreamUrl(rawUrl, drawDetectionsOnStream);
+        const src = buildStreamUrl(rawUrl, drawDetectionsOnStream, enableFaceBiometrics);
         setActiveMjpegSrc(src);
         setIsStreamActive(true);
         setStreamKey((k) => k + 1);
@@ -221,7 +224,7 @@ export function LiveWorkspace() {
       const msg = err instanceof Error ? err.message : "Validation failed";
       setRtspUrl(rawUrl);
       setRtspInputValue(rawUrl);
-      const src = buildStreamUrl(rawUrl, drawDetectionsOnStream);
+      const src = buildStreamUrl(rawUrl, drawDetectionsOnStream, enableFaceBiometrics);
       setActiveMjpegSrc(src);
       setIsStreamActive(true);
       setStreamKey((k) => k + 1);
@@ -230,7 +233,7 @@ export function LiveWorkspace() {
     } finally {
       setIsValidatingStream(false);
     }
-  }, [rtspInputValue, drawDetectionsOnStream]);
+  }, [rtspInputValue, drawDetectionsOnStream, enableFaceBiometrics]);
 
   const handleDisconnectStream = useCallback(() => {
     setIsStreamActive(false);
@@ -906,7 +909,7 @@ export function LiveWorkspace() {
             type="button"
             onClick={handleRunInference}
             disabled={isInferencing || !isOnline}
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-lg text-xs font-semibold bg-[#123824] hover:bg-[#18462d] text-white shadow-xs transition-all duration-150 disabled:opacity-50"
+            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-lg text-xs font-semibold bg-[#1e4b38] hover:bg-[#163a2b] text-white shadow-xs transition-all duration-150 disabled:opacity-50"
           >
             {isInferencing ? (
               <>
@@ -1012,7 +1015,7 @@ export function LiveWorkspace() {
                     type="button"
                     onClick={() => handleConnectStream()}
                     disabled={!rtspInputValue.trim() || isValidatingStream}
-                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-[#133322] hover:bg-[#1a442d] text-white transition-colors disabled:opacity-40 cursor-pointer shadow-xs"
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-[#1e4b38] hover:bg-[#163a2b] text-white transition-colors disabled:opacity-40 cursor-pointer shadow-xs"
                   >
                     {isValidatingStream ? (
                       <>
@@ -1040,6 +1043,20 @@ export function LiveWorkspace() {
                     AI Overlay
                   </label>
                 )}
+
+                {/* Face biometrics overlay toggle */}
+                <label className="flex items-center gap-1.5 cursor-pointer select-none text-xs font-semibold text-slate-700 ml-1 border-l border-slate-200 pl-2.5" title="Overlay real-time facial recognition & suspect identification">
+                  <input
+                    type="checkbox"
+                    checked={enableFaceBiometrics}
+                    onChange={(e) => setEnableFaceBiometrics(e.target.checked)}
+                    className="accent-emerald-600 w-3.5 h-3.5 cursor-pointer"
+                  />
+                  <span className="flex items-center gap-1 text-emerald-800 font-semibold">
+                    <ScanFace className="w-3.5 h-3.5 text-emerald-600" />
+                    Face Biometrics
+                  </span>
+                </label>
               </div>
             </div>
 
@@ -1175,7 +1192,7 @@ export function LiveWorkspace() {
             <button
               type="button"
               onClick={() => router.push("/alerts")}
-              className="px-3.5 py-2 rounded-xl text-xs font-bold bg-[#133322] hover:bg-[#1a442d] text-white shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
+              className="px-3.5 py-2 rounded-xl text-xs font-bold bg-[#1e4b38] hover:bg-[#163a2b] text-white shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
             >
               Command Center →
             </button>

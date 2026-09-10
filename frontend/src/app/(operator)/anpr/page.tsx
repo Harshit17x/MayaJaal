@@ -46,12 +46,6 @@ import { useCameras } from "@/lib/camerasStore";
 const BACKEND_BASE_URL =
   process.env.NEXT_PUBLIC_BACKEND_URL?.replace(/\/$/, "") || "http://localhost:8000";
 
-const RTSP_PRESETS = [
-  { label: "BOP-04 Gate Demo", id: "BOP-04-GATE", url: "sample", type: "Sample Simulation" },
-  { label: "Suchetgarh JCP Octroi Gate", id: "bop-jk-02", url: "rtsp://10.20.72.59:8554/cam3", type: "RTSP Live" },
-  { label: "RS Pura BOP Alpha", id: "bop-jk-01", url: "rtsp://10.20.72.59:8554/cam2", type: "RTSP Live" },
-  { label: "Mobile IP Webcam (WiFi)", id: "MOBILE-IPCAM", url: "http://192.168.1.100:8080/video", type: "IP Webcam" },
-];
 
 export default function AnprPage() {
   const { cameras } = useCameras();
@@ -484,9 +478,6 @@ export default function AnprPage() {
                       TCP Transport
                     </span>
                   </h3>
-                  <p className="text-xs text-slate-500">
-                    Connect border outpost gates, tactical check posts, and custom RTSP / IP Camera video streams
-                  </p>
                 </div>
               </div>
 
@@ -649,40 +640,6 @@ export default function AnprPage() {
               </div>
             )}
 
-            {/* Quick-Connect Preset Chips */}
-            <div className="flex flex-wrap items-center gap-2 pt-1">
-              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mr-1">
-                Quick Feeds:
-              </span>
-              {RTSP_PRESETS.map((preset) => {
-                const isSelected = activeStreamUrl === preset.url;
-                return (
-                  <button
-                    key={preset.id}
-                    onClick={() => {
-                      if (streamSourceMode === "custom") {
-                        setCustomRtspInput(preset.url);
-                        setCustomCameraName(preset.id);
-                      }
-                      handleConnectStream(preset.url, preset.id);
-                    }}
-                    className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border transition-all ${
-                      isSelected
-                        ? "bg-emerald-50 text-emerald-800 border-emerald-300 font-bold shadow-2xs"
-                        : "bg-slate-50 hover:bg-slate-100 text-slate-600 border-slate-200"
-                    }`}
-                  >
-                    <span
-                      className={`w-1.5 h-1.5 rounded-full ${
-                        isSelected ? "bg-emerald-600 animate-ping" : "bg-slate-400"
-                      }`}
-                    />
-                    <span>{preset.label}</span>
-                    <span className="text-[10px] text-slate-400">({preset.type})</span>
-                  </button>
-                );
-              })}
-            </div>
 
             {/* Stream Telemetry & Status Bar */}
             <div className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-xl bg-slate-900 text-slate-200 text-xs">

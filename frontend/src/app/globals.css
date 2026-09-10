@@ -3,11 +3,14 @@
 @tailwind utilities;
 
 :root {
-  --background: #f7f7f5;
+  --background: #f4f7f5;
   --foreground: #1c2022;
   --charcoal-muted: #50565b;
-  --forest-green: #153e28;
-  --forest-green-hover: #0f2f1e;
+  --forest-green: #1e4b38;
+  --forest-green-hover: #163a2b;
+  --gov-sage-bg: #edf3ef;
+  --gov-sage-border: #d2dfd6;
+  --gov-accent: #2d6a4f;
 }
 
 body {
