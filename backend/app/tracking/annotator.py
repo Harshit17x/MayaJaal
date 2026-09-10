@@ -8,8 +8,10 @@ Converts annotated videos to faststart H.264 MP4 for instant browser playback.
 from __future__ import annotations
 
 import logging
+import os
 import shutil
 import subprocess
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -169,14 +171,90 @@ def draw_tracked_boxes(
     return frame
 
 
+def find_ffmpeg_executable() -> str | None:
+    """
+    Locate the FFmpeg executable reliably across system paths, Python scripts,
+    local project bin, and Windows package installations.
+    """
+    # 1. Check explicit environment override
+    custom_ffmpeg = os.environ.get("FFMPEG_PATH") or os.environ.get("FFMPEG_BINARY")
+    if custom_ffmpeg and Path(custom_ffmpeg).is_file():
+        return str(custom_ffmpeg)
+
+    # 2. Check standard PATH lookup
+    found = shutil.which("ffmpeg")
+    if found:
+        return found
+
+    # 3. Check MayaJaal project's local bin directory
+    project_bin = Path(__file__).resolve().parents[2] / "bin"
+    for name in ("ffmpeg.exe", "ffmpeg"):
+        candidate = project_bin / name
+        if candidate.is_file():
+            return str(candidate)
+
+    # 4. Check Python installation directory & Scripts
+    py_dir = Path(sys.prefix)
+    candidates = [
+        py_dir / "Scripts" / "ffmpeg.exe",
+        py_dir / "ffmpeg.exe",
+        py_dir / "bin" / "ffmpeg",
+    ]
+    for c in candidates:
+        if c.is_file():
+            return str(c)
+
+    # 5. Check Windows WinGet and common Windows install directories
+    local_app_data = os.environ.get("LOCALAPPDATA")
+    if local_app_data:
+        winget_dir = Path(local_app_data) / "Microsoft" / "WinGet" / "Packages"
+        if winget_dir.exists():
+            try:
+                matches = list(winget_dir.glob("**/ffmpeg.exe"))
+                if matches:
+                    return str(matches[0])
+            except Exception:
+                pass
+
+    common_win_paths = [
+        Path("C:/ffmpeg/bin/ffmpeg.exe"),
+        Path("C:/Program Files/ffmpeg/bin/ffmpeg.exe"),
+        Path("C:/ProgramData/chocolatey/bin/ffmpeg.exe"),
+    ]
+    for c in common_win_paths:
+        if c.is_file():
+            return str(c)
+
+    # 6. Check if imageio_ffmpeg is installed
+    try:
+        import imageio_ffmpeg
+        return imageio_ffmpeg.get_ffmpeg_exe()
+    except Exception:
+        pass
+
+    return None
+
+
 def convert_video_to_h264(raw_mp4_path: Path, output_mp4_path: Path) -> bool:
     """
     Convert an OpenCV-encoded MP4 to browser-compatible H.264 MP4 with faststart.
     """
+    ffmpeg_bin = find_ffmpeg_executable()
+    if not ffmpeg_bin:
+        logger.error(
+            "FFmpeg executable not found in PATH, project bin, or Python Scripts. "
+            "Server-side H.264 video conversion cannot proceed."
+        )
+        try:
+            shutil.copyfile(raw_mp4_path, output_mp4_path)
+            return True
+        except Exception:
+            return False
+
     try:
         subprocess.run(
             [
-                "ffmpeg",
+                ffmpeg_bin,
                 "-y",
                 "-i", str(raw_mp4_path),
                 "-c:v", "libx264",
@@ -186,9 +264,10 @@ def convert_video_to_h264(raw_mp4_path: Path, output_mp4_path: Path) -> bool:
                 str(output_mp4_path),
             ],
             capture_output=True,
-            timeout=90,
+            timeout=120,
             check=True,
         )
+        logger.info("Successfully converted video to browser-compatible H.264 MP4: %s", output_mp4_path)
         return True
     except Exception as exc:
         logger.warning("FFmpeg H.264 conversion failed: %s. Using raw MP4 fallback.", exc)

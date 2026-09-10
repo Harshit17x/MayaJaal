@@ -53,3 +53,9 @@ Thumbs.db
 
 # TypeScript Cache
 *.tsbuildinfo
+
+# Binary Executables & Third-party Binaries
+backend/bin/
+bin/
+*.exe
+*.dll
