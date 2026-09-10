@@ -664,10 +664,11 @@ async def reset_rtsp_session(camera_id: str) -> dict:
 # Server-side Annotated Video & Frame File Serving
 # ---------------------------------------------------------------------------
 
-@router.get("/video/annotated/{filename}")
+@router.api_route("/video/annotated/{filename}", methods=["GET", "HEAD"])
 async def get_annotated_video(filename: str):
     """
     Serve a server-annotated ByteTrack video with burned-in bounding boxes (H.264 MP4).
+    Supports GET, HEAD, HTTP 206 Partial Content range requests, and inline playback.
     """
     safe_name = Path(filename).name
     target_path = settings.temp_directory / "annotated" / safe_name
@@ -676,11 +677,15 @@ async def get_annotated_video(filename: str):
     return FileResponse(
         str(target_path),
         media_type="video/mp4",
-        filename=safe_name,
+        content_disposition_type="inline",
+        headers={
+            "Accept-Ranges": "bytes",
+            "Cache-Control": "public, max-age=3600",
+        },
     )
 
 
-@router.get("/video/frame/{video_id}/{frame_index}")
+@router.api_route("/video/frame/{video_id}/{frame_index}", methods=["GET", "HEAD"])
 async def get_annotated_frame(video_id: str, frame_index: int):
     """
     Serve a single server-annotated JPEG frame from tracked video.
@@ -692,5 +697,9 @@ async def get_annotated_frame(video_id: str, frame_index: int):
     return FileResponse(
         str(frame_path),
         media_type="image/jpeg",
+        content_disposition_type="inline",
+        headers={
+            "Cache-Control": "public, max-age=3600",
+        },
     )
 

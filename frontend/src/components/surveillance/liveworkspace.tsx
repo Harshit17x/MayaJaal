@@ -323,6 +323,37 @@ export function LiveWorkspace() {
     }
   };
 
+  // Synchronize target bounding boxes and inspector in real-time as video plays
+  const handleVideoTimeUpdate = () => {
+    if (sourceMode !== "upload-video" || videoResults.length === 0 || !videoRef.current) return;
+    const currentTime = videoRef.current.currentTime;
+    const fps = videoMetadata?.fps && videoMetadata.fps > 0 ? videoMetadata.fps : 30;
+    const currentFrameIdx = Math.min(
+      videoResults.length - 1,
+      Math.max(0, Math.floor(currentTime * fps))
+    );
+    if (currentFrameIdx !== selectedFrameIndex) {
+      setSelectedFrameIndex(currentFrameIdx);
+      const target = videoResults.find((fr) => fr.frame_index === currentFrameIdx);
+      if (target) {
+        const dets = target.tracked_objects || target.inference?.detections || target.detections || [];
+        setDetections(dets);
+      }
+    }
+  };
+
+  // Automatic resilience: if server-annotated video cannot be decoded by browser, gracefully fall back to Raw Video + Client Canvas
+  const handleVideoError = () => {
+    if (sourceMode === "upload-video" && isServerAnnotatedActive && originalVideoUrl) {
+      console.warn("Server-annotated video stream codec failed in browser. Automatically falling back to Raw Video + Client Canvas overlay.");
+      setIsServerAnnotatedActive(false);
+      setVideoPreviewUrl(originalVideoUrl);
+      setStatusMessage(
+        "Notice: Server video format unsupported by browser decoder. Switched to Raw Video with dynamic AI Canvas overlay."
+      );
+    }
+  };
+
   // Trigger AI Inference (Image, Video, or RTSP)
   const handleRunInference = async () => {
     if (!isOnline) {
@@ -1116,11 +1147,14 @@ export function LiveWorkspace() {
             ) : sourceMode === "upload-video" ? (
               <video
                 ref={videoRef}
+                key={videoPreviewUrl}
                 src={videoPreviewUrl}
                 controls
                 playsInline
                 loop
                 onLoadedMetadata={handleVideoLoaded}
+                onTimeUpdate={handleVideoTimeUpdate}
+                onError={handleVideoError}
                 className="w-full h-full object-contain"
               />
             ) : (
@@ -1160,6 +1194,12 @@ export function LiveWorkspace() {
                       onClick={() => {
                         setVideoPreviewUrl(annotatedVideoUrl);
                         setIsServerAnnotatedActive(true);
+                        setTimeout(() => {
+                          if (videoRef.current) {
+                            videoRef.current.load();
+                            videoRef.current.play().catch(() => {});
+                          }
+                        }, 50);
                       }}
                       className={`px-2 py-0.5 rounded text-[10px] font-mono font-medium transition-all ${
                         isServerAnnotatedActive
@@ -1167,13 +1207,19 @@ export function LiveWorkspace() {
                           : "text-slate-400 hover:text-white"
                       }`}
                     >
-                      Server Bounding Boxes (Active)
+                      Server Bounding Boxes {isServerAnnotatedActive ? "(Active)" : ""}
                     </button>
                     <button
                       type="button"
                       onClick={() => {
                         setVideoPreviewUrl(originalVideoUrl);
                         setIsServerAnnotatedActive(false);
+                        setTimeout(() => {
+                          if (videoRef.current) {
+                            videoRef.current.load();
+                            videoRef.current.play().catch(() => {});
+                          }
+                        }, 50);
                       }}
                       className={`px-2 py-0.5 rounded text-[10px] font-mono font-medium transition-all ${
                         !isServerAnnotatedActive
@@ -1181,7 +1227,7 @@ export function LiveWorkspace() {
                           : "text-slate-400 hover:text-white"
                       }`}
                     >
-                      Raw Video + Canvas
+                      Raw Video + Canvas {!isServerAnnotatedActive ? "(Active)" : ""}
                     </button>
                   </div>
                 )}
