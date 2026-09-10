@@ -324,13 +324,24 @@ def draw_bounding_boxes(
             cv2.line(frame, (x2, y2), (x2, y2 - corner_len), color, 3)
 
         # Label background pill
+        global_trace_id = det.get("global_trace_id")
+        is_cross_camera = bool(det.get("is_cross_camera", False))
         track_id = det.get("track_id")
-        id_prefix = f"#{track_id} " if track_id is not None else ""
+        if global_trace_id:
+            cross_icon = " ⇄" if is_cross_camera else ""
+            id_prefix = f"{global_trace_id}{cross_icon} | "
+        elif track_id is not None:
+            id_prefix = f"#{track_id} "
+        else:
+            id_prefix = ""
         label = f"{id_prefix}{cls_name.upper()} {int(conf * 100)}%"
         (lbl_w, lbl_h), _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.42, 1)
         pill_y1 = max(0, y1 - lbl_h - 6)
         pill_y2 = y1
         cv2.rectangle(frame, (x1, pill_y1), (x1 + lbl_w + 8, pill_y2), color, -1)
+        if global_trace_id or track_id is not None:
+            badge_border = (255, 230, 80) if is_cross_camera else (255, 255, 255)
+            cv2.rectangle(frame, (x1, pill_y1), (x1 + lbl_w + 8, pill_y2), badge_border, 1)
         cv2.putText(
             frame,
             label,
@@ -351,6 +362,8 @@ def stream_generator(
     fps_limit: int = 24,
     rotation: int = 0,
     enable_face_recognition: bool = False,
+    camera_id: Optional[str] = None,
+    camera_name: Optional[str] = None,
 ) -> Generator[bytes, None, None]:
     """
     Generator yielding multipart JPEG frames from RTSP or IP Webcam Pro stream.
@@ -364,6 +377,9 @@ def stream_generator(
         or not clean_url
         or Path(rtsp_url).is_file()
     )
+
+    effective_cam_id = camera_id or resolved_url or rtsp_url
+    effective_cam_name = camera_name or protocol or "Live Stream"
 
     # Initialize AI preprocessor if detections requested
     preprocessor = None
@@ -482,6 +498,24 @@ def stream_generator(
                             try:
                                 tracked = tracker.update(raw_dets, frame_resolution=(w, h))
                                 cached_detections = [t.to_dict() for t in tracked]
+                                try:
+                                    from app.tracking.global_tracker import global_trace_manager
+                                    for det in cached_detections:
+                                        c_name = str(det.get("class_name", "")).lower()
+                                        if (c_name in ("person", "human", "pedestrian") or det.get("class_id") == 0) and det.get("track_id") is not None:
+                                            gtid, is_cross, reid_sc = global_trace_manager.update_track(
+                                                camera_id=effective_cam_id,
+                                                camera_name=effective_cam_name,
+                                                local_track_id=det["track_id"],
+                                                box=det.get("box", []),
+                                                frame_bgr=frame,
+                                                confidence=float(det.get("confidence", 0.75)),
+                                            )
+                                            det["global_trace_id"] = gtid
+                                            det["is_cross_camera"] = is_cross
+                                            det["reid_score"] = reid_sc
+                                except Exception as g_err:
+                                    logger.debug("Global Re-ID update skip: %s", g_err)
                             except Exception:
                                 cached_detections = raw_dets
                         else:
@@ -624,6 +658,14 @@ def get_live_stream(
         False,
         description="Overlay real-time facial recognition and identity labels",
     ),
+    camera_id: Optional[str] = Query(
+        None,
+        description="Optional camera UUID / ID for multi-camera Re-ID tracking",
+    ),
+    camera_name: Optional[str] = Query(
+        None,
+        description="Optional friendly camera name (e.g. North Gate)",
+    ),
 ) -> StreamingResponse:
     """
     Stream live RTSP or IP Webcam CCTV camera feed as multipart/x-mixed-replace (MJPEG)
@@ -637,6 +679,8 @@ def get_live_stream(
             model_name=model_name,
             fps_limit=fps,
             enable_face_recognition=enable_face_recognition,
+            camera_id=camera_id,
+            camera_name=camera_name,
         ),
         media_type="multipart/x-mixed-replace; boundary=frame",
         headers={

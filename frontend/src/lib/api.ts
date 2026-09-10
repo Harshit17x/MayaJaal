@@ -27,7 +27,7 @@ import {
   FaceScanResponse,
   RegisterFaceResponse,
 } from "@/types/face";
-import { AlertItem, ScannerStatus, QrtDispatchRecord, SuspectTrajectory } from "@/types/alert";
+import { AlertItem, ScannerStatus, QrtDispatchRecord, SuspectTrajectory, GlobalTraceItem } from "@/types/alert";
 
 const BACKEND_BASE_URL =
   process.env.NEXT_PUBLIC_BACKEND_URL?.replace(/\/$/, "") || "http://localhost:8000";
@@ -596,6 +596,18 @@ export const api = {
 
   async getSuspectTrajectory(suspectName: string): Promise<SuspectTrajectory> {
     return request<SuspectTrajectory>(`/api/alerts/trajectory/${encodeURIComponent(suspectName)}`);
+  },
+
+  async getGlobalTraces(): Promise<{ status: string; total_active: number; traces: GlobalTraceItem[] }> {
+    return request<{ status: string; total_active: number; traces: GlobalTraceItem[] }>("/api/tracking/global/traces");
+  },
+
+  async getGlobalTraceTrajectory(traceId: string): Promise<SuspectTrajectory> {
+    return request<SuspectTrajectory>(`/api/tracking/global/traces/${encodeURIComponent(traceId)}`);
+  },
+
+  async resetGlobalTraces(): Promise<{ status: string; message: string }> {
+    return request<{ status: string; message: string }>("/api/tracking/global/traces", { method: "DELETE" });
   },
 
   async dispatchQrt(

@@ -119,16 +119,26 @@ def draw_tracked_boxes(
         cv2.line(frame, (x2, y2), (x2 - corner_len, y2), white, 3)
         cv2.line(frame, (x2, y2), (x2, y2 - corner_len), white, 3)
 
+        global_trace_id = obj.get("global_trace_id")
+        is_cross_camera = bool(obj.get("is_cross_camera", False))
+
         # 4. Badge pill above box
         if is_threat or suspect_name:
             display_name = (suspect_name or cls_name.replace("suspect_", "")).upper()
             t_level = threat_level or "ALERT"
-            label = f"SUSPECT: {display_name} [{t_level}] {int(conf * 100)}%"
+            trace_prefix = f"[{global_trace_id}] " if global_trace_id else ""
+            label = f"{trace_prefix}SUSPECT: {display_name} [{t_level}] {int(conf * 100)}%"
         elif cls_name.startswith("face_"):
             display_name = (suspect_name or cls_name.replace("face_", "")).upper()
             label = f"FACE: {display_name} {int(conf * 100)}%"
         else:
-            id_part = f"ID #{track_id} | " if track_id is not None else ""
+            if global_trace_id:
+                cross_icon = " ⇄" if is_cross_camera else ""
+                id_part = f"{global_trace_id}{cross_icon} | "
+            elif track_id is not None:
+                id_part = f"ID #{track_id} | "
+            else:
+                id_part = ""
             label = f"{id_part}{cls_name.upper()} {int(conf * 100)}%"
         font = cv2.FONT_HERSHEY_SIMPLEX
         font_scale = 0.46
@@ -143,8 +153,10 @@ def draw_tracked_boxes(
         # Fill badge background with solid class color
         cv2.rectangle(frame, (x1, badge_y1), (badge_x2, badge_y2), color, -1)
         # Tactical border for badge if tracked
-        if track_id is not None:
-            cv2.rectangle(frame, (x1, badge_y1), (badge_x2, badge_y2), white, 1)
+        if global_trace_id is not None or track_id is not None:
+            # Highlight cross-camera traces with cyan border, normal with white
+            border_col = (255, 230, 80) if is_cross_camera else white
+            cv2.rectangle(frame, (x1, badge_y1), (badge_x2, badge_y2), border_col, 1)
 
         # Badge text in white
         cv2.putText(
