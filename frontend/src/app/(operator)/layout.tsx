@@ -22,6 +22,7 @@ import {
   PanelLeft,
   Maximize2,
   Minimize2,
+  ScanFace,
 } from "lucide-react";
 import { useAlerts } from "@/lib/alertsStore";
 import { useAuth } from "@/lib/authStore";
@@ -165,6 +166,11 @@ export default function OperatorLayout({
       label: "ANPR Vehicles",
       href: "/anpr",
       icon: Car,
+    },
+    {
+      label: "Facial Recognition",
+      href: "/facial-recognition",
+      icon: ScanFace,
     },
   ];
 
