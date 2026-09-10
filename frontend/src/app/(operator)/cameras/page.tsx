@@ -43,12 +43,44 @@ import {
 import { useCameras } from "@/lib/camerasStore";
 import { BorderMap } from "@/components/map/BorderMap";
 
-// Common sector options
+// Common sector options across India's border sectors
 const SECTORS = [
-  "Sector-04 (BOP Alpha)",
-  "Sector-03 (South Riverine)",
-  "Sector-02 (Eastern Gate)",
-  "Sector-01 (Western Flank)",
+  "Sector-04 (Jammu - RS Pura)",
+  "Sector-03 (Jammu - Gajansoo)",
+  "Sector-03 (Akhnoor - Chenab)",
+  "Sector-02 (Samba - Ramgarh)",
+  "Sector-01 (Kathua - Hiranagar)",
+  "Sector-06 (Poonch - LoC)",
+  "Sector-07 (Baramulla - Uri LoC)",
+  "Sector-08 (Kupwara - Kishanganga LoC)",
+  "Sector-09 (Punjab - Amritsar)",
+  "Sector-10 (Punjab - Gurdaspur)",
+  "Sector-11 (Punjab - Ferozepur)",
+  "Sector-12 (Punjab - Fazilka)",
+  "Sector-13 (Rajasthan - Sri Ganganagar)",
+  "Sector-14 (Rajasthan - Bikaner)",
+  "Sector-15 (Rajasthan - Jaisalmer)",
+  "Sector-16 (Rajasthan - Barmer)",
+  "Sector-17 (Gujarat - Sir Creek)",
+  "Sector-18 (Gujarat - Khavda Kutch)",
+  "Sector-19 (Gujarat - Lakhpat)",
+  "Sector-20 (Ladakh - Pangong Sector)",
+  "Sector-21 (Ladakh - Sub-Sector North)",
+  "Sector-22 (Himachal - Kinnaur LAC)",
+  "Sector-23 (Uttarakhand - Chamoli)",
+  "Sector-24 (Sikkim - East District)",
+  "Sector-25 (Arunachal - Tawang LAC)",
+  "Sector-26 (Arunachal - Anjaw)",
+  "Sector-27 (West Bengal - North 24 Parganas)",
+  "Sector-28 (West Bengal - Dakshin Dinajpur)",
+  "Sector-29 (West Bengal - Siliguri)",
+  "Sector-30 (Meghalaya - West Jaintia Hills)",
+  "Sector-31 (Assam - Barak Valley)",
+  "Sector-32 (Manipur - Tengnoupal)",
+  "Sector-33 (Mizoram - Champhai)",
+  "Sector-34 (Bihar - East Champaran)",
+  "Sector-35 (Uttarakhand - Champawat)",
+  "Sector-36 (West Bengal - Alipurduar)",
 ];
 
 // Camera type options
@@ -63,11 +95,15 @@ const CAMERA_TYPES: CameraType[] = [
 
 // Preset coordinates along border sector
 const COORDINATE_PRESETS = [
-  { name: "North Forward Post", lat: 24.10, lng: 77.70 },
-  { name: "Eastern Outpost Gate", lat: 23.70, lng: 79.30 },
-  { name: "Watch Tower 03", lat: 22.40, lng: 78.10 },
-  { name: "Southern Ridge Point", lat: 22.90, lng: 79.40 },
-  { name: "Central Riverine Crossing", lat: 23.25, lng: 78.75 },
+  { name: "RS Pura BOP Alpha (Jammu IB)", lat: 32.7160, lng: 74.6640 },
+  { name: "Suchetgarh JCP Octroi Gate (Jammu)", lat: 32.6840, lng: 74.6720 },
+  { name: "Chenab Riverine Bluff (Akhnoor)", lat: 32.7480, lng: 74.6780 },
+  { name: "Attari-Wagah Joint Check Post (Punjab)", lat: 31.6045, lng: 74.5750 },
+  { name: "Tanot Mata Post (Jaisalmer Thar)", lat: 27.7900, lng: 70.3500 },
+  { name: "Sir Creek Harami Nala (Gujarat)", lat: 23.8800, lng: 68.3200 },
+  { name: "Pangong Tso LAC (Ladakh)", lat: 33.7200, lng: 78.5000 },
+  { name: "Nathu La Pass (Sikkim LAC)", lat: 27.3860, lng: 88.8310 },
+  { name: "Petrapole ICP (West Bengal)", lat: 23.0400, lng: 88.8950 },
 ];
 
 export default function CamerasPage() {
@@ -1205,8 +1241,8 @@ function AddCameraModal({
   const [streamUrl, setStreamUrl] = useState("rtsp://admin:pass@10.20.72.110:554/live/ch0");
 
   // Lat / Long
-  const [latitude, setLatitude] = useState(24.10);
-  const [longitude, setLongitude] = useState(77.70);
+  const [latitude, setLatitude] = useState(32.7160);
+  const [longitude, setLongitude] = useState(74.6640);
 
   // Model & Params
   const [modelAssigned, setModelAssigned] = useState("best.onnx (Threat Detector)");

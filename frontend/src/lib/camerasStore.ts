@@ -8,151 +8,21 @@ import {
   StreamTestResult,
 } from "@/types/camera";
 import { api } from "@/lib/api";
+import { ALL_BORDER_CAMERAS } from "@/lib/borderCameras";
 
-const STORAGE_KEY = "mayajaal_operator_cameras_v1";
+const STORAGE_KEY = "mayajaal_operator_cameras_v4";
 
-export const INITIAL_CAMERAS: Camera[] = [
-  {
-    id: "cam-1",
-    name: "North Perimeter Optical 4K",
-    sector: "Sector-04 (BOP Alpha)",
-    location: "Pillar 14 — Forward Trench",
-    status: "online",
-    type: "Optical 4K",
-    ipAddress: "10.20.72.101",
-    port: 554,
-    streamUrl: "rtsp://admin:pass@10.20.72.101:554/live/ch0",
-    isRtsp: true,
-    latitude: 24.10,
-    longitude: 77.70,
-    coordinates: [77.70, 24.10],
-    modelAssigned: "best.onnx (Threat Detector)",
-    resolution: "4K UHD (3840x2160)",
-    fps: 30,
-    confThreshold: 0.75,
-    iouThreshold: 0.45,
-    isRecording: true,
-    alertTriggerEnabled: true,
-    lastActive: "Just now",
-    healthStats: {
-      bitrate: "8.4 Mbps",
-      latencyMs: 42,
-      packetLoss: "0.01%",
-    },
-  },
-  {
-    id: "cam-2",
-    name: "Eastern Gate Rapid Response",
-    sector: "Sector-04 (BOP Alpha)",
-    location: "Eastern Vehicle Checkpost & Gate",
-    status: "alert",
-    type: "ANPR Dedicated",
-    ipAddress: "10.20.72.102",
-    port: 554,
-    streamUrl: "rtsp://admin:pass@10.20.72.102:554/live/ch0",
-    isRtsp: true,
-    latitude: 23.70,
-    longitude: 79.30,
-    coordinates: [79.30, 23.70],
-    modelAssigned: "best.onnx (Threat Detector)",
-    resolution: "1080p FHD (1920x1080)",
-    fps: 60,
-    confThreshold: 0.70,
-    iouThreshold: 0.45,
-    isRecording: true,
-    alertTriggerEnabled: true,
-    lastActive: "Just now",
-    healthStats: {
-      bitrate: "6.2 Mbps",
-      latencyMs: 38,
-      packetLoss: "0.00%",
-    },
-  },
-  {
-    id: "cam-3",
-    name: "Watch Tower High-Mast FLIR",
-    sector: "Sector-04 (BOP Alpha)",
-    location: "Watch Tower 03 — Elevated Ridge",
-    status: "online",
-    type: "Thermal FLIR",
-    ipAddress: "10.20.72.103",
-    port: 554,
-    streamUrl: "rtsp://admin:pass@10.20.72.103:554/live/ch1",
-    isRtsp: true,
-    latitude: 22.40,
-    longitude: 78.10,
-    coordinates: [78.10, 22.40],
-    modelAssigned: "best.onnx (Threat Detector)",
-    resolution: "1080p Thermal",
-    fps: 25,
-    confThreshold: 0.80,
-    iouThreshold: 0.50,
-    isRecording: true,
-    alertTriggerEnabled: true,
-    lastActive: "1 min ago",
-    healthStats: {
-      bitrate: "4.5 Mbps",
-      latencyMs: 56,
-      packetLoss: "0.05%",
-    },
-  },
-  {
-    id: "cam-4",
-    name: "Southern Ridge Fog Penetration",
-    sector: "Sector-03 (South Riverine)",
-    location: "Riverine Crossing — Point Charlie",
-    status: "online",
-    type: "Night Vision / IR",
-    ipAddress: "10.20.72.104",
-    port: 554,
-    streamUrl: "rtsp://admin:pass@10.20.72.104:554/live/ch0",
-    isRtsp: true,
-    latitude: 22.90,
-    longitude: 79.40,
-    coordinates: [79.40, 22.90],
-    modelAssigned: "best.onnx (Threat Detector)",
-    resolution: "1080p FHD (1920x1080)",
-    fps: 30,
-    confThreshold: 0.75,
-    iouThreshold: 0.45,
-    isRecording: false,
-    alertTriggerEnabled: true,
-    lastActive: "3 mins ago",
-    healthStats: {
-      bitrate: "5.1 Mbps",
-      latencyMs: 64,
-      packetLoss: "0.02%",
-    },
-  },
-  {
-    id: "cam-5",
-    name: "Trench Perimeter PTZ 360",
-    sector: "Sector-01 (Western Flank)",
-    location: "Observation Bunker 09",
-    status: "degraded",
-    type: "PTZ 360",
-    ipAddress: "10.20.72.105",
-    port: 554,
-    streamUrl: "rtsp://admin:pass@10.20.72.105:554/live/ch0",
-    isRtsp: true,
-    latitude: 23.25,
-    longitude: 78.75,
-    coordinates: [78.75, 23.25],
-    modelAssigned: "best.onnx (Threat Detector)",
-    resolution: "1080p FHD (1920x1080)",
-    fps: 25,
-    confThreshold: 0.75,
-    iouThreshold: 0.45,
-    isRecording: true,
-    alertTriggerEnabled: false,
-    lastActive: "8 mins ago",
-    healthStats: {
-      bitrate: "3.2 Mbps",
-      latencyMs: 142,
-      packetLoss: "2.40%",
-    },
-  },
-];
+export const INITIAL_CAMERAS: Camera[] = ALL_BORDER_CAMERAS;
+
+function isLegacyCentralPoint(c: any): boolean {
+  if (!c) return true;
+  if (["cam-1", "cam-2", "cam-3", "cam-4", "cam-5"].includes(c.id)) return true;
+  const lat = Number(c.latitude ?? (c.coordinates ? c.coordinates[1] : 0));
+  const lng = Number(c.longitude ?? (c.coordinates ? c.coordinates[0] : 0));
+  // Any point in central India interior (MP/UP interior: lat 20.0-26.0, lng 75.0-82.0)
+  if (lat >= 20.0 && lat <= 26.0 && lng >= 75.0 && lng <= 82.0) return true;
+  return false;
+}
 
 type CameraListener = (cameras: Camera[]) => void;
 const listeners = new Set<CameraListener>();
@@ -163,11 +33,21 @@ let hasInitialized = false;
 function loadInitialData(): Camera[] {
   if (typeof window === "undefined") return [...INITIAL_CAMERAS];
   try {
+    // Clear out any old legacy cache keys that contained central India dummy coordinates
+    try {
+      localStorage.removeItem("mayajaal_operator_cameras_v1");
+      localStorage.removeItem("mayajaal_operator_cameras_v2");
+      localStorage.removeItem("mayajaal_operator_cameras_v3");
+    } catch {}
+
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        return parsed;
+      if (Array.isArray(parsed)) {
+        const clean = parsed.filter((c: any) => !isLegacyCentralPoint(c));
+        if (clean.length >= 20) {
+          return clean;
+        }
       }
     }
   } catch (err) {
@@ -179,7 +59,8 @@ function loadInitialData(): Camera[] {
 function persistLocally(cameras: Camera[]) {
   if (typeof window === "undefined") return;
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(cameras));
+    const clean = cameras.filter((c) => !isLegacyCentralPoint(c));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(clean));
   } catch (err) {
     console.warn("Could not save cameras to localStorage:", err);
   }
@@ -192,7 +73,7 @@ function notify() {
 
 export const camerasStore = {
   getCameras(): Camera[] {
-    return [...memoryCameras];
+    return memoryCameras.filter((c) => !isLegacyCentralPoint(c));
   },
 
   initClientStorage(): Camera[] {
@@ -200,22 +81,32 @@ export const camerasStore = {
       memoryCameras = loadInitialData();
       hasInitialized = true;
     }
-    return [...memoryCameras];
+    return memoryCameras.filter((c) => !isLegacyCentralPoint(c));
   },
 
   async syncWithBackend(): Promise<Camera[]> {
     try {
       const backendCameras = await api.getCameras();
       if (Array.isArray(backendCameras) && backendCameras.length > 0) {
-        memoryCameras = backendCameras.map((c) => ({
-          ...c,
-          latitude: c.latitude ?? (c.coordinates ? c.coordinates[1] : 23.30),
-          longitude: c.longitude ?? (c.coordinates ? c.coordinates[0] : 78.60),
-          coordinates: c.coordinates ?? [
-            c.longitude ?? 78.60,
-            c.latitude ?? 23.30,
-          ],
-        }));
+        const clean = backendCameras
+          .filter((c) => !isLegacyCentralPoint(c))
+          .map((c) => ({
+            ...c,
+            latitude: Number(c.latitude ?? (c.coordinates ? c.coordinates[1] : 32.7160)),
+            longitude: Number(c.longitude ?? (c.coordinates ? c.coordinates[0] : 74.6640)),
+            coordinates: c.coordinates ?? [
+              Number(c.longitude ?? 74.6640),
+              Number(c.latitude ?? 32.7160),
+            ],
+          }));
+
+        if (clean.length > 0) {
+          const idSet = new Set(clean.map((c) => c.id));
+          const additions = ALL_BORDER_CAMERAS.filter((c) => !idSet.has(c.id));
+          memoryCameras = [...clean, ...additions];
+        } else {
+          memoryCameras = [...ALL_BORDER_CAMERAS];
+        }
         notify();
         return memoryCameras;
       }
