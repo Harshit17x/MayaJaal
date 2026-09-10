@@ -264,6 +264,32 @@
       "source_location": "L63"
     },
     {
+      "id": "backend_app_pipeline_postprocessor_postprocessorconfig",
+      "label": "PostprocessorConfig",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 13,
+      "community_name": "Postprocessor",
+      "file_type": "code",
+      "norm_label": "postprocessorconfig",
+      "source_file": "backend/app/pipeline/postprocessor.py",
+      "source_location": "L53"
+    },
+    {
+      "id": "backend_app_pipeline_postprocessor_postprocessorerror",
+      "label": "PostprocessorError",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 13,
+      "community_name": "Postprocessor",
+      "file_type": "code",
+      "norm_label": "postprocessorerror",
+      "source_file": "backend/app/pipeline/postprocessor.py",
+      "source_location": "L29"
+    },
+    {
       "id": "backend_app_pipeline_image_loader_imagefilenotfounderror",
       "label": "ImageFileNotFoundError",
       "_callable": true,
@@ -439,7 +465,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 22,
-      "community_name": "logging.py",
+      "community_name": "inference_service.py",
       "file_type": "code",
       "norm_label": "inferenceresourceerror",
       "source_file": "backend/app/inference/inference_service.py",
@@ -452,37 +478,24 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 22,
-      "community_name": "logging.py",
+      "community_name": "inference_service.py",
       "file_type": "code",
       "norm_label": "inferenceserviceerror",
       "source_file": "backend/app/inference/inference_service.py",
       "source_location": "L27"
     },
     {
-      "id": "backend_app_pipeline_postprocessor_postprocessorconfig",
-      "label": "PostprocessorConfig",
+      "id": "backend_app_inference_model_manager_modelnotfounderror",
+      "label": "ModelNotFoundError",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 22,
-      "community_name": "logging.py",
+      "community_name": "inference_service.py",
       "file_type": "code",
-      "norm_label": "postprocessorconfig",
-      "source_file": "backend/app/pipeline/postprocessor.py",
-      "source_location": "L53"
-    },
-    {
-      "id": "backend_app_pipeline_postprocessor_postprocessorerror",
-      "label": "PostprocessorError",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 22,
-      "community_name": "logging.py",
-      "file_type": "code",
-      "norm_label": "postprocessorerror",
-      "source_file": "backend/app/pipeline/postprocessor.py",
-      "source_location": "L29"
+      "norm_label": "modelnotfounderror",
+      "source_file": "backend/app/inference/model_manager.py",
+      "source_location": "L21"
     },
     {
       "id": "backend_app_api_models_modelloadrequest",
@@ -498,56 +511,43 @@
       "source_location": "L16"
     },
     {
-      "id": "frontend_src_components_surveillance_detectioncanvas_detectioncanvasprops",
-      "label": "DetectionCanvasProps",
+      "id": "backend_app_inference_onnx_engine_onnxengineerror",
+      "label": "ONNXEngineError",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 26,
-      "community_name": "liveworkspace.tsx",
+      "community_name": "logging.py",
       "file_type": "code",
-      "norm_label": "detectioncanvasprops",
-      "source_file": "frontend/src/components/surveillance/detectioncanvas.tsx",
-      "source_location": "L6"
+      "norm_label": "onnxengineerror",
+      "source_file": "backend/app/inference/onnx_engine.py",
+      "source_location": "L28"
     },
     {
-      "id": "frontend_src_types_backend_detection",
-      "label": "Detection",
+      "id": "backend_app_inference_onnx_engine_onnxinferenceerror",
+      "label": "ONNXInferenceError",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 26,
-      "community_name": "liveworkspace.tsx",
+      "community_name": "logging.py",
       "file_type": "code",
-      "norm_label": "detection",
-      "source_file": "frontend/src/types/backend.ts",
-      "source_location": "L46"
+      "norm_label": "onnxinferenceerror",
+      "source_file": "backend/app/inference/onnx_engine.py",
+      "source_location": "L36"
     },
     {
-      "id": "frontend_src_types_backend_videoframeresult",
-      "label": "VideoFrameResult",
+      "id": "backend_app_inference_onnx_engine_onnxmodelerror",
+      "label": "ONNXModelError",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 26,
-      "community_name": "liveworkspace.tsx",
+      "community_name": "logging.py",
       "file_type": "code",
-      "norm_label": "videoframeresult",
-      "source_file": "frontend/src/types/backend.ts",
-      "source_location": "L82"
-    },
-    {
-      "id": "frontend_src_types_backend_videometadata",
-      "label": "VideoMetadata",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 26,
-      "community_name": "liveworkspace.tsx",
-      "file_type": "code",
-      "norm_label": "videometadata",
-      "source_file": "frontend/src/types/backend.ts",
-      "source_location": "L73"
+      "norm_label": "onnxmodelerror",
+      "source_file": "backend/app/inference/onnx_engine.py",
+      "source_location": "L32"
     },
     {
       "id": "anpr_hf_inference_copy_hfinference",
@@ -563,17 +563,43 @@
       "source_location": "L14"
     },
     {
+      "id": "frontend_src_components_surveillance_detectioncanvas_detectioncanvasprops",
+      "label": "DetectionCanvasProps",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "liveworkspace.tsx",
+      "file_type": "code",
+      "norm_label": "detectioncanvasprops",
+      "source_file": "frontend/src/components/surveillance/detectioncanvas.tsx",
+      "source_location": "L6"
+    },
+    {
       "id": "frontend_src_lib_hooks_usebackendstatus_backendstatusstate",
       "label": "BackendStatusState",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "backend.ts",
+      "community_name": "liveworkspace.tsx",
       "file_type": "code",
       "norm_label": "backendstatusstate",
       "source_file": "frontend/src/lib/hooks/useBackendStatus.ts",
       "source_location": "L7"
+    },
+    {
+      "id": "frontend_src_types_backend_detection",
+      "label": "Detection",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "liveworkspace.tsx",
+      "file_type": "code",
+      "norm_label": "detection",
+      "source_file": "frontend/src/types/backend.ts",
+      "source_location": "L46"
     },
     {
       "id": "frontend_src_types_backend_healthresponse",
@@ -582,7 +608,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "backend.ts",
+      "community_name": "liveworkspace.tsx",
       "file_type": "code",
       "norm_label": "healthresponse",
       "source_file": "frontend/src/types/backend.ts",
@@ -595,7 +621,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "backend.ts",
+      "community_name": "liveworkspace.tsx",
       "file_type": "code",
       "norm_label": "inferenceresponse",
       "source_file": "frontend/src/types/backend.ts",
@@ -608,7 +634,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "backend.ts",
+      "community_name": "liveworkspace.tsx",
       "file_type": "code",
       "norm_label": "inferencestatusresponse",
       "source_file": "frontend/src/types/backend.ts",
@@ -621,7 +647,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "backend.ts",
+      "community_name": "liveworkspace.tsx",
       "file_type": "code",
       "norm_label": "modelmetadata",
       "source_file": "frontend/src/types/backend.ts",
@@ -634,7 +660,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "backend.ts",
+      "community_name": "liveworkspace.tsx",
       "file_type": "code",
       "norm_label": "modelstatusresponse",
       "source_file": "frontend/src/types/backend.ts",
@@ -647,7 +673,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "backend.ts",
+      "community_name": "liveworkspace.tsx",
       "file_type": "code",
       "norm_label": "modeltensorinfo",
       "source_file": "frontend/src/types/backend.ts",
@@ -660,7 +686,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "backend.ts",
+      "community_name": "liveworkspace.tsx",
       "file_type": "code",
       "norm_label": "outputtensormetadata",
       "source_file": "frontend/src/types/backend.ts",
@@ -673,7 +699,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "backend.ts",
+      "community_name": "liveworkspace.tsx",
       "file_type": "code",
       "norm_label": "resourcestatus",
       "source_file": "frontend/src/types/backend.ts",
@@ -686,7 +712,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "backend.ts",
+      "community_name": "liveworkspace.tsx",
       "file_type": "code",
       "norm_label": "rtspinferenceresponse",
       "source_file": "frontend/src/types/backend.ts",
@@ -699,7 +725,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "backend.ts",
+      "community_name": "liveworkspace.tsx",
       "file_type": "code",
       "norm_label": "rtsptrackingresponse",
       "source_file": "frontend/src/types/backend.ts",
@@ -712,7 +738,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "backend.ts",
+      "community_name": "liveworkspace.tsx",
       "file_type": "code",
       "norm_label": "trackedobject",
       "source_file": "frontend/src/types/backend.ts",
@@ -725,7 +751,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "backend.ts",
+      "community_name": "liveworkspace.tsx",
       "file_type": "code",
       "norm_label": "trackingvideoresponse",
       "source_file": "frontend/src/types/backend.ts",
@@ -738,11 +764,24 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "backend.ts",
+      "community_name": "liveworkspace.tsx",
       "file_type": "code",
       "norm_label": "videoframeinference",
       "source_file": "frontend/src/types/backend.ts",
       "source_location": "L98"
+    },
+    {
+      "id": "frontend_src_types_backend_videoframeresult",
+      "label": "VideoFrameResult",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "liveworkspace.tsx",
+      "file_type": "code",
+      "norm_label": "videoframeresult",
+      "source_file": "frontend/src/types/backend.ts",
+      "source_location": "L82"
     },
     {
       "id": "frontend_src_types_backend_videoinferenceresponse",
@@ -751,11 +790,24 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "backend.ts",
+      "community_name": "liveworkspace.tsx",
       "file_type": "code",
       "norm_label": "videoinferenceresponse",
       "source_file": "frontend/src/types/backend.ts",
       "source_location": "L100"
+    },
+    {
+      "id": "frontend_src_types_backend_videometadata",
+      "label": "VideoMetadata",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "liveworkspace.tsx",
+      "file_type": "code",
+      "norm_label": "videometadata",
+      "source_file": "frontend/src/types/backend.ts",
+      "source_location": "L73"
     },
     {
       "id": "backend_app_core_resource_manager_resourcemanager",
@@ -821,19 +873,6 @@
       "norm_label": "modelmanagererror",
       "source_file": "backend/app/inference/model_manager.py",
       "source_location": "L17"
-    },
-    {
-      "id": "backend_app_inference_model_manager_modelnotfounderror",
-      "label": "ModelNotFoundError",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 33,
-      "community_name": "ModelManagerError",
-      "file_type": "code",
-      "norm_label": "modelnotfounderror",
-      "source_file": "backend/app/inference/model_manager.py",
-      "source_location": "L21"
     },
     {
       "id": "backend_app_core_config_settings",
@@ -1003,45 +1042,6 @@
       "norm_label": "onnxengine",
       "source_file": "backend/app/inference/onnx_engine.py",
       "source_location": "L40"
-    },
-    {
-      "id": "backend_app_inference_onnx_engine_onnxengineerror",
-      "label": "ONNXEngineError",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "ONNXEngine",
-      "file_type": "code",
-      "norm_label": "onnxengineerror",
-      "source_file": "backend/app/inference/onnx_engine.py",
-      "source_location": "L28"
-    },
-    {
-      "id": "backend_app_inference_onnx_engine_onnxinferenceerror",
-      "label": "ONNXInferenceError",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "ONNXEngine",
-      "file_type": "code",
-      "norm_label": "onnxinferenceerror",
-      "source_file": "backend/app/inference/onnx_engine.py",
-      "source_location": "L36"
-    },
-    {
-      "id": "backend_app_inference_onnx_engine_onnxmodelerror",
-      "label": "ONNXModelError",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "ONNXEngine",
-      "file_type": "code",
-      "norm_label": "onnxmodelerror",
-      "source_file": "backend/app/inference/onnx_engine.py",
-      "source_location": "L32"
     },
     {
       "id": "backend_app_pipeline_anpr_service_anprpipeline",
@@ -1467,6 +1467,18 @@
       "source_location": "L38"
     },
     {
+      "id": "frontend_src_app_operator_live_page_livepage",
+      "label": "LivePage()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "lucide-react",
+      "file_type": "code",
+      "norm_label": "livepage()",
+      "source_file": "frontend/src/app/(operator)/live/page.tsx",
+      "source_location": "L4"
+    },
+    {
       "id": "frontend_src_app_operator_settings_page_settingspage",
       "label": "SettingsPage()",
       "_callable": true,
@@ -1623,6 +1635,18 @@
       "source_location": "L3"
     },
     {
+      "id": "frontend_src_components_status_connectionstatus_connectionstatus",
+      "label": "ConnectionStatus()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "lucide-react",
+      "file_type": "code",
+      "norm_label": "connectionstatus()",
+      "source_file": "frontend/src/components/status/connectionstatus.tsx",
+      "source_location": "L6"
+    },
+    {
       "id": "frontend_src_components_surveillance_camerafeedplaceholder_camerafeedplaceholder",
       "label": "CameraFeedPlaceholder()",
       "_callable": true,
@@ -1633,6 +1657,30 @@
       "norm_label": "camerafeedplaceholder()",
       "source_file": "frontend/src/components/surveillance/camerafeedplaceholder.tsx",
       "source_location": "L3"
+    },
+    {
+      "id": "frontend_src_components_surveillance_liveworkspace_buildstreamurl",
+      "label": "buildStreamUrl()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "lucide-react",
+      "file_type": "code",
+      "norm_label": "buildstreamurl()",
+      "source_file": "frontend/src/components/surveillance/liveworkspace.tsx",
+      "source_location": "L36"
+    },
+    {
+      "id": "frontend_src_components_surveillance_liveworkspace_liveworkspace",
+      "label": "LiveWorkspace()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "lucide-react",
+      "file_type": "code",
+      "norm_label": "liveworkspace()",
+      "source_file": "frontend/src/components/surveillance/liveworkspace.tsx",
+      "source_location": "L46"
     },
     {
       "id": "frontend_src_lib_alertsstore_notify",
@@ -1681,6 +1729,18 @@
       "norm_label": "useauth()",
       "source_file": "frontend/src/lib/authStore.ts",
       "source_location": "L70"
+    },
+    {
+      "id": "frontend_src_lib_hooks_usebackendstatus_usebackendstatus",
+      "label": "useBackendStatus()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "lucide-react",
+      "file_type": "code",
+      "norm_label": "usebackendstatus()",
+      "source_file": "frontend/src/lib/hooks/useBackendStatus.ts",
+      "source_location": "L19"
     },
     {
       "id": "backend_app_tracking_config_trackerconfig_post_init",
@@ -2257,6 +2317,18 @@
       "norm_label": ".get_class_name()",
       "source_file": "backend/app/pipeline/postprocessor.py",
       "source_location": "L77"
+    },
+    {
+      "id": "backend_app_pipeline_postprocessor_postprocessor_init",
+      "label": ".__init__()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 13,
+      "community_name": "Postprocessor",
+      "file_type": "code",
+      "norm_label": ".__init__()",
+      "source_file": "backend/app/pipeline/postprocessor.py",
+      "source_location": "L73"
     },
     {
       "id": "backend_app_pipeline_postprocessor_postprocessor_rescale_boxes",
@@ -2852,23 +2924,11 @@
       "_callable": true,
       "_origin": "ast",
       "community": 22,
-      "community_name": "logging.py",
+      "community_name": "inference_service.py",
       "file_type": "code",
       "norm_label": ".predict()",
       "source_file": "backend/app/inference/inference_service.py",
       "source_location": "L64"
-    },
-    {
-      "id": "backend_app_pipeline_postprocessor_postprocessor_init",
-      "label": ".__init__()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 22,
-      "community_name": "logging.py",
-      "file_type": "code",
-      "norm_label": ".__init__()",
-      "source_file": "backend/app/pipeline/postprocessor.py",
-      "source_location": "L73"
     },
     {
       "id": "backend_app_api_models_load_model",
@@ -3027,88 +3087,16 @@
       "source_location": "L174"
     },
     {
-      "id": "frontend_src_app_operator_live_page_livepage",
-      "label": "LivePage()",
+      "id": "backend_app_inference_onnx_engine_onnxengine_predict",
+      "label": ".predict()",
       "_callable": true,
       "_origin": "ast",
       "community": 26,
-      "community_name": "liveworkspace.tsx",
+      "community_name": "logging.py",
       "file_type": "code",
-      "norm_label": "livepage()",
-      "source_file": "frontend/src/app/(operator)/live/page.tsx",
-      "source_location": "L4"
-    },
-    {
-      "id": "frontend_src_components_dashboard_dashboardheader_dashboardheader",
-      "label": "DashboardHeader()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 26,
-      "community_name": "liveworkspace.tsx",
-      "file_type": "code",
-      "norm_label": "dashboardheader()",
-      "source_file": "frontend/src/components/dashboard/dashboardheader.tsx",
-      "source_location": "L5"
-    },
-    {
-      "id": "frontend_src_components_status_connectionstatus_connectionstatus",
-      "label": "ConnectionStatus()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 26,
-      "community_name": "liveworkspace.tsx",
-      "file_type": "code",
-      "norm_label": "connectionstatus()",
-      "source_file": "frontend/src/components/status/connectionstatus.tsx",
-      "source_location": "L6"
-    },
-    {
-      "id": "frontend_src_components_surveillance_detectioncanvas_detectioncanvas",
-      "label": "DetectionCanvas()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 26,
-      "community_name": "liveworkspace.tsx",
-      "file_type": "code",
-      "norm_label": "detectioncanvas()",
-      "source_file": "frontend/src/components/surveillance/detectioncanvas.tsx",
-      "source_location": "L36"
-    },
-    {
-      "id": "frontend_src_components_surveillance_liveworkspace_buildstreamurl",
-      "label": "buildStreamUrl()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 26,
-      "community_name": "liveworkspace.tsx",
-      "file_type": "code",
-      "norm_label": "buildstreamurl()",
-      "source_file": "frontend/src/components/surveillance/liveworkspace.tsx",
-      "source_location": "L36"
-    },
-    {
-      "id": "frontend_src_components_surveillance_liveworkspace_liveworkspace",
-      "label": "LiveWorkspace()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 26,
-      "community_name": "liveworkspace.tsx",
-      "file_type": "code",
-      "norm_label": "liveworkspace()",
-      "source_file": "frontend/src/components/surveillance/liveworkspace.tsx",
-      "source_location": "L46"
-    },
-    {
-      "id": "frontend_src_lib_hooks_usebackendstatus_usebackendstatus",
-      "label": "useBackendStatus()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 26,
-      "community_name": "liveworkspace.tsx",
-      "file_type": "code",
-      "norm_label": "usebackendstatus()",
-      "source_file": "frontend/src/lib/hooks/useBackendStatus.ts",
-      "source_location": "L19"
+      "norm_label": ".predict()",
+      "source_file": "backend/app/inference/onnx_engine.py",
+      "source_location": "L265"
     },
     {
       "id": "anpr_hf_inference_copy_hfinference_get_best_text",
@@ -3169,6 +3157,30 @@
       "norm_label": "mock_check_torch_load_is_safe()",
       "source_file": "anpr/hf_inference_copy.py",
       "source_location": "L10"
+    },
+    {
+      "id": "frontend_src_components_dashboard_dashboardheader_dashboardheader",
+      "label": "DashboardHeader()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "liveworkspace.tsx",
+      "file_type": "code",
+      "norm_label": "dashboardheader()",
+      "source_file": "frontend/src/components/dashboard/dashboardheader.tsx",
+      "source_location": "L5"
+    },
+    {
+      "id": "frontend_src_components_surveillance_detectioncanvas_detectioncanvas",
+      "label": "DetectionCanvas()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "liveworkspace.tsx",
+      "file_type": "code",
+      "norm_label": "detectioncanvas()",
+      "source_file": "frontend/src/components/surveillance/detectioncanvas.tsx",
+      "source_location": "L36"
     },
     {
       "id": "backend_app_core_resource_manager_resourcemanager_acquire",
@@ -3721,18 +3733,6 @@
       "norm_label": ".__init__()",
       "source_file": "backend/app/inference/onnx_engine.py",
       "source_location": "L53"
-    },
-    {
-      "id": "backend_app_inference_onnx_engine_onnxengine_predict",
-      "label": ".predict()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "ONNXEngine",
-      "file_type": "code",
-      "norm_label": ".predict()",
-      "source_file": "backend/app/inference/onnx_engine.py",
-      "source_location": "L265"
     },
     {
       "id": "backend_app_inference_onnx_engine_onnxengine_validate_model_path",
@@ -4606,6 +4606,17 @@
       "source_location": "L1"
     },
     {
+      "id": "frontend_src_app_operator_live_page",
+      "label": "live/page.tsx",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "lucide-react",
+      "file_type": "code",
+      "norm_label": "live/page.tsx",
+      "source_file": "frontend/src/app/(operator)/live/page.tsx",
+      "source_location": "L1"
+    },
+    {
       "id": "frontend_src_app_operator_settings_page",
       "label": "settings/page.tsx",
       "_origin": "ast",
@@ -4746,6 +4757,17 @@
       "file_type": "code",
       "norm_label": "bordermappreview.tsx",
       "source_file": "frontend/src/components/map/bordermappreview.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "frontend_src_components_status_connectionstatus",
+      "label": "connectionstatus.tsx",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "lucide-react",
+      "file_type": "code",
+      "norm_label": "connectionstatus.tsx",
+      "source_file": "frontend/src/components/status/connectionstatus.tsx",
       "source_location": "L1"
     },
     {
@@ -5552,6 +5574,17 @@
       "source_location": "L30"
     },
     {
+      "id": "backend_app_pipeline_postprocessor",
+      "label": "postprocessor.py",
+      "_origin": "ast",
+      "community": 13,
+      "community_name": "Postprocessor",
+      "file_type": "code",
+      "norm_label": "postprocessor.py",
+      "source_file": "backend/app/pipeline/postprocessor.py",
+      "source_location": "L1"
+    },
+    {
       "id": "backend_app_pipeline_postprocessor_py_any",
       "label": "Any",
       "_origin": "ast",
@@ -5559,6 +5592,17 @@
       "community_name": "Postprocessor",
       "file_type": "code",
       "norm_label": "any",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "backend_app_pipeline_postprocessor_py_exception",
+      "label": "Exception",
+      "_origin": "ast",
+      "community": 13,
+      "community_name": "Postprocessor",
+      "file_type": "code",
+      "norm_label": "exception",
       "source_file": "",
       "source_location": ""
     },
@@ -5629,6 +5673,17 @@
       "source_location": "L251"
     },
     {
+      "id": "backend_app_pipeline_postprocessor_rationale_30",
+      "label": "Base exception for postprocessing errors.",
+      "_origin": "ast",
+      "community": 13,
+      "community_name": "Postprocessor",
+      "file_type": "rationale",
+      "norm_label": "base exception for postprocessing errors.",
+      "source_file": "backend/app/pipeline/postprocessor.py",
+      "source_location": "L30"
+    },
+    {
       "id": "backend_app_pipeline_postprocessor_rationale_310",
       "label": "Rescale bounding boxes from model input dimensions to original frame dimensions.",
       "_origin": "ast",
@@ -5649,6 +5704,17 @@
       "norm_label": "structured object detection representation.",
       "source_file": "backend/app/pipeline/postprocessor.py",
       "source_location": "L35"
+    },
+    {
+      "id": "backend_app_pipeline_postprocessor_rationale_54",
+      "label": "Configuration for bounding box decoding and NMS.",
+      "_origin": "ast",
+      "community": 13,
+      "community_name": "Postprocessor",
+      "file_type": "rationale",
+      "norm_label": "configuration for bounding box decoding and nms.",
+      "source_file": "backend/app/pipeline/postprocessor.py",
+      "source_location": "L54"
     },
     {
       "id": "backend_app_pipeline_postprocessor_rationale_64",
@@ -6802,7 +6868,7 @@
       "source_location": "L1"
     },
     {
-      "id": "backend_app_api_faces_py_delete",
+      "id": "delete",
       "label": "delete",
       "_origin": "ast",
       "community": 19,
@@ -6813,7 +6879,18 @@
       "source_location": ""
     },
     {
-      "id": "backend_app_api_faces_py_ndarray",
+      "id": "get",
+      "label": "get",
+      "_origin": "ast",
+      "community": 19,
+      "community_name": "faces.py",
+      "file_type": "code",
+      "norm_label": "get",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "ndarray",
       "label": "ndarray",
       "_origin": "ast",
       "community": 19,
@@ -6824,7 +6901,7 @@
       "source_location": ""
     },
     {
-      "id": "backend_app_api_faces_py_post",
+      "id": "post",
       "label": "post",
       "_origin": "ast",
       "community": 19,
@@ -6835,7 +6912,7 @@
       "source_location": ""
     },
     {
-      "id": "backend_app_api_faces_py_response",
+      "id": "response",
       "label": "Response",
       "_origin": "ast",
       "community": 19,
@@ -6846,7 +6923,7 @@
       "source_location": ""
     },
     {
-      "id": "backend_app_api_faces_py_streamingresponse",
+      "id": "streamingresponse",
       "label": "StreamingResponse",
       "_origin": "ast",
       "community": 19,
@@ -6857,7 +6934,7 @@
       "source_location": ""
     },
     {
-      "id": "backend_app_api_faces_py_uploadfile",
+      "id": "uploadfile",
       "label": "UploadFile",
       "_origin": "ast",
       "community": 19,
@@ -6868,7 +6945,7 @@
       "source_location": ""
     },
     {
-      "id": "backend_app_api_faces_py_websocket",
+      "id": "websocket",
       "label": "websocket",
       "_origin": "ast",
       "community": 19,
@@ -7741,7 +7818,7 @@
       "label": "inference_service.py",
       "_origin": "ast",
       "community": 22,
-      "community_name": "logging.py",
+      "community_name": "inference_service.py",
       "file_type": "code",
       "norm_label": "inference_service.py",
       "source_file": "backend/app/inference/inference_service.py",
@@ -7752,7 +7829,7 @@
       "label": "Any",
       "_origin": "ast",
       "community": 22,
-      "community_name": "logging.py",
+      "community_name": "inference_service.py",
       "file_type": "code",
       "norm_label": "any",
       "source_file": "",
@@ -7763,7 +7840,7 @@
       "label": "Exception",
       "_origin": "ast",
       "community": 22,
-      "community_name": "logging.py",
+      "community_name": "inference_service.py",
       "file_type": "code",
       "norm_label": "exception",
       "source_file": "",
@@ -7774,43 +7851,21 @@
       "label": "ndarray",
       "_origin": "ast",
       "community": 22,
-      "community_name": "logging.py",
+      "community_name": "inference_service.py",
       "file_type": "code",
       "norm_label": "ndarray",
       "source_file": "",
       "source_location": ""
     },
     {
-      "id": "backend_app_pipeline_postprocessor",
-      "label": "postprocessor.py",
+      "id": "backend_tests_test_inference_service",
+      "label": "test_inference_service.py",
       "_origin": "ast",
       "community": 22,
-      "community_name": "logging.py",
+      "community_name": "inference_service.py",
       "file_type": "code",
-      "norm_label": "postprocessor.py",
-      "source_file": "backend/app/pipeline/postprocessor.py",
-      "source_location": "L1"
-    },
-    {
-      "id": "backend_app_pipeline_postprocessor_py_exception",
-      "label": "Exception",
-      "_origin": "ast",
-      "community": 22,
-      "community_name": "logging.py",
-      "file_type": "code",
-      "norm_label": "exception",
-      "source_file": "",
-      "source_location": ""
-    },
-    {
-      "id": "backend_app_utils_logging",
-      "label": "logging.py",
-      "_origin": "ast",
-      "community": 22,
-      "community_name": "logging.py",
-      "file_type": "code",
-      "norm_label": "logging.py",
-      "source_file": "backend/app/utils/logging.py",
+      "norm_label": "test_inference_service.py",
+      "source_file": "backend/tests/test_inference_service.py",
       "source_location": "L1"
     },
     {
@@ -7818,7 +7873,7 @@
       "label": "Base exception for inference service errors.",
       "_origin": "ast",
       "community": 22,
-      "community_name": "logging.py",
+      "community_name": "inference_service.py",
       "file_type": "rationale",
       "norm_label": "base exception for inference service errors.",
       "source_file": "backend/app/inference/inference_service.py",
@@ -7829,7 +7884,7 @@
       "label": "Raised when inference resources are unavailable.",
       "_origin": "ast",
       "community": 22,
-      "community_name": "logging.py",
+      "community_name": "inference_service.py",
       "file_type": "rationale",
       "norm_label": "raised when inference resources are unavailable.",
       "source_file": "backend/app/inference/inference_service.py",
@@ -7840,33 +7895,22 @@
       "label": "Run inference using a loaded model. Returns a JSON-serializable structure with\u2026",
       "_origin": "ast",
       "community": 22,
-      "community_name": "logging.py",
+      "community_name": "inference_service.py",
       "file_type": "rationale",
       "norm_label": "run inference using a loaded model. returns a json-serializable structure with...",
       "source_file": "backend/app/inference/inference_service.py",
       "source_location": "L75"
     },
     {
-      "id": "backend_app_pipeline_postprocessor_rationale_30",
-      "label": "Base exception for postprocessing errors.",
+      "id": "backend_app_inference_model_manager_rationale_22",
+      "label": "Raised when a requested model is not loaded.",
       "_origin": "ast",
       "community": 22,
-      "community_name": "logging.py",
+      "community_name": "inference_service.py",
       "file_type": "rationale",
-      "norm_label": "base exception for postprocessing errors.",
-      "source_file": "backend/app/pipeline/postprocessor.py",
-      "source_location": "L30"
-    },
-    {
-      "id": "backend_app_pipeline_postprocessor_rationale_54",
-      "label": "Configuration for bounding box decoding and NMS.",
-      "_origin": "ast",
-      "community": 22,
-      "community_name": "logging.py",
-      "file_type": "rationale",
-      "norm_label": "configuration for bounding box decoding and nms.",
-      "source_file": "backend/app/pipeline/postprocessor.py",
-      "source_location": "L54"
+      "norm_label": "raised when a requested model is not loaded.",
+      "source_file": "backend/app/inference/model_manager.py",
+      "source_location": "L22"
     },
     {
       "id": "backend_app_api_models",
@@ -8166,81 +8210,103 @@
       "source_location": "L51"
     },
     {
-      "id": "frontend_src_app_operator_live_page",
-      "label": "live/page.tsx",
+      "id": "backend_app_inference_model_manager",
+      "label": "model_manager.py",
       "_origin": "ast",
       "community": 26,
-      "community_name": "liveworkspace.tsx",
+      "community_name": "logging.py",
       "file_type": "code",
-      "norm_label": "live/page.tsx",
-      "source_file": "frontend/src/app/(operator)/live/page.tsx",
+      "norm_label": "model_manager.py",
+      "source_file": "backend/app/inference/model_manager.py",
       "source_location": "L1"
     },
     {
-      "id": "frontend_src_components_dashboard_dashboardheader",
-      "label": "dashboardheader.tsx",
+      "id": "backend_app_inference_onnx_engine",
+      "label": "onnx_engine.py",
       "_origin": "ast",
       "community": 26,
-      "community_name": "liveworkspace.tsx",
+      "community_name": "logging.py",
       "file_type": "code",
-      "norm_label": "dashboardheader.tsx",
-      "source_file": "frontend/src/components/dashboard/dashboardheader.tsx",
+      "norm_label": "onnx_engine.py",
+      "source_file": "backend/app/inference/onnx_engine.py",
       "source_location": "L1"
     },
     {
-      "id": "frontend_src_components_status_connectionstatus",
-      "label": "connectionstatus.tsx",
+      "id": "backend_app_inference_onnx_engine_py_exception",
+      "label": "Exception",
       "_origin": "ast",
       "community": 26,
-      "community_name": "liveworkspace.tsx",
+      "community_name": "logging.py",
       "file_type": "code",
-      "norm_label": "connectionstatus.tsx",
-      "source_file": "frontend/src/components/status/connectionstatus.tsx",
+      "norm_label": "exception",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "backend_app_inference_onnx_engine_py_ndarray",
+      "label": "ndarray",
+      "_origin": "ast",
+      "community": 26,
+      "community_name": "logging.py",
+      "file_type": "code",
+      "norm_label": "ndarray",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "backend_app_utils_logging",
+      "label": "logging.py",
+      "_origin": "ast",
+      "community": 26,
+      "community_name": "logging.py",
+      "file_type": "code",
+      "norm_label": "logging.py",
+      "source_file": "backend/app/utils/logging.py",
       "source_location": "L1"
     },
     {
-      "id": "frontend_src_components_surveillance_detectioncanvas",
-      "label": "detectioncanvas.tsx",
+      "id": "backend_app_inference_onnx_engine_rationale_270",
+      "label": "Run inference using a NumPy array. Preprocessing is intentionally kept outside\u2026",
       "_origin": "ast",
       "community": 26,
-      "community_name": "liveworkspace.tsx",
-      "file_type": "code",
-      "norm_label": "detectioncanvas.tsx",
-      "source_file": "frontend/src/components/surveillance/detectioncanvas.tsx",
-      "source_location": "L1"
+      "community_name": "logging.py",
+      "file_type": "rationale",
+      "norm_label": "run inference using a numpy array. preprocessing is intentionally kept outside...",
+      "source_file": "backend/app/inference/onnx_engine.py",
+      "source_location": "L270"
     },
     {
-      "id": "frontend_src_components_surveillance_detectioncanvas_class_colors",
-      "label": "CLASS_COLORS",
+      "id": "backend_app_inference_onnx_engine_rationale_29",
+      "label": "Base exception for ONNX engine errors.",
       "_origin": "ast",
       "community": 26,
-      "community_name": "liveworkspace.tsx",
-      "file_type": "code",
-      "norm_label": "class_colors",
-      "source_file": "frontend/src/components/surveillance/detectioncanvas.tsx",
-      "source_location": "L13"
+      "community_name": "logging.py",
+      "file_type": "rationale",
+      "norm_label": "base exception for onnx engine errors.",
+      "source_file": "backend/app/inference/onnx_engine.py",
+      "source_location": "L29"
     },
     {
-      "id": "frontend_src_components_surveillance_liveworkspace",
-      "label": "liveworkspace.tsx",
+      "id": "backend_app_inference_onnx_engine_rationale_33",
+      "label": "Raised when an ONNX model cannot be loaded or is invalid.",
       "_origin": "ast",
       "community": 26,
-      "community_name": "liveworkspace.tsx",
-      "file_type": "code",
-      "norm_label": "liveworkspace.tsx",
-      "source_file": "frontend/src/components/surveillance/liveworkspace.tsx",
-      "source_location": "L1"
+      "community_name": "logging.py",
+      "file_type": "rationale",
+      "norm_label": "raised when an onnx model cannot be loaded or is invalid.",
+      "source_file": "backend/app/inference/onnx_engine.py",
+      "source_location": "L33"
     },
     {
-      "id": "ref_react",
-      "label": "react",
+      "id": "backend_app_inference_onnx_engine_rationale_37",
+      "label": "Raised when inference fails.",
       "_origin": "ast",
       "community": 26,
-      "community_name": "liveworkspace.tsx",
-      "file_type": "concept",
-      "norm_label": "react",
-      "source_file": "frontend/package.json",
-      "source_location": "L16"
+      "community_name": "logging.py",
+      "file_type": "rationale",
+      "norm_label": "raised when inference fails.",
+      "source_file": "backend/app/inference/onnx_engine.py",
+      "source_location": "L37"
     },
     {
       "id": "package",
@@ -8375,11 +8441,55 @@
       "source_location": "L1"
     },
     {
+      "id": "frontend_src_components_dashboard_dashboardheader",
+      "label": "dashboardheader.tsx",
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "liveworkspace.tsx",
+      "file_type": "code",
+      "norm_label": "dashboardheader.tsx",
+      "source_file": "frontend/src/components/dashboard/dashboardheader.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "frontend_src_components_surveillance_detectioncanvas",
+      "label": "detectioncanvas.tsx",
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "liveworkspace.tsx",
+      "file_type": "code",
+      "norm_label": "detectioncanvas.tsx",
+      "source_file": "frontend/src/components/surveillance/detectioncanvas.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "frontend_src_components_surveillance_detectioncanvas_class_colors",
+      "label": "CLASS_COLORS",
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "liveworkspace.tsx",
+      "file_type": "code",
+      "norm_label": "class_colors",
+      "source_file": "frontend/src/components/surveillance/detectioncanvas.tsx",
+      "source_location": "L13"
+    },
+    {
+      "id": "frontend_src_components_surveillance_liveworkspace",
+      "label": "liveworkspace.tsx",
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "liveworkspace.tsx",
+      "file_type": "code",
+      "norm_label": "liveworkspace.tsx",
+      "source_file": "frontend/src/components/surveillance/liveworkspace.tsx",
+      "source_location": "L1"
+    },
+    {
       "id": "frontend_src_lib_hooks_usebackendstatus",
       "label": "useBackendStatus.ts",
       "_origin": "ast",
       "community": 29,
-      "community_name": "backend.ts",
+      "community_name": "liveworkspace.tsx",
       "file_type": "code",
       "norm_label": "usebackendstatus.ts",
       "source_file": "frontend/src/lib/hooks/useBackendStatus.ts",
@@ -8390,11 +8500,22 @@
       "label": "backend.ts",
       "_origin": "ast",
       "community": 29,
-      "community_name": "backend.ts",
+      "community_name": "liveworkspace.tsx",
       "file_type": "code",
       "norm_label": "backend.ts",
       "source_file": "frontend/src/types/backend.ts",
       "source_location": "L1"
+    },
+    {
+      "id": "ref_react",
+      "label": "react",
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "liveworkspace.tsx",
+      "file_type": "concept",
+      "norm_label": "react",
+      "source_file": "frontend/package.json",
+      "source_location": "L16"
     },
     {
       "id": "backend_app_core_resource_manager",
@@ -8438,17 +8559,6 @@
       "file_type": "code",
       "norm_label": "test_detection_integration.py",
       "source_file": "backend/tests/test_detection_integration.py",
-      "source_location": "L1"
-    },
-    {
-      "id": "backend_tests_test_inference_service",
-      "label": "test_inference_service.py",
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "ResourceManager",
-      "file_type": "code",
-      "norm_label": "test_inference_service.py",
-      "source_file": "backend/tests/test_inference_service.py",
       "source_location": "L1"
     },
     {
@@ -8718,17 +8828,6 @@
       "source_location": "L1"
     },
     {
-      "id": "backend_app_inference_model_manager",
-      "label": "model_manager.py",
-      "_origin": "ast",
-      "community": 33,
-      "community_name": "ModelManagerError",
-      "file_type": "code",
-      "norm_label": "model_manager.py",
-      "source_file": "backend/app/inference/model_manager.py",
-      "source_location": "L1"
-    },
-    {
       "id": "backend_app_inference_model_manager_py_exception",
       "label": "Exception",
       "_origin": "ast",
@@ -8771,17 +8870,6 @@
       "norm_label": "unload one model and release its onnx session.",
       "source_file": "backend/app/inference/model_manager.py",
       "source_location": "L189"
-    },
-    {
-      "id": "backend_app_inference_model_manager_rationale_22",
-      "label": "Raised when a requested model is not loaded.",
-      "_origin": "ast",
-      "community": 33,
-      "community_name": "ModelManagerError",
-      "file_type": "rationale",
-      "norm_label": "raised when a requested model is not loaded.",
-      "source_file": "backend/app/inference/model_manager.py",
-      "source_location": "L22"
     },
     {
       "id": "backend_app_inference_model_manager_rationale_26",
@@ -9002,17 +9090,6 @@
       "norm_label": "config",
       "source_file": "frontend/middleware.ts",
       "source_location": "L8"
-    },
-    {
-      "id": "postcss_load_config",
-      "label": "postcss-load-config",
-      "_origin": "ast",
-      "community": 38,
-      "community_name": "postcss.config.mjs",
-      "confidence": "EXTRACTED",
-      "file_type": "code",
-      "norm_label": "postcss-load-config",
-      "source_file": "postcss-load-config"
     },
     {
       "id": "frontend_postcss_config",
@@ -9279,17 +9356,6 @@
       "source_location": "L1"
     },
     {
-      "id": "backend_app_inference_onnx_engine",
-      "label": "onnx_engine.py",
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "ONNXEngine",
-      "file_type": "code",
-      "norm_label": "onnx_engine.py",
-      "source_file": "backend/app/inference/onnx_engine.py",
-      "source_location": "L1"
-    },
-    {
       "id": "backend_app_inference_onnx_engine_py_any",
       "label": "Any",
       "_origin": "ast",
@@ -9297,28 +9363,6 @@
       "community_name": "ONNXEngine",
       "file_type": "code",
       "norm_label": "any",
-      "source_file": "",
-      "source_location": ""
-    },
-    {
-      "id": "backend_app_inference_onnx_engine_py_exception",
-      "label": "Exception",
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "ONNXEngine",
-      "file_type": "code",
-      "norm_label": "exception",
-      "source_file": "",
-      "source_location": ""
-    },
-    {
-      "id": "backend_app_inference_onnx_engine_py_ndarray",
-      "label": "ndarray",
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "ONNXEngine",
-      "file_type": "code",
-      "norm_label": "ndarray",
       "source_file": "",
       "source_location": ""
     },
@@ -9378,28 +9422,6 @@
       "source_location": "L247"
     },
     {
-      "id": "backend_app_inference_onnx_engine_rationale_270",
-      "label": "Run inference using a NumPy array. Preprocessing is intentionally kept outside\u2026",
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "ONNXEngine",
-      "file_type": "rationale",
-      "norm_label": "run inference using a numpy array. preprocessing is intentionally kept outside...",
-      "source_file": "backend/app/inference/onnx_engine.py",
-      "source_location": "L270"
-    },
-    {
-      "id": "backend_app_inference_onnx_engine_rationale_29",
-      "label": "Base exception for ONNX engine errors.",
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "ONNXEngine",
-      "file_type": "rationale",
-      "norm_label": "base exception for onnx engine errors.",
-      "source_file": "backend/app/inference/onnx_engine.py",
-      "source_location": "L29"
-    },
-    {
       "id": "backend_app_inference_onnx_engine_rationale_324",
       "label": "Return useful information about the loaded model.",
       "_origin": "ast",
@@ -9411,17 +9433,6 @@
       "source_location": "L324"
     },
     {
-      "id": "backend_app_inference_onnx_engine_rationale_33",
-      "label": "Raised when an ONNX model cannot be loaded or is invalid.",
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "ONNXEngine",
-      "file_type": "rationale",
-      "norm_label": "raised when an onnx model cannot be loaded or is invalid.",
-      "source_file": "backend/app/inference/onnx_engine.py",
-      "source_location": "L33"
-    },
-    {
       "id": "backend_app_inference_onnx_engine_rationale_343",
       "label": "Release the ONNX Runtime session.",
       "_origin": "ast",
@@ -9431,17 +9442,6 @@
       "norm_label": "release the onnx runtime session.",
       "source_file": "backend/app/inference/onnx_engine.py",
       "source_location": "L343"
-    },
-    {
-      "id": "backend_app_inference_onnx_engine_rationale_37",
-      "label": "Raised when inference fails.",
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "ONNXEngine",
-      "file_type": "rationale",
-      "norm_label": "raised when inference fails.",
-      "source_file": "backend/app/inference/onnx_engine.py",
-      "source_location": "L37"
     },
     {
       "id": "backend_app_inference_onnx_engine_rationale_41",
@@ -10531,6 +10531,72 @@
       "source_location": ""
     },
     {
+      "id": "backend_app_api_faces_py_delete",
+      "label": "delete",
+      "_origin": "ast",
+      "community": 74,
+      "community_name": "delete",
+      "file_type": "code",
+      "norm_label": "delete",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "backend_app_api_faces_py_ndarray",
+      "label": "ndarray",
+      "_origin": "ast",
+      "community": 75,
+      "community_name": "ndarray",
+      "file_type": "code",
+      "norm_label": "ndarray",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "backend_app_api_faces_py_post",
+      "label": "post",
+      "_origin": "ast",
+      "community": 76,
+      "community_name": "post",
+      "file_type": "code",
+      "norm_label": "post",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "backend_app_api_faces_py_response",
+      "label": "Response",
+      "_origin": "ast",
+      "community": 77,
+      "community_name": "Response",
+      "file_type": "code",
+      "norm_label": "response",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "backend_app_api_faces_py_streamingresponse",
+      "label": "StreamingResponse",
+      "_origin": "ast",
+      "community": 78,
+      "community_name": "StreamingResponse",
+      "file_type": "code",
+      "norm_label": "streamingresponse",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "backend_app_api_faces_py_uploadfile",
+      "label": "UploadFile",
+      "_origin": "ast",
+      "community": 79,
+      "community_name": "UploadFile",
+      "file_type": "code",
+      "norm_label": "uploadfile",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
       "id": "backend_app_pipeline_video_loader",
       "label": "video_loader.py",
       "_origin": "ast",
@@ -10705,6 +10771,17 @@
       "norm_label": "open the video using opencv.",
       "source_file": "backend/app/pipeline/video_loader.py",
       "source_location": "L81"
+    },
+    {
+      "id": "backend_app_api_faces_py_websocket",
+      "label": "websocket",
+      "_origin": "ast",
+      "community": 80,
+      "community_name": "websocket",
+      "file_type": "code",
+      "norm_label": "websocket",
+      "source_file": "",
+      "source_location": ""
     },
     {
       "id": "backend_app_api_tracking",
@@ -11141,7 +11218,7 @@
     },
     {
       "source": "backend_app_api_faces_stream_faces",
-      "target": "backend_app_api_faces_py_streamingresponse",
+      "target": "streamingresponse",
       "relation": "calls",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -13505,7 +13582,7 @@
     },
     {
       "source": "backend_app_api_faces_add_face_sample",
-      "target": "backend_app_api_faces_py_post",
+      "target": "post",
       "relation": "references",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -13517,7 +13594,7 @@
     },
     {
       "source": "backend_app_api_faces_delete_person",
-      "target": "backend_app_api_faces_py_delete",
+      "target": "delete",
       "relation": "references",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -13529,7 +13606,7 @@
     },
     {
       "source": "backend_app_api_faces_get_face_engine_status",
-      "target": "anpr_app_get",
+      "target": "get",
       "relation": "references",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -13541,7 +13618,7 @@
     },
     {
       "source": "backend_app_api_faces_get_face_thumbnail",
-      "target": "anpr_app_get",
+      "target": "get",
       "relation": "references",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -13553,7 +13630,7 @@
     },
     {
       "source": "backend_app_api_faces_get_recent_face_events",
-      "target": "anpr_app_get",
+      "target": "get",
       "relation": "references",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -13565,7 +13642,7 @@
     },
     {
       "source": "backend_app_api_faces_list_enrolled_faces",
-      "target": "anpr_app_get",
+      "target": "get",
       "relation": "references",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -13577,7 +13654,7 @@
     },
     {
       "source": "backend_app_api_faces_register_face",
-      "target": "backend_app_api_faces_py_post",
+      "target": "post",
       "relation": "references",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -13589,7 +13666,7 @@
     },
     {
       "source": "backend_app_api_faces_scan_image",
-      "target": "backend_app_api_faces_py_post",
+      "target": "post",
       "relation": "references",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -13601,7 +13678,7 @@
     },
     {
       "source": "backend_app_api_faces_stop_face_camera",
-      "target": "backend_app_api_faces_py_post",
+      "target": "post",
       "relation": "references",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -13613,7 +13690,7 @@
     },
     {
       "source": "backend_app_api_faces_stream_faces",
-      "target": "anpr_app_get",
+      "target": "get",
       "relation": "references",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -14093,7 +14170,7 @@
     },
     {
       "source": "backend_app_api_faces_add_face_sample",
-      "target": "backend_app_api_faces_py_uploadfile",
+      "target": "uploadfile",
       "relation": "references",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -14105,7 +14182,7 @@
     },
     {
       "source": "backend_app_api_faces_decode_image_input",
-      "target": "backend_app_api_faces_py_ndarray",
+      "target": "ndarray",
       "relation": "references",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -14117,7 +14194,7 @@
     },
     {
       "source": "backend_app_api_faces_register_face",
-      "target": "backend_app_api_faces_py_uploadfile",
+      "target": "uploadfile",
       "relation": "references",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -14129,7 +14206,7 @@
     },
     {
       "source": "backend_app_api_faces_scan_image",
-      "target": "backend_app_api_faces_py_uploadfile",
+      "target": "uploadfile",
       "relation": "references",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -18764,7 +18841,7 @@
     },
     {
       "source": "backend_app_api_faces_face_websocket_stream",
-      "target": "backend_app_api_faces_py_websocket",
+      "target": "websocket",
       "relation": "references",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -19304,7 +19381,7 @@
     },
     {
       "source": "backend_app_api_faces_get_face_thumbnail",
-      "target": "backend_app_api_faces_py_response",
+      "target": "response",
       "relation": "references",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -23922,15 +23999,6 @@
       "weight": 1.0
     },
     {
-      "source": "frontend_postcss_config",
-      "target": "postcss_load_config",
-      "relation": "dynamic_import",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "frontend/postcss.config.mjs"
-    },
-    {
       "source": "backend_app_api_cameras_cameracreaterequest",
       "target": "backend_app_api_cameras_py_basemodel",
       "relation": "inherits",
@@ -28103,5 +28171,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "173b3fe3ee43dc56b919bbbfdbcc23abb9533a90"
+  "built_at_commit": "3af3c1180b76cf0dca182411f9bcddbcdb3fe2d6"
 }

@@ -966,9 +966,9 @@
     "semantic_hash": ""
   },
   "backend/app/api/faces.py": {
-    "mtime": 1789032107.09505,
-    "seen": 1789032148.9268641,
-    "ast_hash": "5a8e96da8321dc394b05cea113bfda7d",
+    "mtime": 1789033631.022655,
+    "seen": 1789033802.8174014,
+    "ast_hash": "77fe21431d61f88b55bae625c9f955be",
     "semantic_hash": ""
   },
   "backend/app/data/faces/known_faces.json": {
@@ -990,9 +990,9 @@
     "semantic_hash": ""
   },
   "frontend/src/app/(operator)/facial-recognition/page.tsx": {
-    "mtime": 1789031942.973491,
-    "seen": 1789032148.926974,
-    "ast_hash": "90a69b34729e04769d8f12d7894a53a4",
+    "mtime": 1789033763.7404761,
+    "seen": 1789033802.8175166,
+    "ast_hash": "e461fe1b2ab76c35825b9ac3433a3026",
     "semantic_hash": ""
   },
   "frontend/src/types/face.ts": {
