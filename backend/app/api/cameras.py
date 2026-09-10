@@ -21,120 +21,18 @@ router = APIRouter(
 
 DATA_FILE = Path(__file__).resolve().parent.parent / "data" / "cameras.json"
 
-DEFAULT_CAMERAS: list[dict[str, Any]] = [
-    {
-        "id": "cam-1",
-        "name": "North Perimeter Optical 4K",
-        "sector": "Sector-04 (BOP Alpha)",
-        "location": "Pillar 14 — Forward Trench",
-        "status": "online",
-        "type": "Optical 4K",
-        "ipAddress": "10.20.72.101",
-        "port": 554,
-        "streamUrl": "rtsp://admin:pass@10.20.72.101:554/live/ch0",
-        "isRtsp": True,
-        "latitude": 24.10,
-        "longitude": 77.70,
-        "coordinates": [77.70, 24.10],
-        "modelAssigned": "best.onnx (Threat Detector)",
-        "resolution": "4K UHD (3840x2160)",
-        "fps": 30,
-        "confThreshold": 0.75,
-        "iouThreshold": 0.45,
-        "isRecording": True,
-        "alertTriggerEnabled": True,
-        "lastActive": "Just now",
-        "healthStats": {
-            "bitrate": "8.4 Mbps",
-            "latencyMs": 42,
-            "packetLoss": "0.01%",
-        },
-    },
-    {
-        "id": "cam-2",
-        "name": "Eastern Gate Rapid Response",
-        "sector": "Sector-04 (BOP Alpha)",
-        "location": "Eastern Vehicle Checkpost & Gate",
-        "status": "alert",
-        "type": "ANPR Dedicated",
-        "ipAddress": "10.20.72.102",
-        "port": 554,
-        "streamUrl": "rtsp://admin:pass@10.20.72.102:554/live/ch0",
-        "isRtsp": True,
-        "latitude": 23.70,
-        "longitude": 79.30,
-        "coordinates": [79.30, 23.70],
-        "modelAssigned": "best.onnx (Threat Detector)",
-        "resolution": "1080p FHD (1920x1080)",
-        "fps": 60,
-        "confThreshold": 0.70,
-        "iouThreshold": 0.45,
-        "isRecording": True,
-        "alertTriggerEnabled": True,
-        "lastActive": "Just now",
-        "healthStats": {
-            "bitrate": "6.2 Mbps",
-            "latencyMs": 38,
-            "packetLoss": "0.00%",
-        },
-    },
-    {
-        "id": "cam-3",
-        "name": "Watch Tower High-Mast FLIR",
-        "sector": "Sector-04 (BOP Alpha)",
-        "location": "Watch Tower 03 — Elevated Ridge",
-        "status": "online",
-        "type": "Thermal FLIR",
-        "ipAddress": "10.20.72.103",
-        "port": 554,
-        "streamUrl": "rtsp://admin:pass@10.20.72.103:554/live/ch1",
-        "isRtsp": True,
-        "latitude": 22.40,
-        "longitude": 78.10,
-        "coordinates": [78.10, 22.40],
-        "modelAssigned": "best.onnx (Threat Detector)",
-        "resolution": "1080p Thermal",
-        "fps": 25,
-        "confThreshold": 0.80,
-        "iouThreshold": 0.50,
-        "isRecording": True,
-        "alertTriggerEnabled": True,
-        "lastActive": "1 min ago",
-        "healthStats": {
-            "bitrate": "4.5 Mbps",
-            "latencyMs": 56,
-            "packetLoss": "0.05%",
-        },
-    },
-    {
-        "id": "cam-4",
-        "name": "Southern Ridge Fog Penetration",
-        "sector": "Sector-03 (South Riverine)",
-        "location": "Riverine Crossing — Point Charlie",
-        "status": "online",
-        "type": "Night Vision / IR",
-        "ipAddress": "10.20.72.104",
-        "port": 554,
-        "streamUrl": "rtsp://admin:pass@10.20.72.104:554/live/ch0",
-        "isRtsp": True,
-        "latitude": 22.90,
-        "longitude": 79.40,
-        "coordinates": [79.40, 22.90],
-        "modelAssigned": "best.onnx (Threat Detector)",
-        "resolution": "1080p FHD (1920x1080)",
-        "fps": 30,
-        "confThreshold": 0.75,
-        "iouThreshold": 0.45,
-        "isRecording": False,
-        "alertTriggerEnabled": True,
-        "lastActive": "3 mins ago",
-        "healthStats": {
-            "bitrate": "5.1 Mbps",
-            "latencyMs": 64,
-            "packetLoss": "0.02%",
-        },
-    },
-]
+def _load_default_cameras_from_file() -> list[dict[str, Any]]:
+    if DATA_FILE.exists():
+        try:
+            with open(DATA_FILE, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                if isinstance(data, list) and len(data) > 0:
+                    return data
+        except Exception as exc:
+            logger.warning("Could not read default cameras.json: %s", exc)
+    return []
+
+DEFAULT_CAMERAS: list[dict[str, Any]] = _load_default_cameras_from_file()
 
 
 def _ensure_data_file() -> None:
