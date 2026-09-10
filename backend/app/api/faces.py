@@ -396,15 +396,21 @@ def _generate_face_stream(
 
                 consecutive_fails = 0
 
-                # Downsample if too high resolution for video stream
+                # Downsample only if exceptionally high resolution (maintain up to 1280px for distant faces)
                 h, w = frame.shape[:2]
-                if w > 854:
-                    scale = 854.0 / w
-                    frame = cv2.resize(frame, (854, int(h * scale)))
+                if w > 1280:
+                    scale = 1280.0 / w
+                    frame = cv2.resize(frame, (1280, int(h * scale)))
 
-                # Run Face detection & recognition with temporal smoothing
+                # Run Face detection & recognition with surveillance parameters and temporal smoothing
                 try:
-                    faces = face_service.detect_and_recognize(frame, use_temporal_smoothing=True)
+                    faces = face_service.detect_and_recognize(
+                        frame,
+                        min_match_score=0.34,
+                        min_face_size=24,
+                        det_score_thresh=0.45,
+                        use_temporal_smoothing=True,
+                    )
                     annotated = face_service.draw_faces(frame, faces)
                 except Exception as model_err:
                     logger.warning("Face processing frame error: %s", model_err)
@@ -511,9 +517,15 @@ async def face_websocket_stream(websocket: WebSocket):
                     scale = 854.0 / w
                     frame = cv2.resize(frame, (854, int(h * scale)))
 
-                # Run Face detection & recognition with temporal smoothing
+                # Run Face detection & recognition with temporal smoothing and surveillance thresholds
                 try:
-                    faces = face_service.detect_and_recognize(frame, use_temporal_smoothing=True)
+                    faces = face_service.detect_and_recognize(
+                        frame,
+                        min_match_score=0.34,
+                        min_face_size=24,
+                        det_score_thresh=0.45,
+                        use_temporal_smoothing=True,
+                    )
                     annotated = face_service.draw_faces(frame, faces)
                 except Exception as model_err:
                     logger.warning("WebSocket face frame processing error: %s", model_err)

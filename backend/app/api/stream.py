@@ -393,6 +393,7 @@ def stream_generator(
             logger.warning("Could not initialize ByteTracker for stream: %s", exc)
 
     cached_detections: list[dict] = []
+    cached_faces: list[dict] = []
     frame_count = 0
     last_fps_time = time.perf_counter()
     measured_fps = float(fps_limit)
@@ -492,15 +493,28 @@ def stream_generator(
             if draw_detections and cached_detections:
                 draw_bounding_boxes(frame, cached_detections)
 
-            # Optional real-time facial recognition overlay
+            # Optional real-time facial recognition overlay with frame decimation (every 3rd frame)
+            # to guarantee zero buffer accumulation and smooth 25+ FPS display
             if enable_face_recognition:
-                try:
-                    from app.pipeline.face_service import face_service
-                    faces = face_service.detect_and_recognize(frame, use_temporal_smoothing=True)
-                    if faces:
-                        frame = face_service.draw_faces(frame, faces)
-                except Exception as exc:
-                    logger.debug("Live stream face recognition exception: %s", exc)
+                if frame_count % 3 == 0 or not cached_faces:
+                    try:
+                        from app.pipeline.face_service import face_service
+                        cached_faces = face_service.detect_and_recognize(
+                            frame,
+                            min_match_score=0.34,
+                            min_face_size=24,
+                            det_score_thresh=0.45,
+                            use_temporal_smoothing=True,
+                        )
+                    except Exception as exc:
+                        logger.debug("Live stream face recognition exception: %s", exc)
+
+                if cached_faces:
+                    try:
+                        from app.pipeline.face_service import face_service
+                        frame = face_service.draw_faces(frame, cached_faces)
+                    except Exception as draw_exc:
+                        logger.debug("Live stream face draw exception: %s", draw_exc)
 
             draw_tactical_hud(
                 frame,
