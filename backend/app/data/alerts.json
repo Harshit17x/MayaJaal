@@ -1,5 +1,29 @@
 [
   {
+    "id": "alert-1789077317897-d27a",
+    "title": "\ud83d\udea8 SUSPECT SIGHTING: HARIOM [LOW]",
+    "location": "SITAICS \u2014 Forward Trench Line #3",
+    "time": "Just now",
+    "timestamp": 1789077317898,
+    "severity": "Medium",
+    "cameraId": "bop-jk-04",
+    "cameraName": "SITAICS",
+    "className": "suspect",
+    "confidence": 0.91,
+    "acknowledged": false,
+    "box": [
+      285.38,
+      217.52,
+      428.25,
+      385.85
+    ],
+    "snapshotUrl": "/api/alerts/snapshots/alert_1789077317889_bop-jk-04.jpg",
+    "suspectName": "Hariom",
+    "threatLevel": "LOW",
+    "category": "Wanted / BOLO",
+    "notes": "Automatic biometric match on feed SITAICS"
+  },
+  {
     "id": "alert-1789077257881-1870",
     "title": "\ud83d\udea8 SUSPECT SIGHTING: HARIOM [LOW]",
     "location": "SASET \u2014 Watchtower 14 Remote Turret",

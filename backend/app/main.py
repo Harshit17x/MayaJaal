@@ -10,6 +10,7 @@ from app.api.alerts import router as alerts_router
 from app.api.anpr import router as anpr_router
 from app.api.cameras import router as cameras_router
 from app.api.faces import router as faces_router
+from app.api.geofences import router as geofences_router
 from app.api.health import router as health_router
 from app.api.inference import router as inference_router
 from app.api.models import router as models_router
@@ -142,6 +143,7 @@ app.include_router(stream_router)
 app.include_router(tracking_router)
 app.include_router(anpr_router)
 app.include_router(faces_router)
+app.include_router(geofences_router)
 app.include_router(alerts_router)
 
 

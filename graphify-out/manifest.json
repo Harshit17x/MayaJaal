@@ -114,9 +114,9 @@
     "semantic_hash": ""
   },
   "backend/app/api/tracking.py": {
-    "mtime": 1789067166.6272082,
-    "seen": 1789072973.6512613,
-    "ast_hash": "3125fa9f1c4da531eaa93bdfcf7507b3",
+    "mtime": 1789076932.0242777,
+    "seen": 1789077095.9884405,
+    "ast_hash": "b9085d4628fc3e265093832b791ce7c8",
     "semantic_hash": ""
   },
   "backend/app/core/config.py": {
@@ -162,9 +162,9 @@
     "semantic_hash": "51fe8a063a7216e3a2df9d4774e8d700"
   },
   "backend/app/main.py": {
-    "mtime": 1789074818.6736245,
-    "seen": 1789074846.405389,
-    "ast_hash": "78277f37935179c6e7c32000d708d28a",
+    "mtime": 1789076805.3416004,
+    "seen": 1789077095.9884534,
+    "ast_hash": "626e1e880ef3e22b10b5985a20ade96c",
     "semantic_hash": ""
   },
   "backend/app/pipeline/anpr_service.py": {
@@ -414,10 +414,10 @@
     "semantic_hash": ""
   },
   "frontend/src/app/(operator)/geofences/page.tsx": {
-    "mtime": 1788946168.8141935,
-    "seen": 1789026248.1501083,
-    "ast_hash": "cd0fe3c162ad450611075810b187cee5",
-    "semantic_hash": "cd0fe3c162ad450611075810b187cee5"
+    "mtime": 1789077079.8826365,
+    "seen": 1789077095.9885037,
+    "ast_hash": "961da2f797417a8cfcd8d554b03d92e4",
+    "semantic_hash": ""
   },
   "frontend/src/app/(operator)/gis-map/page.tsx": {
     "mtime": 1789061459.9549522,
@@ -558,9 +558,9 @@
     "semantic_hash": "c1786940e913f47aea14b96a89b20b8d"
   },
   "frontend/src/components/map/BorderMap.tsx": {
-    "mtime": 1789072915.9366775,
-    "seen": 1789072973.6513395,
-    "ast_hash": "1deb37cbc711e89cd8617f06ac948be3",
+    "mtime": 1789077054.5674937,
+    "seen": 1789077095.988525,
+    "ast_hash": "8dbc5ca6081a35061f5667ad98f285f3",
     "semantic_hash": ""
   },
   "frontend/src/components/map/bordermappreview.tsx": {
@@ -630,9 +630,9 @@
     "semantic_hash": ""
   },
   "frontend/src/lib/api.ts": {
-    "mtime": 1789067166.6059003,
-    "seen": 1789072973.6513512,
-    "ast_hash": "f7b38cfb83799b21124693eeac8bd276",
+    "mtime": 1789076948.852996,
+    "seen": 1789077095.9885361,
+    "ast_hash": "1fc8044cb4ee8448f69ff27d5a6b5f4b",
     "semantic_hash": ""
   },
   "frontend/src/lib/authStore.ts": {
@@ -1038,9 +1038,9 @@
     "semantic_hash": ""
   },
   "backend/app/data/alerts.json": {
-    "mtime": 1789075320.2329614,
-    "seen": 1789075420.3459063,
-    "ast_hash": "af3bc43257f0f9418bec9d351efdb9e8",
+    "mtime": 1789076891.7874875,
+    "seen": 1789077095.988445,
+    "ast_hash": "c021c315e3f6efed1d56d92f2a2e4ff6",
     "semantic_hash": ""
   },
   "backend/app/pipeline/alert_service.py": {
@@ -1098,9 +1098,9 @@
     "semantic_hash": ""
   },
   "backend/app/data/geofences.json": {
-    "mtime": 1789067156.6584756,
-    "seen": 1789072973.6512704,
-    "ast_hash": "a3864439b2cadb4acc75c19cddae3166",
+    "mtime": 1789076916.8560693,
+    "seen": 1789077095.9884493,
+    "ast_hash": "30dbcacf35b3475eeb6ff51109c6e399",
     "semantic_hash": ""
   },
   "frontend/src/components/map/SuspectTrailOverlay.ts": {
@@ -1815,6 +1815,30 @@
     "mtime": 1789075320.3897822,
     "seen": 1789075420.3461053,
     "ast_hash": "85bc3f3ac39513b96e7a85c80c149ea3",
+    "semantic_hash": ""
+  },
+  "backend/app/api/geofences.py": {
+    "mtime": 1789076795.9010167,
+    "seen": 1789077095.9884336,
+    "ast_hash": "af282579fd6ffc8eba0047f82ca65a35",
+    "semantic_hash": ""
+  },
+  "backend/app/pipeline/geofence_engine.py": {
+    "mtime": 1789076912.0342236,
+    "seen": 1789077095.988459,
+    "ast_hash": "60c0621f286fdd009e187c51a6663bb7",
+    "semantic_hash": ""
+  },
+  "backend/tests/test_geofence_engine.py": {
+    "mtime": 1789076863.7867382,
+    "seen": 1789077095.9884837,
+    "ast_hash": "76ae064b38ebeb7da503489ac01138c8",
+    "semantic_hash": ""
+  },
+  "frontend/src/types/geofence.ts": {
+    "mtime": 1789076938.7086434,
+    "seen": 1789077095.9885447,
+    "ast_hash": "31b52709bb5fe621f38ff5de06961eca",
     "semantic_hash": ""
   }
 }
