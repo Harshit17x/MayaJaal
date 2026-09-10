@@ -8,7 +8,7 @@ import time
 from typing import Generator, Optional
 
 import cv2
-from fastapi import APIRouter, File, Form, HTTPException, Query, Request, Response, UploadFile
+from fastapi import APIRouter, File, Form, HTTPException, Query, Request, Response, UploadFile, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 import numpy as np
 
@@ -328,7 +328,7 @@ def _generate_face_stream(
                     # Standby placeholder
                     standby = np.zeros((480, 640, 3), dtype=np.uint8)
                     standby[:] = (20, 24, 28)
-                    status_text = "CAMERA FEED OFFLINE / CONNECTING..." if source.isdigit() else "FACIAL RECON • CONNECTING..."
+                    status_text = "CAMERA FEED OFFLINE / CONNECTING..." if source.isdigit() else "FACIAL RECON | CONNECTING..."
                     cv2.putText(
                         standby,
                         status_text,
@@ -341,7 +341,7 @@ def _generate_face_stream(
                     now_str = datetime.now().strftime("%H:%M:%S")
                     cv2.putText(
                         standby,
-                        f"MAYAJAAL FACE HUD • {now_str} IST",
+                        f"MAYAJAAL FACE HUD | {now_str} IST",
                         (20, 30),
                         cv2.FONT_HERSHEY_SIMPLEX,
                         0.5,
@@ -378,7 +378,7 @@ def _generate_face_stream(
                 now_str = datetime.now().strftime("%H:%M:%S")
                 cv2.putText(
                     annotated,
-                    f"MAYAJAAL FACE HUD • {now_str} IST",
+                    f"MAYAJAAL FACE HUD | {now_str} IST",
                     (20, 30),
                     cv2.FONT_HERSHEY_SIMPLEX,
                     0.55,
@@ -447,3 +447,75 @@ def stream_faces(
             "Connection": "close",
         },
     )
+
+
+@router.websocket("/ws/stream")
+async def face_websocket_stream(websocket: WebSocket):
+    """
+    Bi-directional real-time WebSocket stream for client-side webcams.
+    Receives video frame blobs from any remote browser (getUserMedia) across the network,
+    runs YuNet face detection & SFace identity recognition on the backend server,
+    and returns tactical annotated HUD frames to the client in real time.
+    """
+    await websocket.accept()
+    logger.info("Face recognition WebSocket connected from %s", websocket.client)
+    try:
+        while True:
+            message = await websocket.receive()
+            if "bytes" in message and message["bytes"]:
+                data = message["bytes"]
+                np_arr = np.frombuffer(data, np.uint8)
+                frame = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+                if frame is None or frame.size == 0:
+                    continue
+
+                h, w = frame.shape[:2]
+                if w > 854:
+                    scale = 854.0 / w
+                    frame = cv2.resize(frame, (854, int(h * scale)))
+
+                # Run Face detection & recognition with temporal smoothing
+                try:
+                    faces = face_service.detect_and_recognize(frame, use_temporal_smoothing=True)
+                    annotated = face_service.draw_faces(frame, faces)
+                except Exception as model_err:
+                    logger.warning("WebSocket face frame processing error: %s", model_err)
+                    faces = []
+                    annotated = frame
+
+                # Stream HUD overlay
+                now_str = datetime.now().strftime("%H:%M:%S")
+                cv2.putText(
+                    annotated,
+                    f"MAYAJAAL FACE HUD | {now_str} IST",
+                    (20, 30),
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    0.55,
+                    (0, 230, 115),
+                    2,
+                    cv2.LINE_AA,
+                )
+                count_label = f"DETECTED FACES: {len(faces)} | CLIENT WEBCAM"
+                cv2.putText(
+                    annotated,
+                    count_label,
+                    (20, 55),
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    0.45,
+                    (200, 220, 240),
+                    1,
+                    cv2.LINE_AA,
+                )
+
+                ret, jpeg = cv2.imencode(".jpg", annotated, [int(cv2.IMWRITE_JPEG_QUALITY), 75])
+                if ret:
+                    await websocket.send_bytes(jpeg.tobytes())
+
+            elif "text" in message and message["text"]:
+                if message["text"] == "ping":
+                    await websocket.send_text("pong")
+
+    except WebSocketDisconnect:
+        logger.info("Face recognition WebSocket disconnected.")
+    except Exception as exc:
+        logger.warning("Face recognition WebSocket error: %s", exc)
