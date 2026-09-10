@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { BorderMap } from "@/components/map/BorderMap";
 import { RecentAlerts } from "@/components/dashboard/recentalerts";
 import { SystemStatus } from "@/components/dashboard/systemstatus";
@@ -14,16 +14,41 @@ import {
   Minimize2,
   Radio,
   Navigation,
+  Activity,
 } from "lucide-react";
 import { useAlerts } from "@/lib/alertsStore";
 import { SuspectTrajectoryModal } from "@/components/map/SuspectTrajectoryModal";
+import { api } from "@/lib/api";
+import { GlobalTraceItem } from "@/types/alert";
 
 export default function GisMapPage() {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [activeLayer, setActiveLayer] = useState<"hybrid" | "satellite" | "terrain" | "roadmap">("hybrid");
   const [selectedTrajectorySuspect, setSelectedTrajectorySuspect] = useState<string | null>(null);
+  const [globalTraces, setGlobalTraces] = useState<GlobalTraceItem[]>([]);
+  const [showTraceMenu, setShowTraceMenu] = useState(false);
 
   const { alerts, suspectsCount } = useAlerts();
+
+  useEffect(() => {
+    let mounted = true;
+    async function fetchTraces() {
+      try {
+        const res = await api.getGlobalTraces();
+        if (mounted && res?.traces) {
+          setGlobalTraces(res.traces);
+        }
+      } catch {
+        // silent fallback
+      }
+    }
+    fetchTraces();
+    const interval = setInterval(fetchTraces, 4000);
+    return () => {
+      mounted = false;
+      clearInterval(interval);
+    };
+  }, []);
 
   // Find suspects with alerts
   const detectedSuspects = Array.from(
@@ -72,6 +97,69 @@ export default function GisMapPage() {
               <Navigation className="w-3.5 h-3.5" />
               <span>Suspect Trajectory ({detectedSuspects.length})</span>
             </button>
+          )}
+
+          {/* Re-ID Global Traces Quick Action */}
+          {globalTraces.length > 0 && (
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setShowTraceMenu(!showTraceMenu)}
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-cyan-500/80 bg-cyan-700 hover:bg-cyan-800 text-white text-xs font-bold shadow-xs transition-all cursor-pointer"
+              >
+                <Activity className="w-3.5 h-3.5" />
+                <span>Re-ID Global Traces ({globalTraces.length})</span>
+              </button>
+              {showTraceMenu && (
+                <div className="absolute right-0 top-full mt-2 w-80 bg-white rounded-2xl border border-slate-200 shadow-2xl p-2.5 z-50">
+                  <div className="px-2.5 py-1.5 border-b border-slate-100 flex items-center justify-between text-[10px] font-bold text-slate-500 uppercase tracking-wider font-mono">
+                    <span>Active Person Traces</span>
+                    <span>Last Node</span>
+                  </div>
+                  <div className="max-h-64 overflow-y-auto divide-y divide-slate-100 mt-1">
+                    {globalTraces.map((t) => (
+                      <button
+                        key={t.trace_id}
+                        type="button"
+                        onClick={() => {
+                          setSelectedTrajectorySuspect(t.trace_id);
+                          setShowTraceMenu(false);
+                        }}
+                        className="w-full text-left px-2.5 py-2 hover:bg-cyan-50/60 rounded-xl flex items-center justify-between transition-colors group cursor-pointer"
+                      >
+                        <div>
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-mono text-xs font-bold text-cyan-900 group-hover:text-cyan-700">
+                              {t.trace_id}
+                            </span>
+                            {t.is_cross_camera && (
+                              <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-cyan-100 text-cyan-800 border border-cyan-200">
+                                ⇄ Multi-Cam
+                              </span>
+                            )}
+                            {t.is_suspect && (
+                              <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-rose-100 text-rose-800 border border-rose-200">
+                                Suspect
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-[10px] text-slate-500 font-mono mt-0.5">
+                            {t.suspect_name ? (
+                              <span className="text-rose-700 font-semibold">{t.suspect_name}</span>
+                            ) : (
+                              `${t.total_sightings} sightings • ${t.unique_cameras_count} camera(s)`
+                            )}
+                          </p>
+                        </div>
+                        <span className="text-[10px] font-mono font-medium text-slate-600 truncate max-w-[100px] text-right bg-slate-100 px-1.5 py-0.5 rounded">
+                          {t.last_camera_name}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           )}
 
           {/* Google Maps Layer Toggle */}

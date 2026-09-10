@@ -42,7 +42,10 @@ export function SuspectTrajectoryModal({
       setLoading(true);
       setError(null);
       try {
-        const data = await api.getSuspectTrajectory(suspectName);
+        const isTrace = suspectName.startsWith("TRC-");
+        const data = isTrace
+          ? await api.getGlobalTraceTrajectory(suspectName)
+          : await api.getSuspectTrajectory(suspectName);
         setTrajectory(data);
       } catch {
         setError("Failed to load trajectory telemetry from backend.");
@@ -61,9 +64,9 @@ export function SuspectTrajectoryModal({
     setDispatching(true);
     try {
       await api.dispatchQrt(
-        latestWaypoint.alert_id,
+        latestWaypoint.alert_id || `trace_${suspectName}`,
         dispatchUnit,
-        `Intercept dispatch for suspect ${suspectName} at ${latestWaypoint.location}`
+        `Intercept dispatch for suspect ${suspectName} at ${latestWaypoint.location || latestWaypoint.camera_name}`
       );
       setDispatchSuccess(true);
       setTimeout(() => setDispatchSuccess(false), 3000);
@@ -89,16 +92,30 @@ export function SuspectTrajectoryModal({
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="text-base font-bold tracking-tight text-slate-900">
-                  Suspect Movement Trajectory
+                  {suspectName.startsWith("TRC-") ? "Cross-Camera Movement Trajectory" : "Suspect Movement Trajectory"}
                 </h3>
                 {trajectory?.threat_level && (
                   <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-600 text-white tracking-wider uppercase font-mono">
                     {trajectory.threat_level}
                   </span>
                 )}
+                {trajectory?.is_cross_camera && (
+                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-cyan-700 text-white tracking-wider uppercase font-mono">
+                    Multi-Camera Re-ID
+                  </span>
+                )}
               </div>
               <p className="text-xs text-slate-500 font-mono mt-0.5">
-                Target: <span className="text-rose-700 font-bold">{suspectName}</span>
+                {suspectName.startsWith("TRC-") ? (
+                  <>
+                    Global Trace: <span className="text-cyan-800 font-bold">{suspectName}</span>
+                    {trajectory?.suspect_name ? (
+                      <> • Linked Suspect: <span className="text-rose-700 font-bold">{trajectory.suspect_name}</span></>
+                    ) : ""}
+                  </>
+                ) : (
+                  <>Target: <span className="text-rose-700 font-bold">{suspectName}</span></>
+                )}
                 {trajectory?.category ? ` • ${trajectory.category}` : ""}
               </p>
             </div>
@@ -171,8 +188,11 @@ export function SuspectTrajectoryModal({
                     : `${backendBase}${wp.snapshot_url}`
                   : null;
 
+                const dist = wp.delta_distance_km ?? wp.delta_km ?? 0;
+                const elapsed = wp.elapsed_time_minutes ?? wp.elapsed_minutes ?? 0;
+
                 return (
-                  <div key={wp.alert_id} className="relative group">
+                  <div key={wp.alert_id || `${wp.camera_id}-${wp.step}`} className="relative group">
                     {/* Node Dot */}
                     <div
                       className={`absolute -left-[29px] top-1.5 w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold border-2 ${
@@ -206,20 +226,25 @@ export function SuspectTrajectoryModal({
                             )}
                           </div>
                           <h4 className="text-sm font-bold text-slate-900 mt-0.5">
-                            {wp.location}
+                            {wp.location || wp.sector || wp.camera_name}
                           </h4>
-                          <p className="text-xs text-slate-500 font-mono mt-1 flex items-center gap-2">
+                          <p className="text-xs text-slate-500 font-mono mt-1 flex flex-wrap items-center gap-2">
                             <Clock className="w-3 h-3 text-slate-400" />
                             <span>{wp.time_str}</span>
                             <span>•</span>
                             <span className="text-emerald-800 font-bold bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200">
                               Conf: {formatConfidence(wp.confidence)}
                             </span>
+                            {wp.reid_score !== undefined && wp.reid_score < 1.0 && (
+                              <span className="text-cyan-800 font-bold bg-cyan-50 px-1.5 py-0.2 rounded border border-cyan-200">
+                                Re-ID: {Math.round(wp.reid_score * 100)}%
+                              </span>
+                            )}
                           </p>
-                          {wp.delta_km > 0 && (
+                          {dist > 0 && (
                             <p className="text-[11px] text-amber-800 font-mono mt-1 flex items-center gap-1 font-semibold">
-                              <ArrowDown className="w-3 h-3 text-amber-600" /> Transited {wp.delta_km} km in{" "}
-                              {wp.elapsed_minutes} mins
+                              <ArrowDown className="w-3 h-3 text-amber-600" /> Transited {dist} km in{" "}
+                              {elapsed} mins
                             </p>
                           )}
                         </div>
