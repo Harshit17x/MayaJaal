@@ -20,6 +20,13 @@ import {
   AnprVideoResponse,
   WatchlistEntry,
 } from "@/types/anpr";
+import {
+  EnrolledPerson,
+  FaceEngineStatus,
+  FaceEvent,
+  FaceScanResponse,
+  RegisterFaceResponse,
+} from "@/types/face";
 
 const BACKEND_BASE_URL =
   process.env.NEXT_PUBLIC_BACKEND_URL?.replace(/\/$/, "") || "http://localhost:8000";
@@ -399,6 +406,80 @@ export const api = {
   async deleteAnprWatchlist(plateNumber: string): Promise<{ status: string; message: string }> {
     return request(`/api/anpr/watchlist/${encodeURIComponent(plateNumber)}`, {
       method: "DELETE",
+    });
+  },
+
+  /**
+   * Facial Recognition APIs
+   */
+  async getEnrolledFaces(): Promise<{ success: boolean; count: number; persons: EnrolledPerson[] }> {
+    return request<{ success: boolean; count: number; persons: EnrolledPerson[] }>("/api/faces");
+  },
+
+  async getFaceEngineStatus(): Promise<FaceEngineStatus> {
+    return request<FaceEngineStatus>("/api/faces/status");
+  },
+
+  async getRecentFaceEvents(limit: number = 30): Promise<{ success: boolean; count: number; events: FaceEvent[] }> {
+    return request<{ success: boolean; count: number; events: FaceEvent[] }>(`/api/faces/events?limit=${limit}`);
+  },
+
+  async registerFace(name: string, fileOrBase64: File | Blob | string): Promise<RegisterFaceResponse> {
+    const formData = new FormData();
+    formData.append("name", name);
+    if (typeof fileOrBase64 === "string") {
+      formData.append("image_base64", fileOrBase64);
+    } else {
+      formData.append("file", fileOrBase64);
+    }
+    return request<RegisterFaceResponse>("/api/faces/register", {
+      method: "POST",
+      body: formData,
+    });
+  },
+
+  async addFaceSample(personId: string, fileOrBase64: File | Blob | string): Promise<RegisterFaceResponse> {
+    const formData = new FormData();
+    formData.append("person_id", personId);
+    if (typeof fileOrBase64 === "string") {
+      formData.append("image_base64", fileOrBase64);
+    } else {
+      formData.append("file", fileOrBase64);
+    }
+    return request<RegisterFaceResponse>("/api/faces/add-sample", {
+      method: "POST",
+      body: formData,
+    });
+  },
+
+  async deleteFace(personId: string): Promise<{ success: boolean; message: string }> {
+    return request<{ success: boolean; message: string }>(`/api/faces/${encodeURIComponent(personId)}`, {
+      method: "DELETE",
+    });
+  },
+
+  async scanFaceImage(
+    fileOrBase64: File | Blob | string,
+    minMatchScore: number = 0.40,
+    minFaceSize: number = 40
+  ): Promise<FaceScanResponse> {
+    const formData = new FormData();
+    formData.append("min_match_score", minMatchScore.toString());
+    formData.append("min_face_size", minFaceSize.toString());
+    if (typeof fileOrBase64 === "string") {
+      formData.append("image_base64", fileOrBase64);
+    } else {
+      formData.append("file", fileOrBase64);
+    }
+    return request<FaceScanResponse>("/api/faces/scan", {
+      method: "POST",
+      body: formData,
+    });
+  },
+
+  async stopFaceCamera(): Promise<{ success: boolean; released_cameras: number }> {
+    return request<{ success: boolean; released_cameras: number }>("/api/faces/camera/stop", {
+      method: "POST",
     });
   },
 };
