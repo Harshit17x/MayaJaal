@@ -369,7 +369,7 @@ export class SuspectTrailAnimator {
       activeNodeIndex = 0;
       phase = "dwell";
       legName = "audi2";
-      statusText = "Target Detected at audi2. Thermal Heat Bloom Active.";
+      statusText = "Target detected at audi2 • Thermal signature locked";
       progress = elapsed / this.DWELL_DURATION;
       currentPos = { lat: this.waypoints[0].lat, lng: this.waypoints[0].lng };
 
@@ -382,7 +382,7 @@ export class SuspectTrailAnimator {
       phase = "transit";
       legName = "audi2 ➔ audi3";
       progress = (elapsed - t1) / this.TRANSIT_DURATION;
-      statusText = `Displacement: audi2 ➔ audi3 (${Math.round(progress * 100)}%)`;
+      statusText = `Vector: audi2 → audi3 (${Math.round(progress * 100)}%)`;
 
       currentPos = this.interpolate(this.waypoints[0], this.waypoints[1], progress);
       this.setPolylinePath(0, [this.waypoints[0], currentPos]);
@@ -395,7 +395,7 @@ export class SuspectTrailAnimator {
       phase = "dwell";
       legName = "audi3";
       progress = (elapsed - t2) / this.DWELL_DURATION;
-      statusText = "Target Reached audi3. Heat Highlight Blinking.";
+      statusText = "Target sighted at audi3 • Optical tracking active";
       currentPos = { lat: this.waypoints[1].lat, lng: this.waypoints[1].lng };
 
       this.setPolylinePath(0, [this.waypoints[0], this.waypoints[1]]);
@@ -408,7 +408,7 @@ export class SuspectTrailAnimator {
       phase = "transit";
       legName = "audi3 ➔ SASET";
       progress = (elapsed - t3) / this.TRANSIT_DURATION;
-      statusText = `Displacement: audi3 ➔ SASET (${Math.round(progress * 100)}%)`;
+      statusText = `Vector: audi3 → SASET (${Math.round(progress * 100)}%)`;
 
       currentPos = this.interpolate(this.waypoints[1], this.waypoints[2], progress);
       this.setPolylinePath(0, [this.waypoints[0], this.waypoints[1]]);
@@ -421,7 +421,7 @@ export class SuspectTrailAnimator {
       phase = "dwell";
       legName = "SASET";
       progress = (elapsed - t4) / this.DWELL_DURATION;
-      statusText = "Target Sighted at SASET. Thermal Heat Bloom Active.";
+      statusText = "Target sighted at SASET • Multi-sensor tracking";
       currentPos = { lat: this.waypoints[2].lat, lng: this.waypoints[2].lng };
 
       this.setPolylinePath(0, [this.waypoints[0], this.waypoints[1]]);
@@ -434,7 +434,7 @@ export class SuspectTrailAnimator {
       phase = "transit";
       legName = "SASET ➔ SITAICS";
       progress = (elapsed - t5) / this.TRANSIT_DURATION;
-      statusText = `Displacement: SASET ➔ SITAICS (${Math.round(progress * 100)}%)`;
+      statusText = `Vector: SASET → SITAICS (${Math.round(progress * 100)}%)`;
 
       currentPos = this.interpolate(this.waypoints[2], this.waypoints[3], progress);
       this.setPolylinePath(0, [this.waypoints[0], this.waypoints[1]]);
@@ -447,7 +447,7 @@ export class SuspectTrailAnimator {
       phase = "hold";
       legName = "SITAICS (Complete Trail)";
       progress = (elapsed - t6) / this.FINAL_HOLD_DURATION;
-      statusText = "Transgression Trail Complete at SITAICS. Holding Full Grid.";
+      statusText = "Breach complete at SITAICS • Full perimeter locked";
       currentPos = { lat: this.waypoints[3].lat, lng: this.waypoints[3].lng };
 
       this.setPolylinePath(0, [this.waypoints[0], this.waypoints[1]]);
