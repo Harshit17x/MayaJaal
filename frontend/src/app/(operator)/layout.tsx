@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { useAlerts } from "@/lib/alertsStore";
 import { useAuth } from "@/lib/authStore";
+import { TacticalThreatToast } from "@/components/alerts/TacticalThreatToast";
 
 interface NavItem {
   label: string;
@@ -583,7 +584,8 @@ export default function OperatorLayout({
         </header>
 
         {/* Scrollable Page Body - Full screen utilization */}
-        <main className="flex-1 overflow-y-auto bg-[#f7f7f5] p-4 sm:p-6 lg:p-8">
+        <main className="flex-1 overflow-y-auto bg-[#f7f7f5] p-4 sm:p-6 lg:p-8 relative">
+          <TacticalThreatToast />
           <div className="w-full max-w-[1920px] mx-auto">{children}</div>
         </main>
       </div>

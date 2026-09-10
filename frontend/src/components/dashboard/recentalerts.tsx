@@ -5,7 +5,14 @@ import { AlertSeverity } from "@/types/alert";
 import { Check, ShieldAlert } from "lucide-react";
 import Link from "next/link";
 
-function SeverityBadge({ severity }: { severity: AlertSeverity }) {
+function SeverityBadge({ severity, isSuspect }: { severity: AlertSeverity; isSuspect?: boolean }) {
+  if (isSuspect) {
+    return (
+      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-rose-600 text-white shadow-xs">
+        🚨 Suspect
+      </span>
+    );
+  }
   if (severity === "High") {
     return (
       <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200">
@@ -92,7 +99,10 @@ export function RecentAlerts() {
                   </p>
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
-                  <SeverityBadge severity={alert.severity} />
+                  <SeverityBadge
+                    severity={alert.severity}
+                    isSuspect={Boolean(alert.suspectName) || alert.className === "suspect"}
+                  />
                   {!alert.acknowledged && (
                     <button
                       onClick={() => acknowledgeAlert(alert.id)}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import { useBackendStatus } from "@/lib/hooks/useBackendStatus";
 import { Detection, VideoFrameResult, VideoMetadata } from "@/types/backend";
@@ -8,6 +9,7 @@ import { Camera as CameraType } from "@/types/camera";
 import { alertsStore } from "@/lib/alertsStore";
 import { DetectionCanvas } from "./detectioncanvas";
 import { CameraGrid } from "./cameragrid";
+import { SuspectTrajectoryModal } from "@/components/map/SuspectTrajectoryModal";
 import {
   Play,
   Upload,
@@ -30,6 +32,8 @@ import {
   X,
   Globe,
   HelpCircle,
+  Compass,
+  ShieldAlert,
 } from "lucide-react";
 
 /** Build the backend MJPEG stream URL (proxied Next.js → FastAPI). */
@@ -105,6 +109,13 @@ export function LiveWorkspace() {
   const [detections, setDetections] = useState<Detection[]>([]);
   const [latencyMs, setLatencyMs] = useState<number | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
+
+  const router = useRouter();
+  // Biometric Suspect Detection state for uploaded image/video
+  const [detectedSuspectsInMedia, setDetectedSuspectsInMedia] = useState<
+    Array<{ name: string; threat_level: string; confidence: number; category?: string; frame_index?: number }>
+  >([]);
+  const [selectedSuspectForTrajectory, setSelectedSuspectForTrajectory] = useState<string | null>(null);
 
   const imageFileInputRef = useRef<HTMLInputElement>(null);
   const videoFileInputRef = useRef<HTMLInputElement>(null);
@@ -255,6 +266,7 @@ export function LiveWorkspace() {
     setImagePreviewUrl(url);
     setSourceMode("upload-image");
     setDetections([]);
+    setDetectedSuspectsInMedia([]);
     setLatencyMs(null);
     setStatusMessage(`Loaded image: ${file.name}`);
   };
@@ -271,6 +283,7 @@ export function LiveWorkspace() {
     setSourceMode("upload-video");
     setDetections([]);
     setVideoResults([]);
+    setDetectedSuspectsInMedia([]);
     setLatencyMs(null);
     setStatusMessage(
       `Loaded video: ${file.name} (${(file.size / (1024 * 1024)).toFixed(1)} MB)`
@@ -363,7 +376,7 @@ export function LiveWorkspace() {
 
     try {
       if (sourceMode === "upload-image") {
-        setStatusMessage("Executing ONNX pipeline on image frame...");
+        setStatusMessage("Executing dual-pipeline: ONNX threats + Biometric Face Scan...");
         let fileToSubmit = selectedImageFile;
         if (!fileToSubmit) {
           const res = await fetch(imagePreviewUrl);
@@ -373,13 +386,19 @@ export function LiveWorkspace() {
           });
         }
 
-        const result = await api.runImageInference({
-          file: fileToSubmit,
-          modelName: modelToUse,
-          confThreshold,
-          iouThreshold,
-          postprocess: true,
-        });
+        const [result, faceScanResult] = await Promise.all([
+          api.runImageInference({
+            file: fileToSubmit,
+            modelName: modelToUse,
+            confThreshold,
+            iouThreshold,
+            postprocess: true,
+          }),
+          api.scanFaceImage(fileToSubmit, 0.40, 35).catch((err) => {
+            console.debug("Facial scan fallback:", err);
+            return null;
+          }),
+        ]);
 
         const elapsed = Math.round(performance.now() - t0);
         setLatencyMs(
@@ -387,9 +406,82 @@ export function LiveWorkspace() {
             ? Math.round(result.inference_time_ms)
             : elapsed
         );
-        setDetections(result.detections || []);
+
+        // Convert detected faces into Detection objects
+        const faceDetections: Detection[] = [];
+        const suspectsFound: Array<{ name: string; threat_level: string; confidence: number; category?: string }> = [];
+
+        if (faceScanResult && faceScanResult.faces && faceScanResult.faces.length > 0) {
+          for (const face of faceScanResult.faces) {
+            const isThreat = Boolean(face.is_threat);
+            const isKnown = Boolean(face.is_known);
+            const conf = face.calibrated_conf || face.match_score || face.confidence || 0.85;
+
+            if (isThreat || isKnown) {
+              const faceDet: Detection = {
+                box: face.bbox,
+                confidence: conf,
+                class_id: 999,
+                class_name: isThreat ? `suspect_${face.name.toLowerCase()}` : `face_${face.name.toLowerCase()}`,
+                is_threat: isThreat,
+                threat_level: face.threat_level || (isThreat ? "HIGH" : undefined),
+                suspect_name: face.name,
+                category: face.category || (isThreat ? "Suspect Target" : "Personnel"),
+              };
+              faceDetections.push(faceDet);
+
+              if (isThreat) {
+                const tLevel = face.threat_level || "HIGH";
+                const sev: "High" | "Medium" | "Low" = "High";
+                suspectsFound.push({
+                  name: face.name,
+                  threat_level: tLevel,
+                  confidence: conf,
+                  category: face.category,
+                });
+
+                // Persist alert to backend so it triggers WebSocket broadcast and Global Threat HUD Toast chime
+                api.createAlert({
+                  title: `SUSPECT DETECTED: ${face.name.toUpperCase()}`,
+                  location: "Live Surveillance (Sector Image Scan)",
+                  severity: sev,
+                  cameraName: "Live Image Workspace",
+                  className: "suspect",
+                  confidence: conf,
+                  box: face.bbox,
+                  suspectName: face.name,
+                  threatLevel: tLevel,
+                  category: face.category,
+                  notes: `Biometric facial match verified via YuNet+SFace (${Math.round(conf * 100)}% match).`,
+                }).catch((err) => console.debug("Failed to dispatch alert to backend:", err));
+
+                // Local reactive alert
+                alertsStore.addAlert({
+                  title: `CRITICAL SUSPECT: ${face.name.toUpperCase()}`,
+                  location: "Live Surveillance (Sector Image Scan)",
+                  severity: sev,
+                  className: "suspect",
+                  confidence: conf,
+                  cameraName: "Live Image Workspace",
+                  box: face.bbox,
+                  suspectName: face.name,
+                  threatLevel: tLevel,
+                  category: face.category,
+                });
+              }
+            }
+          }
+        }
+
+        const combinedDetections = [...(result.detections || []), ...faceDetections];
+        setDetections(combinedDetections);
+        setDetectedSuspectsInMedia(suspectsFound);
+
+        const suspectNotice = suspectsFound.length > 0
+          ? ` • 🚨 ${suspectsFound.length} SUSPECT(S) IDENTIFIED: ${suspectsFound.map((s) => s.name).join(", ")}`
+          : "";
         setStatusMessage(
-          `Detected ${result.detections?.length || 0} objects in ${elapsed}ms.`
+          `Detected ${result.detections?.length || 0} objects, ${faceDetections.length} faces in ${elapsed}ms${suspectNotice}.`
         );
 
         // Register high threat alerts
@@ -433,6 +525,7 @@ export function LiveWorkspace() {
         let rawResults: VideoFrameResult[] = [];
         let videoMeta: VideoMetadata | undefined;
         let framesProcessed = 0;
+        let suspectsDetected: Array<{ name: string; threat_level: string; frame_index: number; confidence: number; category?: string }> = [];
 
         if (enableTracking) {
           setStatusMessage(
@@ -447,6 +540,7 @@ export function LiveWorkspace() {
           });
           videoMeta = result.video;
           framesProcessed = result.frames_processed ?? result.results.length;
+          suspectsDetected = result.suspects_detected || [];
           rawResults = (result.results || []).map((fr) => ({
             ...fr,
             detections: fr.tracked_objects || fr.detections || [],
@@ -476,6 +570,7 @@ export function LiveWorkspace() {
             result.frames_processed ??
             result.total_frames_processed ??
             (result.results || []).length;
+          suspectsDetected = result.suspects_detected || [];
           rawResults = (result.results || result.frame_results || []).map((fr) => ({
             ...fr,
             detections: fr.inference?.detections || fr.detections || [],
@@ -522,9 +617,19 @@ export function LiveWorkspace() {
         setSelectedFrameIndex(firstWithDets?.frame_index ?? 0);
         setDetections(activeDets);
 
+        // Check for suspects detected in video
+        if (suspectsDetected.length > 0) {
+          setDetectedSuspectsInMedia(suspectsDetected);
+        }
+
         const trackSummary =
           uniqueTrackIds.size > 0
             ? ` • ${uniqueTrackIds.size} unique targets tracked (ByteTrack MOT)`
+            : "";
+
+        const suspectSummary =
+          suspectsDetected.length > 0
+            ? ` • 🚨 ${suspectsDetected.length} SUSPECT(S) IDENTIFIED: ${suspectsDetected.map((s) => s.name).join(", ")}`
             : "";
 
         const durationSecs =
@@ -533,7 +638,7 @@ export function LiveWorkspace() {
             : (framesProcessed / 30).toFixed(1);
 
         setStatusMessage(
-          `Processed ${framesProcessed} video frames (~${durationSecs}s) in ${elapsed}ms. Found ${allDetections.length} targets${trackSummary}.`
+          `Processed ${framesProcessed} video frames (~${durationSecs}s) in ${elapsed}ms. Found ${allDetections.length} targets${trackSummary}${suspectSummary}.`
         );
 
         // Register alerts in store
@@ -1021,6 +1126,54 @@ export function LiveWorkspace() {
         </div>
       )}
 
+      {/* 🚨 Tactical Suspect Alert Banner for Uploaded Media */}
+      {detectedSuspectsInMedia.length > 0 && (
+        <div className="bg-red-950/90 border-2 border-red-600/80 rounded-xl p-3.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-lg shadow-red-950/50">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-red-600/20 border border-red-500/50 flex items-center justify-center shrink-0 animate-pulse">
+              <ShieldAlert className="w-5 h-5 text-red-400" />
+            </div>
+            <div>
+              <div className="text-sm font-bold text-red-100 flex flex-wrap items-center gap-2">
+                <span>🚨 SUSPECT IDENTIFIED IN FEED:</span>
+                {detectedSuspectsInMedia.map((s, idx) => (
+                  <span
+                    key={idx}
+                    className="px-2 py-0.5 rounded bg-red-900 border border-red-500 text-red-200 text-xs font-mono font-bold"
+                  >
+                    {s.name.toUpperCase()} [{s.threat_level || "HIGH"}] {Math.round(s.confidence * 100)}%
+                  </span>
+                ))}
+              </div>
+              <div className="text-xs text-red-300/80 mt-0.5">
+                Facial biometric match verified via YuNet + SFace. Priority alert dispatched to Command Center & QRT.
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            {detectedSuspectsInMedia[0] && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedSuspectForTrajectory(detectedSuspectsInMedia[0].name);
+                }}
+                className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-red-900/80 hover:bg-red-900 text-red-100 border border-red-500/50 transition-colors flex items-center gap-1.5 shadow-xs cursor-pointer"
+              >
+                <Compass className="w-3.5 h-3.5 text-red-300" />
+                Track Trajectory
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => router.push("/alerts")}
+              className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-red-600 hover:bg-red-500 text-white transition-colors flex items-center gap-1.5 shadow-xs cursor-pointer"
+            >
+              Command Center →
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* 2. Primary Feed with Tactical Overlay Canvas & Inspector */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Main Viewport (Col 8) */}
@@ -1342,6 +1495,14 @@ export function LiveWorkspace() {
           onSelectCamera={handleCameraSelect}
         />
       </section>
+
+      {/* Suspect Trajectory Modal */}
+      {selectedSuspectForTrajectory && (
+        <SuspectTrajectoryModal
+          suspectName={selectedSuspectForTrajectory}
+          onClose={() => setSelectedSuspectForTrajectory(null)}
+        />
+      )}
     </div>
   );
 }

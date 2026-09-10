@@ -26,6 +26,8 @@ from app.pipeline.rtsp_loader import (
     RTSPReadError,
     RTSPStream,
 )
+from app.pipeline.face_service import face_service
+from app.pipeline.alert_service import alert_service, SNAPSHOTS_DIR
 
 
 router = APIRouter(
@@ -472,6 +474,9 @@ async def video_inference(
 
             frame_results = []
             frames_processed = 0
+            session_alerted_suspects: set[str] = set()
+            suspects_detected_summary: list[dict] = []
+            face_scan_interval = 15
 
             # -------------------------
             # Frame processing
@@ -568,6 +573,73 @@ async def video_inference(
                         detail="Video frame inference failed.",
                     ) from exc
 
+                # ── Periodic Biometric Suspect Facial Scan ───────────────
+                if frames_processed % face_scan_interval == 0:
+                    try:
+                        detected_faces = face_service.detect_and_recognize(
+                            frame,
+                            min_match_score=0.40,
+                            min_face_size=35,
+                            use_temporal_smoothing=True,
+                        )
+                        raw_dets = result.get("detections", [])
+                        for f in detected_faces:
+                            is_threat = bool(f.get("is_threat", False))
+                            suspect_name = f.get("name")
+                            is_known = bool(f.get("is_known", False))
+
+                            if is_threat or is_known:
+                                conf = float(f.get("calibrated_conf") or f.get("match_score") or f.get("confidence") or 0.85)
+                                face_dict = {
+                                    "box": [float(c) for c in f["bbox"]],
+                                    "confidence": round(conf, 3),
+                                    "class_id": 999,
+                                    "class_name": f"suspect_{suspect_name.lower()}" if is_threat else f"face_{suspect_name.lower()}",
+                                    "is_threat": is_threat,
+                                    "threat_level": f.get("threat_level") or ("HIGH" if is_threat else None),
+                                    "suspect_name": suspect_name,
+                                    "category": f.get("category"),
+                                }
+                                raw_dets.append(face_dict)
+
+                                if is_threat and suspect_name and suspect_name not in session_alerted_suspects:
+                                    session_alerted_suspects.add(suspect_name)
+                                    session_id_short = uuid.uuid4().hex[:8]
+                                    snap_name = f"suspect_inf_{session_id_short}_{frames_processed}.jpg"
+                                    snap_path = SNAPSHOTS_DIR / snap_name
+                                    try:
+                                        cv2.imwrite(str(snap_path), frame, [cv2.IMWRITE_JPEG_QUALITY, 90])
+                                    except Exception:
+                                        snap_name = None
+
+                                    t_level = f.get("threat_level") or "HIGH"
+                                    sev = "Critical" if t_level == "CRITICAL" else "High"
+                                    alert_service.create_alert(
+                                        title=f"SUSPECT DETECTED: {suspect_name.upper()}",
+                                        location=f"Video Analysis Stream ({file.filename or 'Upload'})",
+                                        severity=sev,
+                                        camera_id="video_upload_stream",
+                                        camera_name=f"Video Upload ({file.filename or 'Video'})",
+                                        class_name="suspect",
+                                        confidence=conf,
+                                        box=[float(c) for c in f["bbox"]],
+                                        snapshot_filename=snap_name,
+                                        suspect_name=suspect_name,
+                                        threat_level=t_level,
+                                        category=f.get("category"),
+                                        notes=f"Identified in uploaded video at frame {frames_processed} with {int(conf * 100)}% biometric match confidence.",
+                                    )
+                                    suspects_detected_summary.append({
+                                        "name": suspect_name,
+                                        "threat_level": t_level,
+                                        "frame_index": frames_processed,
+                                        "confidence": round(conf, 3),
+                                        "category": f.get("category"),
+                                    })
+                        result["detections"] = raw_dets
+                    except Exception as face_err:
+                        pass
+
                 frame_results.append(
                     {
                         "frame_index": frames_processed,
@@ -587,6 +659,7 @@ async def video_inference(
             "video": metadata,
             "frames_requested": max_frames,
             "frames_processed": frames_processed,
+            "suspects_detected": suspects_detected_summary,
             "results": frame_results,
         }
 

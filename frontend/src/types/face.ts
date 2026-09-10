@@ -1,9 +1,15 @@
+export type ThreatLevel = "CRITICAL" | "HIGH" | "MEDIUM" | "LOW";
+
 export interface EnrolledPerson {
   id: string;
   name: string;
   image_url: string;
   created_at: string;
   sample_count: number;
+  is_suspect?: boolean;
+  threat_level?: ThreatLevel;
+  category?: string;
+  notes?: string;
 }
 
 export interface FaceDetection {
@@ -17,6 +23,8 @@ export interface FaceDetection {
   type: string;
   class_name: string;
   is_threat: boolean;
+  threat_level?: string;
+  category?: string;
 }
 
 export interface FaceScanResponse {
@@ -44,6 +52,9 @@ export interface FaceEvent {
   calibrated_conf: number;
   timestamp: string;
   bbox: [number, number, number, number];
+  is_threat?: boolean;
+  threat_level?: string;
+  category?: string;
 }
 
 export interface RegisterFaceResponse {

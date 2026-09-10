@@ -12,6 +12,9 @@ export interface CameraCardProps {
   streamUrl?: string;
   ipAddress?: string;
   isSelected?: boolean;
+  hasSuspectAlert?: boolean;
+  suspectName?: string;
+  threatLevel?: string;
   onClick?: () => void;
 }
 
@@ -24,6 +27,9 @@ export function CameraCard({
   streamUrl,
   ipAddress,
   isSelected = false,
+  hasSuspectAlert = false,
+  suspectName,
+  threatLevel,
   onClick,
 }: CameraCardProps) {
   const [imgError, setImgError] = useState(false);
@@ -33,7 +39,9 @@ export function CameraCard({
     <div
       onClick={onClick}
       className={`bg-white rounded-xl border shadow-xs overflow-hidden flex flex-col transition-all cursor-pointer group ${
-        isSelected
+        hasSuspectAlert
+          ? "border-rose-600 ring-2 ring-rose-500/60 shadow-md animate-pulse"
+          : isSelected
           ? "border-emerald-600 ring-2 ring-emerald-500/30"
           : "border-slate-200 hover:border-emerald-500/60 hover:shadow-md"
       }`}
@@ -63,6 +71,14 @@ export function CameraCard({
           <span>LIVE</span>
         </div>
 
+        {/* Suspect threat banner if active */}
+        {hasSuspectAlert && (
+          <div className="absolute top-2.5 right-2.5 z-10 flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-rose-700/95 text-white font-bold text-[10px] uppercase tracking-wider shadow-lg border border-rose-400">
+            <span className="w-2 h-2 rounded-full bg-white animate-ping" />
+            <span>🚨 SUSPECT: {suspectName || "DETECTED"}</span>
+          </div>
+        )}
+
         {/* Hover view prompt */}
         <div className="absolute inset-0 bg-emerald-950/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5 text-white text-xs font-semibold backdrop-blur-xs">
           <Eye className="w-4 h-4" />
@@ -71,28 +87,36 @@ export function CameraCard({
       </div>
 
       {/* Info footer */}
-      <div className="p-3.5 flex items-center justify-between gap-3 bg-white">
+      <div className={`p-3.5 flex items-center justify-between gap-3 ${hasSuspectAlert ? "bg-rose-50/70" : "bg-white"}`}>
         <div className="min-w-0">
           <h3 className="text-sm font-semibold text-slate-900 truncate flex items-center gap-1.5">
             <span>{name}</span>
-            {isSelected && (
+            {hasSuspectAlert ? (
+              <span className="text-[10px] bg-rose-600 text-white font-bold px-2 py-0.5 rounded-full shadow-xs">
+                🚨 THREAT {threatLevel ? `[${threatLevel}]` : ""}
+              </span>
+            ) : isSelected ? (
               <span className="text-[10px] bg-emerald-100 text-emerald-800 font-mono px-1.5 py-0.2 rounded font-bold">
                 ACTIVE
               </span>
-            )}
+            ) : null}
           </h3>
           <p className="text-xs text-slate-500 truncate mt-0.5">
             {sector ? `${sector} • ` : ""}{location}
           </p>
         </div>
 
-        {/* Small green Online badge */}
-        {isOnline && (
+        {/* Status badge */}
+        {hasSuspectAlert ? (
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-600 text-white shrink-0 shadow-xs">
+            Suspect Alert
+          </span>
+        ) : isOnline ? (
           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200/80 shrink-0">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
             Online
           </span>
-        )}
+        ) : null}
       </div>
     </div>
   );

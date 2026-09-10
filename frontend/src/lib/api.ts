@@ -27,6 +27,7 @@ import {
   FaceScanResponse,
   RegisterFaceResponse,
 } from "@/types/face";
+import { AlertItem, ScannerStatus, QrtDispatchRecord, SuspectTrajectory } from "@/types/alert";
 
 const BACKEND_BASE_URL =
   process.env.NEXT_PUBLIC_BACKEND_URL?.replace(/\/$/, "") || "http://localhost:8000";
@@ -424,9 +425,30 @@ export const api = {
     return request<{ success: boolean; count: number; events: FaceEvent[] }>(`/api/faces/events?limit=${limit}`);
   },
 
-  async registerFace(name: string, fileOrBase64: File | Blob | string): Promise<RegisterFaceResponse> {
+  async registerFace(
+    name: string,
+    fileOrBase64: File | Blob | string,
+    metadata?: {
+      is_suspect?: boolean;
+      threat_level?: string;
+      category?: string;
+      notes?: string;
+    }
+  ): Promise<RegisterFaceResponse> {
     const formData = new FormData();
     formData.append("name", name);
+    if (metadata?.is_suspect !== undefined) {
+      formData.append("is_suspect", String(metadata.is_suspect));
+    }
+    if (metadata?.threat_level) {
+      formData.append("threat_level", metadata.threat_level);
+    }
+    if (metadata?.category) {
+      formData.append("category", metadata.category);
+    }
+    if (metadata?.notes) {
+      formData.append("notes", metadata.notes);
+    }
     if (typeof fileOrBase64 === "string") {
       formData.append("image_base64", fileOrBase64);
     } else {
@@ -436,6 +458,25 @@ export const api = {
       method: "POST",
       body: formData,
     });
+  },
+
+  async updateFaceMetadata(
+    personId: string,
+    updates: {
+      is_suspect?: boolean;
+      threat_level?: string;
+      category?: string;
+      notes?: string;
+    }
+  ): Promise<{ success: boolean; person: EnrolledPerson; message: string }> {
+    return request<{ success: boolean; person: EnrolledPerson; message: string }>(
+      `/api/faces/${encodeURIComponent(personId)}`,
+      {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updates),
+      }
+    );
   },
 
   async addFaceSample(personId: string, fileOrBase64: File | Blob | string): Promise<RegisterFaceResponse> {
@@ -481,6 +522,95 @@ export const api = {
     return request<{ success: boolean; released_cameras: number }>("/api/faces/camera/stop", {
       method: "POST",
     });
+  },
+
+  /**
+   * Security Alerts & Continuous Scanner APIs
+   */
+  async getAlerts(
+    severity?: string,
+    acknowledged?: boolean,
+    cameraId?: string,
+    limit: number = 100
+  ): Promise<AlertItem[]> {
+    const params = new URLSearchParams();
+    if (severity && severity !== "All") params.append("severity", severity);
+    if (acknowledged !== undefined) params.append("acknowledged", String(acknowledged));
+    if (cameraId) params.append("camera_id", cameraId);
+    params.append("limit", limit.toString());
+    const query = params.toString() ? `?${params.toString()}` : "";
+    return request<AlertItem[]>(`/api/alerts${query}`);
+  },
+
+  async createAlert(payload: {
+    title: string;
+    location: string;
+    severity?: string;
+    cameraId?: string;
+    cameraName?: string;
+    className?: string;
+    confidence?: number;
+    box?: number[];
+    suspectName?: string;
+    threatLevel?: string;
+    category?: string;
+    notes?: string;
+  }): Promise<AlertItem> {
+    return request<AlertItem>("/api/alerts", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+  },
+
+  async acknowledgeAlert(alertId: string): Promise<{ success: boolean; alert_id: string; acknowledged: boolean }> {
+    return request<{ success: boolean; alert_id: string; acknowledged: boolean }>(
+      `/api/alerts/${encodeURIComponent(alertId)}/acknowledge`,
+      { method: "PATCH" }
+    );
+  },
+
+  async clearAlerts(): Promise<{ success: boolean; message: string }> {
+    return request<{ success: boolean; message: string }>("/api/alerts/clear", {
+      method: "POST",
+    });
+  },
+
+  async getScannerStatus(): Promise<ScannerStatus> {
+    return request<ScannerStatus>("/api/alerts/scanner/status");
+  },
+
+  async startScanner(): Promise<{ success: boolean; message: string; monitored_cameras?: string[] }> {
+    return request<{ success: boolean; message: string; monitored_cameras?: string[] }>(
+      "/api/alerts/scanner/start",
+      { method: "POST" }
+    );
+  },
+
+  async stopScanner(): Promise<{ success: boolean; message: string }> {
+    return request<{ success: boolean; message: string }>(
+      "/api/alerts/scanner/stop",
+      { method: "POST" }
+    );
+  },
+
+  async getSuspectTrajectory(suspectName: string): Promise<SuspectTrajectory> {
+    return request<SuspectTrajectory>(`/api/alerts/trajectory/${encodeURIComponent(suspectName)}`);
+  },
+
+  async dispatchQrt(
+    alertId: string,
+    unitName: string,
+    notes?: string
+  ): Promise<{ success: boolean; alert_id: string; dispatch: QrtDispatchRecord }> {
+    return request<{ success: boolean; alert_id: string; dispatch: QrtDispatchRecord }>(
+      `/api/alerts/${encodeURIComponent(alertId)}/dispatch`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ unitName, notes }),
+      }
+    );
   },
 };
 
