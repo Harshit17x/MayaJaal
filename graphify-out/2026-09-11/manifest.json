@@ -108,9 +108,9 @@
     "semantic_hash": "11152d95bd04cf7eed28c956479cc8ef"
   },
   "backend/app/api/stream.py": {
-    "mtime": 1789080330.357793,
-    "seen": 1789080435.575065,
-    "ast_hash": "0dcc650c0dd337ebdff72d72f424845c",
+    "mtime": 1789080603.308677,
+    "seen": 1789080659.8254566,
+    "ast_hash": "ad85713481ee20dd93a98d7ec064ecae",
     "semantic_hash": ""
   },
   "backend/app/api/tracking.py": {
@@ -1098,9 +1098,9 @@
     "semantic_hash": ""
   },
   "backend/app/data/geofences.json": {
-    "mtime": 1789080398.5160744,
-    "seen": 1789080435.5750763,
-    "ast_hash": "0bd03a5b6b0f92ce4001b380b965bb25",
+    "mtime": 1789080616.1504269,
+    "seen": 1789080659.8255005,
+    "ast_hash": "f8f2e73f3dd92c5898875d6f1a1af526",
     "semantic_hash": ""
   },
   "frontend/src/components/map/SuspectTrailOverlay.ts": {
