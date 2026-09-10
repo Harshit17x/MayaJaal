@@ -37,6 +37,12 @@ import {
 import { Camera as CameraEntity, CameraStatus, CameraType } from "@/types/camera";
 import { useCameras } from "@/lib/camerasStore";
 import { ALL_BORDER_CAMERAS } from "@/lib/borderCameras";
+import { useAlerts } from "@/lib/alertsStore";
+import {
+  resolveSuspectWaypoints,
+  SuspectTrailAnimator,
+  TrajectoryTelemetry,
+} from "./SuspectTrailOverlay";
 
 const GOOGLE_MAPS_KEY =
   process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ||
@@ -227,6 +233,88 @@ export function BorderMap({
       return true;
     });
   }, [activeCameras, filterTypes]);
+
+  // =========================================================================
+  // SUSPECT TRAJECTORY TRAIL ANIMATION (audi2 -> audi3 -> SASET -> SITAICS)
+  // Triggered automatically when alert for 'hariom' appears (or via toggle)
+  // =========================================================================
+  const { alerts } = useAlerts();
+
+  const hasHariomAlert = useMemo(() => {
+    return alerts.some((a) => {
+      const sName = (a.suspectName || "").toLowerCase();
+      const title = (a.title || "").toLowerCase();
+      const notes = (a.notes || "").toLowerCase();
+      return (
+        sName.includes("hariom") ||
+        title.includes("hariom") ||
+        notes.includes("hariom")
+      );
+    });
+  }, [alerts]);
+
+  const [manualTrailActive, setManualTrailActive] = useState<boolean>(false);
+  const isTrailActive = hasHariomAlert || manualTrailActive;
+
+  const animatorRef = useRef<SuspectTrailAnimator | null>(null);
+  const [telemetry, setTelemetry] = useState<TrajectoryTelemetry | null>(null);
+
+  const waypoints = useMemo(() => {
+    return resolveSuspectWaypoints(activeCameras);
+  }, [activeCameras]);
+
+  const handleFocusTrajectory = useCallback(() => {
+    if (animatorRef.current) {
+      animatorRef.current.fitTrajectoryBounds();
+      showToast("Focused on Suspect Transgression Trail");
+    } else if (mapInstanceRef.current) {
+      mapInstanceRef.current.panTo({ lat: 23.1534, lng: 72.8860 });
+      mapInstanceRef.current.setZoom(17.5);
+    }
+  }, []);
+
+  // Initialize and run trajectory animator when trail is active
+  useEffect(() => {
+    if (!mapInstanceRef.current || !isLoaded) return;
+
+    if (isTrailActive) {
+      if (animatorRef.current) {
+        animatorRef.current.destroy();
+      }
+      const animator = new SuspectTrailAnimator(
+        mapInstanceRef.current,
+        waypoints,
+        (t) => setTelemetry(t)
+      );
+      animatorRef.current = animator;
+      animator.start();
+      showToast("🚨 Suspect Trajectory Active: Target HARIOM");
+    } else {
+      if (animatorRef.current) {
+        animatorRef.current.destroy();
+        animatorRef.current = null;
+        setTelemetry(null);
+      }
+    }
+
+    return () => {
+      if (animatorRef.current) {
+        animatorRef.current.destroy();
+        animatorRef.current = null;
+      }
+    };
+  }, [isTrailActive, waypoints, isLoaded]);
+
+  // Auto-focus on trajectory when hariom alert first appears
+  const previousAlertRef = useRef(false);
+  useEffect(() => {
+    if (hasHariomAlert && !previousAlertRef.current && isLoaded) {
+      setTimeout(() => {
+        animatorRef.current?.fitTrajectoryBounds();
+      }, 500);
+    }
+    previousAlertRef.current = hasHariomAlert;
+  }, [hasHariomAlert, isLoaded]);
 
   // Load Google Maps Script & Initialize
   useEffect(() => {
@@ -962,6 +1050,33 @@ export function BorderMap({
               ))}
             </div>
 
+            {/* Suspect Trajectory Animation Button */}
+            <button
+              type="button"
+              onClick={() => {
+                setManualTrailActive((prev) => !prev);
+                if (!manualTrailActive) {
+                  setTimeout(handleFocusTrajectory, 300);
+                }
+              }}
+              className={`inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold rounded-xl transition-all border cursor-pointer ${
+                isTrailActive
+                  ? "bg-rose-600 text-white border-rose-500 shadow-md animate-pulse"
+                  : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50"
+              }`}
+              title={
+                hasHariomAlert
+                  ? "Suspect Sighting Active: HARIOM (Auto-triggered)"
+                  : "Toggle Suspect Transgression Trail (HARIOM)"
+              }
+            >
+              <Navigation className={`w-3.5 h-3.5 ${isTrailActive ? "text-white" : "text-rose-600"}`} />
+              <span>{isTrailActive ? "Trail Active" : "Suspect Trail"}</span>
+              {hasHariomAlert && (
+                <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
+              )}
+            </button>
+
             {/* Reset Center button */}
             <button
               type="button"
@@ -1014,6 +1129,86 @@ export function BorderMap({
 
         {/* The Google Map DOM Node */}
         <div ref={mapContainerRef} className="w-full h-full" />
+
+        {/* FLOATING TACTICAL SUSPECT TRAJECTORY HUD */}
+        {isTrailActive && (
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-40 max-w-xl w-[92%] sm:w-auto bg-slate-950/95 border border-rose-500/80 rounded-2xl shadow-2xl backdrop-blur-md p-3 text-white animate-in fade-in slide-in-from-top-4 pointer-events-auto">
+            <div className="flex items-center justify-between gap-3 pb-2 border-b border-rose-500/30">
+              <div className="flex items-center gap-2">
+                <span className="relative flex h-3 w-3">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-rose-600"></span>
+                </span>
+                <span className="text-xs font-black tracking-wider uppercase text-rose-400 font-mono">
+                  Suspect Transgression Trail
+                </span>
+                <span className="px-1.5 py-0.5 rounded bg-rose-900/60 text-rose-200 text-[10px] font-mono font-bold border border-rose-700/50">
+                  TARGET: HARIOM
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleFocusTrajectory}
+                  className="px-2 py-0.5 rounded-lg bg-emerald-600/30 hover:bg-emerald-600/50 text-emerald-300 border border-emerald-500/40 text-[10px] font-mono font-bold flex items-center gap-1 cursor-pointer transition-colors"
+                  title="Focus camera view on all 4 nodes"
+                >
+                  <Crosshair className="w-3 h-3" />
+                  <span>Focus Trail</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setManualTrailActive(false)}
+                  className="text-slate-400 hover:text-white transition-colors cursor-pointer"
+                  title="Dismiss trajectory overlay"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            {/* Waypoint Flow Stepper */}
+            <div className="flex items-center justify-between gap-1.5 mt-2.5 px-1">
+              {waypoints.map((wp, idx) => {
+                const isActive = telemetry?.activeNodeIndex === idx;
+                const isVisited = (telemetry?.activeNodeIndex ?? -1) >= idx;
+                return (
+                  <div key={wp.code} className="flex items-center gap-1.5 flex-1">
+                    <div
+                      className={`flex items-center gap-1.5 px-2 py-1 rounded-lg border text-[11px] font-mono transition-all flex-1 justify-center ${
+                        isActive
+                          ? "bg-rose-600 text-white border-rose-400 font-bold shadow-lg shadow-rose-900/50 scale-105"
+                          : isVisited
+                          ? "bg-rose-950/40 text-rose-200 border-rose-800/40 font-semibold"
+                          : "bg-slate-900/60 text-slate-400 border-slate-800"
+                      }`}
+                    >
+                      <span
+                        className={`w-1.5 h-1.5 rounded-full ${
+                          isActive ? "bg-white animate-ping" : isVisited ? "bg-rose-400" : "bg-slate-600"
+                        }`}
+                      />
+                      <span>{wp.code}</span>
+                    </div>
+                    {idx < waypoints.length - 1 && (
+                      <span className="text-slate-600 text-[10px] font-mono">▶</span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Real-time Telemetry Details */}
+            <div className="mt-2 flex items-center justify-between text-[10px] font-mono text-slate-400 pt-2 border-t border-slate-800/60">
+              <span className="text-rose-300 font-medium truncate max-w-[280px]">
+                {telemetry?.statusText || "Synchronizing vector displacement telemetry..."}
+              </span>
+              <span className="text-slate-300 shrink-0">
+                Displacement: <strong className="text-white">{telemetry?.totalDistanceMeters || 0}m</strong>
+              </span>
+            </div>
+          </div>
+        )}
 
         {/* FLOATING BACK / EXIT FULLSCREEN COMMAND HUD (Active in Fullscreen Focus View) */}
         {isFocusMode && (
@@ -1099,6 +1294,26 @@ export function BorderMap({
                   </button>
                 ))}
               </div>
+
+              {/* Suspect Trail Button */}
+              <button
+                type="button"
+                onClick={() => {
+                  setManualTrailActive((prev) => !prev);
+                  if (!manualTrailActive) {
+                    setTimeout(handleFocusTrajectory, 300);
+                  }
+                }}
+                className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                  isTrailActive
+                    ? "bg-rose-600 text-white shadow-md animate-pulse"
+                    : "text-slate-300 hover:text-white hover:bg-slate-800"
+                }`}
+                title="Toggle Suspect Transgression Trail (HARIOM)"
+              >
+                <Navigation className={`w-3.5 h-3.5 ${isTrailActive ? "text-white" : "text-rose-400"}`} />
+                <span>{isTrailActive ? "Trail Active" : "Suspect Trail"}</span>
+              </button>
 
               {/* Reset View */}
               <button
