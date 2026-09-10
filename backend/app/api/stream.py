@@ -350,6 +350,7 @@ def stream_generator(
     model_name: str = "best",
     fps_limit: int = 24,
     rotation: int = 0,
+    enable_face_recognition: bool = False,
 ) -> Generator[bytes, None, None]:
     """
     Generator yielding multipart JPEG frames from RTSP or IP Webcam Pro stream.
@@ -491,6 +492,16 @@ def stream_generator(
             if draw_detections and cached_detections:
                 draw_bounding_boxes(frame, cached_detections)
 
+            # Optional real-time facial recognition overlay
+            if enable_face_recognition:
+                try:
+                    from app.pipeline.face_service import face_service
+                    faces = face_service.detect_and_recognize(frame, use_temporal_smoothing=True)
+                    if faces:
+                        frame = face_service.draw_faces(frame, faces)
+                except Exception as exc:
+                    logger.debug("Live stream face recognition exception: %s", exc)
+
             draw_tactical_hud(
                 frame,
                 rtsp_url=resolved_url,
@@ -595,6 +606,10 @@ def get_live_stream(
         le=60,
         description="Target stream framerate",
     ),
+    enable_face_recognition: bool = Query(
+        False,
+        description="Overlay real-time facial recognition and identity labels",
+    ),
 ) -> StreamingResponse:
     """
     Stream live RTSP or IP Webcam CCTV camera feed as multipart/x-mixed-replace (MJPEG)
@@ -607,6 +622,7 @@ def get_live_stream(
             conf_threshold=conf_threshold,
             model_name=model_name,
             fps_limit=fps,
+            enable_face_recognition=enable_face_recognition,
         ),
         media_type="multipart/x-mixed-replace; boundary=frame",
         headers={

@@ -59,3 +59,7 @@ backend/bin/
 bin/
 *.exe
 *.dll
+
+# Graphify Cache & Local Sidecars
+graphify-out/cache/
+graphify-out/.*
