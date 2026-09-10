@@ -55,11 +55,19 @@ export const DEMO_OPERATORS: OperatorUser[] = [
 ];
 
 const AUTH_STORAGE_KEY = "maatrix_operator_session_v1";
+const LEGACY_AUTH_STORAGE_KEY = "mayajaal_operator_session_v1";
 
 export function getStoredOperator(): OperatorUser | null {
   if (typeof window === "undefined") return null;
   try {
-    const raw = localStorage.getItem(AUTH_STORAGE_KEY);
+    let raw = localStorage.getItem(AUTH_STORAGE_KEY);
+    if (!raw) {
+      // Migrate from legacy session key if available
+      raw = localStorage.getItem(LEGACY_AUTH_STORAGE_KEY);
+      if (raw) {
+        localStorage.setItem(AUTH_STORAGE_KEY, raw);
+      }
+    }
     if (!raw) return null;
     return JSON.parse(raw);
   } catch {

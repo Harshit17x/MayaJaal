@@ -18,37 +18,48 @@ function LoginFormCard() {
   // If already logged in, navigate straight to the destination dashboard
   useEffect(() => {
     if (isAuthenticated) {
-      router.replace(redirectTarget);
+      window.location.href = redirectTarget;
     }
-  }, [isAuthenticated, redirectTarget, router]);
+  }, [isAuthenticated, redirectTarget]);
 
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  // Pre-fill valid operator credentials for seamless access
+  const [username, setUsername] = useState("BSF-9482-KR");
+  const [password, setPassword] = useState("MAATRIX2026");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const executeLogin = (userBadge: string) => {
     setIsLoading(true);
 
-    setTimeout(() => {
-      // Pick or create the operator session
-      const matchingDemo = DEMO_OPERATORS[0];
-      const sessionUser = {
-        ...matchingDemo,
-        name: username.trim()
-          ? username.includes(" ")
-            ? username
-            : `Officer ${username}`
-          : matchingDemo.name,
-        badgeNumber: username.trim() ? username.toUpperCase() : matchingDemo.badgeNumber,
-        authenticatedAt: new Date().toISOString(),
-      };
+    const matchingDemo =
+      DEMO_OPERATORS.find(
+        (o) => o.badgeNumber.toLowerCase() === userBadge.trim().toLowerCase()
+      ) || DEMO_OPERATORS[0];
 
-      login(sessionUser);
-      router.push(redirectTarget);
-    }, 400);
+    const sessionUser = {
+      ...matchingDemo,
+      name: userBadge.trim()
+        ? userBadge.includes(" ")
+          ? userBadge
+          : `Officer ${userBadge}`
+        : matchingDemo.name,
+      badgeNumber: userBadge.trim() ? userBadge.toUpperCase() : matchingDemo.badgeNumber,
+      authenticatedAt: new Date().toISOString(),
+    };
+
+    login(sessionUser);
+
+    // Guaranteed hard navigation so operator dashboard initializes freshly
+    setTimeout(() => {
+      window.location.href = redirectTarget;
+    }, 150);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const effectiveBadge = username.trim() || "BSF-9482-KR";
+    executeLogin(effectiveBadge);
   };
 
   return (
@@ -75,6 +86,18 @@ function LoginFormCard() {
           </span>
         </div>
 
+        {/* Quick 1-Click Access Badge */}
+        <div className="mb-4">
+          <button
+            type="button"
+            onClick={() => executeLogin("BSF-9482-KR")}
+            className="w-full py-2.5 px-3 rounded-xl bg-emerald-50 hover:bg-emerald-100/80 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer"
+          >
+            <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse" />
+            <span>Quick Login · Insp. K. Rathore (BSF)</span>
+          </button>
+        </div>
+
         {/* Input Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Username Field */}
@@ -82,10 +105,9 @@ function LoginFormCard() {
             <User className="w-4 h-4 text-slate-600 absolute left-4 top-1/2 -translate-y-1/2" />
             <input
               type="text"
-              required
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              placeholder="Username"
+              placeholder="Username / Badge ID"
               className="w-full pl-11 pr-4 py-3 bg-[#f3f4f6] hover:bg-[#ebeef1] focus:bg-white rounded-2xl border border-transparent focus:border-emerald-700/30 focus:ring-2 focus:ring-emerald-800/15 text-slate-900 text-sm font-medium placeholder:text-slate-600 focus:outline-none transition-all"
             />
           </div>
@@ -95,7 +117,6 @@ function LoginFormCard() {
             <Lock className="w-4 h-4 text-slate-600 absolute left-4 top-1/2 -translate-y-1/2" />
             <input
               type={showPassword ? "text" : "password"}
-              required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Password"
@@ -124,13 +145,13 @@ function LoginFormCard() {
               <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
             ) : (
               <>
-                <span>Login</span>
+                <span>Enter Console</span>
                 <ArrowRight className="w-4 h-4" />
               </>
             )}
           </button>
 
-          {/* Remember me & Forgot Password */}
+          {/* Remember me & Demo Auto-fill */}
           <div className="flex items-center justify-between pt-2 text-xs">
             <label className="flex items-center gap-2 text-slate-600 hover:text-slate-800 cursor-pointer select-none">
               <input
@@ -150,7 +171,7 @@ function LoginFormCard() {
               }}
               className="text-slate-600 hover:text-slate-900 underline transition-colors"
             >
-              Forgot password?
+              Reset to Demo Credentials
             </button>
           </div>
         </form>
