@@ -7,6 +7,7 @@ import { useBackendStatus } from "@/lib/hooks/useBackendStatus";
 import { Detection, VideoFrameResult, VideoMetadata } from "@/types/backend";
 import { Camera as CameraType } from "@/types/camera";
 import { alertsStore } from "@/lib/alertsStore";
+import { formatConfidence, normalizeConfidence } from "@/lib/utils";
 import { DetectionCanvas } from "./detectioncanvas";
 import { CameraGrid } from "./cameragrid";
 import { SuspectTrajectoryModal } from "@/components/map/SuspectTrajectoryModal";
@@ -415,7 +416,9 @@ export function LiveWorkspace() {
           for (const face of faceScanResult.faces) {
             const isThreat = Boolean(face.is_threat);
             const isKnown = Boolean(face.is_known);
-            const conf = face.calibrated_conf || face.match_score || face.confidence || 0.85;
+            const conf = normalizeConfidence(
+              face.calibrated_conf || face.match_score || face.confidence || 0.85
+            );
 
             if (isThreat || isKnown) {
               const faceDet: Detection = {
@@ -452,21 +455,23 @@ export function LiveWorkspace() {
                   suspectName: face.name,
                   threatLevel: tLevel,
                   category: face.category,
-                  notes: `Biometric facial match verified via YuNet+SFace (${Math.round(conf * 100)}% match).`,
-                }).catch((err) => console.debug("Failed to dispatch alert to backend:", err));
-
-                // Local reactive alert
-                alertsStore.addAlert({
-                  title: `CRITICAL SUSPECT: ${face.name.toUpperCase()}`,
-                  location: "Live Surveillance (Sector Image Scan)",
-                  severity: sev,
-                  className: "suspect",
-                  confidence: conf,
-                  cameraName: "Live Image Workspace",
-                  box: face.bbox,
-                  suspectName: face.name,
-                  threatLevel: tLevel,
-                  category: face.category,
+                  notes: `Biometric facial match verified via YuNet+SFace (${formatConfidence(conf)} match).`,
+                }).catch((err) => {
+                  console.debug("Failed to dispatch alert to backend, adding locally:", err);
+                  if (!alertsStore.isConnected()) {
+                    alertsStore.addAlert({
+                      title: `CRITICAL SUSPECT: ${face.name.toUpperCase()}`,
+                      location: "Live Surveillance (Sector Image Scan)",
+                      severity: sev,
+                      className: "suspect",
+                      confidence: conf,
+                      cameraName: "Live Image Workspace",
+                      box: face.bbox,
+                      suspectName: face.name,
+                      threatLevel: tLevel,
+                      category: face.category,
+                    });
+                  }
                 });
               }
             }
@@ -921,14 +926,14 @@ export function LiveWorkspace() {
       {/* Live Stream URL Controls (RTSP & IP Webcam Pro) */}
       {sourceMode === "rtsp" && (
         <div className="space-y-2">
-          <div className="bg-slate-900 text-white p-3 rounded-xl flex flex-col gap-2.5 shadow-md border border-slate-800">
+          <div className="bg-white text-slate-900 p-3.5 rounded-2xl flex flex-col gap-2.5 shadow-xs border border-slate-200/90">
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
               {/* Status dot / Protocol Icon */}
               <div className="flex items-center gap-2 flex-shrink-0">
                 {isValidatingStream ? (
-                  <span className="flex items-center gap-1.5 text-amber-400">
-                    <RefreshCw className="w-4 h-4 animate-spin" />
-                    <span className="text-xs font-mono text-amber-300">Probing Link:</span>
+                  <span className="flex items-center gap-1.5 text-amber-600">
+                    <RefreshCw className="w-4 h-4 animate-spin text-amber-600" />
+                    <span className="text-xs font-mono font-bold text-amber-700">Probing Link:</span>
                   </span>
                 ) : isStreamActive && !streamError ? (
                   <span className="flex items-center gap-1.5">
@@ -936,22 +941,22 @@ export function LiveWorkspace() {
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
                       <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
                     </span>
-                    <Wifi className="w-4 h-4 text-emerald-400" />
-                    <span className="text-xs font-mono text-emerald-300 whitespace-nowrap">
+                    <Wifi className="w-4 h-4 text-emerald-700" />
+                    <span className="text-xs font-mono font-bold text-emerald-800 whitespace-nowrap">
                       {streamProtocol}:
                     </span>
                   </span>
                 ) : streamError ? (
                   <span className="flex items-center gap-1.5">
-                    <AlertTriangle className="w-4 h-4 text-amber-400" />
-                    <span className="text-xs font-mono text-amber-300 whitespace-nowrap">
+                    <AlertTriangle className="w-4 h-4 text-amber-600" />
+                    <span className="text-xs font-mono font-bold text-amber-700 whitespace-nowrap">
                       Feed Alert:
                     </span>
                   </span>
                 ) : (
                   <span className="flex items-center gap-1.5">
-                    <WifiOff className="w-4 h-4 text-slate-500" />
-                    <span className="text-xs font-mono text-slate-300 whitespace-nowrap">
+                    <WifiOff className="w-4 h-4 text-slate-400" />
+                    <span className="text-xs font-mono font-bold text-slate-600 whitespace-nowrap">
                       Live Feed:
                     </span>
                   </span>
@@ -975,7 +980,7 @@ export function LiveWorkspace() {
                     }
                   }}
                   placeholder="e.g. http://12.10.5.194:8080, rtsp://10.20.72.101:554/live, or 'sample'"
-                  className="w-full bg-slate-800 border border-slate-700 rounded px-3 py-1.5 pr-8 text-xs font-mono text-white placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-emerald-400"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 pr-8 text-xs font-mono text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-700/20 focus:border-emerald-700 shadow-2xs"
                 />
                 {rtspInputValue && (
                   <button
@@ -983,7 +988,7 @@ export function LiveWorkspace() {
                     onClick={() => {
                       setRtspInputValue("");
                     }}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white p-0.5"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 p-0.5 cursor-pointer"
                     title="Clear input"
                   >
                     <X className="w-3.5 h-3.5" />
@@ -997,7 +1002,7 @@ export function LiveWorkspace() {
                   <button
                     type="button"
                     onClick={handleDisconnectStream}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-rose-700 hover:bg-rose-600 text-white transition-colors"
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-rose-600 hover:bg-rose-700 text-white transition-colors cursor-pointer shadow-xs"
                   >
                     <Link2Off className="w-3.5 h-3.5" />
                     Disconnect
@@ -1007,7 +1012,7 @@ export function LiveWorkspace() {
                     type="button"
                     onClick={() => handleConnectStream()}
                     disabled={!rtspInputValue.trim() || isValidatingStream}
-                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white transition-colors disabled:opacity-40"
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-[#133322] hover:bg-[#1a442d] text-white transition-colors disabled:opacity-40 cursor-pointer shadow-xs"
                   >
                     {isValidatingStream ? (
                       <>
@@ -1025,12 +1030,12 @@ export function LiveWorkspace() {
 
                 {/* AI overlay toggle */}
                 {loadedModels.length > 0 && (
-                  <label className="flex items-center gap-1.5 cursor-pointer select-none text-xs text-slate-300 ml-1 border-l border-slate-700 pl-2.5">
+                  <label className="flex items-center gap-1.5 cursor-pointer select-none text-xs font-semibold text-slate-700 ml-1 border-l border-slate-200 pl-2.5">
                     <input
                       type="checkbox"
                       checked={drawDetectionsOnStream}
                       onChange={(e) => setDrawDetectionsOnStream(e.target.checked)}
-                      className="accent-emerald-500 w-3.5 h-3.5"
+                      className="accent-emerald-600 w-3.5 h-3.5 cursor-pointer"
                     />
                     AI Overlay
                   </label>
@@ -1039,15 +1044,15 @@ export function LiveWorkspace() {
             </div>
 
             {/* Quick preset links */}
-            <div className="flex flex-wrap items-center gap-1.5 pt-1.5 border-t border-slate-800/80 text-[11px]">
-              <span className="text-slate-400">Presets:</span>
+            <div className="flex flex-wrap items-center gap-1.5 pt-2 border-t border-slate-100 text-[11px]">
+              <span className="text-slate-400 font-medium">Presets:</span>
               <button
                 type="button"
                 onClick={() => {
                   setRtspInputValue("sample");
                   handleConnectStream("sample");
                 }}
-                className="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-emerald-500/30 transition-colors font-mono"
+                className="px-2 py-0.5 rounded-md bg-slate-100 hover:bg-slate-200 text-emerald-800 border border-slate-200 transition-colors font-mono font-medium cursor-pointer"
               >
                 Sample Simulation Feed
               </button>
@@ -1056,7 +1061,7 @@ export function LiveWorkspace() {
                 onClick={() => {
                   setRtspInputValue("http://192.168.1.5:8080");
                 }}
-                className="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-sky-400 border border-sky-500/30 transition-colors font-mono"
+                className="px-2 py-0.5 rounded-md bg-slate-100 hover:bg-slate-200 text-sky-800 border border-slate-200 transition-colors font-mono font-medium cursor-pointer"
               >
                 IP Webcam Pro (Android/iOS)
               </button>
@@ -1065,7 +1070,7 @@ export function LiveWorkspace() {
                 onClick={() => {
                   setRtspInputValue("rtsp://10.20.72.101:554/live/ch0");
                 }}
-                className="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-amber-400 border border-amber-500/30 transition-colors font-mono"
+                className="px-2 py-0.5 rounded-md bg-slate-100 hover:bg-slate-200 text-amber-800 border border-slate-200 transition-colors font-mono font-medium cursor-pointer"
               >
                 RTSP Camera (Port 554)
               </button>
@@ -1128,45 +1133,49 @@ export function LiveWorkspace() {
 
       {/* 🚨 Tactical Suspect Alert Banner for Uploaded Media */}
       {detectedSuspectsInMedia.length > 0 && (
-        <div className="bg-red-950/90 border-2 border-red-600/80 rounded-xl p-3.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-lg shadow-red-950/50">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-red-600/20 border border-red-500/50 flex items-center justify-center shrink-0 animate-pulse">
-              <ShieldAlert className="w-5 h-5 text-red-400" />
+        <div className="bg-white rounded-2xl border-l-4 border-l-rose-600 border border-slate-200/90 shadow-sm p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3.5 min-w-0">
+            <div className="w-11 h-11 rounded-xl bg-rose-50 border border-rose-200 flex items-center justify-center shrink-0 text-rose-600 shadow-2xs">
+              <ShieldAlert className="w-5 h-5 animate-pulse" />
             </div>
-            <div>
-              <div className="text-sm font-bold text-red-100 flex flex-wrap items-center gap-2">
-                <span>🚨 SUSPECT IDENTIFIED IN FEED:</span>
+            <div className="min-w-0">
+              <div className="text-sm font-extrabold text-slate-900 flex flex-wrap items-center gap-2">
+                <span className="text-rose-700 font-mono uppercase tracking-wider text-xs font-bold bg-rose-50 border border-rose-200 px-2 py-0.5 rounded">
+                  🚨 Suspect Identified in Feed
+                </span>
                 {detectedSuspectsInMedia.map((s, idx) => (
                   <span
                     key={idx}
-                    className="px-2 py-0.5 rounded bg-red-900 border border-red-500 text-red-200 text-xs font-mono font-bold"
+                    className="px-2.5 py-0.5 rounded-md bg-rose-600 text-white text-xs font-mono font-bold shadow-2xs flex items-center gap-1.5"
                   >
-                    {s.name.toUpperCase()} [{s.threat_level || "HIGH"}] {Math.round(s.confidence * 100)}%
+                    <span>{s.name.toUpperCase()}</span>
+                    <span className="text-rose-200 text-[10px] font-normal">[{s.threat_level || "HIGH"}]</span>
+                    <span className="bg-rose-800/80 px-1 py-0.2 rounded text-[10px]">{formatConfidence(s.confidence)}</span>
                   </span>
                 ))}
               </div>
-              <div className="text-xs text-red-300/80 mt-0.5">
+              <div className="text-xs text-slate-500 font-medium mt-1">
                 Facial biometric match verified via YuNet + SFace. Priority alert dispatched to Command Center & QRT.
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-2.5 shrink-0 w-full sm:w-auto justify-end">
             {detectedSuspectsInMedia[0] && (
               <button
                 type="button"
                 onClick={() => {
                   setSelectedSuspectForTrajectory(detectedSuspectsInMedia[0].name);
                 }}
-                className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-red-900/80 hover:bg-red-900 text-red-100 border border-red-500/50 transition-colors flex items-center gap-1.5 shadow-xs cursor-pointer"
+                className="px-3.5 py-2 rounded-xl text-xs font-semibold bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer"
               >
-                <Compass className="w-3.5 h-3.5 text-red-300" />
+                <Compass className="w-3.5 h-3.5 text-rose-600" />
                 Track Trajectory
               </button>
             )}
             <button
               type="button"
               onClick={() => router.push("/alerts")}
-              className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-red-600 hover:bg-red-500 text-white transition-colors flex items-center gap-1.5 shadow-xs cursor-pointer"
+              className="px-3.5 py-2 rounded-xl text-xs font-bold bg-[#133322] hover:bg-[#1a442d] text-white shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
             >
               Command Center →
             </button>
@@ -1397,13 +1406,13 @@ export function LiveWorkspace() {
 
         {/* Tactical Telemetry & Detection Inspector (Col 4) */}
         <div className="lg:col-span-4 space-y-4">
-          <div className="bg-white rounded-xl border border-slate-200/80 shadow-xs p-5">
+          <div className="bg-white rounded-2xl border border-slate-200/90 shadow-xs p-5">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
+              <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
                 <Sparkles className="w-4 h-4 text-emerald-700" />
                 Target Inspector
               </h3>
-              <span className="text-xs font-mono font-medium text-slate-500">
+              <span className="text-xs font-mono font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md">
                 {sourceMode === "upload-video" && videoResults.length > 0
                   ? `Frame #${selectedFrameIndex} (${detections.length})`
                   : `${detections.length} Detected`}
@@ -1416,62 +1425,109 @@ export function LiveWorkspace() {
                 No active threats or targets identified in current view.
               </div>
             ) : (
-              <div className="divide-y divide-slate-100 max-h-[320px] overflow-y-auto mt-2">
-                {detections.map((det, idx) => (
-                  <div key={idx} className="py-2.5 space-y-1">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold font-mono uppercase text-slate-800 flex items-center gap-1.5">
-                        {det.track_id !== undefined && (
-                          <span className="bg-emerald-950 text-emerald-300 border border-emerald-700/50 px-1.5 py-0.5 rounded text-[10px] font-bold font-mono">
-                            ID #{det.track_id}
+              <div className="divide-y divide-slate-100 max-h-[340px] overflow-y-auto mt-2">
+                {detections.map((det, idx) => {
+                  const isSuspect = Boolean(
+                    det.is_threat ||
+                    det.class_name.toLowerCase().startsWith("suspect") ||
+                    det.threat_level
+                  );
+                  const suspectName = det.suspect_name || det.class_name.replace(/^suspect_/i, "");
+
+                  return (
+                    <div
+                      key={idx}
+                      className={`py-2.5 px-2 rounded-xl transition-all ${
+                        isSuspect
+                          ? "bg-rose-50/50 border border-rose-200/80 my-1"
+                          : "hover:bg-slate-50 my-0.5"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span
+                          className={`text-xs font-bold font-mono uppercase flex items-center gap-1.5 ${
+                            isSuspect ? "text-rose-800" : "text-slate-800"
+                          }`}
+                        >
+                          {isSuspect ? (
+                            <span className="w-2 h-2 rounded-full bg-rose-600 animate-pulse shrink-0" />
+                          ) : det.track_id !== undefined ? (
+                            <span className="bg-emerald-950 text-emerald-300 border border-emerald-700/50 px-1.5 py-0.5 rounded text-[10px] font-bold font-mono">
+                              ID #{det.track_id}
+                            </span>
+                          ) : null}
+                          <span className="truncate">
+                            {isSuspect ? `SUSPECT: ${suspectName.toUpperCase()}` : `${det.class_name} #${idx + 1}`}
                           </span>
+                        </span>
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          {isSuspect && det.threat_level && (
+                            <span className="text-[10px] font-bold bg-rose-600 text-white px-1.5 py-0.2 rounded uppercase">
+                              {det.threat_level}
+                            </span>
+                          )}
+                          <span
+                            className={`text-xs font-semibold px-2 py-0.5 rounded ${
+                              isSuspect
+                                ? "text-rose-700 bg-rose-100 border border-rose-200 font-bold"
+                                : "text-emerald-800 bg-emerald-50 border border-emerald-200/60"
+                            }`}
+                          >
+                            {formatConfidence(det.confidence)}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="text-[11px] font-mono text-slate-500 flex items-center justify-between mt-1.5">
+                        <span>
+                          Box: [{det.box.map((n) => Math.round(n)).join(", ")}]
+                        </span>
+                        {isSuspect ? (
+                          <button
+                            type="button"
+                            onClick={() => setSelectedSuspectForTrajectory(suspectName)}
+                            className="text-[11px] text-rose-700 hover:text-rose-900 font-semibold underline flex items-center gap-1 cursor-pointer"
+                          >
+                            <Compass className="w-3 h-3" /> Trajectory
+                          </button>
+                        ) : (
+                          <span>Class ID: {det.class_id}</span>
                         )}
-                        {det.class_name} #{idx + 1}
-                      </span>
-                      <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">
-                        {Math.round(det.confidence * 100)}%
-                      </span>
+                      </div>
                     </div>
-                    <div className="text-[11px] font-mono text-slate-400 flex items-center justify-between">
-                      <span>
-                        Box: [{det.box.map((n) => Math.round(n)).join(", ")}]
-                      </span>
-                      <span>Class ID: {det.class_id}</span>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
 
           {/* Engine Parameters Card */}
-          <div className="bg-white rounded-xl border border-slate-200/80 shadow-xs p-4 text-xs space-y-2 text-slate-600">
-            <div className="font-semibold text-slate-900 border-b border-slate-100 pb-1.5 flex items-center justify-between">
+          <div className="bg-white rounded-2xl border border-slate-200/90 shadow-xs p-4 text-xs space-y-2 text-slate-600">
+            <div className="font-bold text-slate-900 border-b border-slate-100 pb-2 flex items-center justify-between">
               <span>Runtime Specs</span>
-              <span className="font-mono text-emerald-700 font-bold">
+              <span className="font-mono text-xs font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded">
                 {selectedModel || "None Selected"}
               </span>
             </div>
-            <div className="flex justify-between">
-              <span>Mode:</span>
+            <div className="flex justify-between py-0.5">
+              <span className="text-slate-500">Mode:</span>
               <span className="font-mono font-medium text-slate-800 capitalize">
                 {sourceMode.replace("-", " ")}
               </span>
             </div>
-            <div className="flex justify-between">
-              <span>Inference Hardware:</span>
+            <div className="flex justify-between py-0.5">
+              <span className="text-slate-500">Inference Hardware:</span>
               <span className="font-mono font-medium text-slate-800">
                 ONNX Runtime (CPU/CUDA)
               </span>
             </div>
-            <div className="flex justify-between">
-              <span>NMS Threshold:</span>
+            <div className="flex justify-between py-0.5">
+              <span className="text-slate-500">NMS Threshold:</span>
               <span className="font-mono font-medium text-slate-800">
                 IoU {iouThreshold}
               </span>
             </div>
-            <div className="flex justify-between">
-              <span>Confidence Cutoff:</span>
+            <div className="flex justify-between py-0.5">
+              <span className="text-slate-500">Confidence Cutoff:</span>
               <span className="font-mono font-medium text-slate-800">
                 Conf &gt;= {confThreshold}
               </span>

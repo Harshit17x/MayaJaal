@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { Detection } from "@/types/backend";
+import { formatConfidence } from "@/lib/utils";
 
 interface DetectionCanvasProps {
   detections: Detection[];
@@ -155,16 +156,17 @@ export function DetectionCanvas({
         ctx.stroke();
 
         // 4. Label Badge
+        const confStr = formatConfidence(det.confidence);
         const trackTag = det.track_id !== undefined ? `ID #${det.track_id} · ` : "";
-        let labelText = `${trackTag}${det.class_name.replace(/_/g, " ").toUpperCase()} ${Math.round(det.confidence * 100)}%`;
+        let labelText = `${trackTag}${det.class_name.replace(/_/g, " ").toUpperCase()} ${confStr}`;
 
         if (isSuspect) {
           const name = (det.suspect_name || det.class_name.replace(/^suspect_/i, "")).toUpperCase();
           const tLevel = det.threat_level || "ALERT";
-          labelText = `🚨 SUSPECT: ${name} [${tLevel}] ${Math.round(det.confidence * 100)}%`;
+          labelText = `🚨 SUSPECT: ${name} [${tLevel}] ${confStr}`;
         } else if (isFace) {
           const name = (det.suspect_name || det.class_name.replace(/^face_/i, "")).toUpperCase();
-          labelText = `👤 ${name} ${Math.round(det.confidence * 100)}%`;
+          labelText = `👤 ${name} ${confStr}`;
         }
 
         ctx.font = isSuspect ? "bold 11px system-ui, sans-serif" : "bold 11px monospace";
