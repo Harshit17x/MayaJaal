@@ -108,9 +108,9 @@
     "semantic_hash": "11152d95bd04cf7eed28c956479cc8ef"
   },
   "backend/app/api/stream.py": {
-    "mtime": 1789075320.2329614,
-    "seen": 1789075420.3459005,
-    "ast_hash": "d3867a125f5b05468ff2f11b1d538a04",
+    "mtime": 1789080330.357793,
+    "seen": 1789080435.575065,
+    "ast_hash": "0dcc650c0dd337ebdff72d72f424845c",
     "semantic_hash": ""
   },
   "backend/app/api/tracking.py": {
@@ -414,9 +414,9 @@
     "semantic_hash": ""
   },
   "frontend/src/app/(operator)/geofences/page.tsx": {
-    "mtime": 1789077079.8826365,
-    "seen": 1789077095.9885037,
-    "ast_hash": "961da2f797417a8cfcd8d554b03d92e4",
+    "mtime": 1789080357.1416695,
+    "seen": 1789080435.575139,
+    "ast_hash": "b0a4954d6502ec9daa8b89d0acebc1f1",
     "semantic_hash": ""
   },
   "frontend/src/app/(operator)/gis-map/page.tsx": {
@@ -1098,9 +1098,9 @@
     "semantic_hash": ""
   },
   "backend/app/data/geofences.json": {
-    "mtime": 1789076916.8560693,
-    "seen": 1789077095.9884493,
-    "ast_hash": "30dbcacf35b3475eeb6ff51109c6e399",
+    "mtime": 1789080398.5160744,
+    "seen": 1789080435.5750763,
+    "ast_hash": "0bd03a5b6b0f92ce4001b380b965bb25",
     "semantic_hash": ""
   },
   "frontend/src/components/map/SuspectTrailOverlay.ts": {
@@ -1824,9 +1824,9 @@
     "semantic_hash": ""
   },
   "backend/app/pipeline/geofence_engine.py": {
-    "mtime": 1789076912.0342236,
-    "seen": 1789077095.988459,
-    "ast_hash": "60c0621f286fdd009e187c51a6663bb7",
+    "mtime": 1789080283.500239,
+    "seen": 1789080435.5750868,
+    "ast_hash": "8004f405a2e67f5c67820fb04707ea13",
     "semantic_hash": ""
   },
   "backend/tests/test_geofence_engine.py": {
@@ -1839,6 +1839,54 @@
     "mtime": 1789076938.7086434,
     "seen": 1789077095.9885447,
     "ast_hash": "31b52709bb5fe621f38ff5de06961eca",
+    "semantic_hash": ""
+  },
+  "frontend/public/images/cctv_sample.jpg": {
+    "mtime": 1789075320.2524848,
+    "seen": 1789078483.563765,
+    "ast_hash": "dcdabf64e9d3243d602004c600aca851",
+    "semantic_hash": ""
+  },
+  "frontend/public/images/cameras/bop-jk-01.jpg": {
+    "mtime": 1789075320.2576003,
+    "seen": 1789078483.5637574,
+    "ast_hash": "454482aec4d3d09227699350382189b0",
+    "semantic_hash": ""
+  },
+  "frontend/public/images/cameras/bop-jk-02.jpg": {
+    "mtime": 1789075320.2524848,
+    "seen": 1789078483.5637586,
+    "ast_hash": "dcdabf64e9d3243d602004c600aca851",
+    "semantic_hash": ""
+  },
+  "frontend/public/images/cameras/bop-jk-03.jpg": {
+    "mtime": 1789075320.2663345,
+    "seen": 1789078483.5637596,
+    "ast_hash": "dcda2633a429f568d104fda3ed6eb8c5",
+    "semantic_hash": ""
+  },
+  "frontend/public/images/cameras/bop-jk-04.jpg": {
+    "mtime": 1789075320.249931,
+    "seen": 1789078483.563761,
+    "ast_hash": "a03799ea223155ba801bc704b1004643",
+    "semantic_hash": ""
+  },
+  "frontend/public/images/cameras/bop-jk-05.jpg": {
+    "mtime": 1789075320.2494216,
+    "seen": 1789078483.5637622,
+    "ast_hash": "cada75b39a98ab036024ed2865a1638c",
+    "semantic_hash": ""
+  },
+  "frontend/public/images/cameras/bop-jk-06.jpg": {
+    "mtime": 1789075320.3358436,
+    "seen": 1789078483.5637631,
+    "ast_hash": "cd25845ea58230da26e6c400efd7d3b9",
+    "semantic_hash": ""
+  },
+  "frontend/public/images/test_frame.jpg": {
+    "mtime": 1789079177.8312476,
+    "seen": 1789079366.7228816,
+    "ast_hash": "cef9766a5e43b0430ebbf738043a5dbc",
     "semantic_hash": ""
   }
 }

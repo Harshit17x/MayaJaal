@@ -319,8 +319,21 @@ class GeofenceEngine:
 
         # Get active zones & tripwires for this camera
         with self.lock:
-            active_zones = [z for z in self.zones if z.get("enabled", True) and (not z.get("cameraId") or z.get("cameraId") == camera_id)]
-            active_wires = [w for w in self.tripwires if w.get("enabled", True) and (not w.get("cameraId") or w.get("cameraId") == camera_id)]
+            def cam_match(entity_cam: Optional[str]) -> bool:
+                if not entity_cam:
+                    return True
+                ent_s = str(entity_cam).strip().lower()
+                tgt_s = str(camera_id).strip().lower()
+                return ent_s == tgt_s or ent_s in tgt_s or tgt_s in ent_s
+
+            active_zones = [z for z in self.zones if z.get("enabled", True) and cam_match(z.get("cameraId"))]
+            active_wires = [w for w in self.tripwires if w.get("enabled", True) and cam_match(w.get("cameraId"))]
+
+            # Fallback to all enabled fences if camera-specific match returned none
+            if not active_zones and self.zones:
+                active_zones = [z for z in self.zones if z.get("enabled", True)]
+            if not active_wires and self.tripwires:
+                active_wires = [w for w in self.tripwires if w.get("enabled", True)]
 
         if camera_id not in self._history:
             self._history[camera_id] = {}
@@ -352,26 +365,29 @@ class GeofenceEngine:
                     continue
 
                 if is_point_in_polygon(curr_fp[0], curr_fp[1], poly):
+                    # Always register visual breach event for stream HUD and bounding box rendering
+                    breach_event = {
+                        "type": "zone_breach",
+                        "zoneId": zone["id"],
+                        "name": zone.get("name", "Restricted Perimeter"),
+                        "cameraId": camera_id,
+                        "trackId": track_id,
+                        "className": class_name,
+                        "confidence": conf,
+                        "suspectName": suspect_name,
+                        "footpoint": [round(curr_fp[0], 4), round(curr_fp[1], 4)],
+                        "severity": zone.get("severity", "CRITICAL"),
+                        "timestamp": datetime.now(timezone.utc).isoformat(),
+                    }
+                    breaches.append(breach_event)
+
+                    # Debounce heavy system/database/WebSocket alert dispatch
                     cd_key = f"zone:{zone['id']}:{track_id}"
                     cooldown = float(zone.get("cooldownSeconds", 20.0))
                     last_alert_time = self._cooldowns.get(cd_key, 0.0)
 
                     if (now - last_alert_time) >= cooldown:
                         self._cooldowns[cd_key] = now
-                        breach_event = {
-                            "type": "zone_breach",
-                            "zoneId": zone["id"],
-                            "name": zone.get("name", "Restricted Perimeter"),
-                            "cameraId": camera_id,
-                            "trackId": track_id,
-                            "className": class_name,
-                            "confidence": conf,
-                            "suspectName": suspect_name,
-                            "footpoint": [round(curr_fp[0], 4), round(curr_fp[1], 4)],
-                            "severity": zone.get("severity", "CRITICAL"),
-                            "timestamp": datetime.now(timezone.utc).isoformat(),
-                        }
-                        breaches.append(breach_event)
 
                         if auto_alert:
                             try:
