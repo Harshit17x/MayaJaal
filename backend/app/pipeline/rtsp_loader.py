@@ -110,6 +110,11 @@ class RTSPStream:
                 base = self.rtsp_url.rstrip("/")
                 candidates = [f"{base}/video", f"{base}/videofeed", self.rtsp_url]
 
+        # Configure low-latency FFmpeg capture options:
+        os.environ["OPENCV_FFMPEG_CAPTURE_OPTIONS"] = (
+            "rtsp_transport;tcp|fflags;nobuffer|flags;low_delay|max_delay;500000"
+        )
+
         last_error = None
         for target in candidates:
             try:
@@ -118,6 +123,7 @@ class RTSPStream:
                     cv2.CAP_FFMPEG,
                 )
                 if capture.isOpened():
+                    capture.set(cv2.CAP_PROP_BUFFERSIZE, 1)
                     success, frame = capture.read()
                     if success and frame is not None and frame.size > 0:
                         self.capture = capture
