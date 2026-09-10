@@ -50,6 +50,8 @@ from app.tracking.config import TrackerConfig
 from app.tracking.tracker import ByteTrackerWrapper, ByteTrackerError
 from app.tracking.session_store import tracker_session_store
 from app.tracking.annotator import draw_tracked_boxes, convert_video_to_h264
+from app.pipeline.face_service import face_service
+from app.pipeline.alert_service import alert_service, SNAPSHOTS_DIR
 
 
 logger = logging.getLogger(__name__)
@@ -244,6 +246,9 @@ async def video_tracking(
 
         frame_results: list[dict] = []
         frames_processed = 0
+        session_alerted_suspects: set[str] = set()
+        suspects_detected_summary: list[dict] = []
+        face_scan_interval = 15
 
         # ── Open video ───────────────────────────────────────────────────
         with VideoLoader(temp_path) as video:
@@ -306,6 +311,70 @@ async def video_tracking(
                     raise HTTPException(status_code=500, detail=str(exc)) from exc
 
                 tracked_dicts = [t.to_dict() for t in tracked_objects]
+
+                # ── Periodic Biometric Suspect Facial Scan ───────────────
+                if frames_processed % face_scan_interval == 0:
+                    try:
+                        detected_faces = face_service.detect_and_recognize(
+                            frame,
+                            min_match_score=0.40,
+                            min_face_size=35,
+                            use_temporal_smoothing=True,
+                        )
+                        for f in detected_faces:
+                            is_threat = bool(f.get("is_threat", False))
+                            suspect_name = f.get("name")
+                            is_known = bool(f.get("is_known", False))
+
+                            if is_threat or is_known:
+                                conf = float(f.get("calibrated_conf") or f.get("match_score") or f.get("confidence") or 0.85)
+                                face_dict = {
+                                    "box": [float(c) for c in f["bbox"]],
+                                    "confidence": round(conf, 3),
+                                    "class_id": 999,
+                                    "class_name": f"suspect_{suspect_name.lower()}" if is_threat else f"face_{suspect_name.lower()}",
+                                    "is_threat": is_threat,
+                                    "threat_level": f.get("threat_level") or ("HIGH" if is_threat else None),
+                                    "suspect_name": suspect_name,
+                                    "category": f.get("category"),
+                                }
+                                tracked_dicts.append(face_dict)
+
+                                if is_threat and suspect_name and suspect_name not in session_alerted_suspects:
+                                    session_alerted_suspects.add(suspect_name)
+                                    snap_name = f"suspect_vid_{session_video_id}_{frames_processed}.jpg"
+                                    snap_path = SNAPSHOTS_DIR / snap_name
+                                    try:
+                                        cv2.imwrite(str(snap_path), frame, [cv2.IMWRITE_JPEG_QUALITY, 90])
+                                    except Exception:
+                                        snap_name = None
+
+                                    t_level = f.get("threat_level") or "HIGH"
+                                    sev = "Critical" if t_level == "CRITICAL" else "High"
+                                    alert_service.create_alert(
+                                        title=f"SUSPECT DETECTED: {suspect_name.upper()}",
+                                        location=f"Video Analysis Stream ({file.filename or 'Upload'})",
+                                        severity=sev,
+                                        camera_id=f"video_upload_{session_video_id}",
+                                        camera_name=f"Video Upload ({file.filename or 'Video'})",
+                                        class_name="suspect",
+                                        confidence=conf,
+                                        box=[float(c) for c in f["bbox"]],
+                                        snapshot_filename=snap_name,
+                                        suspect_name=suspect_name,
+                                        threat_level=t_level,
+                                        category=f.get("category"),
+                                        notes=f"Identified in uploaded video at frame {frames_processed} with {int(conf * 100)}% biometric match confidence.",
+                                    )
+                                    suspects_detected_summary.append({
+                                        "name": suspect_name,
+                                        "threat_level": t_level,
+                                        "frame_index": frames_processed,
+                                        "confidence": round(conf, 3),
+                                        "category": f.get("category"),
+                                    })
+                    except Exception as face_err:
+                        logger.debug("Face scan error during video tracking: %s", face_err)
 
                 # ── Server-Side Bounding Box & Track ID Creation ─────────
                 annotated_frame = frame.copy()
@@ -373,6 +442,7 @@ async def video_tracking(
             "frames_requested": max_frames,
             "frames_processed": frames_processed,
             "annotated_video_url": annotated_video_url,
+            "suspects_detected": suspects_detected_summary,
             "tracker_config": {
                 "track_activation_threshold": tracker_config.track_activation_threshold,
                 "lost_track_buffer": tracker_config.lost_track_buffer,

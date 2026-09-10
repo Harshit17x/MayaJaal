@@ -542,6 +542,27 @@ export const api = {
     return request<AlertItem[]>(`/api/alerts${query}`);
   },
 
+  async createAlert(payload: {
+    title: string;
+    location: string;
+    severity?: string;
+    cameraId?: string;
+    cameraName?: string;
+    className?: string;
+    confidence?: number;
+    box?: number[];
+    suspectName?: string;
+    threatLevel?: string;
+    category?: string;
+    notes?: string;
+  }): Promise<AlertItem> {
+    return request<AlertItem>("/api/alerts", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+  },
+
   async acknowledgeAlert(alertId: string): Promise<{ success: boolean; alert_id: string; acknowledged: boolean }> {
     return request<{ success: boolean; alert_id: string; acknowledged: boolean }>(
       `/api/alerts/${encodeURIComponent(alertId)}/acknowledge`,

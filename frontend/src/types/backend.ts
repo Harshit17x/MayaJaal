@@ -49,6 +49,18 @@ export interface Detection {
   class_id: number;
   class_name: string;
   track_id?: number;
+  is_threat?: boolean;
+  threat_level?: string;
+  suspect_name?: string;
+  category?: string;
+}
+
+export interface SuspectSummary {
+  name: string;
+  threat_level: string;
+  frame_index: number;
+  confidence: number;
+  category?: string;
 }
 
 export type TrackedObject = Detection & { track_id: number };
@@ -108,6 +120,7 @@ export interface VideoInferenceResponse {
   fps?: number;
   results?: VideoFrameResult[];
   frame_results?: VideoFrameResult[];
+  suspects_detected?: SuspectSummary[];
 }
 
 export interface TrackingVideoResponse {
@@ -118,6 +131,7 @@ export interface TrackingVideoResponse {
   frames_requested?: number;
   frames_processed?: number;
   annotated_video_url?: string;
+  suspects_detected?: SuspectSummary[];
   results: VideoFrameResult[];
   tracker_config?: Record<string, unknown>;
 }
