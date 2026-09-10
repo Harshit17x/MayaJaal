@@ -11,8 +11,8 @@ const CATEGORIES: CategoryStat[] = [
   {
     label: "Humans",
     percentage: 64,
-    colorClass: "bg-[#1b4830]",
-    dotBg: "bg-[#1b4830]",
+    colorClass: "bg-[#2d6a4f]",
+    dotBg: "bg-[#2d6a4f]",
   },
   {
     label: "Vehicles",
@@ -30,7 +30,7 @@ const CATEGORIES: CategoryStat[] = [
 
 export function DetectionBreakdownCard() {
   return (
-    <div className="bg-white rounded-2xl border border-slate-200/90 p-6 shadow-xs flex flex-col justify-between h-full">
+    <div className="bg-white rounded-2xl border border-[#dce5df] p-6 shadow-xs flex flex-col justify-between h-full">
       {/* Header */}
       <div>
         <h2 className="text-base font-bold text-slate-900 tracking-tight">

@@ -25,7 +25,7 @@ export function ActivityOverviewChart() {
   const [hoveredDay, setHoveredDay] = useState<DayData | null>(null);
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200/90 p-6 shadow-xs flex flex-col justify-between h-full">
+    <div className="bg-white rounded-2xl border border-[#dce5df] p-6 shadow-xs flex flex-col justify-between h-full">
       {/* Header & Legend */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
         <div>
@@ -40,11 +40,11 @@ export function ActivityOverviewChart() {
         {/* Legend */}
         <div className="flex items-center gap-4 text-xs font-medium text-slate-600">
           <div className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded-[2px] bg-[#1a442d] inline-block shadow-xs" />
+            <span className="w-3 h-3 rounded-[2px] bg-[#2d6a4f] inline-block shadow-2xs" />
             <span>Normal Traffic</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded-[2px] bg-[#f59e0b] inline-block shadow-xs" />
+            <span className="w-3 h-3 rounded-[2px] bg-[#f59e0b] inline-block shadow-2xs" />
             <span>Alerts</span>
           </div>
         </div>
@@ -74,12 +74,12 @@ export function ActivityOverviewChart() {
               >
                 {/* Paired Bars Container */}
                 <div className="w-full flex items-end justify-center gap-1.5 sm:gap-2 h-full pb-1">
-                  {/* Normal Traffic Bar (Dark Forest Green) */}
+                  {/* Normal Traffic Bar (Government Green) */}
                   <div className="relative w-full max-w-[22px] flex items-end h-full">
                     <div
                       style={{ height: `${item.normalHeightPercent}%` }}
                       className={`w-full rounded-t-sm transition-all duration-300 ${
-                        isHovered ? "bg-[#143724] ring-2 ring-emerald-600/30" : "bg-[#1b4830]"
+                        isHovered ? "bg-[#22543d] ring-2 ring-[#2d6a4f]/30" : "bg-[#2d6a4f]"
                       }`}
                     />
                   </div>
@@ -99,7 +99,7 @@ export function ActivityOverviewChart() {
                 <span
                   className={`text-xs mt-3 transition-colors ${
                     item.isPeak
-                      ? "font-bold text-slate-900 underline decoration-emerald-700 underline-offset-4"
+                      ? "font-bold text-slate-900 underline decoration-[#2d6a4f] underline-offset-4"
                       : "font-medium text-slate-500 group-hover:text-slate-900"
                   }`}
                 >

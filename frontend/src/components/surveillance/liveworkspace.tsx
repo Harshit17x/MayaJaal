@@ -906,7 +906,7 @@ export function LiveWorkspace() {
             type="button"
             onClick={handleRunInference}
             disabled={isInferencing || !isOnline}
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-lg text-xs font-semibold bg-[#123824] hover:bg-[#18462d] text-white shadow-xs transition-all duration-150 disabled:opacity-50"
+            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-lg text-xs font-semibold bg-[#1e4b38] hover:bg-[#163a2b] text-white shadow-xs transition-all duration-150 disabled:opacity-50"
           >
             {isInferencing ? (
               <>
@@ -1012,7 +1012,7 @@ export function LiveWorkspace() {
                     type="button"
                     onClick={() => handleConnectStream()}
                     disabled={!rtspInputValue.trim() || isValidatingStream}
-                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-[#133322] hover:bg-[#1a442d] text-white transition-colors disabled:opacity-40 cursor-pointer shadow-xs"
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-[#1e4b38] hover:bg-[#163a2b] text-white transition-colors disabled:opacity-40 cursor-pointer shadow-xs"
                   >
                     {isValidatingStream ? (
                       <>
@@ -1175,7 +1175,7 @@ export function LiveWorkspace() {
             <button
               type="button"
               onClick={() => router.push("/alerts")}
-              className="px-3.5 py-2 rounded-xl text-xs font-bold bg-[#133322] hover:bg-[#1a442d] text-white shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
+              className="px-3.5 py-2 rounded-xl text-xs font-bold bg-[#1e4b38] hover:bg-[#163a2b] text-white shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
             >
               Command Center →
             </button>

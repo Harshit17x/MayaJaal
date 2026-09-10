@@ -200,7 +200,7 @@ export function TacticalThreatToast() {
                   <button
                     type="button"
                     onClick={() => handleQuickDispatch(alert.id)}
-                    className="px-3 py-1.5 rounded-lg text-xs font-bold bg-[#133322] hover:bg-[#1a442d] text-white flex items-center gap-1 transition-colors shadow-xs cursor-pointer"
+                    className="px-3 py-1.5 rounded-lg text-xs font-bold bg-[#1e4b38] hover:bg-[#163a2b] text-white flex items-center gap-1 transition-colors shadow-xs cursor-pointer"
                   >
                     {dispatchSuccess === alert.id ? (
                       <>
@@ -243,7 +243,7 @@ export function TacticalThreatToast() {
                   <button
                     type="button"
                     onClick={() => setDispatchingAlertId(alert.id)}
-                    className="px-3 py-1.5 rounded-lg text-xs font-bold bg-[#133322] hover:bg-[#1a442d] text-white flex items-center gap-1.5 transition-colors shadow-2xs cursor-pointer"
+                    className="px-3 py-1.5 rounded-lg text-xs font-bold bg-[#1e4b38] hover:bg-[#163a2b] text-white flex items-center gap-1.5 transition-colors shadow-2xs cursor-pointer"
                   >
                     <Send className="w-3 h-3" /> QRT
                   </button>

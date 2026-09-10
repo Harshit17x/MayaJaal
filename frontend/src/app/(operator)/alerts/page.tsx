@@ -252,7 +252,7 @@ export default function AlertsPage() {
                 severityFilter === sev
                   ? sev === "Suspects"
                     ? "bg-rose-700 text-white shadow-xs font-bold"
-                    : "bg-[#1c5436] text-white shadow-xs"
+                    : "bg-[#1e4b38] text-white shadow-xs"
                   : sev === "Suspects"
                   ? "bg-rose-50 text-rose-800 border border-rose-200 hover:bg-rose-100 font-semibold"
                   : "bg-slate-100 text-slate-600 hover:bg-slate-200"

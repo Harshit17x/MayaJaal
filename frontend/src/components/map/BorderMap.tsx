@@ -879,7 +879,7 @@ export function BorderMap({
               onClick={handleToggle3D}
               className={`inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold rounded-xl transition-all border cursor-pointer ${
                 is3DMode
-                  ? "bg-[#143724] text-white border-emerald-700 shadow-xs"
+                  ? "bg-[#1e4b38] text-white border-emerald-700 shadow-xs"
                   : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50"
               }`}
               title="Toggle Google Maps 3D Oblique Perspective Tilt (45°)"
@@ -927,7 +927,7 @@ export function BorderMap({
               onClick={() => setShowBorders(!showBorders)}
               className={`inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold rounded-xl transition-all border cursor-pointer ${
                 showBorders
-                  ? "bg-[#143724] text-white border-emerald-700 shadow-xs"
+                  ? "bg-[#1e4b38] text-white border-emerald-700 shadow-xs"
                   : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
               }`}
               title="Toggle Survey of India International Land Borders"
@@ -1040,7 +1040,7 @@ export function BorderMap({
                 onClick={handleToggle3D}
                 className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                   is3DMode
-                    ? "bg-[#143724] text-white border border-emerald-600 shadow-xs"
+                    ? "bg-[#1e4b38] text-white border border-emerald-600 shadow-xs"
                     : "text-slate-300 hover:text-white hover:bg-slate-800"
                 }`}
                 title="Toggle Google Maps 3D Oblique Perspective Tilt (45°)"

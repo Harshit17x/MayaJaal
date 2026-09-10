@@ -118,7 +118,7 @@ function LoginFormCard() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full mt-2 py-3.5 px-6 rounded-2xl bg-[#1c3a28] hover:bg-[#142c1e] active:scale-[0.99] text-white text-sm font-semibold tracking-wide shadow-md shadow-emerald-950/20 transition-all duration-150 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-70"
+            className="w-full mt-2 py-3.5 px-6 rounded-2xl bg-[#1e4b38] hover:bg-[#163a2b] active:scale-[0.99] text-white text-sm font-semibold tracking-wide shadow-md shadow-emerald-950/20 transition-all duration-150 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-70"
           >
             {isLoading ? (
               <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />

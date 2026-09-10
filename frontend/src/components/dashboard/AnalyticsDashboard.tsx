@@ -76,7 +76,7 @@ export function AnalyticsDashboard() {
           <button
             type="button"
             onClick={handleExport}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-[#143724] hover:bg-[#102d1d] text-white shadow-xs transition-all active:scale-[0.98]"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-[#1e4b38] hover:bg-[#163a2b] text-white shadow-xs transition-all active:scale-[0.98] cursor-pointer"
           >
             <Download className="w-3.5 h-3.5" />
             <span>Export Summary</span>
@@ -87,12 +87,12 @@ export function AnalyticsDashboard() {
       {/* Top 3 Metric Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
         {/* Total Detections */}
-        <div className="bg-white rounded-2xl border border-slate-200/90 p-6 shadow-xs flex flex-col justify-between">
+        <div className="bg-white rounded-2xl border border-[#dce5df] p-6 shadow-xs flex flex-col justify-between">
           <div className="flex items-center justify-between gap-2 mb-3">
             <span className="text-[11px] font-bold tracking-wider uppercase text-slate-500">
               TOTAL DETECTIONS
             </span>
-            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/60">
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-[#eaf4ed] text-[#1b5032] border border-[#c4ded0]">
               +12% vs last week
             </span>
           </div>
@@ -107,7 +107,7 @@ export function AnalyticsDashboard() {
         </div>
 
         {/* Critical Alerts */}
-        <div className="bg-white rounded-2xl border border-slate-200/90 p-6 shadow-xs flex flex-col justify-between">
+        <div className="bg-white rounded-2xl border border-[#dce5df] p-6 shadow-xs flex flex-col justify-between">
           <div className="flex items-center justify-between gap-2 mb-3">
             <span className="text-[11px] font-bold tracking-wider uppercase text-slate-500">
               CRITICAL ALERTS
@@ -127,18 +127,18 @@ export function AnalyticsDashboard() {
         </div>
 
         {/* System Health */}
-        <div className="bg-white rounded-2xl border border-slate-200/90 p-6 shadow-xs flex flex-col justify-between">
+        <div className="bg-white rounded-2xl border border-[#dce5df] p-6 shadow-xs flex flex-col justify-between">
           <div className="flex items-center justify-between gap-2 mb-3">
             <span className="text-[11px] font-bold tracking-wider uppercase text-slate-500">
               SYSTEM HEALTH
             </span>
-            <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#1b5032]">
+              <span className="w-2 h-2 rounded-full bg-[#16a34a]" />
               All 12 Nodes Online
             </span>
           </div>
           <div>
-            <div className="text-3xl sm:text-4xl font-extrabold text-[#143724] tracking-tight">
+            <div className="text-3xl sm:text-4xl font-extrabold text-[#1e4b38] tracking-tight">
               99.9%
             </div>
             <p className="text-xs text-slate-400 font-medium mt-1">
