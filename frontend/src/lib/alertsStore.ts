@@ -3,56 +3,7 @@
 import { useState, useEffect } from "react";
 import { AlertItem, AlertSeverity } from "@/types/alert";
 
-const INITIAL_ALERTS: AlertItem[] = [
-  {
-    id: "alert-1",
-    title: "Person Crossing Geofence",
-    location: "Camera 02 — Eastern Gate",
-    time: "2 mins ago",
-    timestamp: Date.now() - 2 * 60 * 1000,
-    severity: "High",
-    className: "person",
-    confidence: 0.94,
-    cameraName: "Camera 02",
-    acknowledged: false,
-  },
-  {
-    id: "alert-2",
-    title: "Vehicle at Unauthorised Hour",
-    location: "Camera 01 — North Perimeter",
-    time: "14 mins ago",
-    timestamp: Date.now() - 14 * 60 * 1000,
-    severity: "Medium",
-    className: "car",
-    confidence: 0.88,
-    cameraName: "Camera 01",
-    acknowledged: false,
-  },
-  {
-    id: "alert-3",
-    title: "Group Movement Detected",
-    location: "Camera 04 — Southern Trail",
-    time: "28 mins ago",
-    timestamp: Date.now() - 28 * 60 * 1000,
-    severity: "Medium",
-    className: "person",
-    confidence: 0.82,
-    cameraName: "Camera 04",
-    acknowledged: false,
-  },
-  {
-    id: "alert-4",
-    title: "Suspicious Loitering",
-    location: "Camera 03 — Watch Tower",
-    time: "45 mins ago",
-    timestamp: Date.now() - 45 * 60 * 1000,
-    severity: "Low",
-    className: "person",
-    confidence: 0.76,
-    cameraName: "Camera 03",
-    acknowledged: true,
-  },
-];
+const INITIAL_ALERTS: AlertItem[] = [];
 
 import { api } from "@/lib/api";
 
@@ -173,8 +124,7 @@ function initWebSocket() {
 async function syncWithBackend() {
   try {
     const backendAlerts = await api.getAlerts();
-    if (Array.isArray(backendAlerts) && backendAlerts.length > 0) {
-      // Merge backend alerts with memory, favoring backend
+    if (Array.isArray(backendAlerts)) {
       memoryAlerts = backendAlerts;
       notify();
     }
