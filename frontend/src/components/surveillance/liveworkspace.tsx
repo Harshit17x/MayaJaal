@@ -87,11 +87,7 @@ export function LiveWorkspace() {
   const [videoPreviewUrl, setVideoPreviewUrl] = useState<string>(
     "/videos/himalayan-border-animated.mp4"
   );
-  const [originalVideoUrl, setOriginalVideoUrl] = useState<string>(
-    "/videos/himalayan-border-animated.mp4"
-  );
   const [annotatedVideoUrl, setAnnotatedVideoUrl] = useState<string | null>(null);
-  const [isServerAnnotatedActive, setIsServerAnnotatedActive] = useState<boolean>(true);
   const [videoResults, setVideoResults] = useState<VideoFrameResult[]>([]);
   const [selectedFrameIndex, setSelectedFrameIndex] = useState<number>(0);
   const [videoMetadata, setVideoMetadata] = useState<VideoMetadata | null>(null);
@@ -271,9 +267,7 @@ export function LiveWorkspace() {
     setSelectedVideoFile(file);
     const url = URL.createObjectURL(file);
     setVideoPreviewUrl(url);
-    setOriginalVideoUrl(url);
     setAnnotatedVideoUrl(null);
-    setIsServerAnnotatedActive(false);
     setSourceMode("upload-video");
     setDetections([]);
     setVideoResults([]);
@@ -342,14 +336,11 @@ export function LiveWorkspace() {
     }
   };
 
-  // Automatic resilience: if server-annotated video cannot be decoded by browser, gracefully fall back to Raw Video + Client Canvas
+  // Video stream error telemetry
   const handleVideoError = () => {
-    if (sourceMode === "upload-video" && isServerAnnotatedActive && originalVideoUrl) {
-      console.warn("Server-annotated video stream codec failed in browser. Automatically falling back to Raw Video + Client Canvas overlay.");
-      setIsServerAnnotatedActive(false);
-      setVideoPreviewUrl(originalVideoUrl);
+    if (sourceMode === "upload-video") {
       setStatusMessage(
-        "Notice: Server video format unsupported by browser decoder. Switched to Raw Video with dynamic AI Canvas overlay."
+        "Server video stream playback error. Ensure backend video server is reachable and FFmpeg H.264 is enabled."
       );
     }
   };
@@ -467,7 +458,6 @@ export function LiveWorkspace() {
             const fullAnnUrl = `${backendBase}${result.annotated_video_url}?_t=${Date.now()}`;
             setAnnotatedVideoUrl(fullAnnUrl);
             setVideoPreviewUrl(fullAnnUrl);
-            setIsServerAnnotatedActive(true);
           }
         } else {
           setStatusMessage(
@@ -1168,10 +1158,10 @@ export function LiveWorkspace() {
               />
             )}
 
-            {/* Detection overlay canvas — only for image mode or when client canvas is active */}
-            {sourceMode !== "rtsp" && (
+            {/* Detection overlay canvas — strictly for image mode; video mode uses server-side burned-in rendering */}
+            {sourceMode === "upload-image" && (
               <DetectionCanvas
-                detections={isServerAnnotatedActive && sourceMode === "upload-video" ? [] : detections}
+                detections={detections}
                 sourceWidth={sourceDims.width}
                 sourceHeight={sourceDims.height}
               />
@@ -1188,47 +1178,9 @@ export function LiveWorkspace() {
                 </span>
 
                 {annotatedVideoUrl && (
-                  <div className="flex items-center gap-1.5 bg-slate-800 p-0.5 rounded-md border border-slate-700">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setVideoPreviewUrl(annotatedVideoUrl);
-                        setIsServerAnnotatedActive(true);
-                        setTimeout(() => {
-                          if (videoRef.current) {
-                            videoRef.current.load();
-                            videoRef.current.play().catch(() => {});
-                          }
-                        }, 50);
-                      }}
-                      className={`px-2 py-0.5 rounded text-[10px] font-mono font-medium transition-all ${
-                        isServerAnnotatedActive
-                          ? "bg-emerald-600 text-white font-bold"
-                          : "text-slate-400 hover:text-white"
-                      }`}
-                    >
-                      Server Bounding Boxes {isServerAnnotatedActive ? "(Active)" : ""}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setVideoPreviewUrl(originalVideoUrl);
-                        setIsServerAnnotatedActive(false);
-                        setTimeout(() => {
-                          if (videoRef.current) {
-                            videoRef.current.load();
-                            videoRef.current.play().catch(() => {});
-                          }
-                        }, 50);
-                      }}
-                      className={`px-2 py-0.5 rounded text-[10px] font-mono font-medium transition-all ${
-                        !isServerAnnotatedActive
-                          ? "bg-emerald-600 text-white font-bold"
-                          : "text-slate-400 hover:text-white"
-                      }`}
-                    >
-                      Raw Video + Canvas {!isServerAnnotatedActive ? "(Active)" : ""}
-                    </button>
+                  <div className="flex items-center gap-1.5 bg-emerald-950/80 text-emerald-400 border border-emerald-500/40 px-2.5 py-1 rounded-md text-[11px] font-mono font-semibold shadow-xs">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    <span>Server-Side Bounding Boxes Burned-In</span>
                   </div>
                 )}
 
