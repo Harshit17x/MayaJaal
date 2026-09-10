@@ -24,6 +24,7 @@ import {
   Navigation,
 } from "lucide-react";
 import { SuspectTrajectoryModal } from "@/components/map/SuspectTrajectoryModal";
+import { formatConfidence } from "@/lib/utils";
 
 export default function AlertsPage() {
   const {
@@ -414,8 +415,8 @@ export default function AlertsPage() {
                         {alert.confidence && (
                           <>
                             <span>•</span>
-                            <span className="text-emerald-700 font-medium">
-                              Biometric Match: {Math.round(alert.confidence * 100)}%
+                            <span className="text-emerald-700 font-semibold font-mono">
+                              Biometric Match: {formatConfidence(alert.confidence)}
                             </span>
                           </>
                         )}

@@ -781,42 +781,78 @@ class ANPRPipeline:
         fps_limit: int = 24,
     ) -> Generator[bytes, None, None]:
         """Generator yielding MJPEG multipart stream with real-time ANPR overlays."""
-        clean_url = stream_url.strip().lower()
-        if clean_url in ("sample", "demo", "test") or not clean_url:
-            source = str(settings.model_directory.parent / "test_video_input.mp4")
-        else:
-            source = stream_url
+        from app.api.stream import create_standby_frame, open_video_source
 
-        cap = cv2.VideoCapture(source)
         frame_interval = 1.0 / max(1, min(fps_limit, 30))
+        cap, conn_diag, resolved_url, protocol = open_video_source(stream_url)
+        clean_url = stream_url.strip().lower()
+        is_video_file = (
+            clean_url in ("sample", "demo", "test")
+            or not clean_url
+            or Path(stream_url).is_file()
+        )
+
         seen_plates: set[str] = set()
+        reconnect_attempts = 0
+        max_reconnects = 5
 
         try:
             while True:
                 t_start = time.perf_counter()
-                if not cap.isOpened():
-                    cap = cv2.VideoCapture(source)
+
+                if cap is None or not cap.isOpened():
+                    reconnect_attempts += 1
+                    if reconnect_attempts <= max_reconnects:
+                        time.sleep(0.5)
+                        cap, conn_diag, resolved_url, protocol = open_video_source(stream_url)
+                        if cap and cap.isOpened():
+                            reconnect_attempts = 0
+                            continue
+
+                    # Stream standby frame while waiting for link
+                    status_label = (
+                        f"Connecting to {protocol} ({conn_diag})..."
+                        if reconnect_attempts < 3
+                        else f"{protocol} Offline - {conn_diag}"
+                    )
+                    standby = create_standby_frame(
+                        rtsp_url=stream_url,
+                        status_msg=status_label,
+                        protocol=f"ANPR {protocol}",
+                    )
+                    ret, jpeg = cv2.imencode(".jpg", standby, [cv2.IMWRITE_JPEG_QUALITY, 80])
+                    if ret:
+                        yield (
+                            b"--frame\r\n"
+                            b"Content-Type: image/jpeg\r\n\r\n" + jpeg.tobytes() + b"\r\n"
+                        )
                     time.sleep(0.5)
+                    cap, conn_diag, resolved_url, protocol = open_video_source(stream_url)
                     continue
 
                 ret, frame = cap.read()
                 if not ret or frame is None:
-                    # Loop video if sample
-                    if "test_video" in source or "sample" in source:
+                    if is_video_file and cap is not None:
                         cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
                         continue
+                    reconnect_attempts += 1
+                    if reconnect_attempts > 4:
+                        cap.release()
+                        cap = None
                     time.sleep(0.1)
                     continue
 
-                # Run ANPR processing
-                annotated, _, _ = self.process_frame(
+                reconnect_attempts = 0
+
+                # Run ANPR processing on frame
+                annotated, frame_records, extracted = self.process_frame(
                     frame, camera_id=camera_id, save_snapshots=True, seen_plates=seen_plates
                 )
 
-                # Header watermark
+                # Header watermark (ASCII-safe, no ???)
                 cv2.putText(
                     annotated,
-                    f"MAYAJAAL • ANPR LIVE GATE MONITOR [{camera_id}]",
+                    f"MAYAJAAL | ANPR LIVE GATE MONITOR [{camera_id}]",
                     (20, 30),
                     cv2.FONT_HERSHEY_SIMPLEX,
                     0.55,
@@ -835,7 +871,8 @@ class ANPRPipeline:
                 if sleep_time > 0:
                     time.sleep(sleep_time)
         finally:
-            cap.release()
+            if cap is not None:
+                cap.release()
 
 
 # Singleton ANPR Pipeline Instance

@@ -20,10 +20,24 @@ import {
   Play,
   Pause,
   Maximize2,
+  Minimize2,
   Layers,
   Clock,
   Sparkles,
   Zap,
+  Radio,
+  Wifi,
+  WifiOff,
+  Link2,
+  Link2Off,
+  HelpCircle,
+  Activity,
+  Scan,
+  ChevronDown,
+  Info,
+  RotateCcw,
+  Eye,
+  Filter,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { AnprRecord, AnprScanResponse, AnprVideoResponse, WatchlistEntry } from "@/types/anpr";
@@ -32,15 +46,51 @@ import { useCameras } from "@/lib/camerasStore";
 const BACKEND_BASE_URL =
   process.env.NEXT_PUBLIC_BACKEND_URL?.replace(/\/$/, "") || "http://localhost:8000";
 
+const RTSP_PRESETS = [
+  { label: "BOP-04 Gate Demo", id: "BOP-04-GATE", url: "sample", type: "Sample Simulation" },
+  { label: "Suchetgarh JCP Octroi Gate", id: "bop-jk-02", url: "rtsp://10.20.72.59:8554/cam3", type: "RTSP Live" },
+  { label: "RS Pura BOP Alpha", id: "bop-jk-01", url: "rtsp://10.20.72.59:8554/cam2", type: "RTSP Live" },
+  { label: "Mobile IP Webcam (WiFi)", id: "MOBILE-IPCAM", url: "http://192.168.1.100:8080/video", type: "IP Webcam" },
+];
+
 export default function AnprPage() {
   const { cameras } = useCameras();
   const [activeTab, setActiveTab] = useState<"stream" | "image" | "video" | "watchlist">("stream");
 
-  // Live Stream State
+  // Live Stream Source State
+  const [streamSourceMode, setStreamSourceMode] = useState<"preset" | "custom">("preset");
   const [selectedCameraId, setSelectedCameraId] = useState<string>("BOP-04-GATE");
-  const [selectedStreamUrl, setSelectedStreamUrl] = useState<string>("sample");
+  const [customRtspInput, setCustomRtspInput] = useState<string>("");
+  const [customCameraName, setCustomCameraName] = useState<string>("Custom Gate Cam 01");
+  const [activeStreamUrl, setActiveStreamUrl] = useState<string>("sample");
+  const [activeCameraId, setActiveCameraId] = useState<string>("BOP-04-GATE");
   const [streamDetections, setStreamDetections] = useState<AnprRecord[]>([]);
   const [isStreamPlaying, setIsStreamPlaying] = useState<boolean>(true);
+  const [streamFps, setStreamFps] = useState<number>(24);
+  const [streamKey, setStreamKey] = useState<number>(0);
+
+  // Stream Health & Telemetry
+  const [isValidatingStream, setIsValidatingStream] = useState<boolean>(false);
+  const [streamStatus, setStreamStatus] = useState<"live" | "connecting" | "offline">("live");
+  const [streamProtocol, setStreamProtocol] = useState<string>("Sample Surveillance Loop");
+  const [streamLatency, setStreamLatency] = useState<number | null>(null);
+  const [streamDiagnostics, setStreamDiagnostics] = useState<string | null>(null);
+  const [streamError, setStreamError] = useState<string | null>(null);
+  const [showRtspHelp, setShowRtspHelp] = useState<boolean>(false);
+  const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
+  const [isCapturingSnapshot, setIsCapturingSnapshot] = useState<boolean>(false);
+  const [interceptionSearch, setInterceptionSearch] = useState<string>("");
+
+  const streamViewportRef = useRef<HTMLDivElement>(null);
+
+  // Fullscreen Change Listener
+  useEffect(() => {
+    const handleFsChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener("fullscreenchange", handleFsChange);
+    return () => document.removeEventListener("fullscreenchange", handleFsChange);
+  }, []);
 
   // Image Upload State
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -103,6 +153,114 @@ export default function AnprPage() {
     navigator.clipboard.writeText(text);
     setCopiedPlate(text);
     setTimeout(() => setCopiedPlate(null), 2000);
+  };
+
+  const getProtocolHint = (url: string): string => {
+    const clean = url.trim().toLowerCase();
+    if (!clean || clean === "sample" || clean === "demo") return "Sample Gate Feed";
+    if (clean.startsWith("rtsps://")) return "Secure RTSP (TLS)";
+    if (clean.startsWith("rtsp://")) return "RTSP (H.264/TCP)";
+    if (clean.includes(":8080") || clean.includes("ip_webcam") || clean.includes("/video")) return "IP Webcam Pro (HTTP)";
+    if (clean.startsWith("http://") || clean.startsWith("https://")) return "HTTP Video / MJPEG";
+    return "Network Stream";
+  };
+
+  const handleConnectStream = async (targetUrl: string, targetCamId?: string) => {
+    const rawUrl = targetUrl.trim();
+    if (!rawUrl) return;
+
+    setIsValidatingStream(true);
+    setStreamError(null);
+    setStreamDiagnostics(null);
+    setStreamStatus("connecting");
+
+    const camId = targetCamId || (rawUrl === "sample" ? "BOP-04-GATE" : (customCameraName.trim() || "RTSP-GATE"));
+
+    try {
+      if (rawUrl === "sample" || rawUrl === "demo") {
+        setStreamProtocol("Sample Gate Feed");
+        setStreamStatus("live");
+        setStreamLatency(1);
+        setActiveStreamUrl("sample");
+        setActiveCameraId(camId);
+        setIsStreamPlaying(true);
+        setStreamKey((k) => k + 1);
+        setStreamDiagnostics("Simulated border gate ANPR surveillance stream active.");
+      } else {
+        const validation = await api.validateStream(rawUrl);
+        setStreamProtocol(validation.protocol || getProtocolHint(rawUrl));
+        setStreamLatency(validation.latency_ms ?? 0);
+
+        if (validation.reachable) {
+          setStreamStatus("live");
+          setStreamDiagnostics(validation.message || `Connected to ${validation.protocol}`);
+        } else {
+          setStreamStatus("offline");
+          setStreamError(validation.message || "RTSP camera host is unreachable or port 554 is closed.");
+          setStreamDiagnostics(validation.message);
+        }
+
+        setActiveStreamUrl(rawUrl);
+        setActiveCameraId(camId);
+        setIsStreamPlaying(true);
+        setStreamKey((k) => k + 1);
+      }
+    } catch (err: any) {
+      setStreamProtocol(getProtocolHint(rawUrl));
+      setStreamStatus("live");
+      setActiveStreamUrl(rawUrl);
+      setActiveCameraId(camId);
+      setIsStreamPlaying(true);
+      setStreamKey((k) => k + 1);
+      setStreamDiagnostics(`Stream initialized: ${rawUrl}`);
+    } finally {
+      setIsValidatingStream(false);
+    }
+  };
+
+  const toggleFullscreen = () => {
+    if (!streamViewportRef.current) return;
+    if (!document.fullscreenElement) {
+      streamViewportRef.current.requestFullscreen().catch(() => {});
+    } else {
+      document.exitFullscreen().catch(() => {});
+    }
+  };
+
+  const handleCaptureSnapshotToScanner = async () => {
+    setIsCapturingSnapshot(true);
+    try {
+      const snapshotUrl = `${BACKEND_BASE_URL}/api/stream/snapshot?rtsp_url=${encodeURIComponent(activeStreamUrl)}`;
+      const res = await fetch(snapshotUrl);
+      if (!res.ok) throw new Error("Failed to fetch stream snapshot");
+      const blob = await res.blob();
+      const file = new File([blob], `anpr-gate-capture-${Date.now()}.jpg`, { type: "image/jpeg" });
+
+      setImageFile(file);
+      setImagePreview(URL.createObjectURL(blob));
+      setImageResult(null);
+      setImageError(null);
+      setActiveTab("image");
+      setIsScanningImage(true);
+
+      const result = await api.scanAnprImage(file, activeCameraId);
+      setImageResult(result);
+      fetchRecords();
+    } catch (err: any) {
+      console.error("Snapshot to scanner failed", err);
+      setActiveTab("image");
+    } finally {
+      setIsCapturingSnapshot(false);
+    }
+  };
+
+  const handleQuickAddWatchlist = (plateNumber: string, vehicleType: string = "car") => {
+    setNewPlateNumber(plateNumber);
+    setNewReason("Tactical Live Interception Flag");
+    setNewSeverity("high");
+    setNewVehicleType(vehicleType);
+    setShowAddWatchlist(true);
+    setActiveTab("watchlist");
   };
 
   // Image scan handler
@@ -311,177 +469,580 @@ export default function AnprPage() {
 
       {/* TAB 1: LIVE SURVEILLANCE GATE */}
       {activeTab === "stream" && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Main Video Stream Container (2 cols) */}
-          <div className="lg:col-span-2 space-y-4">
-            <div className="bg-slate-900 rounded-2xl overflow-hidden border border-slate-800 shadow-lg relative">
-              {/* Top Stream Control Bar */}
-              <div className="bg-slate-950/80 backdrop-blur-md px-4 py-3 border-b border-slate-800 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
-                  <span className="text-xs font-bold font-mono text-emerald-400">ANPR GATE LIVE</span>
-                  <span className="text-xs text-slate-400">|</span>
-                  <span className="text-xs text-slate-300 font-mono">{selectedCameraId}</span>
+        <div className="space-y-4">
+          {/* RTSP Stream Control & Source Configuration Card */}
+          <div className="bg-white rounded-2xl border border-slate-200/90 p-4 sm:p-5 shadow-xs space-y-4">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 pb-3 border-b border-slate-100">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-xl bg-emerald-50 text-emerald-800">
+                  <Radio className="w-4 h-4 text-emerald-700 animate-pulse" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                    <span>Live Gate Surveillance & RTSP Streaming</span>
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold uppercase">
+                      TCP Transport
+                    </span>
+                  </h3>
+                  <p className="text-xs text-slate-500">
+                    Connect border outpost gates, tactical check posts, and custom RTSP / IP Camera video streams
+                  </p>
+                </div>
+              </div>
+
+              {/* Source Mode Toggle */}
+              <div className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-100 border border-slate-200 self-start md:self-auto">
+                <button
+                  onClick={() => setStreamSourceMode("preset")}
+                  className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 ${
+                    streamSourceMode === "preset"
+                      ? "bg-white text-slate-900 shadow-xs"
+                      : "text-slate-600 hover:text-slate-900"
+                  }`}
+                >
+                  <Camera className="w-3.5 h-3.5 text-emerald-700" />
+                  <span>Preset Gate Cameras</span>
+                </button>
+                <button
+                  onClick={() => setStreamSourceMode("custom")}
+                  className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 ${
+                    streamSourceMode === "custom"
+                      ? "bg-white text-slate-900 shadow-xs"
+                      : "text-slate-600 hover:text-slate-900"
+                  }`}
+                >
+                  <Link2 className="w-3.5 h-3.5 text-emerald-700" />
+                  <span>Custom RTSP / IP Stream</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Mode 1: Preset Gate Cameras */}
+            {streamSourceMode === "preset" && (
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
+                <div className="md:col-span-8">
+                  <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+                    Select Active Surveillance Node / Gate
+                  </label>
+                  <div className="relative">
+                    <select
+                      value={selectedCameraId}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setSelectedCameraId(val);
+                        if (val === "BOP-04-GATE") {
+                          handleConnectStream("sample", "BOP-04-GATE");
+                        } else if (val === "BOP-02-HIGHWAY") {
+                          handleConnectStream("rtsp://10.20.72.59:8554/cam2", "BOP-02-HIGHWAY");
+                        } else {
+                          const matched = cameras.find((c) => c.id === val);
+                          const stream = matched?.streamUrl || "sample";
+                          handleConnectStream(stream, matched?.name || val);
+                        }
+                      }}
+                      className="w-full bg-slate-50 hover:bg-slate-100/80 text-slate-800 text-xs font-semibold px-3.5 py-2.5 rounded-xl border border-slate-200 outline-none transition-all pr-8 appearance-none"
+                    >
+                      <option value="BOP-04-GATE">BOP-04 Main Gate Entrance — Forward Barbed Perimeter (Simulation Loop)</option>
+                      <option value="BOP-02-HIGHWAY">Sector-02 Highway Checkpoint — National Highway Entry (RTSP Live)</option>
+                      <optgroup label="Registered Border Cameras">
+                        {cameras.map((c, idx) => (
+                          <option key={c.id || `cam-${idx}`} value={c.id}>
+                            {c.name} • {c.sector} ({c.type}) — {c.streamUrl || "No URL"}
+                          </option>
+                        ))}
+                      </optgroup>
+                    </select>
+                    <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3 top-3 pointer-events-none" />
+                  </div>
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <select
-                    value={selectedCameraId}
-                    onChange={(e) => {
-                      setSelectedCameraId(e.target.value);
-                      const matched = cameras.find((c) => c.id === e.target.value);
-                      if (matched && matched.streamUrl) {
-                        setSelectedStreamUrl(matched.streamUrl);
-                      } else {
-                        setSelectedStreamUrl("sample");
-                      }
-                    }}
-                    className="bg-slate-800 text-slate-200 text-xs px-2.5 py-1 rounded-lg border border-slate-700 outline-none"
+                <div className="md:col-span-4 flex items-end gap-2 pt-1 md:pt-0">
+                  <button
+                    onClick={() => handleConnectStream(activeStreamUrl, activeCameraId)}
+                    disabled={isValidatingStream}
+                    className="flex-1 inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-emerald-800 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs transition-all disabled:opacity-50"
                   >
-                    <option value="BOP-04-GATE">BOP-04 Main Gate Entrance</option>
-                    <option value="BOP-02-HIGHWAY">Sector-02 Highway Checkpoint</option>
-                    {cameras.map((c, idx) => (
-                      <option key={c.id || `cam-${idx}`} value={c.id}>
-                        {c.name} ({c.type})
-                      </option>
-                    ))}
-                  </select>
+                    {isValidatingStream ? (
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <RotateCcw className="w-3.5 h-3.5" />
+                    )}
+                    <span>{isValidatingStream ? "Connecting..." : "Reconnect Feed"}</span>
+                  </button>
 
                   <button
-                    onClick={() => setIsStreamPlaying(!isStreamPlaying)}
-                    className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs transition-colors"
+                    onClick={() => setShowRtspHelp(!showRtspHelp)}
+                    className="p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200/80 text-slate-600 transition-colors"
+                    title="Stream Connection Guidelines"
                   >
-                    {isStreamPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
+                    <HelpCircle className="w-4 h-4" />
                   </button>
                 </div>
               </div>
+            )}
 
-              {/* Stream Feed Viewport */}
-              <div className="relative aspect-video w-full bg-black flex items-center justify-center overflow-hidden">
-                {isStreamPlaying ? (
-                  <img
-                    src={`${BACKEND_BASE_URL}/api/anpr/stream?rtsp_url=${encodeURIComponent(
-                      selectedStreamUrl
-                    )}&camera_id=${encodeURIComponent(selectedCameraId)}`}
-                    alt="ANPR Live Stream"
-                    className="w-full h-full object-contain"
-                  />
-                ) : (
-                  <div className="text-center text-slate-500">
-                    <Pause className="w-10 h-10 mx-auto mb-2 opacity-50" />
-                    <p className="text-xs">Stream Paused</p>
+            {/* Mode 2: Custom RTSP Stream URL Input */}
+            {streamSourceMode === "custom" && (
+              <div className="space-y-3">
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
+                  <div className="md:col-span-4">
+                    <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+                      Camera / Gate Identifier
+                    </label>
+                    <input
+                      type="text"
+                      value={customCameraName}
+                      onChange={(e) => setCustomCameraName(e.target.value)}
+                      placeholder="e.g. ICP-ATTARI-GATE-01"
+                      className="w-full bg-slate-50 text-slate-800 text-xs font-semibold px-3.5 py-2.5 rounded-xl border border-slate-200 outline-none focus:border-emerald-600 focus:bg-white transition-all font-mono"
+                    />
                   </div>
-                )}
-              </div>
-            </div>
 
-            {/* Tactical Guidelines Bar */}
-            <div className="bg-white rounded-xl border border-slate-200/90 p-3.5 flex items-center justify-between text-xs text-slate-600 shadow-xs">
-              <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-sm bg-emerald-500"></span>
-                <span>Green Reticle: Verified License Plate</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-sm bg-rose-600"></span>
-                <span>Red Reticle: Interception Watchlist Match</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-sm bg-amber-500"></span>
-                <span>Amber Box: Vehicle Classifier (Car / Bike / Truck)</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Side Panel: Recent Interceptions & Plate Gallery */}
-          <div className="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-xs flex flex-col h-[580px]">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-3">
-              <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-emerald-700" />
-                <h3 className="text-sm font-bold text-slate-900">Recent Interceptions</h3>
-              </div>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
-                Auto-Updating
-              </span>
-            </div>
-
-            {/* Scrollable List */}
-            <div className="flex-1 overflow-y-auto space-y-3 pr-1">
-              {streamDetections.length === 0 ? (
-                <div className="h-full flex flex-col items-center justify-center text-center p-6 text-slate-400">
-                  <Car className="w-8 h-8 mb-2 opacity-40" />
-                  <p className="text-xs">Awaiting inbound vehicle passes on active gates...</p>
-                </div>
-              ) : (
-                streamDetections.map((rec, idx) => (
-                  <div
-                    key={rec.id || `stream-rec-${idx}-${rec.plateNumber}`}
-                    className={`p-3 rounded-xl border transition-all ${
-                      rec.isWatchlisted
-                        ? "bg-rose-50/70 border-rose-200 hover:border-rose-300"
-                        : "bg-slate-50/70 border-slate-200 hover:border-slate-300"
-                    }`}
-                  >
-                    <div className="flex items-start justify-between gap-2 mb-2">
-                      <div>
-                        <div className="flex items-center gap-1.5">
-                          <span
-                            className={`text-sm font-black font-mono tracking-wider px-2 py-0.5 rounded-md ${
-                              rec.isWatchlisted
-                                ? "bg-rose-600 text-white"
-                                : "bg-slate-900 text-emerald-400"
-                            }`}
-                          >
-                            {rec.plateNumber}
+                  <div className="md:col-span-8">
+                    <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+                      RTSP or IP Camera Stream URL
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <div className="relative flex-1">
+                        <input
+                          type="text"
+                          value={customRtspInput}
+                          onChange={(e) => setCustomRtspInput(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") handleConnectStream(customRtspInput);
+                          }}
+                          placeholder="e.g. rtsp://10.20.72.59:8554/cam2 or http://192.168.1.100:8080/video"
+                          className="w-full bg-slate-50 text-slate-800 text-xs font-semibold pl-3.5 pr-20 py-2.5 rounded-xl border border-slate-200 outline-none focus:border-emerald-600 focus:bg-white transition-all font-mono"
+                        />
+                        {customRtspInput && (
+                          <span className="absolute right-2.5 top-2.5 text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-slate-200 text-slate-700">
+                            {getProtocolHint(customRtspInput)}
                           </span>
-                          <button
-                            onClick={() => handleCopy(rec.plateNumber)}
-                            className="p-1 rounded text-slate-400 hover:text-slate-600 transition-colors"
-                            title="Copy Plate Number"
-                          >
-                            {copiedPlate === rec.plateNumber ? (
-                              <Check className="w-3.5 h-3.5 text-emerald-600" />
-                            ) : (
-                              <Copy className="w-3.5 h-3.5" />
-                            )}
-                          </button>
-                        </div>
-                        <div className="text-[10px] font-semibold text-slate-500 uppercase mt-1">
-                          {rec.vehicleType} • {(rec.confidence * 100).toFixed(0)}% Confidence
-                        </div>
+                        )}
                       </div>
 
-                      {rec.isWatchlisted && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-rose-600 text-white text-[10px] font-black uppercase">
-                          <ShieldAlert className="w-3 h-3" />
-                          BOLO
-                        </span>
+                      <button
+                        onClick={() => handleConnectStream(customRtspInput)}
+                        disabled={!customRtspInput.trim() || isValidatingStream}
+                        className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-emerald-800 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs transition-all disabled:opacity-50"
+                      >
+                        {isValidatingStream ? (
+                          <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                        ) : (
+                          <Play className="w-3.5 h-3.5 fill-current" />
+                        )}
+                        <span>{isValidatingStream ? "Verifying..." : "Connect"}</span>
+                      </button>
+
+                      {customRtspInput && (
+                        <button
+                          onClick={() => setCustomRtspInput("")}
+                          className="p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 text-xs transition-colors"
+                          title="Clear Input"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
                       )}
                     </div>
-
-                    {rec.isWatchlisted && rec.watchlistReason && (
-                      <p className="text-[11px] font-semibold text-rose-700 bg-rose-100/80 px-2 py-1 rounded-md mb-2">
-                        Reason: {rec.watchlistReason}
-                      </p>
-                    )}
-
-                    {/* Plate Crop Image */}
-                    {rec.snapshotUrl && (
-                      <div className="mt-1.5 rounded-lg overflow-hidden border border-slate-200 bg-black">
-                        <img
-                          src={`${BACKEND_BASE_URL}${rec.snapshotUrl}`}
-                          alt={rec.plateNumber}
-                          className="h-12 w-full object-cover"
-                        />
-                      </div>
-                    )}
-
-                    <div className="flex items-center justify-between text-[10px] text-slate-400 mt-2">
-                      <span>Gate: {rec.cameraId}</span>
-                      <span>{new Date(rec.timestamp).toLocaleTimeString()}</span>
-                    </div>
                   </div>
-                ))
-              )}
+                </div>
+              </div>
+            )}
+
+            {/* Quick-Connect Preset Chips */}
+            <div className="flex flex-wrap items-center gap-2 pt-1">
+              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mr-1">
+                Quick Feeds:
+              </span>
+              {RTSP_PRESETS.map((preset) => {
+                const isSelected = activeStreamUrl === preset.url;
+                return (
+                  <button
+                    key={preset.id}
+                    onClick={() => {
+                      if (streamSourceMode === "custom") {
+                        setCustomRtspInput(preset.url);
+                        setCustomCameraName(preset.id);
+                      }
+                      handleConnectStream(preset.url, preset.id);
+                    }}
+                    className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border transition-all ${
+                      isSelected
+                        ? "bg-emerald-50 text-emerald-800 border-emerald-300 font-bold shadow-2xs"
+                        : "bg-slate-50 hover:bg-slate-100 text-slate-600 border-slate-200"
+                    }`}
+                  >
+                    <span
+                      className={`w-1.5 h-1.5 rounded-full ${
+                        isSelected ? "bg-emerald-600 animate-ping" : "bg-slate-400"
+                      }`}
+                    />
+                    <span>{preset.label}</span>
+                    <span className="text-[10px] text-slate-400">({preset.type})</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Stream Telemetry & Status Bar */}
+            <div className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-xl bg-slate-900 text-slate-200 text-xs">
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
+                  <span
+                    className={`w-2.5 h-2.5 rounded-full ${
+                      streamStatus === "live"
+                        ? "bg-emerald-400 animate-pulse"
+                        : streamStatus === "connecting"
+                        ? "bg-amber-400 animate-ping"
+                        : "bg-rose-500"
+                    }`}
+                  />
+                  <span className="font-bold uppercase font-mono tracking-wider text-[11px]">
+                    {streamStatus === "live"
+                      ? "LIVE RTSP FEED"
+                      : streamStatus === "connecting"
+                      ? "CONNECTING..."
+                      : "STREAM OFFLINE"}
+                  </span>
+                </div>
+
+                <span className="text-slate-600">|</span>
+                <span className="text-slate-400 font-mono text-[11px]">{streamProtocol}</span>
+
+                {streamLatency !== null && (
+                  <>
+                    <span className="text-slate-600">|</span>
+                    <span className="text-emerald-400 font-mono text-[11px] flex items-center gap-1">
+                      <Activity className="w-3 h-3" />
+                      {streamLatency} ms latency
+                    </span>
+                  </>
+                )}
+              </div>
+
+              <div className="flex items-center gap-3 text-[11px] text-slate-400 font-mono">
+                <span className="truncate max-w-[280px]">
+                  Target: <strong className="text-slate-200">{activeCameraId}</strong> ({activeStreamUrl})
+                </span>
+              </div>
+            </div>
+
+            {/* Diagnostic Alert Banner if stream is unreachable */}
+            {streamError && (
+              <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 flex items-start gap-2.5 text-xs text-rose-800">
+                <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <strong className="font-bold">Stream Warning: </strong>
+                  <span>{streamError}</span>
+                  <div className="mt-1 flex items-center gap-2">
+                    <button
+                      onClick={() => handleConnectStream("sample", "BOP-04-GATE")}
+                      className="text-rose-900 underline font-semibold hover:text-rose-700 text-[11px]"
+                    >
+                      Switch to Simulation Demo Feed
+                    </button>
+                    <span>•</span>
+                    <button
+                      onClick={() => handleConnectStream(activeStreamUrl, activeCameraId)}
+                      className="text-rose-900 underline font-semibold hover:text-rose-700 text-[11px]"
+                    >
+                      Retry Connection
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Stream Guidelines & Setup Guide */}
+            {showRtspHelp && (
+              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2 text-xs text-slate-600">
+                <div className="flex items-center justify-between font-bold text-slate-900 pb-1 border-b border-slate-200">
+                  <span className="flex items-center gap-1.5">
+                    <Info className="w-4 h-4 text-emerald-700" />
+                    How to Stream CCTV RTSP & IP Cameras to ANPR
+                  </span>
+                  <button
+                    onClick={() => setShowRtspHelp(false)}
+                    className="text-slate-400 hover:text-slate-600 text-xs"
+                  >
+                    Close
+                  </button>
+                </div>
+                <ul className="list-disc list-inside space-y-1 text-slate-600 pt-1">
+                  <li>
+                    <strong className="text-slate-800">Standard RTSP CCTV Feed: </strong>
+                    <code className="bg-slate-200 px-1.5 py-0.5 rounded text-[11px] text-slate-800">
+                      rtsp://admin:pass@10.20.72.101:554/live/ch0
+                    </code>{" "}
+                    (OpenCV automatically requests TCP transport for low packet drop).
+                  </li>
+                  <li>
+                    <strong className="text-slate-800">Mobile Phone IP Webcam: </strong>
+                    Install <em>IP Webcam</em> (Android) or <em>DroidCam</em>, tap &quot;Start Server&quot;, then enter{" "}
+                    <code className="bg-slate-200 px-1.5 py-0.5 rounded text-[11px] text-slate-800">
+                      http://192.168.1.100:8080/video
+                    </code>.
+                  </li>
+                  <li>
+                    <strong className="text-slate-800">Demo Gate Loop: </strong>
+                    Type <code className="bg-slate-200 px-1.5 py-0.5 rounded text-[11px] text-slate-800">sample</code>{" "}
+                    to run the built-in border gate loop.
+                  </li>
+                </ul>
+              </div>
+            )}
+          </div>
+
+          {/* Main Video Stream Container (2 cols) & Recent Interceptions (1 col) */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Main Video Stream Container (2 cols) */}
+            <div className="lg:col-span-2 space-y-4">
+              <div className="bg-slate-900 rounded-2xl overflow-hidden border border-slate-800 shadow-lg relative">
+                {/* Top Stream Control Bar */}
+                <div className="bg-slate-950/80 backdrop-blur-md px-4 py-3 border-b border-slate-800 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={`w-2.5 h-2.5 rounded-full ${
+                        streamStatus === "live" ? "bg-emerald-500 animate-ping" : "bg-amber-500"
+                      }`}
+                    />
+                    <span className="text-xs font-bold font-mono text-emerald-400">ANPR GATE LIVE</span>
+                    <span className="text-xs text-slate-400">|</span>
+                    <span className="text-xs text-slate-300 font-mono">{activeCameraId}</span>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    {/* Framerate selector */}
+                    <div className="flex items-center gap-1 bg-slate-800 px-2 py-1 rounded-lg border border-slate-700 text-slate-300 text-xs">
+                      <span className="text-[10px] text-slate-400 font-mono">FPS:</span>
+                      <select
+                        value={streamFps}
+                        onChange={(e) => setStreamFps(Number(e.target.value))}
+                        className="bg-transparent text-slate-200 text-xs outline-none cursor-pointer"
+                      >
+                        <option value={15} className="bg-slate-800">15</option>
+                        <option value={20} className="bg-slate-800">20</option>
+                        <option value={24} className="bg-slate-800">24</option>
+                        <option value={30} className="bg-slate-800">30</option>
+                      </select>
+                    </div>
+
+                    {/* Snapshot to OCR Scanner Button */}
+                    <button
+                      onClick={handleCaptureSnapshotToScanner}
+                      disabled={isCapturingSnapshot}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-900 hover:bg-emerald-800 text-emerald-200 text-xs font-semibold border border-emerald-700 transition-colors"
+                      title="Capture active frame and inspect in Single Image Scanner"
+                    >
+                      <Scan className="w-3.5 h-3.5 text-emerald-400" />
+                      <span className="hidden sm:inline">Inspect in Scanner</span>
+                    </button>
+
+                    {/* Play / Pause Toggle */}
+                    <button
+                      onClick={() => setIsStreamPlaying(!isStreamPlaying)}
+                      className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs transition-colors"
+                      title={isStreamPlaying ? "Pause Stream" : "Resume Stream"}
+                    >
+                      {isStreamPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
+                    </button>
+
+                    {/* Reconnect button */}
+                    <button
+                      onClick={() => handleConnectStream(activeStreamUrl, activeCameraId)}
+                      className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs transition-colors"
+                      title="Reconnect Stream"
+                    >
+                      <RefreshCw className="w-3.5 h-3.5" />
+                    </button>
+
+                    {/* Fullscreen Button */}
+                    <button
+                      onClick={toggleFullscreen}
+                      className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs transition-colors"
+                      title="Toggle Fullscreen"
+                    >
+                      {isFullscreen ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Stream Feed Viewport */}
+                <div
+                  ref={streamViewportRef}
+                  className="relative aspect-video w-full bg-slate-950 flex items-center justify-center overflow-hidden group"
+                >
+                  {/* Tactical Reticle Accents */}
+                  <div className="absolute top-3 left-3 w-4 h-4 border-t-2 border-l-2 border-emerald-500/70 z-10 pointer-events-none" />
+                  <div className="absolute top-3 right-3 w-4 h-4 border-t-2 border-r-2 border-emerald-500/70 z-10 pointer-events-none" />
+                  <div className="absolute bottom-3 left-3 w-4 h-4 border-b-2 border-l-2 border-emerald-500/70 z-10 pointer-events-none" />
+                  <div className="absolute bottom-3 right-3 w-4 h-4 border-b-2 border-r-2 border-emerald-500/70 z-10 pointer-events-none" />
+
+                  {isStreamPlaying ? (
+                    <img
+                      key={`stream-${streamKey}-${activeStreamUrl}`}
+                      src={`${BACKEND_BASE_URL}/api/anpr/stream?rtsp_url=${encodeURIComponent(
+                        activeStreamUrl
+                      )}&camera_id=${encodeURIComponent(activeCameraId)}&fps=${streamFps}`}
+                      alt="ANPR Live Stream"
+                      className="w-full h-full object-contain"
+                    />
+                  ) : (
+                    <div className="text-center text-slate-500 py-16">
+                      <Pause className="w-12 h-12 mx-auto mb-2 opacity-50 text-slate-400" />
+                      <p className="text-xs font-mono uppercase tracking-widest text-slate-400">Stream Paused</p>
+                      <button
+                        onClick={() => setIsStreamPlaying(true)}
+                        className="mt-3 px-3 py-1.5 rounded-lg bg-emerald-800 hover:bg-emerald-700 text-white text-xs font-semibold"
+                      >
+                        Resume Stream
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Tactical Guidelines Bar */}
+              <div className="bg-white rounded-xl border border-slate-200/90 p-3.5 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-600 shadow-xs">
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-sm bg-emerald-500" />
+                  <span>Green Reticle: Verified License Plate</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-sm bg-rose-600" />
+                  <span>Red Reticle: Interception Watchlist Match</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-sm bg-amber-500" />
+                  <span>Amber Box: Vehicle Classifier (Car / Bike / Truck)</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Side Panel: Recent Interceptions & Plate Gallery */}
+            <div className="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-xs flex flex-col h-[640px]">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-3">
+                <div className="flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-emerald-700" />
+                  <h3 className="text-sm font-bold text-slate-900">Recent Interceptions</h3>
+                </div>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-semibold">
+                  Auto-Updating
+                </span>
+              </div>
+
+              {/* Plate Search Filter */}
+              <div className="relative mb-3">
+                <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
+                <input
+                  type="text"
+                  value={interceptionSearch}
+                  onChange={(e) => setInterceptionSearch(e.target.value)}
+                  placeholder="Filter plates or vehicle type..."
+                  className="w-full bg-slate-50 text-slate-800 text-xs pl-8 pr-3 py-2 rounded-xl border border-slate-200 outline-none focus:border-emerald-600 focus:bg-white transition-all"
+                />
+              </div>
+
+              {/* Scrollable List */}
+              <div className="flex-1 overflow-y-auto space-y-3 pr-1">
+                {streamDetections.length === 0 ? (
+                  <div className="h-full flex flex-col items-center justify-center text-center p-6 text-slate-400">
+                    <Car className="w-8 h-8 mb-2 opacity-40" />
+                    <p className="text-xs">Awaiting inbound vehicle passes on active gates...</p>
+                  </div>
+                ) : (
+                  streamDetections
+                    .filter((rec) => {
+                      if (!interceptionSearch.trim()) return true;
+                      const q = interceptionSearch.trim().toLowerCase();
+                      return (
+                        rec.plateNumber.toLowerCase().includes(q) ||
+                        rec.vehicleType.toLowerCase().includes(q) ||
+                        (rec.cameraId?.toLowerCase() || "").includes(q)
+                      );
+                    })
+                    .map((rec, idx) => (
+                      <div
+                        key={rec.id || `stream-rec-${idx}-${rec.plateNumber}`}
+                        className={`p-3 rounded-xl border transition-all ${
+                          rec.isWatchlisted
+                            ? "bg-rose-50/70 border-rose-200 hover:border-rose-300"
+                            : "bg-slate-50/70 border-slate-200 hover:border-slate-300"
+                        }`}
+                      >
+                        <div className="flex items-start justify-between gap-2 mb-2">
+                          <div>
+                            <div className="flex items-center gap-1.5">
+                              <span
+                                className={`text-sm font-black font-mono tracking-wider px-2 py-0.5 rounded-md ${
+                                  rec.isWatchlisted
+                                    ? "bg-rose-600 text-white"
+                                    : "bg-slate-900 text-emerald-400"
+                                }`}
+                              >
+                                {rec.plateNumber}
+                              </span>
+                              <button
+                                onClick={() => handleCopy(rec.plateNumber)}
+                                className="p-1 rounded text-slate-400 hover:text-slate-600 transition-colors"
+                                title="Copy Plate Number"
+                              >
+                                {copiedPlate === rec.plateNumber ? (
+                                  <Check className="w-3.5 h-3.5 text-emerald-600" />
+                                ) : (
+                                  <Copy className="w-3.5 h-3.5" />
+                                )}
+                              </button>
+                            </div>
+                            <div className="text-[10px] font-semibold text-slate-500 uppercase mt-1">
+                              {rec.vehicleType} • {(rec.confidence * 100).toFixed(0)}% Confidence
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-1">
+                            {rec.isWatchlisted ? (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-rose-600 text-white text-[10px] font-black uppercase">
+                                <ShieldAlert className="w-3 h-3" />
+                                BOLO
+                              </span>
+                            ) : (
+                              <button
+                                onClick={() => handleQuickAddWatchlist(rec.plateNumber, rec.vehicleType)}
+                                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-white border border-rose-200 text-rose-600 hover:bg-rose-50 text-[10px] font-bold uppercase transition-all"
+                                title="Add to BOLO Watchlist"
+                              >
+                                <Plus className="w-2.5 h-2.5" />
+                                BOLO
+                              </button>
+                            )}
+                          </div>
+                        </div>
+
+                        {rec.isWatchlisted && rec.watchlistReason && (
+                          <p className="text-[11px] font-semibold text-rose-700 bg-rose-100/80 px-2 py-1 rounded-md mb-2">
+                            Reason: {rec.watchlistReason}
+                          </p>
+                        )}
+
+                        {/* Plate Crop Image */}
+                        {rec.snapshotUrl && (
+                          <div className="mt-1.5 rounded-lg overflow-hidden border border-slate-200 bg-black">
+                            <img
+                              src={`${BACKEND_BASE_URL}${rec.snapshotUrl}`}
+                              alt={rec.plateNumber}
+                              className="h-12 w-full object-cover"
+                            />
+                          </div>
+                        )}
+
+                        <div className="flex items-center justify-between text-[10px] text-slate-400 mt-2">
+                          <span>Gate: {rec.cameraId}</span>
+                          <span>{new Date(rec.timestamp).toLocaleTimeString()}</span>
+                        </div>
+                      </div>
+                    ))
+                )}
+              </div>
             </div>
           </div>
         </div>

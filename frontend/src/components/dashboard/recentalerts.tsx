@@ -3,6 +3,7 @@
 import { useAlerts } from "@/lib/alertsStore";
 import { AlertSeverity } from "@/types/alert";
 import { Check, ShieldAlert } from "lucide-react";
+import { formatConfidence } from "@/lib/utils";
 import Link from "next/link";
 
 function SeverityBadge({ severity, isSuspect }: { severity: AlertSeverity; isSuspect?: boolean }) {
@@ -91,8 +92,8 @@ export function RecentAlerts() {
                     {alert.confidence && (
                       <>
                         <span className="text-slate-300">•</span>
-                        <span className="text-emerald-700 font-medium">
-                          {Math.round(alert.confidence * 100)}% conf
+                        <span className="text-emerald-700 font-medium font-mono text-[11px]">
+                          {formatConfidence(alert.confidence)} conf
                         </span>
                       </>
                     )}

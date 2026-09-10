@@ -85,8 +85,16 @@ function initWebSocket() {
         const payload = JSON.parse(evt.data);
         if (payload.type === "NEW_ALERT" && payload.alert) {
           const incoming = payload.alert as AlertItem;
-          // Avoid duplicate by ID
-          const existingIdx = memoryAlerts.findIndex((a) => a.id === incoming.id);
+          // Avoid duplicate by ID, or if same suspect + location arrived within 5 seconds
+          const existingIdx = memoryAlerts.findIndex(
+            (a) =>
+              a.id === incoming.id ||
+              (Boolean(a.suspectName) &&
+                Boolean(incoming.suspectName) &&
+                a.suspectName?.toLowerCase() === incoming.suspectName?.toLowerCase() &&
+                a.location === incoming.location &&
+                Math.abs((a.timestamp || 0) - (incoming.timestamp || Date.now())) < 5000)
+          );
           if (existingIdx === -1) {
             memoryAlerts = [incoming, ...memoryAlerts];
             playAlertChime(incoming.threatLevel || (incoming.severity as string));
@@ -147,6 +155,20 @@ export const alertsStore = {
   },
 
   addAlert(alert: Omit<AlertItem, "id" | "time" | "timestamp" | "acknowledged"> & Partial<AlertItem>): AlertItem {
+    // Avoid duplicate if identical suspect alert already exists in memory within 5 seconds
+    if (alert.suspectName) {
+      const existing = memoryAlerts.find(
+        (a) =>
+          !a.acknowledged &&
+          a.suspectName?.toLowerCase() === alert.suspectName?.toLowerCase() &&
+          a.location === alert.location &&
+          Date.now() - (a.timestamp || 0) < 5000
+      );
+      if (existing) {
+        return existing;
+      }
+    }
+
     const newAlert: AlertItem = {
       id: `alert-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
       time: "Just now",
