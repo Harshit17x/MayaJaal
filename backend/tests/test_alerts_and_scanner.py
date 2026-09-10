@@ -221,14 +221,39 @@ def test_suspect_trajectory_and_qrt_dispatch():
     print("[PASS] POST /api/alerts/{alert_id}/dispatch successfully deployed QRT unit.")
 
 
+def cleanup_test_data():
+    """Clear all test alerts and restore camera statuses to 'online' so no dummy data remains."""
+    alert_service.clear_all()
+    cameras_file = backend_dir / "app" / "data" / "cameras.json"
+    if cameras_file.exists():
+        try:
+            import json
+            with open(cameras_file, "r", encoding="utf-8") as f:
+                cams = json.load(f)
+            updated = False
+            for c in cams:
+                if c.get("id") in ("bop-jk-01", "bop-jk-02") and c.get("status") == "alert":
+                    c["status"] = "online"
+                    updated = True
+            if updated:
+                with open(cameras_file, "w", encoding="utf-8") as f:
+                    json.dump(cams, f, indent=2)
+        except Exception:
+            pass
+
+
 if __name__ == "__main__":
     print("\n--- Running Alerts, Scanner, and Trajectory Test Suite ---")
-    test_model_preservation()
-    test_alert_service_lifecycle()
-    test_continuous_face_scanner_telemetry()
-    test_alerts_api_endpoints()
-    test_suspect_trajectory_and_qrt_dispatch()
-    print("\n===================================================================")
-    print(" ALL TESTS PASSED: PHASE 3 TACTICAL TRAJECTORY & QRT DISPATCH ")
-    print("===================================================================\n")
+    try:
+        test_model_preservation()
+        test_alert_service_lifecycle()
+        test_continuous_face_scanner_telemetry()
+        test_alerts_api_endpoints()
+        test_suspect_trajectory_and_qrt_dispatch()
+        print("\n===================================================================")
+        print(" ALL TESTS PASSED: PHASE 3 TACTICAL TRAJECTORY & QRT DISPATCH ")
+        print("===================================================================\n")
+    finally:
+        cleanup_test_data()
+
 

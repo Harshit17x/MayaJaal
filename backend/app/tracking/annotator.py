@@ -86,7 +86,16 @@ def draw_tracked_boxes(
         cls_name = str(obj.get("class_name", "object")).lower()
         conf = float(obj.get("confidence", 0.0))
         track_id = obj.get("track_id")
-        color = CLASS_COLORS.get(cls_name, DEFAULT_COLOR)
+        is_threat = bool(obj.get("is_threat", False) or cls_name.startswith("suspect"))
+        suspect_name = obj.get("suspect_name")
+        threat_level = obj.get("threat_level")
+
+        if is_threat or suspect_name:
+            color = (34, 34, 220)  # BGR Crimson Red
+        elif cls_name.startswith("face_") or cls_name.startswith("person_"):
+            color = (130, 200, 30)  # Emerald green
+        else:
+            color = CLASS_COLORS.get(cls_name, DEFAULT_COLOR)
 
         # 1. Semi-transparent box fill
         cv2.rectangle(overlay, (x1, y1), (x2, y2), color, -1)
@@ -111,8 +120,16 @@ def draw_tracked_boxes(
         cv2.line(frame, (x2, y2), (x2, y2 - corner_len), white, 3)
 
         # 4. Badge pill above box
-        id_part = f"ID #{track_id} | " if track_id is not None else ""
-        label = f"{id_part}{cls_name.upper()} {int(conf * 100)}%"
+        if is_threat or suspect_name:
+            display_name = (suspect_name or cls_name.replace("suspect_", "")).upper()
+            t_level = threat_level or "ALERT"
+            label = f"SUSPECT: {display_name} [{t_level}] {int(conf * 100)}%"
+        elif cls_name.startswith("face_"):
+            display_name = (suspect_name or cls_name.replace("face_", "")).upper()
+            label = f"FACE: {display_name} {int(conf * 100)}%"
+        else:
+            id_part = f"ID #{track_id} | " if track_id is not None else ""
+            label = f"{id_part}{cls_name.upper()} {int(conf * 100)}%"
         font = cv2.FONT_HERSHEY_SIMPLEX
         font_scale = 0.46
         thickness = 1

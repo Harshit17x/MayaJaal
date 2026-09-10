@@ -96,10 +96,10 @@
     "semantic_hash": "9f3b839914bb3bfbcabd7c16a5cb5708"
   },
   "backend/app/api/inference.py": {
-    "mtime": 1788976371.8258681,
-    "seen": 1789026248.1500318,
-    "ast_hash": "0d0e9aa4af5f97424c91990d77627658",
-    "semantic_hash": "0d0e9aa4af5f97424c91990d77627658"
+    "mtime": 1789041804.365322,
+    "seen": 1789042211.3609476,
+    "ast_hash": "b010b38c38030f9a7eee5f761f2ad2a3",
+    "semantic_hash": ""
   },
   "backend/app/api/models.py": {
     "mtime": 1788946168.7306702,
@@ -114,10 +114,10 @@
     "semantic_hash": ""
   },
   "backend/app/api/tracking.py": {
-    "mtime": 1789017642.8778913,
-    "seen": 1789026248.1500359,
-    "ast_hash": "857563996d2cdb2be9cb82be6bd880c6",
-    "semantic_hash": "857563996d2cdb2be9cb82be6bd880c6"
+    "mtime": 1789041776.171259,
+    "seen": 1789042211.360951,
+    "ast_hash": "9fbfb6c769067ab23726588b9a241f06",
+    "semantic_hash": ""
   },
   "backend/app/core/config.py": {
     "mtime": 1788971478.5412335,
@@ -138,9 +138,9 @@
     "semantic_hash": "fc1210cf128bc2f54fc65e8c0ad439ad"
   },
   "backend/app/data/cameras.json": {
-    "mtime": 1789038199.6327994,
-    "seen": 1789038236.7221594,
-    "ast_hash": "a800eff35edb8640ebb900e061f84375",
+    "mtime": 1789041997.1990516,
+    "seen": 1789042211.3609552,
+    "ast_hash": "ce2c601695c3c6b25e84531432b343d9",
     "semantic_hash": ""
   },
   "backend/app/inference/inference_service.py": {
@@ -210,10 +210,10 @@
     "semantic_hash": "83c876791fb2328f130118d4b822116c"
   },
   "backend/app/tracking/annotator.py": {
-    "mtime": 1789020054.396374,
-    "seen": 1789026248.15006,
-    "ast_hash": "bde86b39e2c74c0f37c87bad9de76edd",
-    "semantic_hash": "bde86b39e2c74c0f37c87bad9de76edd"
+    "mtime": 1789041729.4512608,
+    "seen": 1789042211.3609698,
+    "ast_hash": "e2b7a7e0fad7d836a83fa2ad85a93480",
+    "semantic_hash": ""
   },
   "backend/app/tracking/config.py": {
     "mtime": 1788971341.1349874,
@@ -594,16 +594,16 @@
     "semantic_hash": ""
   },
   "frontend/src/components/surveillance/detectioncanvas.tsx": {
-    "mtime": 1788973650.679595,
-    "seen": 1789026248.1501546,
-    "ast_hash": "f98f8c55fb9d9cb9b3f9cd0a457ff0b6",
-    "semantic_hash": "f98f8c55fb9d9cb9b3f9cd0a457ff0b6"
+    "mtime": 1789041841.1109402,
+    "seen": 1789042211.3610294,
+    "ast_hash": "fd1a58d5caf96ddcdb705339abd3c3ac",
+    "semantic_hash": ""
   },
   "frontend/src/components/surveillance/liveworkspace.tsx": {
-    "mtime": 1789019341.2665217,
-    "seen": 1789026248.150156,
-    "ast_hash": "2eaf7f9ea3f8d083327116a7ac86e7d7",
-    "semantic_hash": "2eaf7f9ea3f8d083327116a7ac86e7d7"
+    "mtime": 1789042174.088314,
+    "seen": 1789042211.3610299,
+    "ast_hash": "495deec9d11bb47a7022f398c9a5bd06",
+    "semantic_hash": ""
   },
   "frontend/src/components/ui/badge.tsx": {
     "mtime": 1788946168.848961,
@@ -624,15 +624,15 @@
     "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
   },
   "frontend/src/lib/alertsStore.ts": {
-    "mtime": 1789037645.013286,
-    "seen": 1789037832.6035733,
-    "ast_hash": "d8a48b1677a5f73aba1f4fb7ae06f2f2",
+    "mtime": 1789039363.1361718,
+    "seen": 1789039477.0001726,
+    "ast_hash": "9e357f7989ed9eb47eacb1ef86859c31",
     "semantic_hash": ""
   },
   "frontend/src/lib/api.ts": {
-    "mtime": 1789038033.7380488,
-    "seen": 1789038236.7223015,
-    "ast_hash": "e07aaed3d7182fd0b2c1d02b7fc19421",
+    "mtime": 1789041825.7826283,
+    "seen": 1789042211.361034,
+    "ast_hash": "29bb814941fbc2ed18583c04c53b0fea",
     "semantic_hash": ""
   },
   "frontend/src/lib/authStore.ts": {
@@ -678,10 +678,10 @@
     "semantic_hash": "03cdf99b41dda6550233242fb4e8b8a5"
   },
   "frontend/src/types/backend.ts": {
-    "mtime": 1788975610.857296,
-    "seen": 1789026248.1501744,
-    "ast_hash": "ad75738b5a730f61f5e4044680a6b512",
-    "semantic_hash": "ad75738b5a730f61f5e4044680a6b512"
+    "mtime": 1789041817.824071,
+    "seen": 1789042211.36104,
+    "ast_hash": "f35218958651f0764abc879cbbd7d7f1",
+    "semantic_hash": ""
   },
   "frontend/src/types/camera.ts": {
     "mtime": 1788946168.8560262,
@@ -1038,9 +1038,9 @@
     "semantic_hash": ""
   },
   "backend/app/data/alerts.json": {
-    "mtime": 1789038199.6515012,
-    "seen": 1789038236.7221575,
-    "ast_hash": "cf75ad84d32b3870bc26fa1800dca399",
+    "mtime": 1789042026.0764227,
+    "seen": 1789042211.360954,
+    "ast_hash": "d751713988987e9331980363e24189ce",
     "semantic_hash": ""
   },
   "backend/app/pipeline/alert_service.py": {
@@ -1056,9 +1056,9 @@
     "semantic_hash": ""
   },
   "backend/tests/test_alerts_and_scanner.py": {
-    "mtime": 1789038164.7143273,
-    "seen": 1789038236.7222006,
-    "ast_hash": "fac12b0f39b796664716f49e77b0de20",
+    "mtime": 1789039376.212123,
+    "seen": 1789039477.0000837,
+    "ast_hash": "16fd94bd9a18ce1ce525e0ac05d8be24",
     "semantic_hash": ""
   },
   "frontend/src/components/alerts/TacticalThreatToast.tsx": {
@@ -1071,6 +1071,12 @@
     "mtime": 1789038096.6179214,
     "seen": 1789038236.7222831,
     "ast_hash": "20757085d42979b057ea40e47ff5b3a8",
+    "semantic_hash": ""
+  },
+  "backend/tests/test_video_upload_suspect.py": {
+    "mtime": 1789042019.9621751,
+    "seen": 1789042211.3609893,
+    "ast_hash": "9d0310967ef041d011f9333adb6a526b",
     "semantic_hash": ""
   }
 }

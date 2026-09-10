@@ -102,22 +102,29 @@ export function DetectionCanvas({
         const boxW = rx2 - rx1;
         const boxH = ry2 - ry1;
 
-        const color =
-          CLASS_COLORS[det.class_name.toLowerCase()] || CLASS_COLORS.default;
+        const isSuspect = Boolean(det.is_threat || det.class_name.toLowerCase().startsWith("suspect") || det.threat_level);
+        const isFace = det.class_name.toLowerCase().startsWith("face_") || det.class_name.toLowerCase().startsWith("person_");
+
+        let color = CLASS_COLORS[det.class_name.toLowerCase()] || CLASS_COLORS.default;
+        if (isSuspect) {
+          color = "#dc2626"; // Crimson Alert
+        } else if (isFace) {
+          color = "#10b981"; // Emerald Known Face
+        }
 
         // 1. Semi-transparent fill
-        ctx.fillStyle = `${color}18`;
+        ctx.fillStyle = isSuspect ? `${color}28` : `${color}18`;
         ctx.fillRect(rx1, ry1, boxW, boxH);
 
         // 2. Bounding Box Stroke
-        ctx.lineWidth = 2;
+        ctx.lineWidth = isSuspect ? 3 : 2;
         ctx.strokeStyle = color;
         ctx.strokeRect(rx1, ry1, boxW, boxH);
 
         // 3. Tactical Corner brackets
         const cornerLen = Math.min(14, Math.max(4, boxW / 4), Math.max(4, boxH / 4));
         ctx.lineWidth = 3;
-        ctx.strokeStyle = "#ffffff";
+        ctx.strokeStyle = isSuspect ? "#fca5a5" : "#ffffff";
 
         // Top-Left corner
         ctx.beginPath();
@@ -149,18 +156,28 @@ export function DetectionCanvas({
 
         // 4. Label Badge
         const trackTag = det.track_id !== undefined ? `ID #${det.track_id} · ` : "";
-        const labelText = `${trackTag}${det.class_name.replace(/_/g, " ").toUpperCase()} ${Math.round(det.confidence * 100)}%`;
-        ctx.font = "bold 11px monospace";
+        let labelText = `${trackTag}${det.class_name.replace(/_/g, " ").toUpperCase()} ${Math.round(det.confidence * 100)}%`;
+
+        if (isSuspect) {
+          const name = (det.suspect_name || det.class_name.replace(/^suspect_/i, "")).toUpperCase();
+          const tLevel = det.threat_level || "ALERT";
+          labelText = `🚨 SUSPECT: ${name} [${tLevel}] ${Math.round(det.confidence * 100)}%`;
+        } else if (isFace) {
+          const name = (det.suspect_name || det.class_name.replace(/^face_/i, "")).toUpperCase();
+          labelText = `👤 ${name} ${Math.round(det.confidence * 100)}%`;
+        }
+
+        ctx.font = isSuspect ? "bold 11px system-ui, sans-serif" : "bold 11px monospace";
         const textMetrics = ctx.measureText(labelText);
         const paddingX = 6;
-        const badgeH = 18;
+        const badgeH = 20;
         const badgeW = textMetrics.width + paddingX * 2;
         const badgeY = ry1 - badgeH >= offsetY ? ry1 - badgeH : ry1;
 
         ctx.fillStyle = color;
         ctx.fillRect(rx1, badgeY, badgeW, badgeH);
 
-        if (det.track_id !== undefined) {
+        if (det.track_id !== undefined || isSuspect) {
           ctx.strokeStyle = "#ffffff";
           ctx.lineWidth = 1;
           ctx.strokeRect(rx1, badgeY, badgeW, badgeH);
