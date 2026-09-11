@@ -687,6 +687,20 @@ async def rtsp_tracking(
                     except Exception as reid_err:
                         logger.debug("ReID update skip in RTSP tracking: %s", reid_err)
 
+            # ── Geofence & Directional Tripwire Evaluation ────────────────
+            try:
+                from app.pipeline.geofence_engine import geofence_engine
+                geofence_engine.evaluate_tracks(
+                    camera_id=camera_id,
+                    tracked_objects=tracked_dicts,
+                    frame_resolution=(orig_w, orig_h),
+                    auto_alert=True,
+                    frame=frame,
+                    camera_name=f"Camera {camera_id}",
+                )
+            except Exception as geo_err:
+                logger.debug("Geofence evaluation skip in RTSP tracking: %s", geo_err)
+
             frame_results.append(
                 {
                     "frame_index": frames_processed,

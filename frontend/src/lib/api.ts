@@ -28,6 +28,14 @@ import {
   RegisterFaceResponse,
 } from "@/types/face";
 import { AlertItem, ScannerStatus, QrtDispatchRecord, SuspectTrajectory, GlobalTraceItem } from "@/types/alert";
+import {
+  GeofenceZone,
+  DirectionalTripwire,
+  GeofencesResponse,
+  GeofenceEvaluateResponse,
+  CreateZonePayload,
+  CreateTripwirePayload,
+} from "@/types/geofence";
 
 const BACKEND_BASE_URL =
   process.env.NEXT_PUBLIC_BACKEND_URL?.replace(/\/$/, "") || "http://localhost:8000";
@@ -623,6 +631,87 @@ export const api = {
         body: JSON.stringify({ unitName, notes }),
       }
     );
+  },
+
+  // ── Geofences & Directional Tripwires ────────────────────────────────────
+  async getGeofences(cameraId?: string): Promise<GeofencesResponse> {
+    const query = cameraId ? `?camera_id=${encodeURIComponent(cameraId)}` : "";
+    return request<GeofencesResponse>(`/api/geofences${query}`);
+  },
+
+  async createGeofenceZone(payload: CreateZonePayload): Promise<{ status: string; zone: GeofenceZone }> {
+    return request<{ status: string; zone: GeofenceZone }>("/api/geofences/zones", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+  },
+
+  async updateGeofenceZone(
+    zoneId: string,
+    payload: Partial<CreateZonePayload>
+  ): Promise<{ status: string; zone: GeofenceZone }> {
+    return request<{ status: string; zone: GeofenceZone }>(`/api/geofences/zones/${encodeURIComponent(zoneId)}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+  },
+
+  async deleteGeofenceZone(zoneId: string): Promise<{ status: string; deleted_id: string }> {
+    return request<{ status: string; deleted_id: string }>(`/api/geofences/zones/${encodeURIComponent(zoneId)}`, {
+      method: "DELETE",
+    });
+  },
+
+  async createTripwire(payload: CreateTripwirePayload): Promise<{ status: string; tripwire: DirectionalTripwire }> {
+    return request<{ status: string; tripwire: DirectionalTripwire }>("/api/geofences/tripwires", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+  },
+
+  async updateTripwire(
+    wireId: string,
+    payload: Partial<CreateTripwirePayload>
+  ): Promise<{ status: string; tripwire: DirectionalTripwire }> {
+    return request<{ status: string; tripwire: DirectionalTripwire }>(
+      `/api/geofences/tripwires/${encodeURIComponent(wireId)}`,
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      }
+    );
+  },
+
+  async deleteTripwire(wireId: string): Promise<{ status: string; deleted_id: string }> {
+    return request<{ status: string; deleted_id: string }>(
+      `/api/geofences/tripwires/${encodeURIComponent(wireId)}`,
+      {
+        method: "DELETE",
+      }
+    );
+  },
+
+  async evaluateGeofences(payload: {
+    cameraId: string;
+    tracks: Array<{ trackId: number; box: number[]; className?: string; confidence?: number; suspectName?: string }>;
+    dispatchAlerts?: boolean;
+  }): Promise<GeofenceEvaluateResponse> {
+    return request<GeofenceEvaluateResponse>("/api/geofences/evaluate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+  },
+
+  async resetGeofenceHistory(cameraId?: string): Promise<{ status: string; message: string }> {
+    const query = cameraId ? `?camera_id=${encodeURIComponent(cameraId)}` : "";
+    return request<{ status: string; message: string }>(`/api/geofences/reset-history${query}`, {
+      method: "POST",
+    });
   },
 };
 

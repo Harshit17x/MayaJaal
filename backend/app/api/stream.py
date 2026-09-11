@@ -261,6 +261,7 @@ def draw_tactical_hud(
     detections_count: int,
     is_live: bool = True,
     protocol: str = "LIVE FEED",
+    breach_label: Optional[str] = None,
 ) -> None:
     """Draw tactical border surveillance HUD on top of live video."""
     h, w = frame.shape[:2]
@@ -277,6 +278,15 @@ def draw_tactical_hud(
     status_text = f"{short_proto} LIVE" if is_live else "FEED SYNCING"
     cv2.putText(frame, status_text, (38, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (255, 255, 255), 1)
     cv2.putText(frame, f"{fps:.1f} FPS", (195, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.42, (180, 200, 220), 1)
+
+    # Active Geofence Breach Banner in Top Center
+    if breach_label:
+        banner_text = f"🚨 BREACH DETECTED: {breach_label.upper()}"
+        (tw, th), _ = cv2.getTextSize(banner_text, cv2.FONT_HERSHEY_SIMPLEX, 0.50, 2)
+        cx = w // 2
+        cv2.rectangle(frame, (cx - tw // 2 - 16, 8), (cx + tw // 2 + 16, 44), (20, 20, 220), -1)
+        cv2.rectangle(frame, (cx - tw // 2 - 16, 8), (cx + tw // 2 + 16, 44), (255, 255, 255), 2)
+        cv2.putText(frame, banner_text, (cx - tw // 2, 31), cv2.FONT_HERSHEY_SIMPLEX, 0.50, (255, 255, 255), 2, cv2.LINE_AA)
 
     # Top right timestamp
     now_str = datetime.now().strftime("%H:%M:%S")
@@ -317,10 +327,14 @@ def draw_bounding_boxes(
 
         cls_name = det.get("class_name", "Object").lower()
         conf = det.get("confidence", 0.0)
-        color = CLASS_COLORS.get(cls_name, DEFAULT_COLOR)
+        is_breach = bool(det.get("is_breach", False))
+        breach_label = det.get("breach_label", "PERIMETER BREACH")
+
+        color = (0, 0, 255) if is_breach else CLASS_COLORS.get(cls_name, DEFAULT_COLOR)
+        box_thickness = 3 if is_breach else 2
 
         # Draw main box
-        cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
+        cv2.rectangle(frame, (x1, y1), (x2, y2), color, box_thickness)
 
         # Draw corner accents
         corner_len = min(15, (x2 - x1) // 3, (y2 - y1) // 3)
@@ -334,32 +348,45 @@ def draw_bounding_boxes(
             cv2.line(frame, (x2, y2), (x2 - corner_len, y2), color, 3)
             cv2.line(frame, (x2, y2), (x2, y2 - corner_len), color, 3)
 
+        # Highlight ground footpoint with bullseye on breach
+        if is_breach:
+            fpx = (x1 + x2) // 2
+            fpy = y2
+            cv2.circle(frame, (fpx, fpy), 7, (0, 0, 255), -1)
+            cv2.circle(frame, (fpx, fpy), 13, (0, 255, 255), 2)
+            cv2.line(frame, (fpx - 18, fpy), (fpx + 18, fpy), (0, 255, 255), 1)
+            cv2.line(frame, (fpx, fpy - 18), (fpx, fpy + 18), (0, 255, 255), 1)
+
         # Label background pill
         global_trace_id = det.get("global_trace_id")
         is_cross_camera = bool(det.get("is_cross_camera", False))
         track_id = det.get("track_id")
-        if global_trace_id:
+        if is_breach:
+            label = f"🚨 BREACH: {breach_label.upper()} [#{track_id}]"
+        elif global_trace_id:
             cross_icon = " ⇄" if is_cross_camera else ""
             id_prefix = f"{global_trace_id}{cross_icon} | "
+            label = f"{id_prefix}{cls_name.upper()} {int(conf * 100)}%"
         elif track_id is not None:
             id_prefix = f"#{track_id} "
+            label = f"{id_prefix}{cls_name.upper()} {int(conf * 100)}%"
         else:
-            id_prefix = ""
-        label = f"{id_prefix}{cls_name.upper()} {int(conf * 100)}%"
+            label = f"{cls_name.upper()} {int(conf * 100)}%"
+
         (lbl_w, lbl_h), _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.42, 1)
         pill_y1 = max(0, y1 - lbl_h - 6)
         pill_y2 = y1
-        cv2.rectangle(frame, (x1, pill_y1), (x1 + lbl_w + 8, pill_y2), color, -1)
-        if global_trace_id or track_id is not None:
-            badge_border = (255, 230, 80) if is_cross_camera else (255, 255, 255)
-            cv2.rectangle(frame, (x1, pill_y1), (x1 + lbl_w + 8, pill_y2), badge_border, 1)
+        pill_color = (0, 0, 220) if is_breach else color
+        text_color = (255, 255, 255) if is_breach else (0, 0, 0)
+        cv2.rectangle(frame, (x1, pill_y1), (x1 + lbl_w + 8, pill_y2), pill_color, -1)
+        cv2.rectangle(frame, (x1, pill_y1), (x1 + lbl_w + 8, pill_y2), (255, 255, 255), 1)
         cv2.putText(
             frame,
             label,
             (x1 + 4, pill_y2 - 3),
             cv2.FONT_HERSHEY_SIMPLEX,
             0.42,
-            (0, 0, 0),
+            text_color,
             1,
             cv2.LINE_AA,
         )
@@ -422,6 +449,9 @@ def stream_generator(
     cached_detections: list[dict] = []
     cached_faces: list[dict] = []
     seen_track_reid: dict[int, tuple[str, bool, float]] = {}  # Cache local_track_id -> Re-ID
+    recent_track_breaches: dict[int, tuple[str, str, float]] = {}  # track_id -> (name, type, timestamp)
+    active_breach_name: Optional[str] = None
+    active_breach_time: float = 0.0
     frame_count = 0
     last_fps_time = time.perf_counter()
     measured_fps = float(fps_limit)
@@ -543,6 +573,40 @@ def stream_generator(
                                             det["reid_score"] = reid_sc
                                 except Exception as g_err:
                                     logger.debug("Global Re-ID update skip: %s", g_err)
+                                # ── Geofence & Directional Tripwire Real-Time Breach Evaluation ──
+                                try:
+                                    from app.pipeline.geofence_engine import geofence_engine
+                                    breaches = geofence_engine.evaluate_tracks(
+                                        camera_id=effective_cam_id,
+                                        tracked_objects=tracked_dets,
+                                        frame_resolution=(w, h),
+                                        auto_alert=True,
+                                        frame=frame,
+                                        camera_name=effective_cam_name,
+                                    )
+                                    now_t = time.time()
+                                    if breaches:
+                                        for b in breaches:
+                                            bid = b.get("trackId")
+                                            if bid is not None:
+                                                b_name = b.get("name", "PERIMETER")
+                                                b_type = b.get("type", "zone_breach")
+                                                recent_track_breaches[bid] = (b_name, b_type, now_t)
+                                                active_breach_name = b_name
+                                                active_breach_time = now_t
+
+                                    # Apply active or recent breach visual highlights (persists 3.5s)
+                                    for d in tracked_dets:
+                                        tid = d.get("track_id")
+                                        if tid in recent_track_breaches:
+                                            b_name, b_type, b_time = recent_track_breaches[tid]
+                                            if now_t - b_time < 3.5:
+                                                d["is_breach"] = True
+                                                d["breach_label"] = b_name
+                                                d["breach_type"] = b_type
+                                except Exception as geo_err:
+                                    logger.debug("Geofence live stream evaluation skip: %s", geo_err)
+
                                 cached_detections = tracked_dets
                             except Exception:
                                 cached_detections = raw_dets
@@ -586,6 +650,7 @@ def stream_generator(
                 detections_count=len(cached_detections),
                 is_live=not is_video_file,
                 protocol=protocol,
+                breach_label=active_breach_name if (time.time() - active_breach_time < 4.0) else None,
             )
 
             # Encode frame to JPEG

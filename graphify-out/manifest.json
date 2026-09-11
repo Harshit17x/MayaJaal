@@ -108,15 +108,15 @@
     "semantic_hash": "11152d95bd04cf7eed28c956479cc8ef"
   },
   "backend/app/api/stream.py": {
-    "mtime": 1789075320.2329614,
-    "seen": 1789075420.3459005,
-    "ast_hash": "d3867a125f5b05468ff2f11b1d538a04",
+    "mtime": 1789117663.9979439,
+    "seen": 1789118047.8308277,
+    "ast_hash": "995923bb9276f1d50134ee44dc00999a",
     "semantic_hash": ""
   },
   "backend/app/api/tracking.py": {
-    "mtime": 1789067166.6272082,
-    "seen": 1789072973.6512613,
-    "ast_hash": "3125fa9f1c4da531eaa93bdfcf7507b3",
+    "mtime": 1789117683.7840474,
+    "seen": 1789118047.8308306,
+    "ast_hash": "6ccb7de2b4c98c50c2e630f9de81e914",
     "semantic_hash": ""
   },
   "backend/app/core/config.py": {
@@ -138,9 +138,9 @@
     "semantic_hash": "fc1210cf128bc2f54fc65e8c0ad439ad"
   },
   "backend/app/data/cameras.json": {
-    "mtime": 1789075320.3877246,
-    "seen": 1789075420.3459077,
-    "ast_hash": "65abeda27e4a5b6ee1d101478f7b7184",
+    "mtime": 1789118027.6218884,
+    "seen": 1789118047.830841,
+    "ast_hash": "6401a84487c52f36731e6c04847b4768",
     "semantic_hash": ""
   },
   "backend/app/inference/inference_service.py": {
@@ -162,9 +162,9 @@
     "semantic_hash": "51fe8a063a7216e3a2df9d4774e8d700"
   },
   "backend/app/main.py": {
-    "mtime": 1789074818.6736245,
-    "seen": 1789074846.405389,
-    "ast_hash": "78277f37935179c6e7c32000d708d28a",
+    "mtime": 1789076805.3416004,
+    "seen": 1789077095.9884534,
+    "ast_hash": "626e1e880ef3e22b10b5985a20ade96c",
     "semantic_hash": ""
   },
   "backend/app/pipeline/anpr_service.py": {
@@ -384,9 +384,9 @@
     "semantic_hash": "d1283e7566e136247b268494a6a545eb"
   },
   "frontend/src/app/(operator)/alerts/page.tsx": {
-    "mtime": 1789059975.790751,
-    "seen": 1789061558.707526,
-    "ast_hash": "c8e94650300d0187405d93b332f2dcc5",
+    "mtime": 1789117834.028151,
+    "seen": 1789118047.8309417,
+    "ast_hash": "fdc025216552c3e3b1f8c89275725bc6",
     "semantic_hash": ""
   },
   "frontend/src/app/(operator)/anpr/page.tsx": {
@@ -414,10 +414,10 @@
     "semantic_hash": ""
   },
   "frontend/src/app/(operator)/geofences/page.tsx": {
-    "mtime": 1788946168.8141935,
-    "seen": 1789026248.1501083,
-    "ast_hash": "cd0fe3c162ad450611075810b187cee5",
-    "semantic_hash": "cd0fe3c162ad450611075810b187cee5"
+    "mtime": 1789080357.1416695,
+    "seen": 1789080435.575139,
+    "ast_hash": "b0a4954d6502ec9daa8b89d0acebc1f1",
+    "semantic_hash": ""
   },
   "frontend/src/app/(operator)/gis-map/page.tsx": {
     "mtime": 1789061459.9549522,
@@ -558,9 +558,9 @@
     "semantic_hash": "c1786940e913f47aea14b96a89b20b8d"
   },
   "frontend/src/components/map/BorderMap.tsx": {
-    "mtime": 1789072915.9366775,
-    "seen": 1789072973.6513395,
-    "ast_hash": "1deb37cbc711e89cd8617f06ac948be3",
+    "mtime": 1789077054.5674937,
+    "seen": 1789077095.988525,
+    "ast_hash": "8dbc5ca6081a35061f5667ad98f285f3",
     "semantic_hash": ""
   },
   "frontend/src/components/map/bordermappreview.tsx": {
@@ -630,9 +630,9 @@
     "semantic_hash": ""
   },
   "frontend/src/lib/api.ts": {
-    "mtime": 1789067166.6059003,
-    "seen": 1789072973.6513512,
-    "ast_hash": "f7b38cfb83799b21124693eeac8bd276",
+    "mtime": 1789076948.852996,
+    "seen": 1789077095.9885361,
+    "ast_hash": "1fc8044cb4ee8448f69ff27d5a6b5f4b",
     "semantic_hash": ""
   },
   "frontend/src/lib/authStore.ts": {
@@ -1038,9 +1038,9 @@
     "semantic_hash": ""
   },
   "backend/app/data/alerts.json": {
-    "mtime": 1789075320.2329614,
-    "seen": 1789075420.3459063,
-    "ast_hash": "af3bc43257f0f9418bec9d351efdb9e8",
+    "mtime": 1789118027.6137638,
+    "seen": 1789118047.8308387,
+    "ast_hash": "ed76b116ae6f79a119a495148d3a1ee4",
     "semantic_hash": ""
   },
   "backend/app/pipeline/alert_service.py": {
@@ -1062,9 +1062,9 @@
     "semantic_hash": ""
   },
   "frontend/src/components/alerts/TacticalThreatToast.tsx": {
-    "mtime": 1789059975.7992609,
-    "seen": 1789061558.7075512,
-    "ast_hash": "45e5e7506077692e4275ee6075e7ff08",
+    "mtime": 1789117772.6026223,
+    "seen": 1789118047.8309686,
+    "ast_hash": "7cc3a12aa6324964a2c76829235947bf",
     "semantic_hash": ""
   },
   "frontend/src/components/map/SuspectTrajectoryModal.tsx": {
@@ -1098,9 +1098,9 @@
     "semantic_hash": ""
   },
   "backend/app/data/geofences.json": {
-    "mtime": 1789067156.6584756,
-    "seen": 1789072973.6512704,
-    "ast_hash": "a3864439b2cadb4acc75c19cddae3166",
+    "mtime": 1789117785.2680306,
+    "seen": 1789118047.8308456,
+    "ast_hash": "6d6e6dc9f69ce7da77ae4896e13e9c06",
     "semantic_hash": ""
   },
   "frontend/src/components/map/SuspectTrailOverlay.ts": {
@@ -1815,6 +1815,120 @@
     "mtime": 1789075320.3897822,
     "seen": 1789075420.3461053,
     "ast_hash": "85bc3f3ac39513b96e7a85c80c149ea3",
+    "semantic_hash": ""
+  },
+  "backend/app/api/geofences.py": {
+    "mtime": 1789076795.9010167,
+    "seen": 1789077095.9884336,
+    "ast_hash": "af282579fd6ffc8eba0047f82ca65a35",
+    "semantic_hash": ""
+  },
+  "backend/app/pipeline/geofence_engine.py": {
+    "mtime": 1789117649.442766,
+    "seen": 1789118047.8308642,
+    "ast_hash": "16f8c438d6b5ac20d9d15120135f1085",
+    "semantic_hash": ""
+  },
+  "backend/tests/test_geofence_engine.py": {
+    "mtime": 1789076863.7867382,
+    "seen": 1789077095.9884837,
+    "ast_hash": "76ae064b38ebeb7da503489ac01138c8",
+    "semantic_hash": ""
+  },
+  "frontend/src/types/geofence.ts": {
+    "mtime": 1789076938.7086434,
+    "seen": 1789077095.9885447,
+    "ast_hash": "31b52709bb5fe621f38ff5de06961eca",
+    "semantic_hash": ""
+  },
+  "frontend/public/images/cctv_sample.jpg": {
+    "mtime": 1789075320.2524848,
+    "seen": 1789078483.563765,
+    "ast_hash": "dcdabf64e9d3243d602004c600aca851",
+    "semantic_hash": ""
+  },
+  "frontend/public/images/cameras/bop-jk-01.jpg": {
+    "mtime": 1789075320.2576003,
+    "seen": 1789078483.5637574,
+    "ast_hash": "454482aec4d3d09227699350382189b0",
+    "semantic_hash": ""
+  },
+  "frontend/public/images/cameras/bop-jk-02.jpg": {
+    "mtime": 1789075320.2524848,
+    "seen": 1789078483.5637586,
+    "ast_hash": "dcdabf64e9d3243d602004c600aca851",
+    "semantic_hash": ""
+  },
+  "frontend/public/images/cameras/bop-jk-03.jpg": {
+    "mtime": 1789075320.2663345,
+    "seen": 1789078483.5637596,
+    "ast_hash": "dcda2633a429f568d104fda3ed6eb8c5",
+    "semantic_hash": ""
+  },
+  "frontend/public/images/cameras/bop-jk-04.jpg": {
+    "mtime": 1789075320.249931,
+    "seen": 1789078483.563761,
+    "ast_hash": "a03799ea223155ba801bc704b1004643",
+    "semantic_hash": ""
+  },
+  "frontend/public/images/cameras/bop-jk-05.jpg": {
+    "mtime": 1789075320.2494216,
+    "seen": 1789078483.5637622,
+    "ast_hash": "cada75b39a98ab036024ed2865a1638c",
+    "semantic_hash": ""
+  },
+  "frontend/public/images/cameras/bop-jk-06.jpg": {
+    "mtime": 1789075320.3358436,
+    "seen": 1789078483.5637631,
+    "ast_hash": "cd25845ea58230da26e6c400efd7d3b9",
+    "semantic_hash": ""
+  },
+  "frontend/public/images/test_frame.jpg": {
+    "mtime": 1789079177.8312476,
+    "seen": 1789079366.7228816,
+    "ast_hash": "cef9766a5e43b0430ebbf738043a5dbc",
+    "semantic_hash": ""
+  },
+  "backend/app/data/alerts/snapshots/breach_1789117695415_bop-jk-01_tr5.jpg": {
+    "mtime": 1789117695.4205368,
+    "seen": 1789118047.8313293,
+    "ast_hash": "368765bf8f2fc0dc1538973d7015e2ad",
+    "semantic_hash": ""
+  },
+  "backend/app/data/alerts/snapshots/breach_1789117695434_cam-test-eval_tr5.jpg": {
+    "mtime": 1789117695.4329226,
+    "seen": 1789118047.8313313,
+    "ast_hash": "854afde91811c325c5fb258968285c91",
+    "semantic_hash": ""
+  },
+  "backend/app/data/alerts/snapshots/breach_1789117695444_cam-test-eval_tr5.jpg": {
+    "mtime": 1789117695.444705,
+    "seen": 1789118047.8313327,
+    "ast_hash": "0d75f5e5bd1156ade533cc2a132fca55",
+    "semantic_hash": ""
+  },
+  "backend/app/data/alerts/snapshots/breach_1789117968271_bop-jk-01_tr5.jpg": {
+    "mtime": 1789117968.2738762,
+    "seen": 1789118047.8313334,
+    "ast_hash": "424e970ca02c860a9304d5d70a6451c8",
+    "semantic_hash": ""
+  },
+  "backend/app/data/alerts/snapshots/breach_1789117968287_cam-test-eval_tr5.jpg": {
+    "mtime": 1789117968.2878962,
+    "seen": 1789118047.8313344,
+    "ast_hash": "55f3205ef628b37d5e6cf3a4b066c548",
+    "semantic_hash": ""
+  },
+  "backend/app/data/alerts/snapshots/breach_1789117968302_cam-test-eval_tr5.jpg": {
+    "mtime": 1789117968.3024573,
+    "seen": 1789118047.8313363,
+    "ast_hash": "8625b3c0daaa26ebde85e7f73f59d018",
+    "semantic_hash": ""
+  },
+  "backend/app/data/alerts/snapshots/breach_1789118027575_bop-jk-02_tr99.jpg": {
+    "mtime": 1789118027.6085875,
+    "seen": 1789118047.8313375,
+    "ast_hash": "01cb38a0dfe4181ae8457164ac3c0893",
     "semantic_hash": ""
   }
 }

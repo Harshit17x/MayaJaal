@@ -304,6 +304,12 @@ export default function AlertsPage() {
           <div className="divide-y divide-slate-100">
             {filteredAlerts.map((alert) => {
               const isSuspectAlert = Boolean(alert.suspectName) || alert.className === "suspect";
+              const isBreachAlert =
+                alert.category === "geofence_breach" ||
+                alert.category === "tripwire_violation" ||
+                alert.category === "tripwire_crossing" ||
+                alert.title?.toLowerCase().includes("geofence") ||
+                alert.title?.toLowerCase().includes("tripwire");
               const snapshotFullUrl = alert.snapshotUrl
                 ? alert.snapshotUrl.startsWith("http")
                   ? alert.snapshotUrl
@@ -318,6 +324,10 @@ export default function AlertsPage() {
                       ? alert.acknowledged
                         ? "bg-rose-50/20 border-l-4 border-l-rose-400"
                         : "bg-rose-50/50 border-l-4 border-l-rose-600 hover:bg-rose-50"
+                      : isBreachAlert
+                      ? alert.acknowledged
+                        ? "bg-red-50/20 border-l-4 border-l-red-400"
+                        : "bg-red-50/40 border-l-4 border-l-red-600 hover:bg-red-50/60"
                       : alert.acknowledged
                       ? "bg-slate-50/50 opacity-75"
                       : "hover:bg-slate-50"
@@ -335,7 +345,7 @@ export default function AlertsPage() {
                             camera: alert.location,
                           })
                         }
-                        className="relative group shrink-0 w-16 h-16 rounded-lg overflow-hidden border border-slate-300 bg-slate-100 hover:ring-2 hover:ring-rose-500 transition-all cursor-pointer"
+                        className="relative group shrink-0 w-16 h-16 rounded-lg overflow-hidden border border-slate-300 bg-slate-100 hover:ring-2 hover:ring-rose-500 transition-all cursor-pointer shadow-xs"
                         title="Click to view full forensic snapshot"
                       >
                         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -356,10 +366,14 @@ export default function AlertsPage() {
                           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-[11px] font-bold bg-rose-700 text-white tracking-wide shadow-xs">
                             🚨 SUSPECT SIGHTING
                           </span>
+                        ) : isBreachAlert ? (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-[11px] font-bold bg-red-600 text-white tracking-wide shadow-xs">
+                            🚨 PERIMETER BREACH
+                          </span>
                         ) : (
                           <span
                             className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold ${
-                              alert.severity === "High"
+                              alert.severity === "High" || (alert.severity as string) === "CRITICAL"
                                 ? "bg-rose-100 text-rose-800 border border-rose-200"
                                 : alert.severity === "Medium"
                                 ? "bg-amber-100 text-amber-800 border border-amber-200"
@@ -416,7 +430,8 @@ export default function AlertsPage() {
                           <>
                             <span>•</span>
                             <span className="text-emerald-700 font-semibold font-mono">
-                              Biometric Match: {formatConfidence(alert.confidence)}
+                              {isSuspectAlert ? "Biometric Match: " : "Detection Conf: "}
+                              {formatConfidence(alert.confidence)}
                             </span>
                           </>
                         )}
@@ -495,7 +510,13 @@ export default function AlertsPage() {
               />
             </div>
             <div className="px-5 py-3 bg-slate-950/80 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
-              <span>Automatic facial biometric capture with YuNet & SFace</span>
+              <span>
+                {selectedSnapshot.title?.toLowerCase().includes("geofence") ||
+                selectedSnapshot.title?.toLowerCase().includes("tripwire") ||
+                selectedSnapshot.title?.toLowerCase().includes("breach")
+                  ? "Tactical perimeter intrusion forensics • Geofence Engine"
+                  : "Automatic facial biometric capture with YuNet & SFace"}
+              </span>
               <a
                 href={selectedSnapshot.url}
                 target="_blank"
