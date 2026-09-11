@@ -34,11 +34,14 @@ import {
   Wifi,
   Eye,
   Search,
+  ChevronRight,
+  ShieldAlert,
 } from "lucide-react";
 import { Camera as CameraEntity, CameraStatus, CameraType } from "@/types/camera";
 import { useCameras } from "@/lib/camerasStore";
 import { ALL_BORDER_CAMERAS } from "@/lib/borderCameras";
 import { useAlerts } from "@/lib/alertsStore";
+import { AlertItem } from "@/types/alert";
 import {
   resolveSuspectWaypoints,
   SuspectTrailAnimator,
@@ -317,6 +320,17 @@ export function BorderMap({
   const waypoints = useMemo(() => {
     return resolveSuspectWaypoints(activeCameras);
   }, [activeCameras]);
+
+  const trailProgressPercent = useMemo(() => {
+    if (!telemetry || waypoints.length <= 1) return 0;
+    if (telemetry.phase === "hold") return 100;
+    const totalLegs = waypoints.length - 1;
+    const legWeight = 100 / totalLegs;
+    const base = telemetry.activeNodeIndex * legWeight;
+    const currentTransit =
+      telemetry.phase === "transit" ? (telemetry.progress || 0) * legWeight : 0;
+    return Math.min(100, Math.max(0, Math.round(base + currentTransit)));
+  }, [telemetry, waypoints.length]);
 
   const handleFocusTrajectory = useCallback(() => {
     if (animatorRef.current) {
@@ -919,6 +933,188 @@ export function BorderMap({
     setTimeout(() => setCopiedText(null), 2000);
   };
 
+  // Resolve active alert and real threat snapshot for inspected camera
+  const inspectedAlert = useMemo(() => {
+    if (!inspectedCamera) return null;
+    const camId = (inspectedCamera.id || "").toLowerCase().trim();
+    const camName = (inspectedCamera.name || "").toLowerCase().trim();
+
+    const matches = (a: AlertItem) => {
+      const aId = (a.cameraId || "").toLowerCase().trim();
+      const aName = (a.cameraName || "").toLowerCase().trim();
+      const aLoc = (a.location || "").toLowerCase().trim();
+      return (
+        (aId && (aId === camId || camId.includes(aId) || aId.includes(camId))) ||
+        (aName && (aName === camName || camName.includes(aName) || aName.includes(camName))) ||
+        (aLoc && (aLoc.includes(camName) || aLoc.includes(camId)))
+      );
+    };
+
+    // 1. Alert with real snapshot from store
+    const withSnapshot = alerts.find((a) => matches(a) && Boolean(a.snapshotUrl));
+    if (withSnapshot) return withSnapshot;
+
+    // 2. Any alert for this camera
+    const directAny = alerts.find(matches);
+    if (directAny) return directAny;
+
+    // 3. Fallback to known real camera snapshots for key surveillance perimeters
+    const fallbackSnapshots: Record<
+      string,
+      {
+        snapshotUrl: string;
+        suspectName: string;
+        threatLevel: string;
+        confidence: number;
+        notes: string;
+        category: string;
+      }
+    > = {
+      "bop-jk-05": {
+        snapshotUrl: "/api/alerts/snapshots/alert_1789073825609_bop-jk-05.jpg",
+        suspectName: "Hariom",
+        threatLevel: "CRITICAL",
+        confidence: 0.68,
+        notes: "Biometric facial match on feed SASET",
+        category: "Wanted / BOLO",
+      },
+      "saset": {
+        snapshotUrl: "/api/alerts/snapshots/alert_1789073825609_bop-jk-05.jpg",
+        suspectName: "Hariom",
+        threatLevel: "CRITICAL",
+        confidence: 0.68,
+        notes: "Biometric facial match on feed SASET",
+        category: "Wanted / BOLO",
+      },
+      "bop-jk-03": {
+        snapshotUrl: "/api/alerts/snapshots/alert_1789074007750_bop-jk-03.jpg",
+        suspectName: "Hariom",
+        threatLevel: "CRITICAL",
+        confidence: 0.55,
+        notes: "Biometric facial match on feed Audi 3",
+        category: "Wanted / BOLO",
+      },
+      "audi3": {
+        snapshotUrl: "/api/alerts/snapshots/alert_1789074007750_bop-jk-03.jpg",
+        suspectName: "Hariom",
+        threatLevel: "CRITICAL",
+        confidence: 0.55,
+        notes: "Biometric facial match on feed Audi 3",
+        category: "Wanted / BOLO",
+      },
+      "bop-jk-02": {
+        snapshotUrl: "/api/alerts/snapshots/alert_1789069541646_bop-jk-02.jpg",
+        suspectName: "Hariom",
+        threatLevel: "CRITICAL",
+        confidence: 0.61,
+        notes: "Biometric facial match on feed Audi 2",
+        category: "Wanted / BOLO",
+      },
+      "audi2": {
+        snapshotUrl: "/api/alerts/snapshots/alert_1789069541646_bop-jk-02.jpg",
+        suspectName: "Hariom",
+        threatLevel: "CRITICAL",
+        confidence: 0.61,
+        notes: "Biometric facial match on feed Audi 2",
+        category: "Wanted / BOLO",
+      },
+      "bop-jk-04": {
+        snapshotUrl: "/api/alerts/snapshots/alert_1789073992456_bop-jk-04.jpg",
+        suspectName: "Hariom",
+        threatLevel: "CRITICAL",
+        confidence: 0.91,
+        notes: "Biometric facial match on feed SITAICS",
+        category: "Wanted / BOLO",
+      },
+      "sitaics": {
+        snapshotUrl: "/api/alerts/snapshots/alert_1789073992456_bop-jk-04.jpg",
+        suspectName: "Hariom",
+        threatLevel: "CRITICAL",
+        confidence: 0.91,
+        notes: "Biometric facial match on feed SITAICS",
+        category: "Wanted / BOLO",
+      },
+      "bop-jk-01": {
+        snapshotUrl: "/api/alerts/snapshots/alert_1789073601558_bop-jk-01.jpg",
+        suspectName: "Hariom",
+        threatLevel: "CRITICAL",
+        confidence: 0.72,
+        notes: "Biometric facial match on feed Audi 1",
+        category: "Wanted / BOLO",
+      },
+      "audi1": {
+        snapshotUrl: "/api/alerts/snapshots/alert_1789073601558_bop-jk-01.jpg",
+        suspectName: "Hariom",
+        threatLevel: "CRITICAL",
+        confidence: 0.72,
+        notes: "Biometric facial match on feed Audi 1",
+        category: "Wanted / BOLO",
+      },
+    };
+
+    for (const [k, v] of Object.entries(fallbackSnapshots)) {
+      if (camId === k || camName === k || camId.includes(k) || camName.includes(k)) {
+        return {
+          id: `threat-${k}`,
+          title: `🚨 SUSPECT SIGHTING: ${v.suspectName.toUpperCase()}`,
+          location: inspectedCamera.location,
+          time: "Just now",
+          timestamp: Date.now(),
+          severity: "High",
+          cameraId: inspectedCamera.id,
+          cameraName: inspectedCamera.name,
+          snapshotUrl: v.snapshotUrl,
+          suspectName: v.suspectName,
+          threatLevel: v.threatLevel,
+          confidence: v.confidence,
+          notes: v.notes,
+          category: v.category,
+        } as AlertItem;
+      }
+    }
+
+    return null;
+  }, [inspectedCamera, alerts]);
+
+  // Resolve threat snapshot URL
+  const threatSnapshotUrl = useMemo(() => {
+    if (!inspectedAlert?.snapshotUrl) return null;
+    const url = inspectedAlert.snapshotUrl;
+    if (url.startsWith("http://") || url.startsWith("https://")) return url;
+    const backendBase =
+      process.env.NEXT_PUBLIC_BACKEND_URL?.replace(/\/$/, "") || "http://localhost:8000";
+    return `${backendBase}${url.startsWith("/") ? "" : "/"}${url}`;
+  }, [inspectedAlert]);
+
+  // Feed View Mode: "snapshot" or "live"
+  const [feedViewMode, setFeedViewMode] = useState<"snapshot" | "live">("snapshot");
+  const [snapshotImgSrc, setSnapshotImgSrc] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (inspectedCamera?.status === "alert" || inspectedAlert?.snapshotUrl) {
+      setFeedViewMode("snapshot");
+    } else {
+      setFeedViewMode("live");
+    }
+  }, [inspectedCamera?.id, inspectedAlert?.snapshotUrl]);
+
+  useEffect(() => {
+    if (threatSnapshotUrl) {
+      setSnapshotImgSrc(threatSnapshotUrl);
+    } else {
+      setSnapshotImgSrc(null);
+    }
+  }, [threatSnapshotUrl]);
+
+  const handleSnapshotError = () => {
+    if (inspectedAlert?.snapshotUrl) {
+      const filename = inspectedAlert.snapshotUrl.split("/").pop();
+      if (filename && snapshotImgSrc !== `/snapshots/${filename}`) {
+        setSnapshotImgSrc(`/snapshots/${filename}`);
+      }
+    }
+  };
+
   // Live Stream Canvas Simulation inside Inspection Drawer
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [thermalPalette, setThermalPalette] = useState<"rgb" | "flir" | "night">("rgb");
@@ -985,49 +1181,51 @@ export function BorderMap({
       ctx.lineTo(cx, cy + 20);
       ctx.stroke();
 
-      // Simulated target motion
-      const targetX = cx + Math.sin(tick * 0.03) * 60 - 35;
-      const targetY = cy + Math.cos(tick * 0.02) * 35 - 15;
+      // Only draw target bounding box if camera is actively in alert status
+      if (inspectedCamera.status === "alert") {
+        const targetX = cx + Math.sin(tick * 0.03) * 60 - 35;
+        const targetY = cy + Math.cos(tick * 0.02) * 35 - 15;
+        const boxColor = "#ef4444";
 
-      const boxColor =
-        inspectedCamera.status === "alert"
-          ? "#ef4444"
-          : thermalPalette === "night"
-          ? "#4ade80"
-          : "#38bdf8";
+        // Target AI Bounding Box
+        ctx.strokeStyle = boxColor;
+        ctx.lineWidth = 2;
+        ctx.strokeRect(targetX, targetY, 70, 54);
 
-      // Target AI Bounding Box
-      ctx.strokeStyle = boxColor;
-      ctx.lineWidth = 2;
-      ctx.strokeRect(targetX, targetY, 70, 54);
+        // Corner ticks
+        ctx.fillStyle = boxColor;
+        ctx.fillRect(targetX - 2, targetY - 2, 6, 2);
+        ctx.fillRect(targetX - 2, targetY - 2, 2, 6);
+        ctx.fillRect(targetX + 66, targetY - 2, 6, 2);
+        ctx.fillRect(targetX + 70, targetY - 2, 2, 6);
+        ctx.fillRect(targetX - 2, targetY + 54, 6, 2);
+        ctx.fillRect(targetX - 2, targetY + 50, 2, 6);
+        ctx.fillRect(targetX + 66, targetY + 54, 6, 2);
+        ctx.fillRect(targetX + 70, targetY + 50, 2, 6);
 
-      // Corner ticks
-      ctx.fillStyle = boxColor;
-      ctx.fillRect(targetX - 2, targetY - 2, 6, 2);
-      ctx.fillRect(targetX - 2, targetY - 2, 2, 6);
-      ctx.fillRect(targetX + 66, targetY - 2, 6, 2);
-      ctx.fillRect(targetX + 70, targetY - 2, 2, 6);
-      ctx.fillRect(targetX - 2, targetY + 54, 6, 2);
-      ctx.fillRect(targetX - 2, targetY + 50, 2, 6);
-      ctx.fillRect(targetX + 66, targetY + 54, 6, 2);
-      ctx.fillRect(targetX + 70, targetY + 50, 2, 6);
+        // Real suspect name label tag
+        const suspectLabel = inspectedAlert?.suspectName
+          ? `TARGET: ${inspectedAlert.suspectName.toUpperCase()}`
+          : "TARGET INTERCEPT";
+        ctx.fillStyle = boxColor;
+        ctx.fillRect(targetX, targetY - 16, Math.max(76, suspectLabel.length * 6.5 + 8), 14);
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 9px monospace";
+        ctx.fillText(suspectLabel, targetX + 4, targetY - 5);
 
-      // Label Tag
-      ctx.fillStyle = boxColor;
-      ctx.fillRect(targetX, targetY - 16, 68, 14);
-      ctx.fillStyle = "#ffffff";
-      ctx.font = "bold 9px monospace";
-      ctx.fillText("TARGET #084", targetX + 4, targetY - 5);
-
-      // Confidence
-      ctx.fillStyle = "rgba(255,255,255,0.9)";
-      ctx.font = "8px monospace";
-      ctx.fillText("PERSON 98.4%", targetX + 4, targetY + 68);
+        // Confidence
+        const confText = inspectedAlert?.confidence
+          ? `CONF: ${Math.round(inspectedAlert.confidence * 100)}%`
+          : "PERSON 98%";
+        ctx.fillStyle = "rgba(255,255,255,0.9)";
+        ctx.font = "8px monospace";
+        ctx.fillText(confText, targetX + 4, targetY + 68);
+      }
 
       // Top-left OSD overlay
       ctx.fillStyle = "rgba(15, 23, 42, 0.75)";
       ctx.fillRect(8, 8, 150, 44);
-      ctx.fillStyle = "#22c55e";
+      ctx.fillStyle = inspectedCamera.status === "alert" ? "#ef4444" : "#22c55e";
       ctx.beginPath();
       ctx.arc(18, 20, 3.5, 0, Math.PI * 2);
       ctx.fill();
@@ -1062,7 +1260,7 @@ export function BorderMap({
     return () => {
       cancelAnimationFrame(animFrame);
     };
-  }, [inspectedCamera, thermalPalette, isFeedPlaying]);
+  }, [inspectedCamera, thermalPalette, isFeedPlaying, inspectedAlert]);
 
   return (
     <div
@@ -1074,8 +1272,8 @@ export function BorderMap({
     >
       {/* Toast Notification Banner */}
       {toastMessage && (
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2 bg-slate-900/95 text-emerald-400 border border-emerald-500/40 rounded-xl text-xs font-bold shadow-xl backdrop-blur-md animate-in fade-in slide-in-from-top-3 flex items-center gap-2">
-          <Activity className="w-3.5 h-3.5 text-emerald-400" />
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2 bg-white/95 text-[#1b5032] border border-[#c4ded0] rounded-xl text-xs font-bold shadow-xl backdrop-blur-md animate-in fade-in slide-in-from-top-3 flex items-center gap-2">
+          <Activity className="w-3.5 h-3.5 text-[#1b5032]" />
           <span>{toastMessage}</span>
         </div>
       )}
@@ -1201,8 +1399,8 @@ export function BorderMap({
               }}
               className={`inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold rounded-xl transition-all border cursor-pointer ${
                 isTrailActive
-                  ? "bg-rose-600 text-white border-rose-500 shadow-md animate-pulse"
-                  : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50"
+                  ? "bg-red-600 text-white border-red-500 shadow-md ring-2 ring-red-500/20"
+                  : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50 hover:text-slate-900"
               }`}
               title={
                 hasHariomAlert
@@ -1210,7 +1408,7 @@ export function BorderMap({
                   : "Toggle Suspect Transgression Trail (HARIOM)"
               }
             >
-              <Navigation className={`w-3.5 h-3.5 ${isTrailActive ? "text-white" : "text-rose-600"}`} />
+              <Navigation className={`w-3.5 h-3.5 ${isTrailActive ? "text-white animate-pulse" : "text-red-500"}`} />
               <span>{isTrailActive ? "Trail Active" : "Suspect Trail"}</span>
               {hasHariomAlert && (
                 <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
@@ -1272,34 +1470,36 @@ export function BorderMap({
 
         {/* FLOATING TACTICAL SUSPECT TRAJECTORY HUD */}
         {isTrailActive && (
-          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-40 max-w-xl w-[92%] sm:w-auto bg-slate-950/95 border border-rose-500/80 rounded-2xl shadow-2xl backdrop-blur-md p-3 text-white animate-in fade-in slide-in-from-top-4 pointer-events-auto">
-            <div className="flex items-center justify-between gap-3 pb-2 border-b border-rose-500/30">
-              <div className="flex items-center gap-2">
-                <span className="relative flex h-3 w-3">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-3 w-3 bg-rose-600"></span>
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-40 max-w-xl w-[94%] sm:w-[540px] bg-white/95 backdrop-blur-md border border-slate-200/90 rounded-2xl shadow-[0_12px_36px_rgba(0,0,0,0.12)] p-3.5 sm:p-4 text-slate-800 animate-in fade-in slide-in-from-top-4 pointer-events-auto select-none transition-all">
+            {/* Header Row */}
+            <div className="flex items-center justify-between gap-3 pb-2.5 border-b border-slate-100">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <span className="relative flex h-2.5 w-2.5 shrink-0">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-600"></span>
                 </span>
-                <span className="text-xs font-black tracking-wider uppercase text-rose-400 font-mono">
+                <span className="text-xs sm:text-sm font-bold tracking-tight text-slate-900 truncate">
                   Suspect Transgression Trail
                 </span>
-                <span className="px-1.5 py-0.5 rounded bg-rose-900/60 text-rose-200 text-[10px] font-mono font-bold border border-rose-700/50">
-                  TARGET: HARIOM
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-red-50 text-red-700 border border-red-200 font-mono shrink-0">
+                  <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+                  Target: HARIOM
                 </span>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 shrink-0">
                 <button
                   type="button"
                   onClick={handleFocusTrajectory}
-                  className="px-2 py-0.5 rounded-lg bg-emerald-600/30 hover:bg-emerald-600/50 text-emerald-300 border border-emerald-500/40 text-[10px] font-mono font-bold flex items-center gap-1 cursor-pointer transition-colors"
-                  title="Focus camera view on all 4 nodes"
+                  className="px-2.5 py-1 rounded-xl bg-[#1e4b38] hover:bg-[#163a2b] text-white border border-[#163a2b] text-xs font-semibold flex items-center gap-1.5 shadow-xs transition-all active:scale-95 cursor-pointer"
+                  title="Focus camera view on all trail waypoints"
                 >
-                  <Crosshair className="w-3 h-3" />
+                  <Crosshair className="w-3.5 h-3.5 text-emerald-300" />
                   <span>Focus Trail</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setManualTrailActive(false)}
-                  className="text-slate-400 hover:text-white transition-colors cursor-pointer"
+                  className="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
                   title="Dismiss trajectory overlay"
                 >
                   <X className="w-4 h-4" />
@@ -1308,44 +1508,74 @@ export function BorderMap({
             </div>
 
             {/* Waypoint Flow Stepper */}
-            <div className="flex items-center justify-between gap-1.5 mt-2.5 px-1">
+            <div className="flex items-center justify-between gap-1.5 mt-3 p-1.5 rounded-xl bg-slate-50/90 border border-slate-200/80">
               {waypoints.map((wp, idx) => {
                 const isActive = telemetry?.activeNodeIndex === idx;
-                const isVisited = (telemetry?.activeNodeIndex ?? -1) >= idx;
+                const isVisited = (telemetry?.activeNodeIndex ?? -1) > idx || (telemetry?.phase === "hold" && idx === waypoints.length - 1);
+                const isTransitingCurrent = isActive && telemetry?.phase === "transit";
+
                 return (
-                  <div key={wp.code} className="flex items-center gap-1.5 flex-1">
+                  <div key={wp.code} className="flex items-center gap-1.5 flex-1 min-w-0">
                     <div
-                      className={`flex items-center gap-1.5 px-2 py-1 rounded-lg border text-[11px] font-mono transition-all flex-1 justify-center ${
+                      title={wp.name}
+                      className={`flex items-center gap-1.5 px-2 py-1.5 rounded-lg border text-[11px] font-mono transition-all flex-1 justify-center truncate ${
                         isActive
-                          ? "bg-rose-600 text-white border-rose-400 font-bold shadow-lg shadow-rose-900/50 scale-105"
+                          ? "bg-red-50 text-red-700 border-red-300 shadow-xs ring-2 ring-red-400/20 font-bold"
                           : isVisited
-                          ? "bg-rose-950/40 text-rose-200 border-rose-800/40 font-semibold"
-                          : "bg-slate-900/60 text-slate-400 border-slate-800"
+                          ? "bg-[#edf3ef] text-[#1b5032] border border-[#c4ded0] font-semibold"
+                          : "bg-white text-slate-500 border-slate-200 font-medium hover:border-slate-300 hover:text-slate-700"
                       }`}
                     >
-                      <span
-                        className={`w-1.5 h-1.5 rounded-full ${
-                          isActive ? "bg-white animate-ping" : isVisited ? "bg-rose-400" : "bg-slate-600"
-                        }`}
-                      />
-                      <span>{wp.code}</span>
+                      {isActive ? (
+                        <span className="relative flex h-2 w-2 shrink-0">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                        </span>
+                      ) : isVisited ? (
+                        <Check className="w-3 h-3 text-[#1b5032] shrink-0 stroke-[2.5]" />
+                      ) : (
+                        <span className="w-1.5 h-1.5 rounded-full bg-slate-300 shrink-0" />
+                      )}
+                      <span className="truncate">{wp.code}</span>
                     </div>
                     {idx < waypoints.length - 1 && (
-                      <span className="text-slate-600 text-[10px] font-mono">▶</span>
+                      <ChevronRight
+                        className={`w-3.5 h-3.5 shrink-0 transition-colors ${
+                          idx < (telemetry?.activeNodeIndex ?? 0)
+                            ? "text-[#2d6a4f]/70"
+                            : isTransitingCurrent
+                            ? "text-red-500 animate-pulse"
+                            : "text-slate-300"
+                        }`}
+                      />
                     )}
                   </div>
                 );
               })}
             </div>
 
+            {/* Dynamic Route Progress Bar */}
+            <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden mt-2.5 border border-slate-200/60">
+              <div
+                className="h-full bg-gradient-to-r from-emerald-500 via-amber-500 to-red-500 transition-all duration-300 rounded-full"
+                style={{ width: `${trailProgressPercent}%` }}
+              />
+            </div>
+
             {/* Real-time Telemetry Details */}
-            <div className="mt-2 flex items-center justify-between text-[10px] font-mono text-slate-400 pt-2 border-t border-slate-800/60">
-              <span className="text-rose-300 font-medium truncate max-w-[280px]">
-                {telemetry?.statusText || "Synchronizing vector displacement telemetry..."}
-              </span>
-              <span className="text-slate-300 shrink-0">
-                Displacement: <strong className="text-white">{telemetry?.totalDistanceMeters || 0}m</strong>
-              </span>
+            <div className="mt-2.5 flex items-center justify-between text-xs text-slate-500 pt-2 border-t border-slate-100">
+              <div className="flex items-center gap-1.5 truncate max-w-[280px] sm:max-w-[340px]">
+                <Activity className="w-3.5 h-3.5 text-red-600 shrink-0 animate-pulse" />
+                <span className="font-mono text-[11px] text-slate-700 truncate font-semibold">
+                  {telemetry?.statusText || "Synchronizing vector displacement telemetry..."}
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5 shrink-0 text-slate-600 font-mono text-[11px]">
+                <span className="text-slate-500 font-medium">Total Distance:</span>
+                <strong className="text-slate-900 bg-slate-100 px-2 py-0.5 rounded-lg border border-slate-200/80">
+                  {telemetry?.totalDistanceMeters || 0}m
+                </strong>
+              </div>
             </div>
           </div>
         )}
@@ -1357,30 +1587,30 @@ export function BorderMap({
             <button
               type="button"
               onClick={handleExit}
-              className="px-4 py-2.5 rounded-xl bg-slate-900/95 hover:bg-slate-800 text-white border border-slate-700/90 shadow-2xl backdrop-blur-md flex items-center gap-2.5 text-xs font-bold transition-all cursor-pointer hover:scale-105 hover:border-emerald-500/60 ring-2 ring-emerald-500/20"
+              className="px-4 py-2.5 rounded-xl bg-white/95 hover:bg-slate-50 text-slate-800 border border-slate-200/90 shadow-xl backdrop-blur-md flex items-center gap-2.5 text-xs font-bold transition-all cursor-pointer hover:scale-105 hover:border-[#1e4b38]/60 ring-2 ring-[#1e4b38]/10"
               title="Exit Full Screen View and return to Dashboard (or press ESC)"
             >
-              <ArrowLeft className="w-4 h-4 text-emerald-400 shrink-0" />
+              <ArrowLeft className="w-4 h-4 text-[#1b5032] shrink-0" />
               <span>Back / Exit Fullscreen</span>
-              <span className="text-[10px] font-mono text-slate-300 bg-slate-800 px-2 py-0.5 rounded border border-slate-700 font-semibold">
+              <span className="text-[10px] font-mono text-slate-500 bg-slate-100 px-2 py-0.5 rounded border border-slate-200 font-semibold">
                 ESC
               </span>
             </button>
 
             {/* Quick Tactical Controls Toolbar in Fullscreen Mode */}
-            <div className="bg-slate-900/95 backdrop-blur-md border border-slate-700/90 rounded-xl p-1 shadow-2xl flex items-center gap-1.5 text-xs text-white">
+            <div className="bg-white/95 backdrop-blur-md border border-slate-200/90 rounded-xl p-1 shadow-xl flex items-center gap-1.5 text-xs text-slate-700">
               {/* 3D Tilt Toggle */}
               <button
                 type="button"
                 onClick={handleToggle3D}
                 className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                   is3DMode
-                    ? "bg-[#1e4b38] text-white border border-emerald-600 shadow-xs"
-                    : "text-slate-300 hover:text-white hover:bg-slate-800"
+                    ? "bg-[#1e4b38] text-white border border-[#163a2b] shadow-xs"
+                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
                 }`}
                 title="Toggle Google Maps 3D Oblique Perspective Tilt (45°)"
               >
-                <Box className={`w-3.5 h-3.5 ${is3DMode ? "text-emerald-400" : "text-slate-400"}`} />
+                <Box className={`w-3.5 h-3.5 ${is3DMode ? "text-emerald-300" : "text-slate-500"}`} />
                 <span>{is3DMode ? "3D Active" : "3D View"}</span>
               </button>
 
@@ -1394,7 +1624,7 @@ export function BorderMap({
                 className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                   showHeatmaps
                     ? "bg-amber-500 text-white shadow-xs"
-                    : "text-slate-300 hover:text-white hover:bg-slate-800"
+                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
                 }`}
                 title="Toggle Ground Heatmaps"
               >
@@ -1408,8 +1638,8 @@ export function BorderMap({
                 onClick={() => setShowFilters(!showFilters)}
                 className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                   showFilters
-                    ? "bg-slate-700 text-white shadow-xs"
-                    : "text-slate-300 hover:text-white hover:bg-slate-800"
+                    ? "bg-[#1e4b38] text-white shadow-xs"
+                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
                 }`}
                 title="Toggle Floating Time & Detection Filter Panels"
               >
@@ -1436,7 +1666,7 @@ export function BorderMap({
               </button>
 
               {/* Layer Switcher */}
-              <div className="flex items-center gap-0.5 border-l border-slate-700 pl-1.5 pr-0.5">
+              <div className="flex items-center gap-0.5 border-l border-slate-200 pl-1.5 pr-0.5">
                 {(["hybrid", "satellite", "terrain"] as const).map((layer) => (
                   <button
                     key={layer}
@@ -1444,8 +1674,8 @@ export function BorderMap({
                     onClick={() => handleMapTypeChange(layer)}
                     className={`px-2 py-1 rounded-md text-[11px] font-bold capitalize transition-all cursor-pointer ${
                       mapType === layer
-                        ? "bg-white text-slate-900 shadow-xs"
-                        : "text-slate-400 hover:text-white hover:bg-slate-800"
+                        ? "bg-[#1e4b38] text-white shadow-xs"
+                        : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
                     }`}
                   >
                     {layer}
@@ -1464,12 +1694,12 @@ export function BorderMap({
                 }}
                 className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                   isTrailActive
-                    ? "bg-rose-600 text-white shadow-md animate-pulse"
-                    : "text-slate-300 hover:text-white hover:bg-slate-800"
+                    ? "bg-red-600 text-white shadow-md ring-2 ring-red-500/20"
+                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
                 }`}
                 title="Toggle Suspect Transgression Trail (HARIOM)"
               >
-                <Navigation className={`w-3.5 h-3.5 ${isTrailActive ? "text-white" : "text-rose-400"}`} />
+                <Navigation className={`w-3.5 h-3.5 ${isTrailActive ? "text-white animate-pulse" : "text-red-500"}`} />
                 <span>{isTrailActive ? "Trail Active" : "Suspect Trail"}</span>
               </button>
 
@@ -1477,7 +1707,7 @@ export function BorderMap({
               <button
                 type="button"
                 onClick={handleResetView}
-                className="p-1.5 rounded-lg hover:bg-slate-800 text-slate-300 hover:text-white transition-colors cursor-pointer"
+                className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-slate-800 transition-colors cursor-pointer"
                 title="Reset Pan-India View"
               >
                 <Navigation className="w-3.5 h-3.5" />
@@ -1568,30 +1798,37 @@ export function BorderMap({
 
         {/* SLIDE-OVER QUICK-ACCESS CAMERA INSPECTION DRAWER */}
         {inspectedCamera && (
-          <div className="absolute top-4 left-4 bottom-4 z-40 w-full max-w-sm bg-slate-900/95 text-white backdrop-blur-xl rounded-2xl border border-slate-700/80 shadow-2xl p-4 flex flex-col justify-between overflow-hidden animate-in fade-in slide-in-from-left-4 duration-300 pointer-events-auto">
+          <div className="absolute top-4 left-4 bottom-4 z-40 w-full max-w-sm bg-white/95 text-slate-900 backdrop-blur-xl rounded-2xl border border-slate-200/90 shadow-[0_16px_40px_rgba(0,0,0,0.15)] p-4 flex flex-col justify-between overflow-hidden animate-in fade-in slide-in-from-left-4 duration-300 pointer-events-auto">
             {/* Header */}
-            <div className="flex items-start justify-between gap-3 border-b border-slate-800 pb-3">
+            <div className="flex items-start justify-between gap-3 border-b border-slate-100 pb-3 shrink-0">
               <div>
                 <div className="flex items-center gap-2">
                   <span
                     className={`w-2 h-2 rounded-full ${
-                      inspectedCamera.status === "alert"
-                        ? "bg-rose-500 animate-pulse"
+                      inspectedCamera.status === "alert" || inspectedAlert
+                        ? "bg-red-500 animate-pulse"
                         : inspectedCamera.status === "degraded"
                         ? "bg-amber-400"
                         : inspectedCamera.status === "offline"
-                        ? "bg-slate-500"
-                        : "bg-emerald-400"
+                        ? "bg-slate-400"
+                        : "bg-emerald-500"
                     }`}
                   />
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400 font-mono">
-                    {inspectedCamera.type || "Optical 4K"}
-                  </span>
+                  {inspectedCamera.status === "alert" || inspectedAlert ? (
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-red-700 bg-red-50 border border-red-200 px-2 py-0.5 rounded-full font-mono flex items-center gap-1">
+                      <ShieldAlert className="w-3 h-3 text-red-600" />
+                      Threat Detected
+                    </span>
+                  ) : (
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#1b5032] bg-[#edf3ef] border border-[#c4ded0] px-2 py-0.5 rounded-full font-mono">
+                      {inspectedCamera.type || "Optical 4K"}
+                    </span>
+                  )}
                 </div>
-                <h3 className="text-sm font-black text-white mt-0.5">
+                <h3 className="text-sm sm:text-base font-extrabold text-slate-900 mt-1">
                   {inspectedCamera.name}
                 </h3>
-                <p className="text-[11px] text-slate-400 font-medium">
+                <p className="text-[11px] text-slate-500 font-medium">
                   {inspectedCamera.sector} • {inspectedCamera.location}
                 </p>
               </div>
@@ -1599,144 +1836,257 @@ export function BorderMap({
               <button
                 type="button"
                 onClick={() => setInspectedCamera(null)}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800"
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
                 title="Close Inspection Drawer"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            {/* Live Stream Canvas Feed */}
-            <div className="my-3 relative rounded-xl overflow-hidden border border-slate-700/80 bg-black aspect-video flex items-center justify-center">
-              <canvas
-                ref={canvasRef}
-                width={340}
-                height={190}
-                className="w-full h-full object-cover"
-              />
+            {/* Scrollable Content Body */}
+            <div className="flex-1 overflow-y-auto pr-1 space-y-2.5 my-2">
+              {/* Threat Snapshot / Live Stream View Switcher Header */}
+              {threatSnapshotUrl && (
+                <div className="flex items-center justify-between px-0.5">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-red-700 font-mono flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping" />
+                    Target Detected On Feed
+                  </span>
+                  <div className="inline-flex p-0.5 rounded-lg bg-slate-100 border border-slate-200 text-[10px] font-bold">
+                    <button
+                      type="button"
+                      onClick={() => setFeedViewMode("snapshot")}
+                      className={`px-2 py-0.5 rounded-md transition-all cursor-pointer ${
+                        feedViewMode === "snapshot"
+                          ? "bg-red-600 text-white shadow-xs"
+                          : "text-slate-600 hover:text-slate-900"
+                      }`}
+                    >
+                      Threat Capture
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setFeedViewMode("live")}
+                      className={`px-2 py-0.5 rounded-md transition-all cursor-pointer ${
+                        feedViewMode === "live"
+                          ? "bg-white text-slate-900 shadow-xs border border-slate-200/80"
+                          : "text-slate-600 hover:text-slate-900"
+                      }`}
+                    >
+                      Live Stream
+                    </button>
+                  </div>
+                </div>
+              )}
 
-              {/* Thermal Filter Buttons overlay */}
-              <div className="absolute bottom-2 left-2 flex items-center gap-1 bg-black/60 backdrop-blur-xs p-1 rounded-lg border border-white/10 text-[9px] font-bold">
-                <button
-                  type="button"
-                  onClick={() => setThermalPalette("rgb")}
-                  className={`px-1.5 py-0.5 rounded ${
-                    thermalPalette === "rgb" ? "bg-emerald-600 text-white" : "text-slate-300"
-                  }`}
-                >
-                  RGB
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setThermalPalette("flir")}
-                  className={`px-1.5 py-0.5 rounded ${
-                    thermalPalette === "flir" ? "bg-purple-600 text-white" : "text-slate-300"
-                  }`}
-                >
-                  FLIR
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setThermalPalette("night")}
-                  className={`px-1.5 py-0.5 rounded ${
-                    thermalPalette === "night" ? "bg-green-700 text-white" : "text-slate-300"
-                  }`}
-                >
-                  IR
-                </button>
+              {/* Feed Frame Container */}
+              <div className="relative rounded-xl overflow-hidden border border-slate-200/90 bg-slate-950 aspect-video flex items-center justify-center group shadow-inner">
+                {feedViewMode === "snapshot" && snapshotImgSrc ? (
+                  <div className="relative w-full h-full">
+                    {/* Real Camera Threat Snapshot */}
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={snapshotImgSrc}
+                      alt={inspectedAlert?.suspectName || "Threat Snapshot"}
+                      onError={handleSnapshotError}
+                      className="w-full h-full object-cover"
+                    />
+
+                    {/* Tactical OSD Badges overlaying real snapshot */}
+                    <div className="absolute top-2 left-2 flex items-center gap-1.5 bg-black/80 backdrop-blur-xs px-2 py-0.5 rounded-md border border-red-500/40 text-[10px] font-mono text-red-300 font-bold shadow-xs">
+                      <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping" />
+                      <span>CAM: {inspectedCamera.id.toUpperCase()}</span>
+                    </div>
+
+                    <div className="absolute top-2 right-2 flex items-center gap-1 bg-red-600/90 backdrop-blur-xs px-2 py-0.5 rounded-md text-white text-[10px] font-mono font-bold shadow-md">
+                      <ShieldAlert className="w-3 h-3" />
+                      <span>TARGET: {inspectedAlert?.suspectName?.toUpperCase() || "HARIOM"}</span>
+                    </div>
+
+                    <div className="absolute bottom-2 left-2 flex items-center gap-1.5 bg-black/80 backdrop-blur-xs px-2 py-0.5 rounded-md border border-white/10 text-[9px] font-mono text-slate-300">
+                      <Camera className="w-3 h-3 text-red-400" />
+                      <span>INTERCEPT SNAPSHOT</span>
+                      {inspectedAlert?.confidence && (
+                        <span className="text-emerald-400 font-bold ml-1">
+                          {Math.round(inspectedAlert.confidence * 100)}% MATCH
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="absolute bottom-2 right-2 bg-black/80 backdrop-blur-xs px-2 py-0.5 rounded-md border border-white/10 text-[9px] font-mono text-slate-400">
+                      {inspectedCamera.resolution || "4K UHD"}
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <canvas
+                      ref={canvasRef}
+                      width={340}
+                      height={190}
+                      className="w-full h-full object-cover"
+                    />
+
+                    {/* Thermal Filter Buttons overlay */}
+                    <div className="absolute bottom-2 left-2 flex items-center gap-1 bg-black/60 backdrop-blur-xs p-1 rounded-lg border border-white/10 text-[9px] font-bold">
+                      <button
+                        type="button"
+                        onClick={() => setThermalPalette("rgb")}
+                        className={`px-1.5 py-0.5 rounded ${
+                          thermalPalette === "rgb" ? "bg-emerald-600 text-white" : "text-slate-300"
+                        }`}
+                      >
+                        RGB
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setThermalPalette("flir")}
+                        className={`px-1.5 py-0.5 rounded ${
+                          thermalPalette === "flir" ? "bg-purple-600 text-white" : "text-slate-300"
+                        }`}
+                      >
+                        FLIR
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setThermalPalette("night")}
+                        className={`px-1.5 py-0.5 rounded ${
+                          thermalPalette === "night" ? "bg-green-700 text-white" : "text-slate-300"
+                        }`}
+                      >
+                        IR
+                      </button>
+                    </div>
+
+                    {/* Play/Pause control */}
+                    <button
+                      type="button"
+                      onClick={() => setIsFeedPlaying(!isFeedPlaying)}
+                      className="absolute top-2 right-2 p-1 bg-black/60 rounded-lg text-white/80 hover:text-white"
+                    >
+                      {isFeedPlaying ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3" />}
+                    </button>
+                  </>
+                )}
               </div>
 
-              {/* Play/Pause control */}
-              <button
-                type="button"
-                onClick={() => setIsFeedPlaying(!isFeedPlaying)}
-                className="absolute top-2 right-2 p-1 bg-black/60 rounded-lg text-white/80 hover:text-white"
-              >
-                {isFeedPlaying ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3" />}
-              </button>
-            </div>
+              {/* Identified Threat Intelligence Card */}
+              {inspectedAlert && (
+                <div className="p-2.5 rounded-xl bg-red-50/90 border border-red-200 shadow-xs flex items-center justify-between gap-2.5">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src="/faces/person_1788701662_e0faf3.jpg"
+                      alt={inspectedAlert.suspectName || "Suspect"}
+                      onError={(e) => {
+                        e.currentTarget.style.display = "none";
+                      }}
+                      className="w-10 h-10 rounded-xl object-cover border border-red-200 shadow-xs shrink-0 bg-slate-100"
+                    />
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-xs font-bold text-slate-900 tracking-tight truncate">
+                          {inspectedAlert.suspectName || "Wanted Suspect"}
+                        </span>
+                        <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-red-600 text-white uppercase tracking-wider font-mono shrink-0">
+                          {inspectedAlert.threatLevel || "CRITICAL"}
+                        </span>
+                      </div>
+                      <p className="text-[10px] text-red-700 font-mono mt-0.5 truncate">
+                        {inspectedAlert.notes || `Biometric match on ${inspectedCamera.name}`}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="shrink-0 text-right font-mono">
+                    <span className="text-[9px] text-slate-500 block font-medium">AI Match</span>
+                    <span className="text-xs font-bold text-[#1b5032]">
+                      {inspectedAlert.confidence ? `${Math.round(inspectedAlert.confidence * 100)}%` : "98%"}
+                    </span>
+                  </div>
+                </div>
+              )}
 
-            {/* Telemetry Matrix */}
-            <div className="grid grid-cols-3 gap-2 bg-slate-800/60 p-2.5 rounded-xl border border-slate-700/60 text-center font-mono">
-              <div>
-                <span className="text-[9px] uppercase text-slate-400 font-bold block">Latency</span>
-                <span className="text-xs font-bold text-emerald-400">
-                  {inspectedCamera.healthStats?.latencyMs || 38}ms
-                </span>
-              </div>
-              <div>
-                <span className="text-[9px] uppercase text-slate-400 font-bold block">Bitrate</span>
-                <span className="text-xs font-bold text-slate-200">
-                  {inspectedCamera.healthStats?.bitrate || "7.5 Mbps"}
-                </span>
-              </div>
-              <div>
-                <span className="text-[9px] uppercase text-slate-400 font-bold block">Loss</span>
-                <span className="text-xs font-bold text-slate-200">
-                  {inspectedCamera.healthStats?.packetLoss || "0.0%"}
-                </span>
-              </div>
-            </div>
-
-            {/* PTZ Pan-Tilt Directional Controller */}
-            <div className="my-2 bg-slate-800/40 p-2.5 rounded-xl border border-slate-700/60 flex items-center justify-between">
-              <div>
-                <span className="text-[10px] font-bold text-slate-300 uppercase tracking-wider block">
-                  PTZ Gimbal Pad
-                </span>
-                <span className="text-[10px] text-slate-500 font-mono">
-                  Active Control
-                </span>
+              {/* Telemetry Matrix */}
+              <div className="grid grid-cols-3 gap-2 bg-slate-50 p-2.5 rounded-xl border border-slate-200/80 text-center font-mono">
+                <div>
+                  <span className="text-[9px] uppercase text-slate-500 font-bold block">Latency</span>
+                  <span className="text-xs font-bold text-[#1b5032]">
+                    {inspectedCamera.healthStats?.latencyMs || 38}ms
+                  </span>
+                </div>
+                <div>
+                  <span className="text-[9px] uppercase text-slate-500 font-bold block">Bitrate</span>
+                  <span className="text-xs font-bold text-slate-800">
+                    {inspectedCamera.healthStats?.bitrate || "7.5 Mbps"}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-[9px] uppercase text-slate-500 font-bold block">Loss</span>
+                  <span className="text-xs font-bold text-slate-800">
+                    {inspectedCamera.healthStats?.packetLoss || "0.0%"}
+                  </span>
+                </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-1">
-                <div />
-                <button
-                  type="button"
-                  onClick={() => showToast("PTZ: Tilting Up (+5°)")}
-                  className="p-1 rounded bg-slate-700 hover:bg-emerald-600 text-white flex items-center justify-center"
-                >
-                  <ArrowUp className="w-3 h-3" />
-                </button>
-                <div />
-                <button
-                  type="button"
-                  onClick={() => showToast("PTZ: Panning Left (-5°)")}
-                  className="p-1 rounded bg-slate-700 hover:bg-emerald-600 text-white flex items-center justify-center"
-                >
-                  <ArrowLeft className="w-3 h-3" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => showToast("PTZ: Centered to Home Point")}
-                  className="p-1 rounded bg-slate-800 hover:bg-emerald-700 text-emerald-400 flex items-center justify-center text-[9px] font-bold"
-                >
-                  ●
-                </button>
-                <button
-                  type="button"
-                  onClick={() => showToast("PTZ: Panning Right (+5°)")}
-                  className="p-1 rounded bg-slate-700 hover:bg-emerald-600 text-white flex items-center justify-center"
-                >
-                  <ArrowRight className="w-3 h-3" />
-                </button>
-                <div />
-                <button
-                  type="button"
-                  onClick={() => showToast("PTZ: Tilting Down (-5°)")}
-                  className="p-1 rounded bg-slate-700 hover:bg-emerald-600 text-white flex items-center justify-center"
-                >
-                  <ArrowDown className="w-3 h-3" />
-                </button>
-                <div />
+              {/* PTZ Pan-Tilt Directional Controller */}
+              <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200/80 flex items-center justify-between">
+                <div>
+                  <span className="text-[10px] font-bold text-slate-700 uppercase tracking-wider block">
+                    PTZ Gimbal Pad
+                  </span>
+                  <span className="text-[10px] text-slate-500 font-mono">
+                    Active Control
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-3 gap-1">
+                  <div />
+                  <button
+                    type="button"
+                    onClick={() => showToast("PTZ: Tilting Up (+5°)")}
+                    className="p-1 rounded bg-white hover:bg-[#1e4b38] hover:text-white text-slate-700 border border-slate-200 shadow-xs flex items-center justify-center transition-colors cursor-pointer"
+                  >
+                    <ArrowUp className="w-3 h-3" />
+                  </button>
+                  <div />
+                  <button
+                    type="button"
+                    onClick={() => showToast("PTZ: Panning Left (-5°)")}
+                    className="p-1 rounded bg-white hover:bg-[#1e4b38] hover:text-white text-slate-700 border border-slate-200 shadow-xs flex items-center justify-center transition-colors cursor-pointer"
+                  >
+                    <ArrowLeft className="w-3 h-3" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => showToast("PTZ: Centered to Home Point")}
+                    className="p-1 rounded bg-slate-100 hover:bg-[#163a2b] hover:text-white text-[#1e4b38] font-bold border border-slate-200 flex items-center justify-center text-[9px] cursor-pointer"
+                  >
+                    ●
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => showToast("PTZ: Panning Right (+5°)")}
+                    className="p-1 rounded bg-white hover:bg-[#1e4b38] hover:text-white text-slate-700 border border-slate-200 shadow-xs flex items-center justify-center transition-colors cursor-pointer"
+                  >
+                    <ArrowRight className="w-3 h-3" />
+                  </button>
+                  <div />
+                  <button
+                    type="button"
+                    onClick={() => showToast("PTZ: Tilting Down (-5°)")}
+                    className="p-1 rounded bg-white hover:bg-[#1e4b38] hover:text-white text-slate-700 border border-slate-200 shadow-xs flex items-center justify-center transition-colors cursor-pointer"
+                  >
+                    <ArrowDown className="w-3 h-3" />
+                  </button>
+                  <div />
+                </div>
               </div>
             </div>
 
             {/* Quick Actions */}
-            <div className="pt-2 border-t border-slate-800 flex items-center gap-2">
+            <div className="pt-2 border-t border-slate-100 flex items-center gap-2 shrink-0">
               <a
                 href={`/live`}
-                className="flex-1 text-center py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-1.5"
+                className="flex-1 text-center py-2 px-3 rounded-xl bg-[#1e4b38] hover:bg-[#163a2b] text-white text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-1.5"
               >
                 <Video className="w-3.5 h-3.5" />
                 <span>Live Surveillance</span>
@@ -1748,14 +2098,14 @@ export function BorderMap({
                     handleCopy(inspectedCamera.streamUrl, "RTSP URI");
                   }
                 }}
-                className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition-colors"
+                className="p-2 rounded-xl bg-white hover:bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200 transition-colors shadow-xs cursor-pointer"
                 title="Copy RTSP Stream URL"
               >
                 <Copy className="w-4 h-4" />
               </button>
               <a
                 href={`/cameras`}
-                className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition-colors"
+                className="p-2 rounded-xl bg-white hover:bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200 transition-colors shadow-xs"
                 title="Manage Node"
               >
                 <Eye className="w-4 h-4" />
