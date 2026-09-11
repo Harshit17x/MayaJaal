@@ -695,6 +695,8 @@ async def rtsp_tracking(
                     tracked_objects=tracked_dicts,
                     frame_resolution=(orig_w, orig_h),
                     auto_alert=True,
+                    frame=frame,
+                    camera_name=f"Camera {camera_id}",
                 )
             except Exception as geo_err:
                 logger.debug("Geofence evaluation skip in RTSP tracking: %s", geo_err)

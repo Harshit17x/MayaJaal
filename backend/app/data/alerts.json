@@ -1,5 +1,29 @@
 [
   {
+    "id": "alert-1789118027610-82f4",
+    "title": "Geofence Breach: Joint Check Post Restricted Perimeter",
+    "location": "Sector Grid [bop-jk-02] \u2014 Joint Check Post Restricted Perimeter",
+    "time": "Just now",
+    "timestamp": 1789118027610,
+    "severity": "HIGH",
+    "cameraId": "bop-jk-02",
+    "cameraName": "Audi 2 Outpost",
+    "className": "person",
+    "confidence": 0.89,
+    "acknowledged": false,
+    "box": [
+      200.0,
+      150.0,
+      280.0,
+      380.0
+    ],
+    "snapshotUrl": "/api/alerts/snapshots/breach_1789118027575_bop-jk-02_tr99.jpg",
+    "suspectName": null,
+    "threatLevel": "HIGH",
+    "category": "geofence_breach",
+    "notes": "Track #99 (person) entered restricted zone. Footpoint: (0.38, 0.79)"
+  },
+  {
     "id": "alert-1789067156632-4a03",
     "title": "Tripwire Breach: Api Test Infiltration Wire [FORWARD]",
     "location": "Camera bop-jk-01",
@@ -17,7 +41,7 @@
       480.0,
       780.0
     ],
-    "snapshotUrl": null,
+    "snapshotUrl": "/api/alerts/snapshots/breach_1789117968271_bop-jk-01_tr5.jpg",
     "suspectName": null,
     "threatLevel": "CRITICAL",
     "category": "tripwire_violation",
@@ -41,7 +65,7 @@
       550.0,
       550.0
     ],
-    "snapshotUrl": null,
+    "snapshotUrl": "/api/alerts/snapshots/breach_1789117968287_cam-test-eval_tr5.jpg",
     "suspectName": null,
     "threatLevel": "CRITICAL",
     "category": "geofence_breach",
@@ -65,7 +89,7 @@
       550.0,
       550.0
     ],
-    "snapshotUrl": null,
+    "snapshotUrl": "/api/alerts/snapshots/breach_1789117968302_cam-test-eval_tr5.jpg",
     "suspectName": null,
     "threatLevel": "HIGH",
     "category": "tripwire_violation",

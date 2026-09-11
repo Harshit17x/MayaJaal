@@ -4,7 +4,7 @@
     "name": "Audi 1",
     "sector": "Sector-04 (Jammu - RS Pura)",
     "location": "Pillar 42 \u2014 Forward Barbed Fence",
-    "status": "alert",
+    "status": "online",
     "type": "Optical 4K",
     "latitude": 23.15421,
     "longitude": 72.885257,
@@ -1495,9 +1495,9 @@
     "status": "alert",
     "type": "Optical 4K",
     "latitude": 23.15305,
-    "longitude": 72.88580,
+    "longitude": 72.8858,
     "coordinates": [
-      72.88580,
+      72.8858,
       23.15305
     ],
     "ipAddress": "10.20.90.103",
@@ -1525,11 +1525,11 @@
     "location": "IT & Cyber Security Wing South",
     "status": "alert",
     "type": "Thermal FLIR",
-    "latitude": 23.15300,
+    "latitude": 23.153,
     "longitude": 72.88975,
     "coordinates": [
       72.88975,
-      23.15300
+      23.153
     ],
     "ipAddress": "10.20.90.104",
     "port": 554,
@@ -1538,8 +1538,8 @@
     "modelAssigned": "best.onnx (Threat Detector)",
     "resolution": "1080p Thermal",
     "fps": 25,
-    "confThreshold": 0.80,
-    "iouThreshold": 0.50,
+    "confThreshold": 0.8,
+    "iouThreshold": 0.5,
     "isRecording": true,
     "alertTriggerEnabled": true,
     "lastActive": "Just now",
