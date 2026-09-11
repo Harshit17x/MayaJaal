@@ -1,4 +1,4 @@
-# MayaJaal (मायाजाल)
+# MayaJaal (Maatrix)
 ### Intelligent Video Analytics Platform for Border Surveillance
 **Smart India Hackathon (Problem Statement: SIH26187)**
 
