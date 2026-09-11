@@ -14,7 +14,7 @@
 
 ## 1. Overview
 
-**MayaJaal (मायाजाल)** is an enterprise-grade, tactical AI-powered video analytics platform engineered for border security outposts and perimeter surveillance. Designed to integrate directly with existing legacy CCTV and IP camera infrastructure, MayaJaal converts passive video feeds into a proactive, high-precision border defense grid.
+**MayaJaal (Matrix)** is an enterprise-grade, tactical AI-powered video analytics platform engineered for border security outposts and perimeter surveillance. Designed to integrate directly with existing legacy CCTV and IP camera infrastructure, MayaJaal converts passive video feeds into a proactive, high-precision border defense grid.
 
 The platform provides operators with autonomous multi-threat detection, cross-camera intruder trajectory reconstruction, polygonal perimeter geofencing, facial recognition against national watchlists, automatic number plate recognition (ANPR), and real-time situational awareness on a tactical GIS border map.
 
