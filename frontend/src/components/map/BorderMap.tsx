@@ -35,7 +35,6 @@ import {
   Eye,
   Search,
   ChevronRight,
-  ShieldAlert,
 } from "lucide-react";
 import { Camera as CameraEntity, CameraStatus, CameraType } from "@/types/camera";
 import { useCameras } from "@/lib/camerasStore";

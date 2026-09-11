@@ -23,9 +23,14 @@ import {
   Maximize2,
   Minimize2,
   ScanFace,
+  ShieldCheck,
+  ShieldAlert,
+  Clock,
+  ChevronDown,
+  Lock,
 } from "lucide-react";
 import { useAlerts } from "@/lib/alertsStore";
-import { useAuth } from "@/lib/authStore";
+import { useAuth, getRemainingShiftTime, isSessionExpired } from "@/lib/authStore";
 import { TacticalThreatToast } from "@/components/alerts/TacticalThreatToast";
 
 interface NavItem {
@@ -43,9 +48,12 @@ export default function OperatorLayout({
 }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { operator, logout } = useAuth();
+  const { operator, isAuthenticated, isLoading, logout } = useAuth();
   const { unacknowledgedCount } = useAlerts();
   const [searchQuery, setSearchQuery] = useState("");
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [shiftRemaining, setShiftRemaining] = useState<string>("");
+  const profileMenuRef = useRef<HTMLDivElement | null>(null);
   const [currentTimestamp, setCurrentTimestamp] = useState<{
     date: string;
     time: string;
@@ -53,6 +61,48 @@ export default function OperatorLayout({
     date: "09 Sep 2026",
     time: "10:24:00",
   });
+
+  // Client-side authentication guard: immediately redirect unauthenticated users
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      router.replace(`/login?redirect=${encodeURIComponent(pathname)}`);
+    }
+  }, [isLoading, isAuthenticated, pathname, router]);
+
+  // Periodic duty shift timer and auto-expiration monitor
+  useEffect(() => {
+    if (!operator) return;
+
+    const updateShift = () => {
+      if (isSessionExpired(operator)) {
+        logout();
+        router.replace(
+          `/login?reason=expired&redirect=${encodeURIComponent(pathname)}`
+        );
+        return;
+      }
+      const rem = getRemainingShiftTime(operator.expiresAt);
+      setShiftRemaining((prev) => (prev === rem.formatted ? prev : rem.formatted));
+    };
+
+    updateShift();
+    const interval = setInterval(updateShift, 1000);
+    return () => clearInterval(interval);
+  }, [operator?.badgeNumber, operator?.expiresAt, logout, pathname, router]);
+
+  // Close profile dropdown on outside click
+  useEffect(() => {
+    const handleOutsideClick = (e: MouseEvent) => {
+      if (
+        profileMenuRef.current &&
+        !profileMenuRef.current.contains(e.target as Node)
+      ) {
+        setShowProfileMenu(false);
+      }
+    };
+    document.addEventListener("mousedown", handleOutsideClick);
+    return () => document.removeEventListener("mousedown", handleOutsideClick);
+  }, []);
 
   // Sidebar modes:
   // "rail" = compact icon rail (68px) that expands to 256px on hover
@@ -117,7 +167,10 @@ export default function OperatorLayout({
         hour12: false,
         timeZone: "Asia/Kolkata",
       });
-      setCurrentTimestamp({ date, time });
+      setCurrentTimestamp((prev) => {
+        if (prev.date === date && prev.time === time) return prev;
+        return { date, time };
+      });
     };
 
     updateTime();
@@ -187,6 +240,40 @@ export default function OperatorLayout({
       icon: Cpu,
     },
   ];
+
+  // Render high-security clearance loading gate while determining session state
+  if (isLoading) {
+    return (
+      <div className="fixed inset-0 z-50 bg-[#edf3ef] flex flex-col items-center justify-center select-none text-slate-800">
+        <div className="relative mb-6">
+          <div className="w-20 h-20 rounded-2xl bg-white border border-emerald-200/80 shadow-xl flex items-center justify-center p-3.5">
+            <img
+              src="/images/logo/maatrix-emblem.png"
+              alt="MAATRIX Logo"
+              className="w-full h-full object-contain animate-pulse"
+            />
+          </div>
+          <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-emerald-700 text-white flex items-center justify-center shadow-md">
+            <ShieldCheck className="w-3.5 h-3.5" />
+          </div>
+        </div>
+        <div className="text-center space-y-2">
+          <div className="text-sm font-black tracking-widest text-[#1e4b38] uppercase">
+            MAATRIX DEFENSE GRID
+          </div>
+          <div className="text-xs text-slate-600 font-mono flex items-center justify-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-600 animate-ping" />
+            <span>Verifying Operator Clearance & Duty Session...</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Block rendering of sensitive operator interface if not authenticated
+  if (!isAuthenticated || !operator) {
+    return null;
+  }
 
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-[#f4f7f5] relative">
@@ -536,35 +623,124 @@ export default function OperatorLayout({
 
             <div className="w-px h-6 bg-slate-200" />
 
-            {/* Officer Profile & Sign Out */}
-            <div className="flex items-center gap-2">
-              <div className="text-right hidden sm:block">
-                <div className="text-xs font-bold text-slate-900 leading-tight">
-                  {operator?.name || "Insp. K. Rathore"}
-                </div>
-                <div className="text-[10px] font-medium text-slate-500">
-                  {operator?.role || "Shift Commander"}
-                </div>
-              </div>
-              <div
-                className="w-8 h-8 rounded-full bg-[#1e4b38] text-white flex items-center justify-center text-xs font-bold ring-2 ring-[#1e4b38]/20 shadow-xs select-none"
-                title={operator ? `${operator.name} • ${operator.badgeNumber}` : "Shift Commander"}
-              >
-                {operator?.avatarInitials || "KR"}
-              </div>
-
-              {/* Sign Out / Exit button */}
+            {/* Authenticated Officer Profile & Active Duty Shift Status */}
+            <div className="relative" ref={profileMenuRef}>
               <button
                 type="button"
-                onClick={() => {
-                  logout();
-                  router.push("/login");
-                }}
-                className="p-1.5 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
-                title="Sign Out / Switch Operator"
+                onClick={() => setShowProfileMenu((prev) => !prev)}
+                className="flex items-center gap-2.5 p-1 rounded-xl hover:bg-slate-100/80 transition-colors text-left cursor-pointer"
+                title="Click to view Duty Shift details or Switch Operator"
               >
-                <LogOut className="w-4 h-4" />
+                <div className="text-right hidden sm:block">
+                  <div className="text-xs font-bold text-slate-900 leading-tight">
+                    {operator.name}
+                  </div>
+                  <div className="text-[10px] font-medium text-emerald-700 flex items-center justify-end gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
+                    <span>{operator.role}</span>
+                  </div>
+                </div>
+
+                <div className="relative">
+                  <div
+                    className="w-8 h-8 rounded-full bg-[#1e4b38] text-white flex items-center justify-center text-xs font-bold ring-2 ring-[#1e4b38]/20 shadow-xs select-none"
+                  >
+                    {operator.avatarInitials}
+                  </div>
+                  <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-white" />
+                </div>
+
+                <ChevronDown className="w-3 h-3 text-slate-400 hidden sm:block" />
               </button>
+
+              {/* Interactive Tactical Profile Card Dropdown */}
+              {showProfileMenu && (
+                <div className="absolute right-0 top-full mt-2 w-72 bg-white rounded-2xl shadow-2xl border border-slate-200/80 p-3.5 z-50 text-slate-900 animate-in fade-in slide-in-from-top-2">
+                  {/* Officer Header */}
+                  <div className="flex items-center gap-3 pb-3 border-b border-slate-100">
+                    <div className="w-10 h-10 rounded-xl bg-[#1e4b38] text-white flex items-center justify-center text-sm font-bold shadow-xs">
+                      {operator.avatarInitials}
+                    </div>
+                    <div className="overflow-hidden">
+                      <div className="text-xs font-bold text-slate-950 truncate">
+                        {operator.name}
+                      </div>
+                      <div className="text-[10px] text-slate-500 truncate">
+                        {operator.rank}
+                      </div>
+                      <div className="text-[9px] font-mono text-emerald-800 font-semibold truncate">
+                        {operator.serviceBranch}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Security Clearance & Duty Sector Details */}
+                  <div className="py-2.5 space-y-1.5 text-[11px] border-b border-slate-100">
+                    <div className="flex items-center justify-between text-slate-600">
+                      <span>Badge ID:</span>
+                      <span className="font-mono font-bold text-slate-900">
+                        {operator.badgeNumber}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-slate-600">
+                      <span>Assigned Sector:</span>
+                      <span className="font-medium text-slate-900 truncate max-w-[140px]">
+                        {operator.sector}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-slate-600">
+                      <span>Clearance:</span>
+                      <span className="text-[10px] font-semibold text-emerald-800 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200 truncate max-w-[150px]">
+                        {operator.clearanceLevel}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Duty Shift Timer */}
+                  <div className="py-2 px-2.5 my-2 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-1.5 text-slate-600">
+                      <Clock className="w-3.5 h-3.5 text-emerald-700" />
+                      <span className="text-[11px] font-medium">Duty Shift:</span>
+                    </div>
+                    <span className="font-mono text-[11px] font-bold text-emerald-900">
+                      {shiftRemaining || "Active"}
+                    </span>
+                  </div>
+
+                  {/* Quick Tactical Session Actions */}
+                  <div className="space-y-1 pt-1">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        logout();
+                        router.push(`/login?redirect=${encodeURIComponent(pathname)}`);
+                      }}
+                      className="w-full py-2 px-2.5 rounded-xl hover:bg-slate-100 text-slate-700 text-xs font-semibold flex items-center justify-between transition-colors cursor-pointer"
+                    >
+                      <span className="flex items-center gap-2">
+                        <Lock className="w-3.5 h-3.5 text-slate-500" />
+                        <span>Lock Console</span>
+                      </span>
+                      <span className="text-[10px] text-slate-400 font-mono">Shift Pause</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        logout();
+                        router.push("/login");
+                      }}
+                      className="w-full py-2 px-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-semibold flex items-center justify-between transition-colors cursor-pointer"
+                    >
+                      <span className="flex items-center gap-2">
+                        <LogOut className="w-3.5 h-3.5 text-rose-600" />
+                        <span>Sign Out / End Shift</span>
+                      </span>
+                      <span className="text-[10px] text-rose-500 font-mono">Terminates Session</span>
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </header>

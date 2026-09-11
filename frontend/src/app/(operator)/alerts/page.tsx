@@ -22,6 +22,9 @@ import {
   X,
   Camera,
   Navigation,
+  Download,
+  HardDrive,
+  RotateCcw,
 } from "lucide-react";
 import { SuspectTrajectoryModal } from "@/components/map/SuspectTrajectoryModal";
 import { formatConfidence } from "@/lib/utils";
@@ -34,8 +37,11 @@ export default function AlertsPage() {
     highSeverityCount,
     suspectsCount,
     acknowledgeAlert,
+    deleteIncident,
     clearAll,
+    resetDefaults,
     refresh,
+    exportIncidents,
   } = useAlerts();
 
   const [severityFilter, setSeverityFilter] = useState<AlertSeverity | "All" | "Suspects">("All");
@@ -146,21 +152,52 @@ export default function AlertsPage() {
               {unacknowledgedCount} Unacknowledged
             </span>
           </div>
+
+          <div
+            className="hidden lg:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200/80 text-xs font-semibold text-emerald-800"
+            title="Incident records are stored locally and persistent in your browser"
+          >
+            <HardDrive className="w-3.5 h-3.5 text-emerald-600" />
+            <span>Local Vault ({alerts.length})</span>
+          </div>
+
+          {/* Export Incident Log */}
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              onClick={() => exportIncidents("csv")}
+              className="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
+              title="Export all incident records as CSV"
+            >
+              <Download className="w-3.5 h-3.5 text-slate-500" />
+              <span>CSV</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => exportIncidents("json")}
+              className="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
+              title="Export all incident records as JSON"
+            >
+              <Download className="w-3.5 h-3.5 text-slate-500" />
+              <span>JSON</span>
+            </button>
+          </div>
+
           <button
             onClick={() => refresh()}
-            className="p-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors"
+            className="p-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors cursor-pointer"
             title="Refresh Alerts"
           >
             <RefreshCw className="w-4 h-4" />
           </button>
           <button
             onClick={() => {
-              if (confirm("Are you sure you want to clear all alerts?")) {
+              if (confirm("Are you sure you want to clear all incident records from browser storage?")) {
                 clearAll();
               }
             }}
-            className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-rose-50 hover:text-rose-700 text-slate-600 text-xs font-semibold flex items-center gap-1.5 transition-colors"
-            title="Clear all alerts"
+            className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-rose-50 hover:text-rose-700 text-slate-600 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
+            title="Clear all local incident records"
           >
             <Trash2 className="w-3.5 h-3.5" /> Clear All
           </button>
@@ -299,6 +336,15 @@ export default function AlertsPage() {
             <p className="text-xs text-slate-400 mt-1">
               Adjust filters or keep the Continuous Scanner running to detect suspects across live feeds.
             </p>
+            {alerts.length === 0 && (
+              <button
+                type="button"
+                onClick={resetDefaults}
+                className="mt-3.5 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+              >
+                <RotateCcw className="w-3.5 h-3.5" /> Restore Default Demo Incidents
+              </button>
+            )}
           </div>
         ) : (
           <div className="divide-y divide-slate-100">
@@ -463,7 +509,7 @@ export default function AlertsPage() {
                     {!alert.acknowledged ? (
                       <button
                         onClick={() => acknowledgeAlert(alert.id)}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-700 hover:bg-emerald-800 text-white shadow-xs transition-colors"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-700 hover:bg-emerald-800 text-white shadow-xs transition-colors cursor-pointer"
                       >
                         <Check className="w-3.5 h-3.5" />
                         Acknowledge
@@ -473,6 +519,14 @@ export default function AlertsPage() {
                         Resolved
                       </span>
                     )}
+                    <button
+                      type="button"
+                      onClick={() => deleteIncident(alert.id)}
+                      className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+                      title="Delete incident from browser storage"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
                   </div>
                 </div>
               );
