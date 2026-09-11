@@ -1,25 +1,33 @@
 {
   "zones": [
     {
-      "id": "zone-f6e6a096",
+      "id": "zone-0553cc48",
       "name": "Exclusion Zone 1",
       "cameraId": "bop-jk-01",
       "color": "#ef4444",
       "severity": "CRITICAL",
       "polygon": [
         [
-          0.9215,
-          0.6295
+          0.8609,
+          0.6096
         ],
         [
-          0.9916,
-          0.6611
+          0.8609,
+          0.6096
         ],
         [
-          0.5691,
-          0.9851
+          0.9686,
+          0.6562
         ],
         [
+<<<<<<< HEAD
+          0.612,
+          0.9987
+        ],
+        [
+          0.5335,
+          0.9019
+=======
           0.1,
           0.95
         ]
@@ -128,6 +136,7 @@
         [
           0.5011,
           0.9292
+>>>>>>> a0fd645c1befe39f96f6cea0575c534073b59a96
         ]
       ],
       "targetClasses": [
@@ -137,10 +146,13 @@
       "enabled": true,
       "cooldownSeconds": 15.0,
       "description": "Custom tactical exclusion zone.",
-      "createdAt": "2026-09-10T22:57:40.208878+00:00",
-      "updatedAt": "2026-09-11T08:58:43.883099+00:00"
+      "createdAt": "2026-09-11T09:29:18.602503+00:00"
     }
   ],
+<<<<<<< HEAD
+  "tripwires": [],
+  "updated_at": "2026-09-11T09:29:18.602503+00:00"
+=======
   "tripwires": [
     {
       "id": "wire-demo-01",
@@ -243,4 +255,5 @@
     }
   ],
   "updated_at": "2026-09-11T09:09:45.267609+00:00"
+>>>>>>> a0fd645c1befe39f96f6cea0575c534073b59a96
 }
