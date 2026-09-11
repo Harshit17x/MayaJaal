@@ -384,9 +384,9 @@
     "semantic_hash": "d1283e7566e136247b268494a6a545eb"
   },
   "frontend/src/app/(operator)/alerts/page.tsx": {
-    "mtime": 1789117834.028151,
-    "seen": 1789118047.8309417,
-    "ast_hash": "fdc025216552c3e3b1f8c89275725bc6",
+    "mtime": 1789121484.9423156,
+    "seen": 1789121561.647253,
+    "ast_hash": "736a9c0c586756b625dc84361fd63cf0",
     "semantic_hash": ""
   },
   "frontend/src/app/(operator)/anpr/page.tsx": {
@@ -624,9 +624,9 @@
     "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
   },
   "frontend/src/lib/alertsStore.ts": {
-    "mtime": 1789056943.1698315,
-    "seen": 1789059522.5937588,
-    "ast_hash": "dd5b8d12b47203037fec405064d9455c",
+    "mtime": 1789121431.4872925,
+    "seen": 1789121561.6473308,
+    "ast_hash": "0176cef4c7b480cf4c30d3d9ea61ccf2",
     "semantic_hash": ""
   },
   "frontend/src/lib/api.ts": {
@@ -1038,15 +1038,15 @@
     "semantic_hash": ""
   },
   "backend/app/data/alerts.json": {
-    "mtime": 1789120811.3979142,
-    "seen": 1789120822.400611,
-    "ast_hash": "5c419808c82e7090c9cabb2c7fe63779",
+    "mtime": 1789121366.1248205,
+    "seen": 1789121561.647153,
+    "ast_hash": "d751713988987e9331980363e24189ce",
     "semantic_hash": ""
   },
   "backend/app/pipeline/alert_service.py": {
-    "mtime": 1789064766.647364,
-    "seen": 1789072973.6512752,
-    "ast_hash": "acb6512a65394883bd6b5145c2b9723e",
+    "mtime": 1789121509.515637,
+    "seen": 1789121561.6471698,
+    "ast_hash": "8614d9801630d4a958916ff2f588abd9",
     "semantic_hash": ""
   },
   "backend/app/pipeline/feed_scanner.py": {
@@ -1098,9 +1098,9 @@
     "semantic_hash": ""
   },
   "backend/app/data/geofences.json": {
-    "mtime": 1789120811.399926,
-    "seen": 1789120822.4006186,
-    "ast_hash": "8448dc2f57cc743a6f6c04e46ebc3feb",
+    "mtime": 1789121360.634055,
+    "seen": 1789121561.6471605,
+    "ast_hash": "47448f6bc9b77e440185f2d605335557",
     "semantic_hash": ""
   },
   "frontend/src/components/map/SuspectTrailOverlay.ts": {
