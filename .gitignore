@@ -35,6 +35,9 @@ pnpm-debug.log*
 # Temp files
 backend/temp/*
 !backend/temp/.gitkeep
+backend/app/data/*.tmp
+backend/app/data/alerts/snapshots/*
+!backend/app/data/alerts/snapshots/.gitkeep
 
 # Environment variables & secrets
 .env

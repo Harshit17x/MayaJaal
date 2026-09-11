@@ -2,10 +2,62 @@
 
 import { useState, useEffect } from "react";
 import { AlertItem, AlertSeverity } from "@/types/alert";
-
-const INITIAL_ALERTS: AlertItem[] = [];
-
 import { api } from "@/lib/api";
+
+export const INCIDENT_STORAGE_KEY = "maatrix_incident_records";
+const MAX_LOCAL_INCIDENTS = 500;
+
+export const SEED_INCIDENTS: AlertItem[] = [
+  {
+    id: "incident-demo-01",
+    title: "Geofence Infiltration: RS Pura Zero Line",
+    location: "Sector-04 [bop-jk-01] — Zero Line Perimeter",
+    time: "2m ago",
+    timestamp: Date.now() - 120000,
+    severity: "High",
+    threatLevel: "CRITICAL",
+    cameraId: "bop-jk-01",
+    cameraName: "BOP RS Pura Primary PTZ",
+    className: "person",
+    confidence: 0.94,
+    acknowledged: false,
+    category: "geofence_breach",
+    notes: "Thermal perimeter sensor tripped across forward barbed wire zone.",
+  },
+  {
+    id: "incident-demo-02",
+    title: "Suspect Facial Recognition Sighting",
+    location: "Sector-04 [bop-jk-02] — Octroi Border Post",
+    time: "5m ago",
+    timestamp: Date.now() - 300000,
+    severity: "High",
+    threatLevel: "HIGH",
+    cameraId: "bop-jk-02",
+    cameraName: "Octroi Outpost Optical Cam 02",
+    className: "suspect",
+    suspectName: "Tariq Ahmed (BOLO-2026-089)",
+    confidence: 0.89,
+    acknowledged: false,
+    category: "suspect_sighting",
+    notes: "Positive match on enrolled watchlist suspect with high facial embedding similarity.",
+  },
+  {
+    id: "incident-demo-03",
+    title: "Directional Tripwire Crossing Detected",
+    location: "Sector-05 [bop-sk-01] — Sikkim Transit Corridor",
+    time: "14m ago",
+    timestamp: Date.now() - 840000,
+    severity: "Medium",
+    threatLevel: "MEDIUM",
+    cameraId: "bop-sk-01",
+    cameraName: "Nathu La Optical Gateway",
+    className: "truck",
+    confidence: 0.88,
+    acknowledged: true,
+    category: "tripwire_breach",
+    notes: "Vehicle crossed ingress tripwire barrier moving inward from boundary.",
+  },
+];
 
 type AlertListener = (alerts: AlertItem[]) => void;
 type ConnectionListener = (connected: boolean) => void;
@@ -13,13 +65,44 @@ type ConnectionListener = (connected: boolean) => void;
 const listeners = new Set<AlertListener>();
 const connectionListeners = new Set<ConnectionListener>();
 
-let memoryAlerts: AlertItem[] = [...INITIAL_ALERTS];
+function loadStoredIncidents(): AlertItem[] {
+  if (typeof window === "undefined") return [...SEED_INCIDENTS];
+  try {
+    const raw = localStorage.getItem(INCIDENT_STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      return parsed;
+    }
+  } catch (err) {
+    console.warn("[IncidentsStore] Failed to parse local incidents:", err);
+  }
+  return [];
+}
+
+function persistIncidents(alerts: AlertItem[]) {
+  if (typeof window === "undefined") return;
+  try {
+    const trimmed = alerts.slice(0, MAX_LOCAL_INCIDENTS);
+    localStorage.setItem(INCIDENT_STORAGE_KEY, JSON.stringify(trimmed));
+  } catch (err) {
+    console.error("[IncidentsStore] Failed to persist incident records to localStorage:", err);
+  }
+}
+
+let memoryAlerts: AlertItem[] = [];
 let wsClient: WebSocket | null = null;
 let isConnected = false;
 let initialized = false;
 
-function notify() {
+function notify(skipPersist = false) {
+  if (!skipPersist) {
+    persistIncidents(memoryAlerts);
+  }
   listeners.forEach((listener) => listener([...memoryAlerts]));
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent("maatrix_incidents_updated"));
+  }
 }
 
 function notifyConnection(status: boolean) {
@@ -62,7 +145,7 @@ function playAlertChime(threatLevel?: string) {
     osc.start();
     osc.stop(ctx.currentTime + 0.3);
   } catch {
-    // AudioContext blocked until operator interaction
+    // AudioContext blocked until user interaction
   }
 }
 
@@ -106,8 +189,7 @@ function initWebSocket() {
           );
           notify();
         } else if (payload.type === "CLEAR_ALERTS") {
-          memoryAlerts = [];
-          notify();
+          // Keep local history unless operator explicitly clears locally
         }
       } catch (err) {
         console.debug("Failed to parse alerts WebSocket payload", err);
@@ -117,7 +199,6 @@ function initWebSocket() {
     wsClient.onclose = () => {
       notifyConnection(false);
       wsClient = null;
-      // Auto-reconnect after 3 seconds
       setTimeout(initWebSocket, 3000);
     };
 
@@ -132,12 +213,17 @@ function initWebSocket() {
 async function syncWithBackend() {
   try {
     const backendAlerts = await api.getAlerts();
-    if (Array.isArray(backendAlerts)) {
-      memoryAlerts = backendAlerts;
-      notify();
+    if (Array.isArray(backendAlerts) && backendAlerts.length > 0) {
+      // Merge backend incoming alerts with locally stored incidents without erasing local history
+      const existingIds = new Set(memoryAlerts.map((a) => a.id));
+      const newItems = backendAlerts.filter((a) => !existingIds.has(a.id));
+      if (newItems.length > 0) {
+        memoryAlerts = [...newItems, ...memoryAlerts];
+        notify();
+      }
     }
   } catch (err) {
-    console.debug("Could not fetch alerts from backend, using current memory", err);
+    console.debug("Could not fetch transient alerts from backend, using local incident records:", err);
   }
 }
 
@@ -170,7 +256,7 @@ export const alertsStore = {
     }
 
     const newAlert: AlertItem = {
-      id: `alert-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+      id: `incident-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
       time: "Just now",
       timestamp: Date.now(),
       acknowledged: false,
@@ -191,8 +277,13 @@ export const alertsStore = {
     try {
       await api.acknowledgeAlert(id);
     } catch (err) {
-      console.debug("Error acknowledging alert on backend:", err);
+      console.debug("Transient backend notification for acknowledge failed (offline mode):", err);
     }
+  },
+
+  deleteIncident(id: string) {
+    memoryAlerts = memoryAlerts.filter((a) => a.id !== id);
+    notify();
   },
 
   async clearAll() {
@@ -202,25 +293,114 @@ export const alertsStore = {
     try {
       await api.clearAlerts();
     } catch (err) {
-      console.debug("Error clearing alerts on backend:", err);
+      console.debug("Transient backend clear failed (offline mode):", err);
     }
   },
 
   resetDefaults() {
-    memoryAlerts = [...INITIAL_ALERTS];
+    memoryAlerts = [...SEED_INCIDENTS];
     notify();
+  },
+
+  exportIncidents(format: "json" | "csv" = "json") {
+    if (typeof window === "undefined" || memoryAlerts.length === 0) return;
+
+    let blob: Blob;
+    let filename: string;
+    const nowStr = new Date().toISOString().replace(/[:.]/g, "-");
+
+    if (format === "csv") {
+      const headers = ["ID", "Title", "Severity", "ThreatLevel", "Location", "Camera", "Class", "Suspect", "Timestamp", "Acknowledged", "Notes"];
+      const rows = memoryAlerts.map((a) => [
+        `"${a.id}"`,
+        `"${(a.title || "").replace(/"/g, '""')}"`,
+        `"${a.severity || ""}"`,
+        `"${a.threatLevel || ""}"`,
+        `"${(a.location || "").replace(/"/g, '""')}"`,
+        `"${a.cameraId || a.cameraName || ""}"`,
+        `"${a.className || ""}"`,
+        `"${(a.suspectName || "").replace(/"/g, '""')}"`,
+        `"${new Date(a.timestamp || Date.now()).toISOString()}"`,
+        `"${a.acknowledged ? "YES" : "NO"}"`,
+        `"${(a.notes || "").replace(/"/g, '""')}"`,
+      ]);
+      const csvContent = [headers.join(","), ...rows.map((r) => r.join(","))].join("\r\n");
+      blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      filename = `maatrix-incident-records-${nowStr}.csv`;
+    } else {
+      const jsonContent = JSON.stringify(memoryAlerts, null, 2);
+      blob = new Blob([jsonContent], { type: "application/json;charset=utf-8;" });
+      filename = `maatrix-incident-records-${nowStr}.json`;
+    }
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", filename);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  },
+
+  getStoredCount(): number {
+    return memoryAlerts.length;
   },
 };
 
 export function useAlerts() {
-  const [alerts, setAlerts] = useState<AlertItem[]>(memoryAlerts);
+  const [alerts, setAlerts] = useState<AlertItem[]>(() => {
+    if (memoryAlerts.length > 0) return memoryAlerts;
+    if (typeof window !== "undefined") {
+      const stored = loadStoredIncidents();
+      if (stored.length > 0) {
+        memoryAlerts = stored;
+        return stored;
+      }
+      memoryAlerts = [...SEED_INCIDENTS];
+      persistIncidents(memoryAlerts);
+      return memoryAlerts;
+    }
+    return [...SEED_INCIDENTS];
+  });
+
   const [connected, setConnected] = useState<boolean>(isConnected);
 
   useEffect(() => {
     if (!initialized && typeof window !== "undefined") {
       initialized = true;
+      const stored = loadStoredIncidents();
+      if (stored.length > 0) {
+        memoryAlerts = stored;
+      } else {
+        memoryAlerts = [...SEED_INCIDENTS];
+        persistIncidents(memoryAlerts);
+      }
+      notify(true);
+
       initWebSocket();
       syncWithBackend();
+
+      // Multi-tab synchronization
+      const handleStorageEvent = (e: StorageEvent) => {
+        if (e.key === INCIDENT_STORAGE_KEY && e.newValue) {
+          try {
+            const parsed = JSON.parse(e.newValue);
+            if (Array.isArray(parsed)) {
+              memoryAlerts = parsed;
+              setAlerts(parsed);
+              listeners.forEach((l) => l([...memoryAlerts]));
+            }
+          } catch {}
+        }
+      };
+
+      const handleCustomUpdate = () => {
+        setAlerts([...memoryAlerts]);
+      };
+
+      window.addEventListener("storage", handleStorageEvent);
+      window.addEventListener("maatrix_incidents_updated", handleCustomUpdate);
     }
 
     const handleUpdate = (updated: AlertItem[]) => setAlerts(updated);
@@ -251,6 +431,8 @@ export function useAlerts() {
   return {
     alerts,
     connected,
+    storedLocally: true,
+    totalStoredCount: alerts.length,
     unacknowledgedCount: unacknowledged.length,
     highSeverityCount: alerts.filter((a) => a.severity === "High").length,
     peopleCount,
@@ -258,7 +440,10 @@ export function useAlerts() {
     suspectsCount,
     addAlert: alertsStore.addAlert,
     acknowledgeAlert: alertsStore.acknowledgeAlert,
+    deleteIncident: alertsStore.deleteIncident,
     clearAll: alertsStore.clearAll,
+    resetDefaults: alertsStore.resetDefaults,
     refresh: alertsStore.refresh,
+    exportIncidents: alertsStore.exportIncidents,
   };
 }

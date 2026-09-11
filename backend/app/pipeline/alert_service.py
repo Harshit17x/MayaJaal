@@ -93,32 +93,14 @@ class AlertService:
         self._load_alerts()
 
     def _load_alerts(self) -> None:
+        """Initialize in-memory alerts ring buffer without persistent disk file dependencies."""
         with self.lock:
-            if not ALERTS_FILE.exists():
-                self.alerts = []
-                self._save_alerts()
-                return
-
-            try:
-                with open(ALERTS_FILE, "r", encoding="utf-8") as f:
-                    data = json.load(f)
-                    if isinstance(data, list):
-                        self.alerts = data[: self.max_alerts]
-                    else:
-                        self.alerts = []
-                logger.info("Loaded %d alerts into AlertService.", len(self.alerts))
-            except Exception as exc:
-                logger.warning("Failed to load alerts file from %s: %s", ALERTS_FILE, exc)
-                self.alerts = []
+            self.alerts = []
+            logger.info("AlertService operating in stateless broadcast mode (frontend is incident store).")
 
     def _save_alerts(self) -> None:
-        try:
-            temp_file = ALERTS_FILE.with_suffix(".tmp")
-            with open(temp_file, "w", encoding="utf-8") as f:
-                json.dump(self.alerts, f, indent=2)
-            temp_file.replace(ALERTS_FILE)
-        except Exception as exc:
-            logger.error("Failed to save alerts to %s: %s", ALERTS_FILE, exc)
+        """No-op: Incident records are stored persistently on the frontend."""
+        pass
 
     def create_alert(
         self,
@@ -231,21 +213,16 @@ class AlertService:
 
     def acknowledge_alert(self, alert_id: str) -> bool:
         with self.lock:
-            found = False
             for a in self.alerts:
                 if a["id"] == alert_id:
                     a["acknowledged"] = True
-                    found = True
                     break
-            if found:
-                self._save_alerts()
 
-        if found:
-            self.broadcaster.broadcast_sync({
-                "type": "ACKNOWLEDGE_ALERT",
-                "alertId": alert_id,
-            })
-        return found
+        self.broadcaster.broadcast_sync({
+            "type": "ACKNOWLEDGE_ALERT",
+            "alertId": alert_id,
+        })
+        return True
 
     def clear_all(self) -> None:
         with self.lock:

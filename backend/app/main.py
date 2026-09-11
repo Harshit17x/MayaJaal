@@ -8,6 +8,7 @@ from fastapi.responses import JSONResponse
 
 from app.api.alerts import router as alerts_router
 from app.api.anpr import router as anpr_router
+from app.api.auth import router as auth_router
 from app.api.cameras import router as cameras_router
 from app.api.faces import router as faces_router
 from app.api.geofences import router as geofences_router
@@ -136,6 +137,7 @@ async def unexpected_exception_handler(
 
 
 app.include_router(health_router)
+app.include_router(auth_router)
 app.include_router(cameras_router)
 app.include_router(models_router)
 app.include_router(inference_router)
