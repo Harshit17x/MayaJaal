@@ -5,12 +5,12 @@
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1275 nodes · 2123 edges · 88 communities (60 shown, 9 thin omitted)
+- 1274 nodes · 2122 edges · 87 communities (59 shown, 9 thin omitted)
 - Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 44 edges (avg confidence: 0.94)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `a0fd645c`
+- Built from commit: `8c1200dd`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -32,8 +32,8 @@
 - load_image
 - compilerOptions
 - README.md
-- AnalyticsDashboard.tsx
-- react
+- lucide-react
+- gis-map/page.tsx
 - faces.py
 - FaceService
 - AlertService
@@ -50,7 +50,7 @@
 - liveworkspace.tsx
 - Settings
 - GlobalTraceManager
-- anpr/page.tsx
+- health
 - middleware.ts
 - postcss.config.mjs
 - next-env.d.ts
@@ -72,8 +72,7 @@
 - FastAPI
 - geofences.py
 - test_cameras_security.py
-- get_logger
-- lucide-react
+- useBackendStatus.ts
 - ONNXEngineError
 - ReIDService
 - auth.py
@@ -95,24 +94,24 @@
 7. `ByteTrackerWrapper` - 19 edges
 8. `GeofenceEngine` - 18 edges
 9. `RTSPStream` - 17 edges
-10. `FaceService` - 16 edges
+10. `PreprocessingError` - 16 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `root()` --references--> `get()`  [EXTRACTED]
   backend/app/main.py → anpr/app.py
-- `get_scanner_status()` --references--> `get()`  [EXTRACTED]
-  backend/app/api/alerts.py → anpr/app.py
-- `list_alerts()` --references--> `get()`  [EXTRACTED]
-  backend/app/api/alerts.py → anpr/app.py
-- `get_plate_snapshot()` --references--> `get()`  [EXTRACTED]
-  backend/app/api/anpr.py → anpr/app.py
-- `get_processed_video()` --references--> `get()`  [EXTRACTED]
-  backend/app/api/anpr.py → anpr/app.py
+- `get_face_engine_status()` --references--> `get()`  [EXTRACTED]
+  backend/app/api/faces.py → anpr/app.py
+- `get_face_thumbnail()` --references--> `get()`  [EXTRACTED]
+  backend/app/api/faces.py → anpr/app.py
+- `get_recent_face_events()` --references--> `get()`  [EXTRACTED]
+  backend/app/api/faces.py → anpr/app.py
+- `list_enrolled_faces()` --references--> `get()`  [EXTRACTED]
+  backend/app/api/faces.py → anpr/app.py
 
 ## Import Cycles
 - None detected.
 
-## Communities (88 total, 9 thin omitted)
+## Communities (87 total, 9 thin omitted)
 
 ### Community 0 - "authStore.ts"
 Cohesion: 0.13
@@ -127,12 +126,12 @@ Cohesion: 0.04
 Nodes (42): nextConfig, dependencies, clsx, lucide-react, maplibre-gl, next, react, react-dom (+34 more)
 
 ### Community 3 - "api.ts"
-Cohesion: 0.11
-Nodes (26): ApiError, request(), StreamValidationResult, BackendStatusState, HealthResponse, InferenceResponse, InferenceStatusResponse, ModelMetadata (+18 more)
+Cohesion: 0.20
+Nodes (14): ApiError, request(), StreamValidationResult, AnprRecord, AnprScanResponse, AnprVideoResponse, WatchlistEntry, EnrolledPerson (+6 more)
 
 ### Community 4 - "BorderMap.tsx"
-Cohesion: 0.06
-Nodes (41): AnprPage(), CAMERA_TYPES, CamerasPage(), COORDINATE_PRESETS, SECTORS, BorderMap(), BorderMapProps, DEMO_ALERT (+33 more)
+Cohesion: 0.05
+Nodes (43): AnprPage(), CAMERA_TYPES, CamerasPage(), COORDINATE_PRESETS, SECTORS, GeofencesPage(), BorderMap(), BorderMapProps (+35 more)
 
 ### Community 5 - "ONNXEngine"
 Cohesion: 0.13
@@ -182,13 +181,13 @@ Nodes (18): compilerOptions, allowJs, esModuleInterop, incremental, isolatedModu
 Cohesion: 0.05
 Nodes (39): 10. Health Check, 11. Runtime Status, 12. Model Management, 13. Adding an ONNX Model, 14. Loading an ONNX Model, 15. Checking Loaded Models, 16. Unloading a Model, 17. ONNX Model Inspection (+31 more)
 
-### Community 17 - "AnalyticsDashboard.tsx"
-Cohesion: 0.14
-Nodes (11): ActivityOverviewChart(), DayData, WEEK_DATA, AnalyticsDashboard(), CameraOutpostGrid(), OutpostItem, OUTPOSTS, CATEGORIES (+3 more)
+### Community 17 - "lucide-react"
+Cohesion: 0.09
+Nodes (12): ActivityOverviewChart(), DayData, WEEK_DATA, AnalyticsDashboard(), CameraOutpostGrid(), OutpostItem, OUTPOSTS, CATEGORIES (+4 more)
 
-### Community 18 - "react"
-Cohesion: 0.14
-Nodes (17): AlertsPage(), NavItem, TacticalThreatToast(), RecentAlerts(), SuspectTrajectoryModal(), SuspectTrajectoryModalProps, api, formatConfidence() (+9 more)
+### Community 18 - "gis-map/page.tsx"
+Cohesion: 0.16
+Nodes (15): AlertsPage(), CameraFeedStrip(), cameras, RecentAlerts(), SuspectTrajectoryModal(), SuspectTrajectoryModalProps, api, formatConfidence() (+7 more)
 
 ### Community 19 - "faces.py"
 Cohesion: 0.06
@@ -223,8 +222,8 @@ Cohesion: 0.18
 Nodes (10): name, private, scripts, build, dev, graphify:report, graphify:update, lint (+2 more)
 
 ### Community 29 - "alertsStore.ts"
-Cohesion: 0.15
-Nodes (19): MetricCard(), MetricCardProps, MetricsRow(), AlertListener, ConnectionListener, connectionListeners, getAlertsWsUrl(), INCIDENT_STORAGE_KEY (+11 more)
+Cohesion: 0.14
+Nodes (20): GisMapPage(), NavItem, TacticalThreatToast(), AlertListener, ConnectionListener, connectionListeners, getAlertsWsUrl(), INCIDENT_STORAGE_KEY (+12 more)
 
 ### Community 30 - "34. Recommended Final Model Integration Process"
 Cohesion: 0.15
@@ -239,8 +238,8 @@ Cohesion: 0.70
 Nodes (4): predict_image(), predict_video(), predict_webcam(), process_frame()
 
 ### Community 33 - "liveworkspace.tsx"
-Cohesion: 0.18
-Nodes (13): ConnectionStatus(), CameraGrid(), CLASS_COLORS, DetectionCanvas(), DetectionCanvasProps, buildStreamUrl(), LiveWorkspace(), alertsStore (+5 more)
+Cohesion: 0.09
+Nodes (24): CLASS_COLORS, DetectionCanvas(), DetectionCanvasProps, buildStreamUrl(), LiveWorkspace(), alertsStore, normalizeConfidence(), Detection (+16 more)
 
 ### Community 34 - "Settings"
 Cohesion: 0.50
@@ -250,9 +249,9 @@ Nodes (3): Central configuration for the SIH26187 inference backend., Settings, 
 Cohesion: 0.10
 Nodes (14): calc_haversine_km(), GlobalTrace, GlobalTraceManager, Any, ndarray, Update the aggregated appearance feature using Exponential Moving Average…, Convert GlobalTrace into JSON-serializable representation., Central Thread-Safe Manager for Cross-Camera Multi-Target Multi-Camera Tracking… (+6 more)
 
-### Community 36 - "anpr/page.tsx"
-Cohesion: 0.60
-Nodes (4): AnprRecord, AnprScanResponse, AnprVideoResponse, WatchlistEntry
+### Community 36 - "health"
+Cohesion: 0.50
+Nodes (3): health(), Any, Return backend health, device config, and execution providers.
 
 ### Community 41 - "GeofenceEngine"
 Cohesion: 0.09
@@ -299,8 +298,8 @@ Cohesion: 0.67
 Nodes (3): alerts_websocket_endpoint(), websocket, WebSocket endpoint for real-time security alerts and suspect sightings. Clients…
 
 ### Community 73 - "FastAPI"
-Cohesion: 0.17
-Nodes (10): websocket, websocket_endpoint(), health(), Any, Return backend health, device config, and execution providers., lifespan(), root(), Configure application-wide logging. Logs are written to both: - the console - a… (+2 more)
+Cohesion: 0.25
+Nodes (7): websocket, websocket_endpoint(), lifespan(), root(), Configure application-wide logging. Logs are written to both: - the console - a…, setup_logging(), FastAPI
 
 ### Community 74 - "geofences.py"
 Cohesion: 0.11
@@ -310,13 +309,9 @@ Nodes (30): create_tripwire(), create_zone(), delete_tripwire(), delete_zone(), 
 Cohesion: 0.67
 Nodes (3): test_stream_target_rejects_addresses_outside_camera_network(), test_stream_target_uses_allowlisted_resolved_address(), MonkeyPatch
 
-### Community 76 - "get_logger"
-Cohesion: 0.67
-Nodes (3): get_logger(), Return a logger for a specific application module., Logger
-
-### Community 77 - "lucide-react"
-Cohesion: 0.13
-Nodes (5): GisMapPage(), CameraFeedStrip(), cameras, SystemStatus(), lucide-react
+### Community 77 - "useBackendStatus.ts"
+Cohesion: 0.21
+Nodes (9): MetricCard(), MetricCardProps, MetricsRow(), SystemStatus(), ConnectionStatus(), BackendStatusState, useBackendStatus(), HealthResponse (+1 more)
 
 ### Community 78 - "ONNXEngineError"
 Cohesion: 0.25
@@ -327,16 +322,16 @@ Cohesion: 0.18
 Nodes (9): ndarray, Extract a single 512-D L2-normalized feature vector from a person crop., Extract 512-D L2-normalized feature vectors for a list of crops. Handles batch…, Robust spatial color histogram descriptor (512-D normalized vector) used as…, Compute cosine similarity between two normalized 512-D vectors in range [-1.0,…, Person Re-Identification Service for MAATRIX. Extracts 512-dimensional…, Verify model presence, attempt download if missing, and initialize ONNX session., Preprocess a single BGR crop into (3, 256, 128) float32 normalized tensor. (+1 more)
 
 ### Community 80 - "auth.py"
-Cohesion: 0.18
-Nodes (16): create_token(), get_roster(), login(), LoginRequest, logout(), Any, BaseModel, post (+8 more)
+Cohesion: 0.15
+Nodes (19): create_token(), get_roster(), login(), LoginRequest, logout(), Any, BaseModel, post (+11 more)
 
 ### Community 81 - "test_facial_recognition.py"
 Cohesion: 0.22
 Nodes (8): Ensure user's custom threat detection model best.onnx is 100% untouched., Verify YuNet and SFace models are properly initialized and database is loaded., Test the REST API endpoints using FastAPI TestClient., Test suspect classification, threat levels, and PATCH metadata updates., test_face_api_endpoints(), test_face_service_initialization(), test_model_preservation(), test_suspect_classification()
 
 ### Community 83 - "geofences/page.tsx"
-Cohesion: 0.17
-Nodes (13): COLOR_PRESETS, FeedViewMode, GeofencesPage(), ToolMode, CreateTripwirePayload, CreateZonePayload, DirectionalTripwire, GeofenceBreachEvent (+5 more)
+Cohesion: 0.20
+Nodes (12): COLOR_PRESETS, FeedViewMode, ToolMode, CreateTripwirePayload, CreateZonePayload, DirectionalTripwire, GeofenceBreachEvent, GeofenceEvaluateResponse (+4 more)
 
 ### Community 84 - "get"
 Cohesion: 0.17
@@ -355,24 +350,24 @@ Cohesion: 0.67
 Nodes (3): acknowledge_alert(), patch, Acknowledge a specific alert by ID.
 
 ## Knowledge Gaps
-- **190 isolated node(s):** `config`, `nextConfig`, `name`, `version`, `private` (+185 more)
+- **190 isolated node(s):** `NavItem`, `AUTHORIZED_PERSONNEL`, `AUTH_STORAGE_KEY`, `AUTH_COOKIE_NAME`, `AUTH_EVENT_NAME` (+185 more)
   These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 599 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
 - **9 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `ModelManager` connect `ModelManager` to `ONNXEngineError`, `ONNXEngine`, `logging.py`, `inference_service.py`?**
-  _High betweenness centrality (0.029) - this node is a cross-community bridge._
 - **Why does `ANPRPipeline` connect `stream.py` to `ONNXEngine`?**
   _High betweenness centrality (0.026) - this node is a cross-community bridge._
+- **Why does `ModelManager` connect `ModelManager` to `ONNXEngineError`, `ONNXEngine`, `logging.py`, `inference_service.py`?**
+  _High betweenness centrality (0.026) - this node is a cross-community bridge._
+- **Why does `ONNXEngine` connect `ONNXEngine` to `ModelManager`, `ONNXEngineError`, `stream.py`?**
+  _High betweenness centrality (0.025) - this node is a cross-community bridge._
 - **Are the 4 inferred relationships involving `ModelManager` (e.g. with `InferenceService` and `ONNXEngine`) actually correct?**
   _`ModelManager` has 4 INFERRED edges - model-reasoned connections that need verification._
-- **What connects `config`, `nextConfig`, `name` to the rest of the system?**
+- **What connects `NavItem`, `AUTHORIZED_PERSONNEL`, `AUTH_STORAGE_KEY` to the rest of the system?**
   _190 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `authStore.ts` be split into smaller, more focused modules?**
   _Cohesion score 0.1330049261083744 - nodes in this community are weakly interconnected._
 - **Should `ByteTrackerWrapper` be split into smaller, more focused modules?**
   _Cohesion score 0.05714285714285714 - nodes in this community are weakly interconnected._
-- **Should `frontend/package.json` be split into smaller, more focused modules?**
-  _Cohesion score 0.0425531914893617 - nodes in this community are weakly interconnected._
