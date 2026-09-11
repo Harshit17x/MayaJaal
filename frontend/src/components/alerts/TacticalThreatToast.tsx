@@ -26,21 +26,29 @@ export function TacticalThreatToast() {
   const [selectedUnit, setSelectedUnit] = useState("QRT Alpha-1");
   const [dispatchSuccess, setDispatchSuccess] = useState<string | null>(null);
 
-  // Find unacknowledged suspect alerts that haven't been dismissed, deduplicated by suspect identity
-  const activeSuspectAlerts: AlertItem[] = [];
-  const seenSuspects = new Set<string>();
+  // Find unacknowledged high-threat alerts (suspect sightings or perimeter breaches) that haven't been dismissed
+  const activeAlerts: AlertItem[] = [];
+  const seenAlertKeys = new Set<string>();
 
   for (const alert of alerts) {
+    const isSuspect = Boolean(alert.suspectName) || alert.className === "suspect";
+    const isBreach =
+      alert.category === "geofence_breach" ||
+      alert.category === "tripwire_violation" ||
+      alert.category === "tripwire_crossing" ||
+      alert.title?.toLowerCase().includes("geofence") ||
+      alert.title?.toLowerCase().includes("tripwire");
+
     if (
       !alert.acknowledged &&
-      (Boolean(alert.suspectName) || alert.className === "suspect") &&
+      (isSuspect || isBreach) &&
       !dismissedIds.has(alert.id)
     ) {
-      const suspectKey = (alert.suspectName || alert.title).trim().toLowerCase();
-      if (!seenSuspects.has(suspectKey)) {
-        seenSuspects.add(suspectKey);
-        activeSuspectAlerts.push(alert);
-        if (activeSuspectAlerts.length >= 2) break; // Show at most 2 distinct suspect banners
+      const alertKey = (alert.suspectName || alert.title || alert.id).trim().toLowerCase();
+      if (!seenAlertKeys.has(alertKey)) {
+        seenAlertKeys.add(alertKey);
+        activeAlerts.push(alert);
+        if (activeAlerts.length >= 2) break; // Show at most 2 distinct banners
       }
     }
   }
@@ -87,14 +95,20 @@ export function TacticalThreatToast() {
     }
   };
 
-  if (activeSuspectAlerts.length === 0) return null;
+  if (activeAlerts.length === 0) return null;
 
   const backendBase =
     process.env.NEXT_PUBLIC_BACKEND_URL?.replace(/\/$/, "") || "http://localhost:8000";
 
   return (
     <div className="fixed top-20 right-4 sm:right-6 z-50 flex flex-col gap-3 max-w-md w-full pointer-events-none">
-      {activeSuspectAlerts.map((alert) => {
+      {activeAlerts.map((alert) => {
+        const isBreach =
+          alert.category === "geofence_breach" ||
+          alert.category === "tripwire_violation" ||
+          alert.category === "tripwire_crossing" ||
+          alert.title?.toLowerCase().includes("geofence") ||
+          alert.title?.toLowerCase().includes("tripwire");
         const snapshotUrl = alert.snapshotUrl
           ? alert.snapshotUrl.startsWith("http")
             ? alert.snapshotUrl
@@ -120,7 +134,7 @@ export function TacticalThreatToast() {
                 </span>
                 <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-rose-50 border border-rose-200 text-[10px] font-extrabold uppercase tracking-wider text-rose-700 font-mono">
                   <ShieldAlert className="w-3.5 h-3.5 text-rose-600" />
-                  SUSPECT SIGHTING
+                  {isBreach ? "PERIMETER BREACH" : "SUSPECT SIGHTING"}
                 </span>
                 <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-rose-600 text-white uppercase tracking-wider font-mono">
                   {alert.threatLevel || "CRITICAL"}

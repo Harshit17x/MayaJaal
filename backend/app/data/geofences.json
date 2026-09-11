@@ -35,6 +35,120 @@
       "updatedAt": "2026-09-11T08:58:43.883099+00:00"
     }
   ],
+<<<<<<< HEAD
   "tripwires": [],
   "updated_at": "2026-09-11T08:58:43.883099+00:00"
+=======
+  "tripwires": [
+    {
+      "id": "wire-demo-01",
+      "name": "Zero Line Infiltration Tripwire (West to East)",
+      "cameraId": "bop-jk-01",
+      "color": "#dc2626",
+      "severity": "CRITICAL",
+      "p1": [
+        0.1,
+        0.5
+      ],
+      "p2": [
+        0.9,
+        0.5
+      ],
+      "direction": "FORWARD",
+      "targetClasses": [
+        "person",
+        "suspect"
+      ],
+      "enabled": true,
+      "cooldownSeconds": 15.0,
+      "description": "High-sensitivity tripwire along international border fence.",
+      "createdAt": "2026-09-11T00:35:08.741269"
+    },
+    {
+      "id": "wire-demo-02",
+      "name": "Gate Approach Directional Tripwire",
+      "cameraId": "bop-jk-02",
+      "color": "#3b82f6",
+      "severity": "MEDIUM",
+      "p1": [
+        0.3505,
+        0.5568
+      ],
+      "p2": [
+        0.8305,
+        0.7914
+      ],
+      "direction": "BIDIRECTIONAL",
+      "targetClasses": [
+        "person",
+        "car",
+        "truck"
+      ],
+      "enabled": true,
+      "cooldownSeconds": 10.0,
+      "description": "Bidirectional ingress/egress counter at gate post.",
+      "createdAt": "2026-09-11T00:35:08.741271",
+      "updatedAt": "2026-09-10T22:20:34.093277+00:00"
+    },
+    {
+      "id": "wire-ca966257",
+      "name": "Tripwire Barrier 2",
+      "cameraId": "bop-jk-02",
+      "color": "#f59e0b",
+      "severity": "HIGH",
+      "p1": [
+        0.3631,
+        0.7384
+      ],
+      "p2": [
+        0.9686,
+        0.6826
+      ],
+      "direction": "BIDIRECTIONAL",
+      "targetClasses": [
+        "person",
+        "motorcycle",
+        "suspect"
+      ],
+      "enabled": true,
+      "cooldownSeconds": 30.0,
+      "description": "High-sensitivity border tripwire barrier.",
+      "createdAt": "2026-09-10T22:39:01.014414+00:00"
+    },
+    {
+      "id": "wire-3dadd61a",
+      "name": "Tripwire Barrier 3",
+      "cameraId": "bop-jk-02",
+      "color": "#f59e0b",
+      "severity": "HIGH",
+      "p1": [
+        0.566,
+        0.3884
+      ],
+      "p2": [
+        0.8358,
+        0.8911
+      ],
+      "direction": "BIDIRECTIONAL",
+      "targetClasses": [
+        "person",
+        "motorcycle",
+        "suspect"
+      ],
+      "enabled": true,
+      "cooldownSeconds": 30.0,
+      "description": "High-sensitivity border tripwire barrier.",
+      "createdAt": "2026-09-10T22:39:17.824960+00:00"
+    }
+  ],
+<<<<<<< HEAD
+  "updated_at": "2026-09-11T09:09:45.267609+00:00"
+=======
+<<<<<<< HEAD
+  "updated_at": "2026-09-10T22:43:33.017242+00:00"
+=======
+  "updated_at": "2026-09-10T22:50:16.149488+00:00"
+>>>>>>> ad3628bebfa41714f67cd5343ce0f7b90873dfeb
+>>>>>>> 4aa3053897ede0e75036f1b603852a1f8cc02cf1
+>>>>>>> d842efc65f9f2926b5258c78d37f9359809b88d3
 }

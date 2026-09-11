@@ -581,6 +581,8 @@ def stream_generator(
                                         tracked_objects=tracked_dets,
                                         frame_resolution=(w, h),
                                         auto_alert=True,
+                                        frame=frame,
+                                        camera_name=effective_cam_name,
                                     )
                                     now_t = time.time()
                                     if breaches:

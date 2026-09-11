@@ -1,5 +1,6 @@
 [
   {
+<<<<<<< HEAD
     "id": "alert-1789118473028-6e2b",
     "title": "Geofence Breach: Exclusion Zone 1",
     "location": "Sector Grid [bop-jk-01] \u2014 Exclusion Zone 1",
@@ -3552,11 +3553,93 @@
     "notes": "Track #6 (person) entered restricted zone. Footpoint: (0.66, 0.73)"
   },
   {
+=======
+<<<<<<< HEAD
+    "id": "alert-1789118027610-82f4",
+    "title": "Geofence Breach: Joint Check Post Restricted Perimeter",
+    "location": "Sector Grid [bop-jk-02] \u2014 Joint Check Post Restricted Perimeter",
+    "time": "Just now",
+    "timestamp": 1789118027610,
+    "severity": "HIGH",
+    "cameraId": "bop-jk-02",
+    "cameraName": "Audi 2 Outpost",
+    "className": "person",
+    "confidence": 0.89,
+    "acknowledged": false,
+    "box": [
+      200.0,
+      150.0,
+      280.0,
+      380.0
+    ],
+    "snapshotUrl": "/api/alerts/snapshots/breach_1789118027575_bop-jk-02_tr99.jpg",
+    "suspectName": null,
+    "threatLevel": "HIGH",
+    "category": "geofence_breach",
+    "notes": "Track #99 (person) entered restricted zone. Footpoint: (0.38, 0.79)"
+  },
+  {
+    "id": "alert-1789067156632-4a03",
+    "title": "Tripwire Breach: Api Test Infiltration Wire [FORWARD]",
+    "location": "Camera bop-jk-01",
+    "time": "Just now",
+    "timestamp": 1789067156632,
+    "severity": "CRITICAL",
+    "cameraId": "bop-jk-01",
+    "cameraName": "Camera bop-jk-01",
+    "className": "suspect",
+    "confidence": 0.94,
+    "acknowledged": false,
+    "box": [
+      340.0,
+      420.0,
+      480.0,
+      780.0
+    ],
+    "snapshotUrl": "/api/alerts/snapshots/breach_1789117968271_bop-jk-01_tr5.jpg",
+    "suspectName": null,
+    "threatLevel": "CRITICAL",
+    "category": "tripwire_violation",
+    "notes": "Target SUSPECT (Track #156) crossed Api Test Infiltration Wire on Camera bop-jk-01."
+  },
+  {
+    "id": "alert-1789067156349-73e5",
+    "title": "Geofence Intrusion: Unit Test Restricted Zone [ENTRY]",
+    "location": "Test Camera",
+    "time": "Just now",
+    "timestamp": 1789067156349,
+    "severity": "CRITICAL",
+    "cameraId": "cam-test-eval",
+    "cameraName": "Test Camera",
+    "className": "person",
+    "confidence": 0.95,
+    "acknowledged": false,
+    "box": [
+      450.0,
+      450.0,
+      550.0,
+      550.0
+    ],
+    "snapshotUrl": "/api/alerts/snapshots/breach_1789117968287_cam-test-eval_tr5.jpg",
+    "suspectName": null,
+    "threatLevel": "CRITICAL",
+    "category": "geofence_breach",
+    "notes": "Target PERSON (Track #101) crossed Unit Test Restricted Zone on Test Camera."
+  },
+  {
+    "id": "alert-1789067156345-4d92",
+    "title": "Tripwire Breach: Unit Test Directional Tripwire [FORWARD]",
+    "location": "Test Camera",
+    "time": "Just now",
+    "timestamp": 1789067156345,
+=======
+>>>>>>> d842efc65f9f2926b5258c78d37f9359809b88d3
     "id": "alert-1789080060880-cb01",
     "title": "Tripwire Triggered: Tripwire Barrier 3",
     "location": "Sector Grid [bop-jk-02] \u2014 Tripwire Barrier 3",
     "time": "Just now",
     "timestamp": 1789080060880,
+>>>>>>> 4aa3053897ede0e75036f1b603852a1f8cc02cf1
     "severity": "HIGH",
     "cameraId": "bop-jk-02",
     "cameraName": "bop-jk-02",
@@ -3569,8 +3652,13 @@
       0.346,
       0.3999
     ],
+<<<<<<< HEAD
+    "snapshotUrl": "/api/alerts/snapshots/breach_1789117968302_cam-test-eval_tr5.jpg",
+    "suspectName": null,
+=======
     "snapshotUrl": null,
     "suspectName": "Simulated Intruder #901",
+>>>>>>> 4aa3053897ede0e75036f1b603852a1f8cc02cf1
     "threatLevel": "HIGH",
     "category": "tripwire_crossing",
     "notes": "Track #901 (suspect) traversed tripwire in FORWARD direction."

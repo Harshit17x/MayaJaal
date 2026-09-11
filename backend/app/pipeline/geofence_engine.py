@@ -17,7 +17,10 @@ import time
 from typing import Any, Optional
 import uuid
 
-from app.pipeline.alert_service import alert_service
+import cv2
+import numpy as np
+
+from app.pipeline.alert_service import alert_service, SNAPSHOTS_DIR
 
 logger = logging.getLogger("SIH26187.GeofenceEngine")
 
@@ -292,6 +295,169 @@ class GeofenceEngine:
                 return True
             return False
 
+    # ── Intruder Snapshot Forensics ──────────────────────────────────────────
+
+    def _capture_breach_snapshot(
+        self,
+        frame: Optional[np.ndarray],
+        box: list[float],
+        track_id: int,
+        camera_id: str,
+        barrier_name: str,
+        barrier_type: str = "zone",
+    ) -> Optional[str]:
+        """
+        Extracts a forensic snapshot of the intruder with context margins, tactical
+        crimson red brackets, footpoint ground contact crosshair, intruder badge,
+        telemetry bar, and picture-in-picture scene overview.
+        Persists as JPEG to SNAPSHOTS_DIR and returns the filename.
+        """
+        try:
+            # If no live frame passed, try loading camera reference image as fallback
+            if frame is None:
+                candidate_paths = [
+                    DATA_DIR.parent.parent.parent / "frontend" / "public" / "images" / "cameras" / f"{camera_id}.jpg",
+                    DATA_DIR / "cameras" / f"{camera_id}.jpg",
+                ]
+                for cp in candidate_paths:
+                    if cp.is_file():
+                        try:
+                            frame = cv2.imread(str(cp))
+                            if frame is not None:
+                                break
+                        except Exception:
+                            pass
+
+            if frame is None:
+                return None
+
+            h, w = frame.shape[:2]
+            if h <= 0 or w <= 0:
+                return None
+
+            b = [float(v) for v in box[:4]]
+            # Convert normalized coordinates if all <= 1.05
+            if max(b) <= 1.05:
+                x1 = int(b[0] * w)
+                y1 = int(b[1] * h)
+                x2 = int(b[2] * w)
+                y2 = int(b[3] * h)
+            else:
+                x1 = int(b[0])
+                y1 = int(b[1])
+                x2 = int(b[2])
+                y2 = int(b[3])
+
+            x1 = max(0, min(w - 1, x1))
+            y1 = max(0, min(h - 1, y1))
+            x2 = max(0, min(w - 1, x2))
+            y2 = max(0, min(h - 1, y2))
+
+            if x2 <= x1 or y2 <= y1 or (x2 - x1 < 8 and y2 - y1 < 8):
+                x1, y1, x2, y2 = int(w * 0.25), int(h * 0.25), int(w * 0.75), int(h * 0.75)
+
+            bw = x2 - x1
+            bh = y2 - y1
+
+            # Generous context padding around person
+            pad_x = max(35, int(bw * 0.35))
+            pad_y = max(35, int(bh * 0.25))
+
+            crop_x1 = max(0, x1 - pad_x)
+            crop_y1 = max(0, y1 - pad_y)
+            crop_x2 = min(w, x2 + pad_x)
+            crop_y2 = min(h, y2 + pad_y)
+
+            crop = frame[crop_y1:crop_y2, crop_x1:crop_x2].copy()
+            ch, cw = crop.shape[:2]
+            if ch < 10 or cw < 10:
+                crop = frame.copy()
+                crop_x1, crop_y1 = 0, 0
+                ch, cw = crop.shape[:2]
+
+            # Relative coordinates in crop
+            bx1 = x1 - crop_x1
+            by1 = y1 - crop_y1
+            bx2 = x2 - crop_x1
+            by2 = y2 - crop_y1
+
+            # Tactical crimson red bounding box
+            color = (0, 0, 235)  # Crimson Red
+            cv2.rectangle(crop, (bx1, by1), (bx2, by2), color, 2)
+
+            # High-visibility corner brackets
+            clen = max(6, min(16, (bx2 - bx1) // 4, (by2 - by1) // 4))
+            bracket_color = (0, 220, 255)  # Bright amber/gold
+            cv2.line(crop, (bx1, by1), (bx1 + clen, by1), bracket_color, 3)
+            cv2.line(crop, (bx1, by1), (bx1, by1 + clen), bracket_color, 3)
+            cv2.line(crop, (bx2, by1), (bx2 - clen, by1), bracket_color, 3)
+            cv2.line(crop, (bx2, by1), (bx2, by1 + clen), bracket_color, 3)
+            cv2.line(crop, (bx1, by2), (bx1 + clen, by2), bracket_color, 3)
+            cv2.line(crop, (bx1, by2), (bx1, by2 - clen), bracket_color, 3)
+            cv2.line(crop, (bx2, by2), (bx2 - clen, by2), bracket_color, 3)
+            cv2.line(crop, (bx2, by2), (bx2, by2 - clen), bracket_color, 3)
+
+            # Ground-contact footpoint bullseye
+            fpx = (bx1 + bx2) // 2
+            fpy = by2
+            cv2.circle(crop, (fpx, fpy), 4, (0, 0, 255), -1)
+            cv2.circle(crop, (fpx, fpy), 9, (0, 255, 255), 2)
+            cv2.line(crop, (fpx - 14, fpy), (fpx + 14, fpy), (0, 255, 255), 1)
+            cv2.line(crop, (fpx, fpy - 14), (fpx, fpy + 14), (0, 255, 255), 1)
+
+            # Top label badge on intruder
+            label_str = f"🚨 INTRUDER #{track_id} | {barrier_name.upper()}"
+            (lw, lh), _ = cv2.getTextSize(label_str, cv2.FONT_HERSHEY_SIMPLEX, 0.40, 1)
+            pill_y1 = max(24, by1 - lh - 8)
+            pill_y2 = max(32, by1)
+            pill_w = min(cw - 4, bx1 + lw + 12)
+            cv2.rectangle(crop, (bx1, pill_y1), (pill_w, pill_y2), (0, 0, 210), -1)
+            cv2.rectangle(crop, (bx1, pill_y1), (pill_w, pill_y2), (255, 255, 255), 1)
+            cv2.putText(crop, label_str, (bx1 + 4, pill_y2 - 3), cv2.FONT_HERSHEY_SIMPLEX, 0.40, (255, 255, 255), 1, cv2.LINE_AA)
+
+            # Top forensic header bar
+            cv2.rectangle(crop, (0, 0), (cw, 22), (10, 15, 25), -1)
+            cv2.line(crop, (0, 22), (cw, 22), (0, 0, 220), 1)
+            cv2.circle(crop, (10, 11), 4, (0, 0, 255), -1)
+            cv2.putText(crop, "PERIMETER BREACH FORENSICS", (20, 15), cv2.FONT_HERSHEY_SIMPLEX, 0.36, (255, 255, 255), 1, cv2.LINE_AA)
+
+            # Picture-in-picture (PIP) scene overview inset in top-right
+            if cw >= 280 and ch >= 200:
+                pip_w = min(130, int(cw * 0.32))
+                pip_h = max(50, int(pip_w * (h / float(w))))
+                pip_img = cv2.resize(frame, (pip_w, pip_h))
+                prx1 = max(0, min(pip_w - 1, int((x1 / float(w)) * pip_w)))
+                pry1 = max(0, min(pip_h - 1, int((y1 / float(h)) * pip_h)))
+                prx2 = max(0, min(pip_w - 1, int((x2 / float(w)) * pip_w)))
+                pry2 = max(0, min(pip_h - 1, int((y2 / float(h)) * pip_h)))
+                cv2.rectangle(pip_img, (prx1, pry1), (prx2, pry2), (0, 0, 255), 1)
+                px = cw - pip_w - 4
+                py = 4
+                if py + pip_h < ch and px >= 0:
+                    crop[py:py+pip_h, px:px+pip_w] = pip_img
+                    cv2.rectangle(crop, (px, py), (px+pip_w, py+pip_h), (80, 100, 140), 1)
+                    cv2.putText(crop, "OVERVIEW", (px + 3, py + 9), cv2.FONT_HERSHEY_SIMPLEX, 0.26, (200, 220, 255), 1)
+
+            # Bottom telemetry bar
+            now_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            foot_norm = (round((x1 + x2) / (2.0 * w), 3), round(y2 / float(h), 3))
+            bot_text = f"CAM: {camera_id.upper()} • {now_time} • FP:{foot_norm}"
+            cv2.rectangle(crop, (0, ch - 20), (cw, ch), (10, 15, 25), -1)
+            cv2.line(crop, (0, ch - 20), (cw, ch - 20), (40, 60, 80), 1)
+            cv2.putText(crop, bot_text, (8, ch - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0, 220, 140), 1, cv2.LINE_AA)
+
+            SNAPSHOTS_DIR.mkdir(parents=True, exist_ok=True)
+            ts_str = int(time.time() * 1000)
+            clean_cam = "".join(c for c in camera_id if c.isalnum() or c in "-_") or "cam"
+            snap_filename = f"breach_{ts_str}_{clean_cam}_tr{track_id}.jpg"
+            snap_path = SNAPSHOTS_DIR / snap_filename
+            cv2.imwrite(str(snap_path), crop, [cv2.IMWRITE_JPEG_QUALITY, 88])
+            logger.info("Saved geofence breach forensics snapshot to %s", snap_path)
+            return snap_filename
+        except Exception as exc:
+            logger.warning("Error creating breach snapshot: %s", exc)
+            return None
+
     # ── Evaluation & Alert Triggering ────────────────────────────────────────
 
     def evaluate_tracks(
@@ -300,16 +466,21 @@ class GeofenceEngine:
         tracked_objects: list[dict[str, Any]],
         frame_resolution: Optional[tuple[int, int]] = None,
         auto_alert: bool = True,
+        frame: Optional[np.ndarray] = None,
+        camera_name: Optional[str] = None,
     ) -> list[dict[str, Any]]:
         """
         Evaluates a frame's tracked objects against all enabled zones and tripwires
-        for the given camera_id.
+        for the given camera_id. Automatically captures intruder forensic snapshots
+        when breaches occur.
 
         Args:
             camera_id: Camera identifier.
             tracked_objects: List of dicts with 'box', 'track_id', 'class_name', 'confidence', etc.
             frame_resolution: (width, height) for pixel coordinate normalization.
             auto_alert: Whether to automatically dispatch security alerts to AlertService.
+            frame: Optional full BGR frame for high-resolution intruder snapshot capture.
+            camera_name: Optional human-readable camera location name.
 
         Returns:
             List of detected breach events.
@@ -365,7 +536,18 @@ class GeofenceEngine:
                     continue
 
                 if is_point_in_polygon(curr_fp[0], curr_fp[1], poly):
-                    # Always register visual breach event for stream HUD and bounding box rendering
+                    # Capture forensic snapshot of intruder
+                    snapshot_filename = None
+                    if auto_alert or frame is not None:
+                        snapshot_filename = self._capture_breach_snapshot(
+                            frame=frame,
+                            box=box,
+                            track_id=track_id,
+                            camera_id=camera_id,
+                            barrier_name=zone.get("name", "Perimeter"),
+                            barrier_type="zone",
+                        )
+
                     breach_event = {
                         "type": "zone_breach",
                         "zoneId": zone["id"],
@@ -377,6 +559,7 @@ class GeofenceEngine:
                         "suspectName": suspect_name,
                         "footpoint": [round(curr_fp[0], 4), round(curr_fp[1], 4)],
                         "severity": zone.get("severity", "CRITICAL"),
+                        "snapshotUrl": f"/api/alerts/snapshots/{snapshot_filename}" if snapshot_filename else None,
                         "timestamp": datetime.now(timezone.utc).isoformat(),
                     }
                     breaches.append(breach_event)
@@ -396,9 +579,11 @@ class GeofenceEngine:
                                     location=f"Sector Grid [{camera_id}] — {zone.get('name')}",
                                     severity=zone.get("severity", "CRITICAL"),
                                     camera_id=camera_id,
+                                    camera_name=camera_name or camera_id,
                                     class_name=class_name,
                                     confidence=conf,
                                     box=box,
+                                    snapshot_filename=snapshot_filename,
                                     suspect_name=suspect_name,
                                     threat_level=zone.get("severity", "CRITICAL"),
                                     category="geofence_breach",
@@ -431,6 +616,17 @@ class GeofenceEngine:
 
                         if (now - last_alert_time) >= cooldown:
                             self._cooldowns[cd_key] = now
+                            snapshot_filename = None
+                            if auto_alert or frame is not None:
+                                snapshot_filename = self._capture_breach_snapshot(
+                                    frame=frame,
+                                    box=box,
+                                    track_id=track_id,
+                                    camera_id=camera_id,
+                                    barrier_name=wire.get("name", "Tactical Tripwire"),
+                                    barrier_type="tripwire",
+                                )
+
                             breach_event = {
                                 "type": "tripwire_crossing",
                                 "wireId": wire["id"],
@@ -444,6 +640,7 @@ class GeofenceEngine:
                                 "directionCrossed": crossed_dir,
                                 "requiredDirection": direction,
                                 "severity": wire.get("severity", "CRITICAL"),
+                                "snapshotUrl": f"/api/alerts/snapshots/{snapshot_filename}" if snapshot_filename else None,
                                 "timestamp": datetime.now(timezone.utc).isoformat(),
                             }
                             breaches.append(breach_event)
@@ -455,13 +652,15 @@ class GeofenceEngine:
                                         location=f"Sector Grid [{camera_id}] — {wire.get('name')}",
                                         severity=wire.get("severity", "CRITICAL"),
                                         camera_id=camera_id,
+                                        camera_name=camera_name or camera_id,
                                         class_name=class_name,
                                         confidence=conf,
                                         box=box,
+                                        snapshot_filename=snapshot_filename,
                                         suspect_name=suspect_name,
                                         threat_level=wire.get("severity", "CRITICAL"),
-                                        category="tripwire_crossing",
-                                        notes=f"Track #{track_id} ({class_name}) traversed tripwire in {crossed_dir} direction.",
+                                        category="tripwire_violation",
+                                        notes=f"Track #{track_id} ({class_name}) crossed {crossed_dir} tripwire. Footpoint: ({curr_fp[0]:.2f}, {curr_fp[1]:.2f})",
                                     )
                                 except Exception as exc:
                                     logger.error("Failed to dispatch tripwire alert: %s", exc)
