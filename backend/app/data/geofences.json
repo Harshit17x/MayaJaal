@@ -1,25 +1,26 @@
 {
   "zones": [
     {
-      "id": "zone-demo-01",
-      "name": "RS Pura Buffer Zone (Zero Line)",
+      "id": "zone-f6e6a096",
+      "name": "Exclusion Zone 1",
       "cameraId": "bop-jk-01",
       "color": "#ef4444",
       "severity": "CRITICAL",
       "polygon": [
         [
-          0.15,
-          0.45
+          0.9215,
+          0.6295
         ],
         [
-          0.85,
-          0.45
+          0.9916,
+          0.6611
         ],
         [
-          0.9,
-          0.95
+          0.5691,
+          0.9851
         ],
         [
+<<<<<<< HEAD
           0.1,
           0.95
         ]
@@ -128,6 +129,10 @@
         [
           0.5189,
           0.9525
+=======
+          0.5011,
+          0.9292
+>>>>>>> f261f64b694d26cd2b1dda86711314859e93ee5f
         ]
       ],
       "targetClasses": [
@@ -137,9 +142,14 @@
       "enabled": true,
       "cooldownSeconds": 15.0,
       "description": "Custom tactical exclusion zone.",
-      "createdAt": "2026-09-10T22:43:33.017242+00:00"
+      "createdAt": "2026-09-10T22:57:40.208878+00:00",
+      "updatedAt": "2026-09-11T08:58:43.883099+00:00"
     }
   ],
+<<<<<<< HEAD
+  "tripwires": [],
+  "updated_at": "2026-09-11T08:58:43.883099+00:00"
+=======
   "tripwires": [
     {
       "id": "wire-demo-01",
@@ -243,4 +253,15 @@
     }
   ],
   "updated_at": "2026-09-11T09:09:45.267609+00:00"
+<<<<<<< HEAD
+=======
+=======
+<<<<<<< HEAD
+  "updated_at": "2026-09-10T22:43:33.017242+00:00"
+=======
+  "updated_at": "2026-09-10T22:50:16.149488+00:00"
+>>>>>>> ad3628bebfa41714f67cd5343ce0f7b90873dfeb
+>>>>>>> 4aa3053897ede0e75036f1b603852a1f8cc02cf1
+>>>>>>> d842efc65f9f2926b5258c78d37f9359809b88d3
+>>>>>>> f261f64b694d26cd2b1dda86711314859e93ee5f
 }
