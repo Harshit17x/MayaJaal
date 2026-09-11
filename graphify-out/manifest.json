@@ -426,9 +426,9 @@
     "semantic_hash": ""
   },
   "frontend/src/app/(operator)/layout.tsx": {
-    "mtime": 1789119639.428501,
-    "seen": 1789119982.8384292,
-    "ast_hash": "9f6dc5d1a267a7d08d72fb1daa345d21",
+    "mtime": 1789124416.3493478,
+    "seen": 1789124468.5144546,
+    "ast_hash": "f503fbbd2b653244973afbf9f67c26ea",
     "semantic_hash": ""
   },
   "frontend/src/app/(operator)/live/page.tsx": {
@@ -636,9 +636,9 @@
     "semantic_hash": ""
   },
   "frontend/src/lib/authStore.ts": {
-    "mtime": 1789119577.5452068,
-    "seen": 1789119982.8384917,
-    "ast_hash": "1f0370a103fcbedfd3851a10c2446d41",
+    "mtime": 1789124402.240872,
+    "seen": 1789124468.514511,
+    "ast_hash": "2b8a7938f5ad24f12898dec27e44d3c5",
     "semantic_hash": ""
   },
   "frontend/src/lib/borderCameras.ts": {

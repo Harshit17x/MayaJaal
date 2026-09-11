@@ -82,13 +82,13 @@ export default function OperatorLayout({
         return;
       }
       const rem = getRemainingShiftTime(operator.expiresAt);
-      setShiftRemaining(rem.formatted);
+      setShiftRemaining((prev) => (prev === rem.formatted ? prev : rem.formatted));
     };
 
     updateShift();
     const interval = setInterval(updateShift, 1000);
     return () => clearInterval(interval);
-  }, [operator, logout, pathname, router]);
+  }, [operator?.badgeNumber, operator?.expiresAt, logout, pathname, router]);
 
   // Close profile dropdown on outside click
   useEffect(() => {
@@ -167,7 +167,10 @@ export default function OperatorLayout({
         hour12: false,
         timeZone: "Asia/Kolkata",
       });
-      setCurrentTimestamp({ date, time });
+      setCurrentTimestamp((prev) => {
+        if (prev.date === date && prev.time === time) return prev;
+        return { date, time };
+      });
     };
 
     updateTime();

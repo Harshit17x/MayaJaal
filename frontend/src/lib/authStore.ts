@@ -257,12 +257,34 @@ export function validateCredentials(
 }
 
 export function useAuth() {
-  const [operator, setOperator] = useState<OperatorUser | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [operator, setOperator] = useState<OperatorUser | null>(() => {
+    if (typeof window !== "undefined") {
+      return getStoredOperator();
+    }
+    return null;
+  });
+  const [isLoading, setIsLoading] = useState<boolean>(() => {
+    if (typeof window !== "undefined") {
+      return false;
+    }
+    return true;
+  });
 
   const syncState = useCallback(() => {
     const stored = getStoredOperator();
-    setOperator(stored);
+    setOperator((prev) => {
+      if (!prev && !stored) return null;
+      if (!prev || !stored) return stored;
+      if (
+        prev.badgeNumber === stored.badgeNumber &&
+        prev.authenticatedAt === stored.authenticatedAt &&
+        prev.expiresAt === stored.expiresAt &&
+        prev.token === stored.token
+      ) {
+        return prev;
+      }
+      return stored;
+    });
     setIsLoading(false);
   }, []);
 
@@ -286,10 +308,14 @@ export function useAuth() {
     // Periodic heartbeat to auto-expire duty shift if time elapses
     const interval = setInterval(() => {
       const current = getStoredOperator();
-      if (!current && operator) {
-        // Just expired
-        setOperator(null);
-        window.dispatchEvent(new Event(AUTH_EVENT_NAME));
+      if (!current) {
+        setOperator((prev) => {
+          if (prev) {
+            window.dispatchEvent(new Event(AUTH_EVENT_NAME));
+            return null;
+          }
+          return null;
+        });
       }
     }, 15000);
 
@@ -298,7 +324,7 @@ export function useAuth() {
       window.removeEventListener(AUTH_EVENT_NAME, handleCustomAuthChange);
       clearInterval(interval);
     };
-  }, [syncState, operator]);
+  }, [syncState]);
 
   /**
    * Initializes a formal operator duty shift session.
