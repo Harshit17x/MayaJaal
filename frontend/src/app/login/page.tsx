@@ -13,12 +13,10 @@ import {
   ShieldCheck,
   ShieldAlert,
   Clock,
-  Sparkles,
 } from "lucide-react";
 import { EmblemIndia } from "@/components/landing/EmblemIndia";
 import {
   useAuth,
-  DEMO_OPERATORS,
   validateCredentials,
   OperatorUser,
 } from "@/lib/authStore";
@@ -75,12 +73,6 @@ function LoginFormCard() {
     executeLogin(validation.user);
   };
 
-  const handleQuickSelect = (demo: (typeof DEMO_OPERATORS)[0]) => {
-    setUsername(demo.badgeNumber);
-    setPassword("MAATRIX2026");
-    setErrorMessage(null);
-    executeLogin(demo);
-  };
 
   return (
     <div className="w-full max-w-[440px] mx-auto">
@@ -128,42 +120,7 @@ function LoginFormCard() {
           </div>
         )}
 
-        {/* 1-Click Quick Operator Access Selector */}
-        <div className="mb-4 space-y-1.5">
-          <div className="flex items-center justify-between text-[11px] font-semibold text-slate-500 px-1">
-            <span className="flex items-center gap-1">
-              <Sparkles className="w-3 h-3 text-emerald-600" />
-              1-Click Duty Shift Access:
-            </span>
-            <span className="text-[10px] text-slate-400 font-mono">Select Operator</span>
-          </div>
 
-          <div className="grid grid-cols-3 gap-1.5">
-            {DEMO_OPERATORS.map((demo) => {
-              const isSelected = username.toUpperCase() === demo.badgeNumber.toUpperCase();
-              return (
-                <button
-                  key={demo.id}
-                  type="button"
-                  onClick={() => handleQuickSelect(demo)}
-                  className={`py-2 px-2 rounded-xl text-[11px] font-semibold border transition-all text-left flex flex-col items-start cursor-pointer ${
-                    isSelected
-                      ? "bg-emerald-50 border-emerald-300 text-emerald-900 ring-1 ring-emerald-500/20 shadow-xs"
-                      : "bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-700"
-                  }`}
-                  title={`${demo.name} · ${demo.serviceBranch}`}
-                >
-                  <span className="font-bold truncate w-full text-[11px]">
-                    {demo.avatarInitials} · {demo.name.split(" ").slice(-1)[0]}
-                  </span>
-                  <span className="text-[9px] text-slate-500 font-mono truncate w-full">
-                    {demo.serviceBranch.split(" ")[0]}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
 
         {/* Credential Form */}
         <form onSubmit={handleSubmit} className="space-y-3.5">

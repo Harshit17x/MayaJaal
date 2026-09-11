@@ -257,18 +257,8 @@ export function validateCredentials(
 }
 
 export function useAuth() {
-  const [operator, setOperator] = useState<OperatorUser | null>(() => {
-    if (typeof window !== "undefined") {
-      return getStoredOperator();
-    }
-    return null;
-  });
-  const [isLoading, setIsLoading] = useState<boolean>(() => {
-    if (typeof window !== "undefined") {
-      return false;
-    }
-    return true;
-  });
+  const [operator, setOperator] = useState<OperatorUser | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const syncState = useCallback(() => {
     const stored = getStoredOperator();

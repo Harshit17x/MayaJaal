@@ -349,20 +349,9 @@ export const alertsStore = {
 };
 
 export function useAlerts() {
-  const [alerts, setAlerts] = useState<AlertItem[]>(() => {
-    if (memoryAlerts.length > 0) return memoryAlerts;
-    if (typeof window !== "undefined") {
-      const stored = loadStoredIncidents();
-      if (stored.length > 0) {
-        memoryAlerts = stored;
-        return stored;
-      }
-      memoryAlerts = [...SEED_INCIDENTS];
-      persistIncidents(memoryAlerts);
-      return memoryAlerts;
-    }
-    return [...SEED_INCIDENTS];
-  });
+  const [alerts, setAlerts] = useState<AlertItem[]>(
+    memoryAlerts.length > 0 ? memoryAlerts : SEED_INCIDENTS
+  );
 
   const [connected, setConnected] = useState<boolean>(isConnected);
 
