@@ -1,6 +1,5 @@
 [
   {
-<<<<<<< HEAD
     "id": "alert-1789118027610-82f4",
     "title": "Geofence Breach: Joint Check Post Restricted Perimeter",
     "location": "Sector Grid [bop-jk-02] \u2014 Joint Check Post Restricted Perimeter",
@@ -73,18 +72,11 @@
     "notes": "Target PERSON (Track #101) crossed Unit Test Restricted Zone on Test Camera."
   },
   {
-    "id": "alert-1789067156345-4d92",
-    "title": "Tripwire Breach: Unit Test Directional Tripwire [FORWARD]",
-    "location": "Test Camera",
-    "time": "Just now",
-    "timestamp": 1789067156345,
-=======
     "id": "alert-1789080060880-cb01",
     "title": "Tripwire Triggered: Tripwire Barrier 3",
     "location": "Sector Grid [bop-jk-02] \u2014 Tripwire Barrier 3",
     "time": "Just now",
     "timestamp": 1789080060880,
->>>>>>> 4aa3053897ede0e75036f1b603852a1f8cc02cf1
     "severity": "HIGH",
     "cameraId": "bop-jk-02",
     "cameraName": "bop-jk-02",
@@ -97,13 +89,8 @@
       0.346,
       0.3999
     ],
-<<<<<<< HEAD
     "snapshotUrl": "/api/alerts/snapshots/breach_1789117968302_cam-test-eval_tr5.jpg",
     "suspectName": null,
-=======
-    "snapshotUrl": null,
-    "suspectName": "Simulated Intruder #901",
->>>>>>> 4aa3053897ede0e75036f1b603852a1f8cc02cf1
     "threatLevel": "HIGH",
     "category": "tripwire_crossing",
     "notes": "Track #901 (suspect) traversed tripwire in FORWARD direction."
