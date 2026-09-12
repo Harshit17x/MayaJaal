@@ -18,9 +18,9 @@
     "semantic_hash": "9f3b839914bb3bfbcabd7c16a5cb5708"
   },
   "backend/app/api/inference.py": {
-    "mtime": 1789226360.9353077,
-    "seen": 1789232338.3521633,
-    "ast_hash": "574d5272cbd1258ea7544ace4695bb23",
+    "mtime": 1789225855.055021,
+    "seen": 1789225957.48483,
+    "ast_hash": "b010b38c38030f9a7eee5f761f2ad2a3",
     "semantic_hash": ""
   },
   "backend/app/api/models.py": {
@@ -36,15 +36,15 @@
     "semantic_hash": ""
   },
   "backend/app/api/tracking.py": {
-    "mtime": 1789226399.2574613,
-    "seen": 1789232338.352171,
-    "ast_hash": "e01e2c87182ec12cbf8484915fee4c6d",
+    "mtime": 1789225855.0518348,
+    "seen": 1789225957.484837,
+    "ast_hash": "6ccb7de2b4c98c50c2e630f9de81e914",
     "semantic_hash": ""
   },
   "backend/app/core/config.py": {
-    "mtime": 1789226038.9296672,
-    "seen": 1789232338.352173,
-    "ast_hash": "b57d4738d0db0e2b1715ab064b393525",
+    "mtime": 1789225855.0671482,
+    "seen": 1789225957.484839,
+    "ast_hash": "270a2024025372d6e651e77c65447922",
     "semantic_hash": ""
   },
   "backend/app/core/resource_manager.py": {
@@ -66,9 +66,9 @@
     "semantic_hash": ""
   },
   "backend/app/inference/inference_service.py": {
-    "mtime": 1789226144.6064239,
-    "seen": 1789232338.3521874,
-    "ast_hash": "4edc4e04c53814ad899cdea334f6e779",
+    "mtime": 1789225855.0638223,
+    "seen": 1789225957.4848511,
+    "ast_hash": "988a4c65ac5e6053b80c6bfb3fc81997",
     "semantic_hash": ""
   },
   "backend/app/inference/model_manager.py": {
@@ -90,9 +90,9 @@
     "semantic_hash": ""
   },
   "backend/app/pipeline/anpr_service.py": {
-    "mtime": 1789226445.7546167,
-    "seen": 1789232338.3521976,
-    "ast_hash": "845787beecbf478f87a5a9bfda8e9cec",
+    "mtime": 1789225078.543299,
+    "seen": 1789225119.3334596,
+    "ast_hash": "402e9bf215b568e7c289a6859a2f1af9",
     "semantic_hash": ""
   },
   "backend/app/pipeline/image_loader.py": {
@@ -102,15 +102,15 @@
     "semantic_hash": "aecac970cddc67daa27780710460b29e"
   },
   "backend/app/pipeline/postprocessor.py": {
-    "mtime": 1789226120.6812325,
-    "seen": 1789232338.352208,
-    "ast_hash": "17a27a0bae889baf8a4177928a919275",
+    "mtime": 1789225855.0645983,
+    "seen": 1789225957.4848688,
+    "ast_hash": "9504dfc3b726e8622cf599030e6057bb",
     "semantic_hash": ""
   },
   "backend/app/pipeline/preprocessor.py": {
-    "mtime": 1789226068.6241744,
-    "seen": 1789232338.3522093,
-    "ast_hash": "9457c5ba08b9f06d094b06f88f15ff1e",
+    "mtime": 1789225855.065413,
+    "seen": 1789225957.4848707,
+    "ast_hash": "3c324ec5e87b536928a337c6a164e3fe",
     "semantic_hash": ""
   },
   "backend/app/pipeline/rtsp_loader.py": {
@@ -3147,12 +3147,6 @@
     "mtime": 1789124601.8125398,
     "seen": 1789135326.6010516,
     "ast_hash": "a17df2b5f2494ce3432a0befd1f20e40",
-    "semantic_hash": ""
-  },
-  "backend/tests/test_onnx_batch_inference.py": {
-    "mtime": 1789226495.0541947,
-    "seen": 1789232338.3522635,
-    "ast_hash": "24722bd80baef6a18308987f6f2f94e3",
     "semantic_hash": ""
   }
 }

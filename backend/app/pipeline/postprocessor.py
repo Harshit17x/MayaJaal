@@ -87,117 +87,118 @@ class Postprocessor:
         original_image_size: tuple[int, int] | None = None,
     ) -> list[dict[str, Any]]:
         """
-        Decode output tensors into a list of detection dictionaries.
+        Decode output tensors into a list of detection dictionaries for a single frame
+        (or returns the first frame's detections if given a batch tensor).
+        """
+        res = self.decode_batch(
+            outputs=outputs,
+            model_input_size=model_input_size,
+            original_image_sizes=[original_image_size] if original_image_size else None,
+        )
+        return res[0] if res else []
 
-        Args:
-            outputs: Raw output tensors from ONNXEngine.
-            model_input_size: (width, height) of the model's preprocessed input tensor.
-            original_image_size: (width, height) of the source image/frame before resizing.
-
-        Returns:
-            List of detection dicts with keys [box, confidence, class_id, class_name].
+    def decode_batch(
+        self,
+        outputs: list[np.ndarray],
+        model_input_size: tuple[int, int] | None = None,
+        original_image_sizes: list[tuple[int, int]] | tuple[int, int] | None = None,
+    ) -> list[list[dict[str, Any]]]:
+        """
+        Decode output tensors into a list of detection lists (one list per frame in the batch).
+        Supports batch sizes from 1 to 6 (or more) for all model architectures.
         """
         if not outputs or not isinstance(outputs[0], np.ndarray):
             return []
 
         primary_output = outputs[0]
-
-        # Only 2D or 3D tensors are candidates for detection outputs
         if primary_output.ndim not in (2, 3):
             return []
 
-        detections: list[Detection] = []
+        if primary_output.ndim == 2:
+            batch_size = 1
+            slices = [primary_output]
+        else:
+            batch_size = primary_output.shape[0]
+            slices = [primary_output[b] for b in range(batch_size)]
+
+        batch_detections: list[list[dict[str, Any]]] = []
         num_classes = len(self.class_labels)
 
-        try:
-            # Check 1: Pre-NMS / End-to-End shape [1, N, 6] ([x1, y1, x2, y2, score, class_id])
-            if primary_output.ndim == 3 and primary_output.shape[-1] == 6:
-                detections = self._decode_end2end(primary_output)
+        if original_image_sizes is None:
+            sizes_list = [None] * batch_size
+        elif isinstance(original_image_sizes, list):
+            sizes_list = original_image_sizes + [None] * max(0, batch_size - len(original_image_sizes))
+        else:
+            sizes_list = [original_image_sizes] * batch_size
 
-            # Check 2: 2D Pre-NMS shape [N, 6]
-            elif primary_output.ndim == 2 and primary_output.shape[1] == 6:
-                detections = self._decode_end2end(np.expand_dims(primary_output, axis=0))
+        for b, slice_data in enumerate(slices):
+            detections: list[Detection] = []
+            try:
+                # 1. Pre-NMS / End-to-End shape [N, 6] ([x1, y1, x2, y2, score, class_id])
+                if slice_data.ndim == 2 and slice_data.shape[1] == 6:
+                    detections = self._decode_end2end_slice(slice_data)
 
-            # Check 3: 3D bounding box detection tensors [1, D1, D2]
-            elif primary_output.ndim == 3:
-                _, d1, d2 = primary_output.shape
+                # 2. 2D tensor: YOLOv8 [4 + C, N] or YOLOv5 [N, 4 + C / 5 + C]
+                elif slice_data.ndim == 2:
+                    d1, d2 = slice_data.shape
+                    if (
+                        d1 in (4 + num_classes, 84)
+                        or (d2 > 500 and d1 < d2 and d1 >= 5)
+                        or (d1 >= 5 and d2 < 50 and d1 > d2)
+                    ):
+                        detections = self._decode_yolov8_slice(slice_data)
+                    elif (
+                        d2 in (5 + num_classes, 4 + num_classes, 85, 84)
+                        or (d1 > 500 and d2 < d1 and d2 >= 5)
+                        or (d2 >= 5 and d1 < 50 and d2 >= d1)
+                    ):
+                        detections = self._decode_yolo_transposed_slice(slice_data)
+            except Exception as exc:
+                logger.warning("Failed to decode detection tensor for batch item %d: %s", b, exc)
 
-                # YOLOv8 format with features in dimension 1: [1, 4 + C, N]
-                # Matches if d1 equals 4+C, or d1 matches 84, or d2 is large anchor grid
-                if (
-                    d1 in (4 + num_classes, 84)
-                    or (d2 > 500 and d1 < d2 and d1 >= 5)
-                    or (d1 >= 5 and d2 < 50 and d1 > d2)
-                ):
-                    detections = self._decode_yolov8(primary_output)
+            orig_size_b = sizes_list[b]
+            if orig_size_b and model_input_size and detections:
+                detections = self._rescale_boxes(
+                    detections=detections,
+                    model_size=model_input_size,
+                    orig_size=orig_size_b,
+                )
 
-                # YOLOv5 format with features in dimension 2: [1, N, 5 + C]
-                # Or transposed YOLOv8 [1, N, 4 + C]
-                elif (
-                    d2 in (5 + num_classes, 4 + num_classes, 85, 84)
-                    or (d1 > 500 and d2 < d1 and d2 >= 5)
-                    or (d2 >= 5 and d1 < 50 and d2 >= d1)
-                ):
-                    detections = self._decode_yolo_transposed(primary_output)
+            batch_detections.append([d.to_dict() for d in detections])
 
-        except Exception as exc:
-            logger.warning("Failed to decode detection tensor: %s", exc)
-            return []
+        return batch_detections
 
-        # Scale coordinates back to original image dimensions if provided
-        if original_image_size and model_input_size and detections:
-            detections = self._rescale_boxes(
-                detections=detections,
-                model_size=model_input_size,
-                orig_size=original_image_size,
-            )
-
-        return [d.to_dict() for d in detections]
-
-    def _decode_yolov8(self, output: np.ndarray) -> list[Detection]:
-        """
-        Decode standard YOLOv8/v9/v11 output with shape [1, 4 + C, N].
-        Row 0..3 are cx, cy, w, h.
-        Row 4..end are class probabilities.
-        """
-        # Squeeze batch dimension: [4 + C, N] -> transpose to [N, 4 + C]
-        data = np.squeeze(output, axis=0).T  # [N, 4 + C]
-
+    def _decode_yolov8_slice(self, data_chw: np.ndarray) -> list[Detection]:
+        """Decode single-frame YOLOv8/v9/v11 output [4 + C, N]."""
+        data = data_chw.T  # [N, 4 + C]
         boxes = data[:, :4]  # [N, 4] -> cx, cy, w, h
         scores = data[:, 4:]  # [N, C]
 
         class_ids = np.argmax(scores, axis=1)
         confidences = np.max(scores, axis=1)
 
-        # Filter by confidence threshold
         mask = confidences >= self.config.conf_threshold
         if not np.any(mask):
             return []
 
-        filtered_boxes = boxes[mask]
-        filtered_confs = confidences[mask]
-        filtered_classes = class_ids[mask]
-
         return self._apply_nms(
-            boxes_cxcywh=filtered_boxes,
-            confidences=filtered_confs,
-            class_ids=filtered_classes,
+            boxes_cxcywh=boxes[mask],
+            confidences=confidences[mask],
+            class_ids=class_ids[mask],
         )
 
-    def _decode_yolo_transposed(self, output: np.ndarray) -> list[Detection]:
-        """
-        Decode YOLOv5/v7 [1, N, 5 + C] or transposed YOLOv8 [1, N, 4 + C].
-        """
-        data = np.squeeze(output, axis=0)  # [N, 4 + C or 5 + C]
-        num_features = data.shape[1]
+    def _decode_yolov8(self, output: np.ndarray) -> list[Detection]:
+        """Decode standard YOLOv8/v9/v11 output with shape [1, 4 + C, N] or [4 + C, N]."""
+        data_chw = np.squeeze(output, axis=0) if output.ndim == 3 else output
+        return self._decode_yolov8_slice(data_chw)
 
-        # Check for YOLOv5 format (box=4, obj_conf=1, class_scores=C)
+    def _decode_yolo_transposed_slice(self, data: np.ndarray) -> list[Detection]:
+        """Decode single-frame YOLOv5/v7 [N, 5 + C] or transposed YOLOv8 [N, 4 + C]."""
+        num_features = data.shape[1]
         if num_features >= 6:
-            # Evaluate if index 4 represents objectness score (between 0 and 1)
             boxes = data[:, :4]
             obj_conf = data[:, 4]
             class_scores = data[:, 5:]
-
             class_ids = np.argmax(class_scores, axis=1)
             confs = obj_conf * np.max(class_scores, axis=1)
         else:
@@ -216,13 +217,14 @@ class Postprocessor:
             class_ids=class_ids[mask],
         )
 
-    def _decode_end2end(self, output: np.ndarray) -> list[Detection]:
-        """
-        Decode pre-NMS / End-to-End detections [1, N, 6] -> [x1, y1, x2, y2, conf, class_id].
-        """
-        data = np.squeeze(output, axis=0)
-        detections: list[Detection] = []
+    def _decode_yolo_transposed(self, output: np.ndarray) -> list[Detection]:
+        """Decode YOLOv5/v7 [1, N, 5 + C] or transposed YOLOv8 [1, N, 4 + C]."""
+        data = np.squeeze(output, axis=0) if output.ndim == 3 else output
+        return self._decode_yolo_transposed_slice(data)
 
+    def _decode_end2end_slice(self, data: np.ndarray) -> list[Detection]:
+        """Decode single-frame pre-NMS / End-to-End detections [N, 6] -> [x1, y1, x2, y2, conf, class_id]."""
+        detections: list[Detection] = []
         for row in data:
             conf = float(row[4])
             if conf < self.config.conf_threshold:
@@ -241,6 +243,11 @@ class Postprocessor:
             )
 
         return detections[: self.config.max_detections]
+
+    def _decode_end2end(self, output: np.ndarray) -> list[Detection]:
+        """Decode pre-NMS / End-to-End detections [1, N, 6] -> [x1, y1, x2, y2, conf, class_id]."""
+        data = np.squeeze(output, axis=0) if output.ndim == 3 else output
+        return self._decode_end2end_slice(data)
 
     def _apply_nms(
         self,

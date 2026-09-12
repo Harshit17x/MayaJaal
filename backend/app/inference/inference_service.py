@@ -70,12 +70,13 @@ class InferenceService:
         conf_threshold: float = 0.25,
         iou_threshold: float = 0.45,
         original_image_size: tuple[int, int] | None = None,
+        original_image_sizes: list[tuple[int, int]] | None = None,
         class_labels: list[str] | None = None,
     ) -> dict[str, Any]:
         """
-        Run inference using a loaded model.
+        Run inference using a loaded model, supporting both single-frame and batch inputs (2 to 6 frames).
 
-        Returns a JSON-serializable structure with detections and tensor metadata.
+        Returns a JSON-serializable structure with detections, batch_detections, and tensor metadata.
         """
 
         if not model_name or not model_name.strip():
@@ -136,10 +137,15 @@ class InferenceService:
                         }
                     )
 
+            batch_size = 1
+            if input_data.ndim == 4:
+                batch_size = int(input_data.shape[0])
+
             detections: list[dict[str, Any]] = []
+            batch_detections: list[list[dict[str, Any]]] = []
 
             if postprocess and outputs:
-                # Infer model input width/height if 4D tensor (e.g. [1, 3, H, W])
+                # Infer model input width/height if 4D tensor (e.g. [B, 3, H, W])
                 model_input_size = None
                 if input_data.ndim == 4:
                     # channel_first format: [B, C, H, W]
@@ -165,23 +171,38 @@ class InferenceService:
                     )
                 )
 
-                detections = postprocessor.decode(
-                    outputs=outputs,
-                    model_input_size=model_input_size,
-                    original_image_size=original_image_size,
-                )
+                if batch_size > 1:
+                    batch_detections = postprocessor.decode_batch(
+                        outputs=outputs,
+                        model_input_size=model_input_size,
+                        original_image_sizes=original_image_sizes or original_image_size,
+                    )
+                    detections = batch_detections[0] if batch_detections else []
+                else:
+                    detections = postprocessor.decode(
+                        outputs=outputs,
+                        model_input_size=model_input_size,
+                        original_image_size=original_image_size,
+                    )
+                    batch_detections = [detections]
+
+            total_detections_count = (
+                sum(len(d) for d in batch_detections) if batch_size > 1 else len(detections)
+            )
 
             logger.info(
                 "Inference completed | "
-                "model=%s | latency=%.4fs | detections=%d",
+                "model=%s | batch_size=%d | latency=%.4fs | detections=%d",
                 model_name,
+                batch_size,
                 elapsed_seconds,
-                len(detections),
+                total_detections_count,
             )
 
             return {
                 "model_name": model_name,
                 "status": "success",
+                "batch_size": batch_size,
                 "latency_seconds": round(
                     elapsed_seconds,
                     6,
@@ -192,8 +213,9 @@ class InferenceService:
                     "shape": list(input_data.shape),
                     "dtype": str(input_data.dtype),
                 },
-                "detections_count": len(detections),
+                "detections_count": total_detections_count,
                 "detections": detections,
+                "batch_detections": batch_detections,
                 "outputs": output_metadata,
             }
 

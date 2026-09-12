@@ -47,7 +47,7 @@ async def scan_image(
 async def scan_video(
     file: UploadFile = File(...),
     camera_id: str = Form("VIDEO-ANPR"),
-    stride: int = Form(15),
+    stride: int = Form(10),
 ) -> dict:
     """Process an uploaded video clip, tracking and recording unique license plates."""
     suffix = Path(file.filename or "video.mp4").suffix or ".mp4"
@@ -148,6 +148,7 @@ def stream_anpr(
     rtsp_url: str = Query("sample", description="RTSP feed URL or 'sample'"),
     camera_id: str = Query("BOP-04-ANPR", description="Camera identifier"),
     fps: int = Query(24, ge=5, le=30),
+    ocr_stride: int = Query(10, ge=1, le=60, description="Run EasyOCR on every Nth frame"),
 ) -> StreamingResponse:
     """Live MJPEG stream with real-time green plate reticles and vehicle identification."""
     return StreamingResponse(
@@ -155,6 +156,7 @@ def stream_anpr(
             stream_url=rtsp_url,
             camera_id=camera_id,
             fps_limit=fps,
+            ocr_stride=ocr_stride,
         ),
         media_type="multipart/x-mixed-replace; boundary=frame",
         headers={

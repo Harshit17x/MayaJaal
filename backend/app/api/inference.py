@@ -1,3 +1,4 @@
+import uuid
 from pathlib import Path
 import tempfile
 
@@ -282,9 +283,10 @@ async def video_inference(
     conf_threshold: float = Form(0.25),
     iou_threshold: float = Form(0.45),
     postprocess: bool = Form(True),
+    batch_size: int = Form(settings.batch_size),
 ) -> dict:
     """
-    Run bounded inference on frames from an uploaded video.
+    Run bounded inference on frames from an uploaded video using ONNX batching (2 to 6 frames at once).
     """
 
     # -------------------------
@@ -335,6 +337,21 @@ async def video_inference(
         raise HTTPException(
             status_code=400,
             detail="max_frames must be between 1 and 3000.",
+        )
+
+    # -------------------------
+    # Batch size validation (2 to 6 frames at once)
+    # -------------------------
+
+    try:
+        batch_size = int(getattr(batch_size, "default", batch_size))
+    except Exception:
+        batch_size = settings.batch_size
+
+    if not isinstance(batch_size, int) or batch_size < 2 or batch_size > 6:
+        raise HTTPException(
+            status_code=400,
+            detail="batch_size must be an integer between 2 and 6.",
         )
 
     # -------------------------
@@ -479,59 +496,74 @@ async def video_inference(
             face_scan_interval = 15
 
             # -------------------------
-            # Frame processing
+            # Batched frame processing (2 to 6 frames at once)
             # -------------------------
 
-            while frames_processed < max_frames:
+            eof = False
+            while frames_processed < max_frames and not eof:
+                batch_frames: list[np.ndarray] = []
+                batch_indices: list[int] = []
+                batch_sizes: list[tuple[int, int]] = []
+                target_count = min(batch_size, max_frames - frames_processed)
 
-                try:
-                    success, frame = video.read_frame()
+                while len(batch_frames) < target_count:
+                    try:
+                        success, frame = video.read_frame()
 
-                except VideoLoaderError as exc:
-                    raise HTTPException(
-                        status_code=400,
-                        detail=str(exc),
-                    ) from exc
+                    except VideoLoaderError as exc:
+                        raise HTTPException(
+                            status_code=400,
+                            detail=str(exc),
+                        ) from exc
 
-                except Exception as exc:
-                    raise HTTPException(
-                        status_code=500,
-                        detail="Unexpected error while reading video frame.",
-                    ) from exc
+                    except Exception as exc:
+                        raise HTTPException(
+                            status_code=500,
+                            detail="Unexpected error while reading video frame.",
+                        ) from exc
 
-                if not success:
+                    if not success or frame is None:
+                        eof = True
+                        break
+
+                    if not isinstance(frame, np.ndarray):
+                        raise HTTPException(
+                            status_code=500,
+                            detail="VideoLoader returned an invalid frame type.",
+                        )
+
+                    if frame.size == 0:
+                        raise HTTPException(
+                            status_code=400,
+                            detail="VideoLoader returned an empty frame.",
+                        )
+
+                    if frame.ndim != 3 or frame.shape[2] != 3:
+                        raise HTTPException(
+                            status_code=400,
+                            detail=(
+                                "VideoLoader returned a frame that is "
+                                "not a 3-channel color image."
+                            ),
+                        )
+
+                    orig_h, orig_w = frame.shape[:2]
+                    batch_indices.append(frames_processed + len(batch_frames))
+                    batch_frames.append(frame)
+                    batch_sizes.append((orig_w, orig_h))
+
+                if not batch_frames:
                     break
-
-                if frame is None:
-                    break
-
-                if not isinstance(frame, np.ndarray):
-                    raise HTTPException(
-                        status_code=500,
-                        detail="VideoLoader returned an invalid frame type.",
-                    )
-
-                if frame.size == 0:
-                    raise HTTPException(
-                        status_code=400,
-                        detail="VideoLoader returned an empty frame.",
-                    )
-
-                if frame.ndim != 3 or frame.shape[2] != 3:
-                    raise HTTPException(
-                        status_code=400,
-                        detail=(
-                            "VideoLoader returned a frame that is "
-                            "not a 3-channel color image."
-                        ),
-                    )
 
                 # -------------------------
                 # Preprocessing
                 # -------------------------
 
                 try:
-                    tensor = preprocessor.process(frame)
+                    if len(batch_frames) == 1:
+                        tensor = preprocessor.process(batch_frames[0])
+                    else:
+                        tensor = preprocessor.process_batch(batch_frames)
 
                 except PreprocessingError as exc:
                     raise HTTPException(
@@ -550,15 +582,14 @@ async def video_inference(
                 # -------------------------
 
                 try:
-                    orig_h, orig_w = frame.shape[:2]
-
-                    result = inference_service.predict(
+                    batch_inf_result = inference_service.predict(
                         model_name=model_name,
                         input_data=tensor,
                         postprocess=postprocess,
                         conf_threshold=conf_threshold,
                         iou_threshold=iou_threshold,
-                        original_image_size=(orig_w, orig_h),
+                        original_image_size=batch_sizes[0] if len(batch_sizes) == 1 else None,
+                        original_image_sizes=batch_sizes if len(batch_sizes) > 1 else None,
                     )
 
                 except KeyError as exc:
@@ -573,81 +604,99 @@ async def video_inference(
                         detail="Video frame inference failed.",
                     ) from exc
 
-                # ── Periodic Biometric Suspect Facial Scan ───────────────
-                if frames_processed % face_scan_interval == 0:
-                    try:
-                        detected_faces = face_service.detect_and_recognize(
-                            frame,
-                            min_match_score=0.40,
-                            min_face_size=35,
-                            use_temporal_smoothing=True,
-                        )
-                        raw_dets = result.get("detections", [])
-                        for f in detected_faces:
-                            is_threat = bool(f.get("is_threat", False))
-                            suspect_name = f.get("name")
-                            is_known = bool(f.get("is_known", False))
+                if len(batch_frames) > 1:
+                    batch_dets = batch_inf_result.get("batch_detections")
+                    if not batch_dets:
+                        batch_dets = [batch_inf_result.get("detections", []) for _ in batch_frames]
+                else:
+                    batch_dets = [batch_inf_result.get("detections", [])]
 
-                            if is_threat or is_known:
-                                conf = float(f.get("calibrated_conf") or f.get("match_score") or f.get("confidence") or 0.85)
-                                face_dict = {
-                                    "box": [float(c) for c in f["bbox"]],
-                                    "confidence": round(conf, 3),
-                                    "class_id": 999,
-                                    "class_name": f"suspect_{suspect_name.lower()}" if is_threat else f"face_{suspect_name.lower()}",
-                                    "is_threat": is_threat,
-                                    "threat_level": f.get("threat_level") or ("HIGH" if is_threat else None),
-                                    "suspect_name": suspect_name,
-                                    "category": f.get("category"),
-                                }
-                                raw_dets.append(face_dict)
+                frame_inf_time = round(batch_inf_result.get("inference_time_ms", 0.0) / len(batch_frames), 2)
 
-                                if is_threat and suspect_name and suspect_name not in session_alerted_suspects:
-                                    session_alerted_suspects.add(suspect_name)
-                                    session_id_short = uuid.uuid4().hex[:8]
-                                    snap_name = f"suspect_inf_{session_id_short}_{frames_processed}.jpg"
-                                    snap_path = SNAPSHOTS_DIR / snap_name
-                                    try:
-                                        cv2.imwrite(str(snap_path), frame, [cv2.IMWRITE_JPEG_QUALITY, 90])
-                                    except Exception:
-                                        snap_name = None
-
-                                    t_level = f.get("threat_level") or "HIGH"
-                                    sev = "Critical" if t_level == "CRITICAL" else "High"
-                                    alert_service.create_alert(
-                                        title=f"SUSPECT DETECTED: {suspect_name.upper()}",
-                                        location=f"Video Analysis Stream ({file.filename or 'Upload'})",
-                                        severity=sev,
-                                        camera_id="video_upload_stream",
-                                        camera_name=f"Video Upload ({file.filename or 'Video'})",
-                                        class_name="suspect",
-                                        confidence=conf,
-                                        box=[float(c) for c in f["bbox"]],
-                                        snapshot_filename=snap_name,
-                                        suspect_name=suspect_name,
-                                        threat_level=t_level,
-                                        category=f.get("category"),
-                                        notes=f"Identified in uploaded video at frame {frames_processed} with {int(conf * 100)}% biometric match confidence.",
-                                    )
-                                    suspects_detected_summary.append({
-                                        "name": suspect_name,
-                                        "threat_level": t_level,
-                                        "frame_index": frames_processed,
-                                        "confidence": round(conf, 3),
-                                        "category": f.get("category"),
-                                    })
-                        result["detections"] = raw_dets
-                    except Exception as face_err:
-                        pass
-
-                frame_results.append(
-                    {
-                        "frame_index": frames_processed,
-                        "inference": result,
+                for frame, f_idx, (orig_w, orig_h), detections in zip(batch_frames, batch_indices, batch_sizes, batch_dets):
+                    frame_inf = {
+                        "model_name": model_name,
+                        "status": "success",
+                        "inference_time_ms": frame_inf_time,
+                        "detections_count": len(detections),
+                        "detections": detections,
                     }
-                )
 
-                frames_processed += 1
+                    # ── Periodic Biometric Suspect Facial Scan ───────────────
+                    if f_idx % face_scan_interval == 0:
+                        try:
+                            detected_faces = face_service.detect_and_recognize(
+                                frame,
+                                min_match_score=0.40,
+                                min_face_size=35,
+                                use_temporal_smoothing=True,
+                            )
+                            raw_dets = list(detections)
+                            for f in detected_faces:
+                                is_threat = bool(f.get("is_threat", False))
+                                suspect_name = f.get("name")
+                                is_known = bool(f.get("is_known", False))
+
+                                if is_threat or is_known:
+                                    conf = float(f.get("calibrated_conf") or f.get("match_score") or f.get("confidence") or 0.85)
+                                    face_dict = {
+                                        "box": [float(c) for c in f["bbox"]],
+                                        "confidence": round(conf, 3),
+                                        "class_id": 999,
+                                        "class_name": f"suspect_{suspect_name.lower()}" if is_threat else f"face_{suspect_name.lower()}",
+                                        "is_threat": is_threat,
+                                        "threat_level": f.get("threat_level") or ("HIGH" if is_threat else None),
+                                        "suspect_name": suspect_name,
+                                        "category": f.get("category"),
+                                    }
+                                    raw_dets.append(face_dict)
+
+                                    if is_threat and suspect_name and suspect_name not in session_alerted_suspects:
+                                        session_alerted_suspects.add(suspect_name)
+                                        session_id_short = uuid.uuid4().hex[:8]
+                                        snap_name = f"suspect_inf_{session_id_short}_{f_idx}.jpg"
+                                        snap_path = SNAPSHOTS_DIR / snap_name
+                                        try:
+                                            cv2.imwrite(str(snap_path), frame, [cv2.IMWRITE_JPEG_QUALITY, 90])
+                                        except Exception:
+                                            snap_name = None
+
+                                        t_level = f.get("threat_level") or "HIGH"
+                                        sev = "Critical" if t_level == "CRITICAL" else "High"
+                                        alert_service.create_alert(
+                                            title=f"SUSPECT DETECTED: {suspect_name.upper()}",
+                                            location=f"Video Analysis Stream ({file.filename or 'Upload'})",
+                                            severity=sev,
+                                            camera_id="video_upload_stream",
+                                            camera_name=f"Video Upload ({file.filename or 'Video'})",
+                                            class_name="suspect",
+                                            confidence=conf,
+                                            box=[float(c) for c in f["bbox"]],
+                                            snapshot_filename=snap_name,
+                                            suspect_name=suspect_name,
+                                            threat_level=t_level,
+                                            category=f.get("category"),
+                                            notes=f"Identified in uploaded video at frame {f_idx} with {int(conf * 100)}% biometric match confidence.",
+                                        )
+                                        suspects_detected_summary.append({
+                                            "name": suspect_name,
+                                            "threat_level": t_level,
+                                            "frame_index": f_idx,
+                                            "confidence": round(conf, 3),
+                                            "category": f.get("category"),
+                                        })
+                            frame_inf["detections"] = raw_dets
+                            frame_inf["detections_count"] = len(raw_dets)
+                        except Exception:
+                            pass
+
+                    frame_results.append(
+                        {
+                            "frame_index": f_idx,
+                            "inference": frame_inf,
+                        }
+                    )
+                    frames_processed += 1
 
         # -------------------------
         # Video response
@@ -659,6 +708,7 @@ async def video_inference(
             "video": metadata,
             "frames_requested": max_frames,
             "frames_processed": frames_processed,
+            "batch_size": batch_size,
             "suspects_detected": suspects_detected_summary,
             "results": frame_results,
         }
@@ -701,9 +751,10 @@ async def rtsp_inference(
     conf_threshold: float = Form(0.25),
     iou_threshold: float = Form(0.45),
     postprocess: bool = Form(True),
+    batch_size: int = Form(settings.batch_size),
 ) -> dict:
     """
-    Run bounded inference on an RTSP CCTV stream.
+    Run bounded inference on an RTSP CCTV stream using ONNX batching (2 to 6 frames at once).
 
     The endpoint processes a limited number of frames per request
     to prevent an unbounded HTTP request from running forever.
@@ -767,6 +818,21 @@ async def rtsp_inference(
             detail="max_frames must be between 1 and 100.",
         )
 
+    # -------------------------
+    # Batch size validation (2 to 6 frames at once)
+    # -------------------------
+
+    try:
+        batch_size = int(getattr(batch_size, "default", batch_size))
+    except Exception:
+        batch_size = settings.batch_size
+
+    if not isinstance(batch_size, int) or batch_size < 2 or batch_size > 6:
+        raise HTTPException(
+            status_code=400,
+            detail="batch_size must be an integer between 2 and 6.",
+        )
+
     stream = None
 
     try:
@@ -827,105 +893,120 @@ async def rtsp_inference(
         reconnect_count = 0
 
         # -------------------------
-        # Bounded RTSP loop
+        # Bounded RTSP loop with batch inference (2 to 6 frames at once)
         # -------------------------
 
         while frames_processed < max_frames:
+            batch_frames: list[np.ndarray] = []
+            batch_indices: list[int] = []
+            batch_sizes: list[tuple[int, int]] = []
+            target_count = min(batch_size, max_frames - frames_processed)
 
-            try:
-                frame = stream.read_frame()
+            while len(batch_frames) < target_count:
+                try:
+                    frame = stream.read_frame()
 
-            except RTSPReadError as exc:
+                except RTSPReadError as exc:
+                    reconnect_count += 1
 
-                reconnect_count += 1
+                    if reconnect_count > 1:
+                        raise HTTPException(
+                            status_code=503,
+                            detail=(
+                                "RTSP frame read failed after "
+                                "reconnection attempt."
+                            ),
+                        ) from exc
 
-                if reconnect_count > 1:
+                    try:
+                        reconnected = stream.reconnect()
+
+                    except RTSPError as reconnect_exc:
+                        raise HTTPException(
+                            status_code=503,
+                            detail=(
+                                "RTSP stream disconnected and "
+                                f"reconnection failed: {reconnect_exc}"
+                            ),
+                        ) from reconnect_exc
+
+                    if not reconnected:
+                        raise HTTPException(
+                            status_code=503,
+                            detail=(
+                                "RTSP stream disconnected and "
+                                "reconnection failed."
+                            ),
+                        )
+
+                    continue
+
+                except RTSPConnectionError as exc:
                     raise HTTPException(
                         status_code=503,
-                        detail=(
-                            "RTSP frame read failed after "
-                            "reconnection attempt."
-                        ),
+                        detail=str(exc),
                     ) from exc
 
-                try:
-                    reconnected = stream.reconnect()
-
-                except RTSPError as reconnect_exc:
+                except RTSPError as exc:
                     raise HTTPException(
                         status_code=503,
-                        detail=(
-                            "RTSP stream disconnected and "
-                            f"reconnection failed: {reconnect_exc}"
-                        ),
-                    ) from reconnect_exc
+                        detail=str(exc),
+                    ) from exc
 
-                if not reconnected:
+                except Exception as exc:
+                    raise HTTPException(
+                        status_code=500,
+                        detail="Unexpected RTSP frame-read error.",
+                    ) from exc
+
+                # -------------------------
+                # Frame validation
+                # -------------------------
+
+                if frame is None:
                     raise HTTPException(
                         status_code=503,
+                        detail="RTSP stream returned no frame.",
+                    )
+
+                if not isinstance(frame, np.ndarray):
+                    raise HTTPException(
+                        status_code=500,
+                        detail="RTSP loader returned an invalid frame type.",
+                    )
+
+                if frame.size == 0:
+                    raise HTTPException(
+                        status_code=400,
+                        detail="RTSP stream returned an empty frame.",
+                    )
+
+                if frame.ndim != 3 or frame.shape[2] != 3:
+                    raise HTTPException(
+                        status_code=400,
                         detail=(
-                            "RTSP stream disconnected and "
-                            "reconnection failed."
+                            "RTSP stream returned a frame that is "
+                            "not a 3-channel color image."
                         ),
                     )
 
-                continue
+                orig_h, orig_w = frame.shape[:2]
+                batch_indices.append(frames_processed + len(batch_frames))
+                batch_frames.append(frame)
+                batch_sizes.append((orig_w, orig_h))
 
-            except RTSPConnectionError as exc:
-                raise HTTPException(
-                    status_code=503,
-                    detail=str(exc),
-                ) from exc
-
-            except RTSPError as exc:
-                raise HTTPException(
-                    status_code=503,
-                    detail=str(exc),
-                ) from exc
-
-            except Exception as exc:
-                raise HTTPException(
-                    status_code=500,
-                    detail="Unexpected RTSP frame-read error.",
-                ) from exc
-
-            # -------------------------
-            # Frame validation
-            # -------------------------
-
-            if frame is None:
-                raise HTTPException(
-                    status_code=503,
-                    detail="RTSP stream returned no frame.",
-                )
-
-            if not isinstance(frame, np.ndarray):
-                raise HTTPException(
-                    status_code=500,
-                    detail="RTSP loader returned an invalid frame type.",
-                )
-
-            if frame.size == 0:
-                raise HTTPException(
-                    status_code=400,
-                    detail="RTSP stream returned an empty frame.",
-                )
-
-            if frame.ndim != 3 or frame.shape[2] != 3:
-                raise HTTPException(
-                    status_code=400,
-                    detail=(
-                        "RTSP stream returned a frame that is "
-                        "not a 3-channel color image."
-                    ),
-                )
+            if not batch_frames:
+                break
 
             # -------------------------
             # Preprocessing
             # -------------------------
 
             try:
-                tensor = preprocessor.process(frame)
+                if len(batch_frames) == 1:
+                    tensor = preprocessor.process(batch_frames[0])
+                else:
+                    tensor = preprocessor.process_batch(batch_frames)
 
             except PreprocessingError as exc:
                 raise HTTPException(
@@ -940,19 +1021,18 @@ async def rtsp_inference(
                 ) from exc
 
             # -------------------------
-            # Inference
+            # Batch Inference
             # -------------------------
 
             try:
-                orig_h, orig_w = frame.shape[:2]
-
-                result = inference_service.predict(
+                batch_result = inference_service.predict(
                     model_name=model_name,
                     input_data=tensor,
                     postprocess=postprocess,
                     conf_threshold=conf_threshold,
                     iou_threshold=iou_threshold,
-                    original_image_size=(orig_w, orig_h),
+                    original_image_size=batch_sizes[0] if len(batch_sizes) == 1 else None,
+                    original_image_sizes=batch_sizes if len(batch_sizes) > 1 else None,
                 )
 
             except KeyError as exc:
@@ -967,18 +1047,29 @@ async def rtsp_inference(
                     detail="RTSP frame inference failed.",
                 ) from exc
 
-            # -------------------------
-            # Store result
-            # -------------------------
+            if len(batch_frames) > 1:
+                batch_dets = batch_result.get("batch_detections")
+                if not batch_dets:
+                    batch_dets = [batch_result.get("detections", []) for _ in batch_frames]
+            else:
+                batch_dets = [batch_result.get("detections", [])]
 
-            frame_results.append(
-                {
-                    "frame_index": frames_processed,
-                    "inference": result,
-                }
-            )
+            frame_inf_time = round(batch_result.get("inference_time_ms", 0.0) / len(batch_frames), 2)
 
-            frames_processed += 1
+            for f_idx, detections in zip(batch_indices, batch_dets):
+                frame_results.append(
+                    {
+                        "frame_index": f_idx,
+                        "inference": {
+                            "model_name": model_name,
+                            "status": "success",
+                            "inference_time_ms": frame_inf_time,
+                            "detections_count": len(detections),
+                            "detections": detections,
+                        },
+                    }
+                )
+                frames_processed += 1
 
         # -------------------------
         # Success response
@@ -987,6 +1078,7 @@ async def rtsp_inference(
         return {
             "model_name": model_name,
             "status": "success",
+            "batch_size": batch_size,
             "stream": {
                 "rtsp_url_configured": True,
                 "frames_requested": max_frames,
@@ -1023,3 +1115,116 @@ async def rtsp_inference(
 
             except Exception:
                 pass
+
+
+@router.post("/batch")
+async def batch_inference(
+    model_name: str = Form(...),
+    files: list[UploadFile] = File(...),
+    batch_size: int = Form(settings.batch_size),
+    conf_threshold: float = Form(0.25),
+    iou_threshold: float = Form(0.45),
+    postprocess: bool = Form(True),
+) -> dict:
+    """
+    Run ONNX batch inference on multiple uploaded images in parallel chunks of 2 to 6 frames.
+    """
+    if not isinstance(model_name, str) or not model_name.strip():
+        raise HTTPException(status_code=400, detail="model_name is required.")
+
+    if not files:
+        raise HTTPException(status_code=400, detail="At least one image file is required.")
+
+    try:
+        batch_size = int(getattr(batch_size, "default", batch_size))
+    except Exception:
+        batch_size = settings.batch_size
+
+    if not isinstance(batch_size, int) or batch_size < 2 or batch_size > 6:
+        raise HTTPException(
+            status_code=400,
+            detail="batch_size must be an integer between 2 and 6.",
+        )
+
+    tw, th = get_model_input_size(model_name.strip())
+    preprocessor = create_preprocessor(target_width=tw, target_height=th)
+
+    # Decode uploaded images
+    loaded_images: list[np.ndarray] = []
+    filenames: list[str] = []
+    for f in files:
+        if not f.filename:
+            continue
+        ext = Path(f.filename).suffix.lower()
+        if ext not in settings.allowed_image_extensions:
+            raise HTTPException(status_code=415, detail=f"Unsupported image type: {ext} in {f.filename}")
+        data = await f.read()
+        if not data:
+            continue
+        arr = np.frombuffer(data, dtype=np.uint8)
+        frame = cv2.imdecode(arr, cv2.IMREAD_COLOR)
+        if frame is None or frame.ndim != 3:
+            continue
+        loaded_images.append(frame)
+        filenames.append(f.filename)
+
+    if not loaded_images:
+        raise HTTPException(status_code=400, detail="No valid images could be decoded.")
+
+    results: list[dict] = []
+    # Process in chunks of batch_size (2 to 6)
+    for chunk_start in range(0, len(loaded_images), batch_size):
+        chunk_frames = loaded_images[chunk_start : chunk_start + batch_size]
+        chunk_names = filenames[chunk_start : chunk_start + batch_size]
+        chunk_sizes = [(f.shape[1], f.shape[0]) for f in chunk_frames]
+
+        try:
+            if len(chunk_frames) == 1:
+                tensor = preprocessor.process(chunk_frames[0])
+            else:
+                tensor = preprocessor.process_batch(chunk_frames)
+        except PreprocessingError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+        except Exception as exc:
+            raise HTTPException(status_code=500, detail="Batch image preprocessing failed.") from exc
+
+        try:
+            batch_inf_result = inference_service.predict(
+                model_name=model_name.strip(),
+                input_data=tensor,
+                postprocess=postprocess,
+                conf_threshold=conf_threshold,
+                iou_threshold=iou_threshold,
+                original_image_size=chunk_sizes[0] if len(chunk_sizes) == 1 else None,
+                original_image_sizes=chunk_sizes if len(chunk_sizes) > 1 else None,
+            )
+        except KeyError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        except Exception as exc:
+            raise HTTPException(status_code=500, detail="Batch inference forward pass failed.") from exc
+
+        if len(chunk_frames) > 1:
+            batch_dets = batch_inf_result.get("batch_detections")
+            if not batch_dets:
+                batch_dets = [batch_inf_result.get("detections", []) for _ in chunk_frames]
+        else:
+            batch_dets = [batch_inf_result.get("detections", [])]
+
+        chunk_time_each = round(batch_inf_result.get("inference_time_ms", 0.0) / len(chunk_frames), 2)
+        for name, (orig_w, orig_h), dets in zip(chunk_names, chunk_sizes, batch_dets):
+            results.append({
+                "filename": name,
+                "image_size": [orig_w, orig_h],
+                "detections_count": len(dets),
+                "inference_time_ms": chunk_time_each,
+                "detections": dets,
+            })
+
+    return {
+        "model_name": model_name.strip(),
+        "status": "success",
+        "batch_size": batch_size,
+        "total_images": len(results),
+        "results": results,
+    }
+

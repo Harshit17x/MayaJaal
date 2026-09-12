@@ -144,59 +144,67 @@ class Preprocessor:
                 f"got {frame.shape[2]}."
             )
 
-    def process(self, frame: np.ndarray) -> np.ndarray:
-        """
-        Convert an OpenCV BGR frame into an ONNX-ready tensor.
-        """
-
+    def _process_single(self, frame: np.ndarray) -> np.ndarray:
+        """Convert a single OpenCV BGR frame into a preprocessed 3D array (C, H, W) or (H, W, C)."""
         self.validate_frame(frame)
 
+        resized = cv2.resize(
+            frame,
+            (
+                self.config.target_width,
+                self.config.target_height,
+            ),
+            interpolation=cv2.INTER_LINEAR,
+        )
+
+        processed = resized
+
+        if self.config.convert_bgr_to_rgb:
+            processed = cv2.cvtColor(
+                processed,
+                cv2.COLOR_BGR2RGB,
+            )
+
+        tensor = processed.astype(
+            np.float32,
+            copy=False,
+        )
+
+        if self.config.normalize:
+            tensor *= self.config.scale
+
+            if self.config.mean is not None:
+                tensor -= np.asarray(
+                    self.config.mean,
+                    dtype=np.float32,
+                )
+
+            if self.config.std is not None:
+                tensor /= np.asarray(
+                    self.config.std,
+                    dtype=np.float32,
+                )
+
+        elif self.config.scale != 1.0:
+            tensor *= self.config.scale
+
+        if self.config.channel_first:
+            tensor = np.transpose(
+                tensor,
+                (2, 0, 1),
+            )
+
+        return tensor
+
+    def process(self, frame: np.ndarray | list[np.ndarray]) -> np.ndarray:
+        """
+        Convert an OpenCV BGR frame (or list of frames) into an ONNX-ready tensor.
+        """
+        if isinstance(frame, (list, tuple)):
+            return self.process_batch(list(frame))
+
         try:
-            resized = cv2.resize(
-                frame,
-                (
-                    self.config.target_width,
-                    self.config.target_height,
-                ),
-                interpolation=cv2.INTER_LINEAR,
-            )
-
-            processed = resized
-
-            if self.config.convert_bgr_to_rgb:
-                processed = cv2.cvtColor(
-                    processed,
-                    cv2.COLOR_BGR2RGB,
-                )
-
-            tensor = processed.astype(
-                np.float32,
-                copy=False,
-            )
-
-            if self.config.normalize:
-                tensor *= self.config.scale
-
-                if self.config.mean is not None:
-                    tensor -= np.asarray(
-                        self.config.mean,
-                        dtype=np.float32,
-                    )
-
-                if self.config.std is not None:
-                    tensor /= np.asarray(
-                        self.config.std,
-                        dtype=np.float32,
-                    )
-
-            elif self.config.scale != 1.0:
-                tensor *= self.config.scale
-
-            if self.config.channel_first:
-                tensor = np.transpose(
-                    tensor,
-                    (2, 0, 1),
-                )
+            tensor = self._process_single(frame)
 
             if self.config.add_batch_dimension:
                 tensor = np.expand_dims(
@@ -227,6 +235,36 @@ class Preprocessor:
             raise PreprocessingError(
                 f"Frame preprocessing failed: {exc}"
             ) from exc
+
+    def process_batch(self, frames: list[np.ndarray]) -> np.ndarray:
+        """
+        Convert a batch of OpenCV BGR frames (e.g. 2 to 6 frames) into an ONNX-ready batch tensor.
+        Returns a single contiguous NumPy tensor of shape (B, C, H, W).
+        """
+        if not frames:
+            raise InvalidFrameError("Batch frames list cannot be empty.")
+
+        try:
+            processed_tensors = [self._process_single(f) for f in frames]
+            batch_tensor = np.stack(processed_tensors, axis=0).astype(np.float32)
+
+            self._validate_tensor(batch_tensor)
+
+            logger.debug(
+                "Batch preprocessing successful | batch_size=%d | output_shape=%s | dtype=%s",
+                len(frames),
+                batch_tensor.shape,
+                batch_tensor.dtype,
+            )
+
+            return batch_tensor
+
+        except PreprocessingError:
+            raise
+
+        except Exception as exc:
+            logger.exception("Batch preprocessing failed.")
+            raise PreprocessingError(f"Batch preprocessing failed: {exc}") from exc
 
     @staticmethod
     def _validate_tensor(tensor: np.ndarray) -> None:
