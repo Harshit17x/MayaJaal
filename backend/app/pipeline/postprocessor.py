@@ -87,7 +87,7 @@ class Postprocessor:
         original_image_size: tuple[int, int] | None = None,
     ) -> list[dict[str, Any]]:
         """
-        Decode output tensors into a list of detection dictionaries.
+        Decode output tensors into a list of detection dictionaries for a single frame.
 
         Args:
             outputs: Raw output tensors from ONNXEngine.
@@ -97,107 +97,127 @@ class Postprocessor:
         Returns:
             List of detection dicts with keys [box, confidence, class_id, class_name].
         """
+        batch_results = self.decode_batch(
+            outputs=outputs,
+            model_input_size=model_input_size,
+            original_image_sizes=original_image_size,
+        )
+        return batch_results[0] if batch_results else []
+
+    def decode_batch(
+        self,
+        outputs: list[np.ndarray],
+        model_input_size: tuple[int, int] | None = None,
+        original_image_sizes: list[tuple[int, int]] | tuple[int, int] | None = None,
+    ) -> list[list[dict[str, Any]]]:
+        """
+        Decode batched output tensors into a list of detection dictionary lists (one list per frame).
+        Supports batch sizes from 1 up to 8 (or more) frames at once.
+        """
         if not outputs or not isinstance(outputs[0], np.ndarray):
             return []
 
         primary_output = outputs[0]
-
-        # Only 2D or 3D tensors are candidates for detection outputs
         if primary_output.ndim not in (2, 3):
             return []
 
-        detections: list[Detection] = []
+        # Extract 2D slices for each item in the batch
+        if primary_output.ndim == 2:
+            batch_slices = [primary_output]
+        else:
+            batch_slices = [primary_output[b] for b in range(primary_output.shape[0])]
+
+        batch_size = len(batch_slices)
         num_classes = len(self.class_labels)
 
-        try:
-            # Check 1: Pre-NMS / End-to-End shape [1, N, 6] ([x1, y1, x2, y2, score, class_id])
-            if primary_output.ndim == 3 and primary_output.shape[-1] == 6:
-                detections = self._decode_end2end(primary_output)
+        # Normalize original_image_sizes to list of length batch_size
+        sizes_list: list[tuple[int, int] | None] = []
+        if isinstance(original_image_sizes, list):
+            sizes_list = [
+                original_image_sizes[i] if i < len(original_image_sizes) else None
+                for i in range(batch_size)
+            ]
+        elif isinstance(original_image_sizes, tuple):
+            sizes_list = [original_image_sizes for _ in range(batch_size)]
+        else:
+            sizes_list = [None for _ in range(batch_size)]
 
-            # Check 2: 2D Pre-NMS shape [N, 6]
-            elif primary_output.ndim == 2 and primary_output.shape[1] == 6:
-                detections = self._decode_end2end(np.expand_dims(primary_output, axis=0))
+        results: list[list[dict[str, Any]]] = []
 
-            # Check 3: 3D bounding box detection tensors [1, D1, D2]
-            elif primary_output.ndim == 3:
-                _, d1, d2 = primary_output.shape
+        for b, slice_arr in enumerate(batch_slices):
+            detections: list[Detection] = []
+            try:
+                # Check 1: End-to-End shape [N, 6] ([x1, y1, x2, y2, score, class_id])
+                if slice_arr.ndim == 2 and slice_arr.shape[-1] == 6:
+                    detections = self._decode_slice_end2end(slice_arr)
 
-                # YOLOv8 format with features in dimension 1: [1, 4 + C, N]
-                # Matches if d1 equals 4+C, or d1 matches 84, or d2 is large anchor grid
-                if (
-                    d1 in (4 + num_classes, 84)
-                    or (d2 > 500 and d1 < d2 and d1 >= 5)
-                    or (d1 >= 5 and d2 < 50 and d1 > d2)
-                ):
-                    detections = self._decode_yolov8(primary_output)
+                elif slice_arr.ndim == 2:
+                    d1, d2 = slice_arr.shape
 
-                # YOLOv5 format with features in dimension 2: [1, N, 5 + C]
-                # Or transposed YOLOv8 [1, N, 4 + C]
-                elif (
-                    d2 in (5 + num_classes, 4 + num_classes, 85, 84)
-                    or (d1 > 500 and d2 < d1 and d2 >= 5)
-                    or (d2 >= 5 and d1 < 50 and d2 >= d1)
-                ):
-                    detections = self._decode_yolo_transposed(primary_output)
+                    # YOLOv8 format with features in dimension 0: [4 + C, N]
+                    if (
+                        d1 in (4 + num_classes, 84)
+                        or (d2 > 500 and d1 < d2 and d1 >= 5)
+                        or (d1 >= 5 and d2 < 50 and d1 > d2)
+                    ):
+                        detections = self._decode_slice_yolov8(slice_arr)
 
-        except Exception as exc:
-            logger.warning("Failed to decode detection tensor: %s", exc)
-            return []
+                    # YOLOv5 / transposed format with features in dimension 1: [N, 5 + C or 4 + C]
+                    elif (
+                        d2 in (5 + num_classes, 4 + num_classes, 85, 84)
+                        or (d1 > 500 and d2 < d1 and d2 >= 5)
+                        or (d2 >= 5 and d1 < 50 and d2 >= d1)
+                    ):
+                        detections = self._decode_slice_yolo_transposed(slice_arr)
 
-        # Scale coordinates back to original image dimensions if provided
-        if original_image_size and model_input_size and detections:
-            detections = self._rescale_boxes(
-                detections=detections,
-                model_size=model_input_size,
-                orig_size=original_image_size,
-            )
+            except Exception as exc:
+                logger.warning("Failed to decode batch slice %d: %s", b, exc)
+                detections = []
 
-        return [d.to_dict() for d in detections]
+            orig_sz = sizes_list[b]
+            if orig_sz and model_input_size and detections:
+                detections = self._rescale_boxes(
+                    detections=detections,
+                    model_size=model_input_size,
+                    orig_size=orig_sz,
+                )
 
-    def _decode_yolov8(self, output: np.ndarray) -> list[Detection]:
+            results.append([d.to_dict() for d in detections])
+
+        return results
+
+    def _decode_slice_yolov8(self, slice_data: np.ndarray) -> list[Detection]:
         """
-        Decode standard YOLOv8/v9/v11 output with shape [1, 4 + C, N].
+        Decode a single YOLOv8 slice with shape [4 + C, N].
         Row 0..3 are cx, cy, w, h.
         Row 4..end are class probabilities.
         """
-        # Squeeze batch dimension: [4 + C, N] -> transpose to [N, 4 + C]
-        data = np.squeeze(output, axis=0).T  # [N, 4 + C]
-
+        data = slice_data.T  # [N, 4 + C]
         boxes = data[:, :4]  # [N, 4] -> cx, cy, w, h
         scores = data[:, 4:]  # [N, C]
 
         class_ids = np.argmax(scores, axis=1)
         confidences = np.max(scores, axis=1)
 
-        # Filter by confidence threshold
         mask = confidences >= self.config.conf_threshold
         if not np.any(mask):
             return []
 
-        filtered_boxes = boxes[mask]
-        filtered_confs = confidences[mask]
-        filtered_classes = class_ids[mask]
-
         return self._apply_nms(
-            boxes_cxcywh=filtered_boxes,
-            confidences=filtered_confs,
-            class_ids=filtered_classes,
+            boxes_cxcywh=boxes[mask],
+            confidences=confidences[mask],
+            class_ids=class_ids[mask],
         )
 
-    def _decode_yolo_transposed(self, output: np.ndarray) -> list[Detection]:
+    def _decode_slice_yolo_transposed(self, data: np.ndarray) -> list[Detection]:
         """
-        Decode YOLOv5/v7 [1, N, 5 + C] or transposed YOLOv8 [1, N, 4 + C].
+        Decode a single YOLOv5/v7 [N, 5 + C] or transposed YOLOv8 [N, 4 + C] slice.
         """
-        data = np.squeeze(output, axis=0)  # [N, 4 + C or 5 + C]
         num_features = data.shape[1]
-
-        # Check for YOLOv5 format (box=4, obj_conf=1, class_scores=C)
         if num_features >= 6:
-            # Evaluate if index 4 represents objectness score (between 0 and 1)
             boxes = data[:, :4]
             obj_conf = data[:, 4]
             class_scores = data[:, 5:]
-
             class_ids = np.argmax(class_scores, axis=1)
             confs = obj_conf * np.max(class_scores, axis=1)
         else:
@@ -216,13 +236,11 @@ class Postprocessor:
             class_ids=class_ids[mask],
         )
 
-    def _decode_end2end(self, output: np.ndarray) -> list[Detection]:
+    def _decode_slice_end2end(self, data: np.ndarray) -> list[Detection]:
         """
-        Decode pre-NMS / End-to-End detections [1, N, 6] -> [x1, y1, x2, y2, conf, class_id].
+        Decode a single pre-NMS / End-to-End slice [N, 6] -> [x1, y1, x2, y2, conf, class_id].
         """
-        data = np.squeeze(output, axis=0)
         detections: list[Detection] = []
-
         for row in data:
             conf = float(row[4])
             if conf < self.config.conf_threshold:
@@ -241,6 +259,21 @@ class Postprocessor:
             )
 
         return detections[: self.config.max_detections]
+
+    def _decode_yolov8(self, output: np.ndarray) -> list[Detection]:
+        """Backward-compatible wrapper for YOLOv8 output tensor."""
+        slice_2d = np.squeeze(output, axis=0) if (output.ndim == 3 and output.shape[0] == 1) else output[0]
+        return self._decode_slice_yolov8(slice_2d)
+
+    def _decode_yolo_transposed(self, output: np.ndarray) -> list[Detection]:
+        """Backward-compatible wrapper for YOLO transposed tensor."""
+        slice_2d = np.squeeze(output, axis=0) if (output.ndim == 3 and output.shape[0] == 1) else output[0]
+        return self._decode_slice_yolo_transposed(slice_2d)
+
+    def _decode_end2end(self, output: np.ndarray) -> list[Detection]:
+        """Backward-compatible wrapper for End-to-End tensor."""
+        slice_2d = np.squeeze(output, axis=0) if (output.ndim == 3 and output.shape[0] == 1) else output[0]
+        return self._decode_slice_end2end(slice_2d)
 
     def _apply_nms(
         self,

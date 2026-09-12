@@ -279,6 +279,7 @@ async def video_inference(
     model_name: str = Form(...),
     file: UploadFile = File(...),
     max_frames: int = Form(300),
+    batch_size: int = Form(8),
     conf_threshold: float = Form(0.25),
     iou_threshold: float = Form(0.45),
     postprocess: bool = Form(True),
@@ -335,6 +336,27 @@ async def video_inference(
         raise HTTPException(
             status_code=400,
             detail="max_frames must be between 1 and 3000.",
+        )
+
+    # -------------------------
+    # Batch size validation
+    # -------------------------
+
+    try:
+        batch_size = int(getattr(batch_size, "default", batch_size))
+    except Exception:
+        batch_size = 8
+
+    if not isinstance(batch_size, int):
+        raise HTTPException(
+            status_code=400,
+            detail="batch_size must be an integer.",
+        )
+
+    if batch_size < 1 or batch_size > 32:
+        raise HTTPException(
+            status_code=400,
+            detail="batch_size must be between 1 and 32.",
         )
 
     # -------------------------
@@ -479,175 +501,185 @@ async def video_inference(
             face_scan_interval = 15
 
             # -------------------------
-            # Frame processing
+            # Frame processing (Batched: 2-8 frames at once)
             # -------------------------
 
             while frames_processed < max_frames:
+                batch_frames: list[np.ndarray] = []
+                remaining_to_process = max_frames - frames_processed
+                target_batch_len = min(batch_size, remaining_to_process)
 
-                try:
-                    success, frame = video.read_frame()
+                for _ in range(target_batch_len):
+                    try:
+                        success, frame = video.read_frame()
+                    except VideoLoaderError as exc:
+                        raise HTTPException(
+                            status_code=400,
+                            detail=str(exc),
+                        ) from exc
+                    except Exception as exc:
+                        raise HTTPException(
+                            status_code=500,
+                            detail="Unexpected error while reading video frame.",
+                        ) from exc
 
-                except VideoLoaderError as exc:
-                    raise HTTPException(
-                        status_code=400,
-                        detail=str(exc),
-                    ) from exc
+                    if not success or frame is None:
+                        break
 
-                except Exception as exc:
-                    raise HTTPException(
-                        status_code=500,
-                        detail="Unexpected error while reading video frame.",
-                    ) from exc
+                    if not isinstance(frame, np.ndarray):
+                        raise HTTPException(
+                            status_code=500,
+                            detail="VideoLoader returned an invalid frame type.",
+                        )
 
-                if not success:
+                    if frame.size == 0:
+                        raise HTTPException(
+                            status_code=400,
+                            detail="VideoLoader returned an empty frame.",
+                        )
+
+                    if frame.ndim != 3 or frame.shape[2] != 3:
+                        raise HTTPException(
+                            status_code=400,
+                            detail=(
+                                "VideoLoader returned a frame that is "
+                                "not a 3-channel color image."
+                            ),
+                        )
+
+                    batch_frames.append(frame)
+
+                if not batch_frames:
                     break
 
-                if frame is None:
-                    break
-
-                if not isinstance(frame, np.ndarray):
-                    raise HTTPException(
-                        status_code=500,
-                        detail="VideoLoader returned an invalid frame type.",
-                    )
-
-                if frame.size == 0:
-                    raise HTTPException(
-                        status_code=400,
-                        detail="VideoLoader returned an empty frame.",
-                    )
-
-                if frame.ndim != 3 or frame.shape[2] != 3:
-                    raise HTTPException(
-                        status_code=400,
-                        detail=(
-                            "VideoLoader returned a frame that is "
-                            "not a 3-channel color image."
-                        ),
-                    )
-
                 # -------------------------
-                # Preprocessing
+                # Preprocessing & Inference (Batched: 2-8 frames at once)
                 # -------------------------
-
                 try:
-                    tensor = preprocessor.process(frame)
-
+                    tensor_batch = preprocessor.process_batch(batch_frames)
                 except PreprocessingError as exc:
                     raise HTTPException(
                         status_code=400,
                         detail=str(exc),
                     ) from exc
-
                 except Exception as exc:
                     raise HTTPException(
                         status_code=500,
                         detail="Video frame preprocessing failed.",
                     ) from exc
 
-                # -------------------------
-                # Inference
-                # -------------------------
-
                 try:
-                    orig_h, orig_w = frame.shape[:2]
-
-                    result = inference_service.predict(
+                    orig_sizes = [(f.shape[1], f.shape[0]) for f in batch_frames]
+                    batch_pred = inference_service.predict_batch(
                         model_name=model_name,
-                        input_data=tensor,
+                        input_data=tensor_batch,
                         postprocess=postprocess,
                         conf_threshold=conf_threshold,
                         iou_threshold=iou_threshold,
-                        original_image_size=(orig_w, orig_h),
+                        original_image_sizes=orig_sizes,
                     )
-
+                    batch_detections = batch_pred.get("batch_detections", [[] for _ in batch_frames])
+                    per_frame_latency_ms = batch_pred.get("per_frame_latency_ms", 0.0)
                 except KeyError as exc:
                     raise HTTPException(
                         status_code=404,
                         detail=str(exc),
                     ) from exc
-
                 except Exception as exc:
                     raise HTTPException(
                         status_code=500,
-                        detail="Video frame inference failed.",
+                        detail=f"Video frame batch inference failed: {exc}",
                     ) from exc
 
-                # ── Periodic Biometric Suspect Facial Scan ───────────────
-                if frames_processed % face_scan_interval == 0:
-                    try:
-                        detected_faces = face_service.detect_and_recognize(
-                            frame,
-                            min_match_score=0.40,
-                            min_face_size=35,
-                            use_temporal_smoothing=True,
-                        )
-                        raw_dets = result.get("detections", [])
-                        for f in detected_faces:
-                            is_threat = bool(f.get("is_threat", False))
-                            suspect_name = f.get("name")
-                            is_known = bool(f.get("is_known", False))
+                for idx, frame in enumerate(batch_frames):
+                    curr_frame_idx = frames_processed + idx
+                    frame_dets = batch_detections[idx] if idx < len(batch_detections) else []
 
-                            if is_threat or is_known:
-                                conf = float(f.get("calibrated_conf") or f.get("match_score") or f.get("confidence") or 0.85)
-                                face_dict = {
-                                    "box": [float(c) for c in f["bbox"]],
-                                    "confidence": round(conf, 3),
-                                    "class_id": 999,
-                                    "class_name": f"suspect_{suspect_name.lower()}" if is_threat else f"face_{suspect_name.lower()}",
-                                    "is_threat": is_threat,
-                                    "threat_level": f.get("threat_level") or ("HIGH" if is_threat else None),
-                                    "suspect_name": suspect_name,
-                                    "category": f.get("category"),
-                                }
-                                raw_dets.append(face_dict)
-
-                                if is_threat and suspect_name and suspect_name not in session_alerted_suspects:
-                                    session_alerted_suspects.add(suspect_name)
-                                    session_id_short = uuid.uuid4().hex[:8]
-                                    snap_name = f"suspect_inf_{session_id_short}_{frames_processed}.jpg"
-                                    snap_path = SNAPSHOTS_DIR / snap_name
-                                    try:
-                                        cv2.imwrite(str(snap_path), frame, [cv2.IMWRITE_JPEG_QUALITY, 90])
-                                    except Exception:
-                                        snap_name = None
-
-                                    t_level = f.get("threat_level") or "HIGH"
-                                    sev = "Critical" if t_level == "CRITICAL" else "High"
-                                    alert_service.create_alert(
-                                        title=f"SUSPECT DETECTED: {suspect_name.upper()}",
-                                        location=f"Video Analysis Stream ({file.filename or 'Upload'})",
-                                        severity=sev,
-                                        camera_id="video_upload_stream",
-                                        camera_name=f"Video Upload ({file.filename or 'Video'})",
-                                        class_name="suspect",
-                                        confidence=conf,
-                                        box=[float(c) for c in f["bbox"]],
-                                        snapshot_filename=snap_name,
-                                        suspect_name=suspect_name,
-                                        threat_level=t_level,
-                                        category=f.get("category"),
-                                        notes=f"Identified in uploaded video at frame {frames_processed} with {int(conf * 100)}% biometric match confidence.",
-                                    )
-                                    suspects_detected_summary.append({
-                                        "name": suspect_name,
-                                        "threat_level": t_level,
-                                        "frame_index": frames_processed,
-                                        "confidence": round(conf, 3),
-                                        "category": f.get("category"),
-                                    })
-                        result["detections"] = raw_dets
-                    except Exception as face_err:
-                        pass
-
-                frame_results.append(
-                    {
-                        "frame_index": frames_processed,
-                        "inference": result,
+                    frame_inference_result = {
+                        "model_name": model_name,
+                        "status": "success",
+                        "latency_ms": per_frame_latency_ms,
+                        "inference_time_ms": per_frame_latency_ms,
+                        "detections_count": len(frame_dets),
+                        "detections": frame_dets,
                     }
-                )
 
-                frames_processed += 1
+                    # ── Periodic Biometric Suspect Facial Scan ───────────────
+                    if curr_frame_idx % face_scan_interval == 0:
+                        try:
+                            detected_faces = face_service.detect_and_recognize(
+                                frame,
+                                min_match_score=0.40,
+                                min_face_size=35,
+                                use_temporal_smoothing=True,
+                            )
+                            raw_dets = list(frame_inference_result.get("detections", []))
+                            for f in detected_faces:
+                                is_threat = bool(f.get("is_threat", False))
+                                suspect_name = f.get("name")
+                                is_known = bool(f.get("is_known", False))
+
+                                if is_threat or is_known:
+                                    conf = float(f.get("calibrated_conf") or f.get("match_score") or f.get("confidence") or 0.85)
+                                    face_dict = {
+                                        "box": [float(c) for c in f["bbox"]],
+                                        "confidence": round(conf, 3),
+                                        "class_id": 999,
+                                        "class_name": f"suspect_{suspect_name.lower()}" if is_threat else f"face_{suspect_name.lower()}",
+                                        "is_threat": is_threat,
+                                        "threat_level": f.get("threat_level") or ("HIGH" if is_threat else None),
+                                        "suspect_name": suspect_name,
+                                        "category": f.get("category"),
+                                    }
+                                    raw_dets.append(face_dict)
+
+                                    if is_threat and suspect_name and suspect_name not in session_alerted_suspects:
+                                        session_alerted_suspects.add(suspect_name)
+                                        session_id_short = uuid.uuid4().hex[:8]
+                                        snap_name = f"suspect_inf_{session_id_short}_{curr_frame_idx}.jpg"
+                                        snap_path = SNAPSHOTS_DIR / snap_name
+                                        try:
+                                            cv2.imwrite(str(snap_path), frame, [cv2.IMWRITE_JPEG_QUALITY, 90])
+                                        except Exception:
+                                            snap_name = None
+
+                                        t_level = f.get("threat_level") or "HIGH"
+                                        sev = "Critical" if t_level == "CRITICAL" else "High"
+                                        alert_service.create_alert(
+                                            title=f"SUSPECT DETECTED: {suspect_name.upper()}",
+                                            location=f"Video Analysis Stream ({file.filename or 'Upload'})",
+                                            severity=sev,
+                                            camera_id="video_upload_stream",
+                                            camera_name=f"Video Upload ({file.filename or 'Video'})",
+                                            class_name="suspect",
+                                            confidence=conf,
+                                            box=[float(c) for c in f["bbox"]],
+                                            snapshot_filename=snap_name,
+                                            suspect_name=suspect_name,
+                                            threat_level=t_level,
+                                            category=f.get("category"),
+                                            notes=f"Identified in uploaded video at frame {curr_frame_idx} with {int(conf * 100)}% biometric match confidence.",
+                                        )
+                                        suspects_detected_summary.append({
+                                            "name": suspect_name,
+                                            "threat_level": t_level,
+                                            "frame_index": curr_frame_idx,
+                                            "confidence": round(conf, 3),
+                                            "category": f.get("category"),
+                                        })
+                            frame_inference_result["detections"] = raw_dets
+                            frame_inference_result["detections_count"] = len(raw_dets)
+                        except Exception as face_err:
+                            pass
+
+                    frame_results.append(
+                        {
+                            "frame_index": curr_frame_idx,
+                            "inference": frame_inference_result,
+                        }
+                    )
+
+                frames_processed += len(batch_frames)
 
         # -------------------------
         # Video response
@@ -659,6 +691,7 @@ async def video_inference(
             "video": metadata,
             "frames_requested": max_frames,
             "frames_processed": frames_processed,
+            "batch_size": batch_size,
             "suspects_detected": suspects_detected_summary,
             "results": frame_results,
         }

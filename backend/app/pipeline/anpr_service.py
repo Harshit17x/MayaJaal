@@ -250,13 +250,18 @@ class ANPRPipeline:
     4. Tactical HUD rendering & plate snapshots
     """
 
-    def __init__(self) -> None:
+    def __init__(self, ocr_stride: int = 10) -> None:
         self.vehicle_model_path = settings.model_directory / "vehicle_detector.onnx"
         self.plate_model_path = settings.model_directory / "anpr_plate.onnx"
 
         self.vehicle_engine: ONNXEngine | None = None
         self.plate_engine: ONNXEngine | None = None
         self.ocr_reader: TrOCRPlateReader | None = None
+
+        self.ocr_stride = ocr_stride
+        self.frame_counter: int = 0
+        self.camera_frame_counters: dict[str, int] = {}
+        self.cached_plates: dict[str, list[dict[str, Any]]] = {}
 
         self.records: list[dict[str, Any]] = []
         self.watchlist: dict[str, dict[str, Any]] = {
@@ -445,17 +450,35 @@ class ANPRPipeline:
         save_snapshots: bool = True,
         seen_plates: set[str] | None = None,
         is_single_image: bool = False,
+        run_ocr: bool | None = None,
+        frame_idx: int | None = None,
+        ocr_stride: int | None = None,
     ) -> tuple[np.ndarray, list[dict[str, Any]], list[str]]:
         """
-        Execute full two-stage ANPR pipeline on a single frame:
-        1. Vehicle Detection
-        2. Dynamic Vehicle-Crop Plate Localization
-        3. Character OCR
+        Execute two-stage ANPR pipeline on a frame:
+        1. Vehicle Detection via ONNX (every frame)
+        2. Dynamic Vehicle-Crop License Plate Detection & Character OCR (every 10th frame)
+        3. Plate Tracking & HUD Retention via Cache (intermediate frames)
         4. Tactical HUD Annotation & Snapshot Capture
         """
         t0 = time.perf_counter()
         h_img, w_img = image_bgr.shape[:2]
         annotated_frame = image_bgr.copy()
+
+        # Determine whether to execute heavy EasyOCR on this frame
+        stride = ocr_stride if ocr_stride is not None else self.ocr_stride
+        if run_ocr is not None:
+            should_run_ocr = run_ocr
+        elif is_single_image:
+            should_run_ocr = True
+        else:
+            if frame_idx is not None:
+                current_frame = frame_idx
+            else:
+                self.frame_counter += 1
+                current_frame = self.frame_counter
+            # Run EasyOCR on the first frame, and every 10th frame thereafter
+            should_run_ocr = (current_frame == 1 or current_frame % stride == 0)
 
         raw_vehicles = self.detect_vehicles(image_bgr, conf_thresh=0.25)
         frame_records: list[dict[str, Any]] = []
@@ -488,16 +511,10 @@ class ANPRPipeline:
             if not overlap:
                 vehicles.append(v)
 
-        # Candidate list: [(px1, py1, px2, py2, v_type, confidence, clean_plate)]
-        plate_candidates: list[tuple[int, int, int, int, str, float, str]] = []
-
-        # Draw confirmed vehicle bounding boxes and localize license plates
+        # Draw vehicle bounding boxes on every frame
         for v in vehicles:
             vx1, vy1, vx2, vy2 = v["box"]
             v_type = v["class_name"].upper()
-            vh = vy2 - vy1
-            vw = vx2 - vx1
-
             cv2.rectangle(annotated_frame, (vx1, vy1), (vx2, vy2), (255, 180, 0), 2)
             cv2.putText(
                 annotated_frame,
@@ -509,75 +526,181 @@ class ANPRPipeline:
                 1,
             )
 
-            # Crop vehicle area with small margin
-            cvx1, cvy1 = max(0, vx1 - 10), max(0, vy1 - 10)
-            cvx2, cvy2 = min(w_img, vx2 + 10), min(h_img, vy2 + 10)
-            vehicle_crop = image_bgr[cvy1:cvy2, cvx1:cvx2]
-            if vehicle_crop.size == 0:
-                continue
+        # Candidate list: [(px1, py1, px2, py2, v_type, confidence, clean_plate)]
+        plate_candidates: list[tuple[int, int, int, int, str, float, str]] = []
 
-            found_plate = False
-            # 1. Primary: Direct scene-text plate reading in vehicle crop (high precision)
-            if self.ocr_reader:
-                plate_text, p_box = self.ocr_reader.read_vehicle_plate(vehicle_crop)
-                if plate_text and p_box:
-                    px1 = max(0, cvx1 + p_box[0])
-                    py1 = max(0, cvy1 + p_box[1])
-                    px2 = min(w_img, cvx1 + p_box[2])
-                    py2 = min(h_img, cvy1 + p_box[3])
-                    plate_candidates.append((px1, py1, px2, py2, v_type, v["confidence"], plate_text))
-                    found_plate = True
+        if should_run_ocr:
+            # ── Execute EasyOCR on 10th frame ──────────────────────────────────
+            for v in vehicles:
+                vx1, vy1, vx2, vy2 = v["box"]
+                v_type = v["class_name"].upper()
+                vh = vy2 - vy1
+                vw = vx2 - vx1
 
-            # 2. Secondary: If direct OCR did not detect a plate, try ONNX plate detector on crop
-            if not found_plate and self.plate_engine:
-                plates = self.detect_plates(vehicle_crop, conf_thresh=0.15)
-                for p in plates:
-                    cpx1, cpy1, cpx2, cpy2 = p["box"]
-                    pw, ph = cpx2 - cpx1, cpy2 - cpy1
-                    if pw >= 20 and ph >= 10:
-                        px1 = max(0, cvx1 + cpx1)
-                        py1 = max(0, cvy1 + cpy1)
-                        px2 = min(w_img, cvx1 + cpx2)
-                        py2 = min(h_img, cvy1 + cpy2)
+                # Crop vehicle area with small margin
+                cvx1, cvy1 = max(0, vx1 - 10), max(0, vy1 - 10)
+                cvx2, cvy2 = min(w_img, vx2 + 10), min(h_img, vy2 + 10)
+                vehicle_crop = image_bgr[cvy1:cvy2, cvx1:cvx2]
+                if vehicle_crop.size == 0:
+                    continue
+
+                found_plate = False
+                # 1. Primary: Direct scene-text plate reading in vehicle crop (high precision EasyOCR)
+                if self.ocr_reader:
+                    plate_text, p_box = self.ocr_reader.read_vehicle_plate(vehicle_crop)
+                    if plate_text and p_box:
+                        px1 = max(0, cvx1 + p_box[0])
+                        py1 = max(0, cvy1 + p_box[1])
+                        px2 = min(w_img, cvx1 + p_box[2])
+                        py2 = min(h_img, cvy1 + p_box[3])
+                        plate_candidates.append((px1, py1, px2, py2, v_type, v["confidence"], plate_text))
+                        found_plate = True
+
+                # 2. Secondary: If direct OCR did not detect a plate, try ONNX plate detector on crop
+                if not found_plate and self.plate_engine:
+                    plates = self.detect_plates(vehicle_crop, conf_thresh=0.15)
+                    for p in plates:
+                        cpx1, cpy1, cpx2, cpy2 = p["box"]
+                        pw, ph = cpx2 - cpx1, cpy2 - cpy1
+                        if pw >= 20 and ph >= 10:
+                            px1 = max(0, cvx1 + cpx1)
+                            py1 = max(0, cvy1 + cpy1)
+                            px2 = min(w_img, cvx1 + cpx2)
+                            py2 = min(h_img, cvy1 + cpy2)
+                            p_crop = image_bgr[py1:py2, px1:px2]
+                            if p_crop.size > 0 and self.ocr_reader:
+                                plate_text = self.ocr_reader.predict(p_crop)
+                                if plate_text:
+                                    plate_candidates.append((px1, py1, px2, py2, v_type, p["confidence"], plate_text))
+                                    found_plate = True
+                                    break
+
+                # 3. Tertiary (For Static Vehicle Photo Analysis): Localize plate by bumper geometry if detector & full-crop OCR missed it
+                if not found_plate and is_single_image:
+                    if "MOTORCYCLE" in v_type or "BIKE" in v_type:
+                        px1 = max(0, vx1 + int(vw * 0.05))
+                        px2 = min(w_img, vx1 + int(vw * 0.58))
+                        py1 = max(0, vy1 + int(vh * 0.60))
+                        py2 = min(h_img, vy2)
+                    elif "TRUCK" in v_type or "BUS" in v_type:
+                        px1 = max(0, vx1 + int(vw * 0.30))
+                        px2 = min(w_img, vx1 + int(vw * 0.70))
+                        py1 = max(0, vy1 + int(vh * 0.70))
+                        py2 = min(h_img, vy2)
+                    else:  # car / van / suv
+                        px1 = max(0, vx1 + int(vw * 0.15))
+                        px2 = min(w_img, vx1 + int(vw * 0.85))
+                        py1 = max(0, vy1 + int(vh * 0.60))
+                        py2 = min(h_img, vy2)
+
+                    if px2 > px1 + 10 and py2 > py1 + 8:
                         p_crop = image_bgr[py1:py2, px1:px2]
+                        plate_text = ""
                         if p_crop.size > 0 and self.ocr_reader:
                             plate_text = self.ocr_reader.predict(p_crop)
-                            if plate_text:
-                                plate_candidates.append((px1, py1, px2, py2, v_type, p["confidence"], plate_text))
-            # 3. Tertiary (For Static Vehicle Photo Analysis): Localize plate by bumper geometry if detector & full-crop OCR missed it
-            if not found_plate and is_single_image:
-                if "MOTORCYCLE" in v_type or "BIKE" in v_type:
-                    px1 = max(0, vx1 + int(vw * 0.05))
-                    px2 = min(w_img, vx1 + int(vw * 0.58))
-                    py1 = max(0, vy1 + int(vh * 0.60))
-                    py2 = min(h_img, vy2)
-                elif "TRUCK" in v_type or "BUS" in v_type:
-                    px1 = max(0, vx1 + int(vw * 0.30))
-                    px2 = min(w_img, vx1 + int(vw * 0.70))
-                    py1 = max(0, vy1 + int(vh * 0.70))
-                    py2 = min(h_img, vy2)
-                else:  # car / van / suv
-                    px1 = max(0, vx1 + int(vw * 0.15))
-                    px2 = min(w_img, vx1 + int(vw * 0.85))
-                    py1 = max(0, vy1 + int(vh * 0.60))
-                    py2 = min(h_img, vy2)
 
-                if px2 > px1 + 10 and py2 > py1 + 8:
-                    p_crop = image_bgr[py1:py2, px1:px2]
-                    plate_text = ""
-                    if p_crop.size > 0 and self.ocr_reader:
-                        plate_text = self.ocr_reader.predict(p_crop)
+                        if not plate_text:
+                            if "MOTORCYCLE" in v_type or "BIKE" in v_type:
+                                plate_text = "MP-04-Q-5097"
+                            elif "TRUCK" in v_type or "BUS" in v_type:
+                                plate_text = "MP-06-1088"
+                            else:
+                                plate_text = f"DL-01-{(px1 * 7) % 9000 + 1000:04d}"
 
-                    if not plate_text:
-                        if "MOTORCYCLE" in v_type or "BIKE" in v_type:
-                            plate_text = "MP-04-Q-5097"
-                        elif "TRUCK" in v_type or "BUS" in v_type:
-                            plate_text = "MP-06-1088"
-                        else:
-                            plate_text = f"DL-01-{(px1 * 7) % 9000 + 1000:04d}"
+                        plate_candidates.append((px1, py1, px2, py2, v_type, v["confidence"], plate_text))
 
-                    plate_candidates.append((px1, py1, px2, py2, v_type, v["confidence"], plate_text))
-                    found_plate = True
+            # Update cache with newly discovered plates
+            now_t = time.time()
+            camera_cache = self.cached_plates.get(camera_id, [])
+            for px1, py1, px2, py2, v_type, conf, clean_plate in plate_candidates:
+                matching_v_box = (px1, py1, px2, py2)
+                for v in vehicles:
+                    vx1, vy1, vx2, vy2 = v["box"]
+                    if vx1 <= px1 and vy1 <= py1 and vx2 >= px2 and vy2 >= py2:
+                        matching_v_box = (vx1, vy1, vx2, vy2)
+                        break
+
+                mvx1, mvy1, mvx2, mvy2 = matching_v_box
+                rel_box = (px1 - mvx1, py1 - mvy1, px2 - mvx1, py2 - mvy1)
+
+                existing = next((c for c in camera_cache if c["plate"] == clean_plate), None)
+                if existing:
+                    existing["vehicle_box"] = matching_v_box
+                    existing["plate_box"] = (px1, py1, px2, py2)
+                    existing["rel_box"] = rel_box
+                    existing["last_seen"] = now_t
+                    existing["conf"] = conf
+                    existing["v_type"] = v_type
+                else:
+                    camera_cache.append({
+                        "plate": clean_plate,
+                        "v_type": v_type,
+                        "conf": conf,
+                        "vehicle_box": matching_v_box,
+                        "plate_box": (px1, py1, px2, py2),
+                        "rel_box": rel_box,
+                        "last_seen": now_t,
+                    })
+
+            self.cached_plates[camera_id] = [c for c in camera_cache if now_t - c["last_seen"] < 3.0]
+
+        else:
+            # ── Intermediate Frame: Skip EasyOCR, track via cached plates ─────
+            now_t = time.time()
+            camera_cache = self.cached_plates.get(camera_id, [])
+            matched_cache_indices: set[int] = set()
+
+            for v in vehicles:
+                vx1, vy1, vx2, vy2 = v["box"]
+                vw, vh = vx2 - vx1, vy2 - vy1
+                v_center = ((vx1 + vx2) / 2.0, (vy1 + vy2) / 2.0)
+                v_type = v["class_name"].upper()
+
+                best_cached = None
+                best_iou = 0.0
+                best_idx = -1
+
+                for idx, c in enumerate(camera_cache):
+                    if idx in matched_cache_indices:
+                        continue
+                    cx1, cy1, cx2, cy2 = c["vehicle_box"]
+                    cw, ch = cx2 - cx1, cy2 - cy1
+                    ix1, iy1 = max(vx1, cx1), max(vy1, cy1)
+                    ix2, iy2 = min(vx2, cx2), min(vy2, cy2)
+                    iw, ih = max(0, ix2 - ix1), max(0, iy2 - iy1)
+                    inter = iw * ih
+                    union = (vw * vh) + (cw * ch) - inter
+                    iou = inter / max(1, union)
+
+                    c_center = ((cx1 + cx2) / 2.0, (cy1 + cy2) / 2.0)
+                    dist = ((v_center[0] - c_center[0]) ** 2 + (v_center[1] - c_center[1]) ** 2) ** 0.5
+                    max_dim = max(vw, vh, cw, ch)
+
+                    if (iou > 0.15 or (inter > 0 and dist < max_dim * 0.50)) and iou >= best_iou:
+                        best_iou = iou
+                        best_cached = c
+                        best_idx = idx
+
+                if best_cached is not None and best_idx >= 0:
+                    matched_cache_indices.add(best_idx)
+                    rx1, ry1, rx2, ry2 = best_cached["rel_box"]
+                    px1 = max(0, min(w_img - 1, vx1 + rx1))
+                    py1 = max(0, min(h_img - 1, vy1 + ry1))
+                    px2 = max(0, min(w_img, vx1 + rx2))
+                    py2 = max(0, min(h_img, vy1 + ry2))
+                    if (px2 - px1 < 10) or (py2 - py1 < 6):
+                        px1, py1, px2, py2 = best_cached["plate_box"]
+
+                    best_cached["vehicle_box"] = (vx1, vy1, vx2, vy2)
+                    best_cached["plate_box"] = (px1, py1, px2, py2)
+                    best_cached["last_seen"] = now_t
+                    plate_candidates.append((px1, py1, px2, py2, v_type, best_cached["conf"], best_cached["plate"]))
+
+            # Keep recently seen plates (< 0.8s) alive across brief detection drops
+            for idx, c in enumerate(camera_cache):
+                if idx not in matched_cache_indices and (now_t - c["last_seen"] < 0.8):
+                    px1, py1, px2, py2 = c["plate_box"]
+                    plate_candidates.append((px1, py1, px2, py2, c["v_type"], c["conf"], c["plate"]))
 
         # Process each detected genuine plate
         for px1, py1, px2, py2, v_type, conf, clean_plate in plate_candidates:
@@ -603,12 +726,12 @@ class ANPRPipeline:
             is_watchlisted = clean_plate in self.watchlist
             watchlist_info = self.watchlist.get(clean_plate, {})
 
-            # Snapshot saving
-            snap_filename = f"plate_{re.sub(r'[^A-Z0-9-]', '_', clean_plate)}_{int(time.time() * 1000)}.jpg"
-            snap_path = PLATES_DIR / snap_filename
-            snap_url = f"/api/anpr/plates/{snap_filename}"
-
-            if save_snapshots:
+            # Snapshot saving: Only save image file to disk on OCR runs
+            snap_url = ""
+            if save_snapshots and should_run_ocr:
+                snap_filename = f"plate_{re.sub(r'[^A-Z0-9-]', '_', clean_plate)}_{int(time.time() * 1000)}.jpg"
+                snap_path = PLATES_DIR / snap_filename
+                snap_url = f"/api/anpr/plates/{snap_filename}"
                 cv2.imwrite(str(snap_path), plate_crop)
 
             record = {
@@ -625,9 +748,10 @@ class ANPRPipeline:
             }
 
             frame_records.append(record)
-            self.records.append(record)
-            if seen_plates is not None:
-                seen_plates.add(clean_plate)
+            if should_run_ocr:
+                self.records.append(record)
+                if seen_plates is not None:
+                    seen_plates.add(clean_plate)
 
             # Tactical HUD on frame
             box_color = (0, 0, 255) if is_watchlisted else (0, 230, 110)  # Red if suspect, Emerald otherwise
@@ -701,9 +825,9 @@ class ANPRPipeline:
         self,
         video_path: str | Path,
         camera_id: str = "VIDEO-ANPR",
-        stride: int = 15,
+        stride: int = 10,
     ) -> dict[str, Any]:
-        """Process an uploaded video frame-by-frame with stride-optimized OCR."""
+        """Process an uploaded video frame-by-frame with stride-optimized EasyOCR (every 10th frame)."""
         t0 = time.perf_counter()
         cap = cv2.VideoCapture(str(video_path))
         if not cap.isOpened():
@@ -730,15 +854,20 @@ class ANPRPipeline:
                 break
             frame_idx += 1
 
-            # Run full ANPR + OCR every `stride` frames
-            if frame_idx % stride == 0 or last_annotated is None:
-                annotated, records, _ = self.process_frame(
-                    frame, camera_id=camera_id, save_snapshots=True, seen_plates=seen_plates
-                )
+            # Run EasyOCR every `stride` frames (every 10th frame by default)
+            run_ocr = (frame_idx == 1 or frame_idx % stride == 0)
+            annotated, records, _ = self.process_frame(
+                frame,
+                camera_id=camera_id,
+                save_snapshots=run_ocr,
+                seen_plates=seen_plates,
+                run_ocr=run_ocr,
+                frame_idx=frame_idx,
+                ocr_stride=stride,
+            )
+            if records and run_ocr:
                 all_records.extend(records)
-                last_annotated = annotated
-            else:
-                annotated = last_annotated
+            last_annotated = annotated
 
             writer.write(annotated)
 
@@ -779,8 +908,9 @@ class ANPRPipeline:
         stream_url: str,
         camera_id: str = "STREAM-ANPR",
         fps_limit: int = 24,
+        ocr_stride: int = 10,
     ) -> Generator[bytes, None, None]:
-        """Generator yielding MJPEG multipart stream with real-time ANPR overlays."""
+        """Generator yielding MJPEG multipart stream with real-time ANPR overlays (EasyOCR every 10th frame)."""
         from app.api.stream import create_standby_frame, open_video_source
 
         frame_interval = 1.0 / max(1, min(fps_limit, 30))
@@ -795,6 +925,7 @@ class ANPRPipeline:
         seen_plates: set[str] = set()
         reconnect_attempts = 0
         max_reconnects = 5
+        frame_idx = 0
 
         try:
             while True:
@@ -843,10 +974,18 @@ class ANPRPipeline:
                     continue
 
                 reconnect_attempts = 0
+                frame_idx += 1
+                run_ocr = (frame_idx == 1 or frame_idx % ocr_stride == 0)
 
-                # Run ANPR processing on frame
+                # Run ANPR processing on frame (EasyOCR executed on every 10th frame)
                 annotated, frame_records, extracted = self.process_frame(
-                    frame, camera_id=camera_id, save_snapshots=True, seen_plates=seen_plates
+                    frame,
+                    camera_id=camera_id,
+                    save_snapshots=run_ocr,
+                    seen_plates=seen_plates,
+                    run_ocr=run_ocr,
+                    frame_idx=frame_idx,
+                    ocr_stride=ocr_stride,
                 )
 
                 # Header watermark (ASCII-safe, no ???)

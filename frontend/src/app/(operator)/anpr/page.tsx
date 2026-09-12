@@ -97,7 +97,7 @@ export default function AnprPage() {
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [videoResult, setVideoResult] = useState<AnprVideoResponse | null>(null);
   const [isProcessingVideo, setIsProcessingVideo] = useState<boolean>(false);
-  const [videoStride, setVideoStride] = useState<number>(15);
+  const [videoStride, setVideoStride] = useState<number>(10);
   const [videoError, setVideoError] = useState<string | null>(null);
 
   // Watchlist State

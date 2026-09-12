@@ -95,6 +95,23 @@ class InferenceService:
 
         model_name = model_name.strip()
 
+        # Transparently route multi-frame batch tensors (e.g. 2 to 8 frames) to predict_batch
+        if input_data.ndim == 4 and input_data.shape[0] > 1:
+            batch_res = self.predict_batch(
+                model_name=model_name,
+                input_data=input_data,
+                input_name=input_name,
+                postprocess=postprocess,
+                conf_threshold=conf_threshold,
+                iou_threshold=iou_threshold,
+                original_image_sizes=original_image_size,
+                class_labels=class_labels,
+            )
+            flat_dets = [d for frame_dets in batch_res["batch_detections"] for d in frame_dets]
+            batch_res["detections"] = flat_dets
+            batch_res["detections_count"] = len(flat_dets)
+            return batch_res
+
         start_time = time.perf_counter()
 
         try:
@@ -230,3 +247,125 @@ class InferenceService:
             raise InferenceServiceError(
                 f"Unexpected inference error: {exc}"
             ) from exc
+
+    def predict_batch(
+        self,
+        model_name: str,
+        input_data: np.ndarray,
+        input_name: str | None = None,
+        postprocess: bool = True,
+        conf_threshold: float = 0.25,
+        iou_threshold: float = 0.45,
+        original_image_sizes: list[tuple[int, int]] | tuple[int, int] | None = None,
+        class_labels: list[str] | None = None,
+    ) -> dict[str, Any]:
+        """
+        Run batched inference on multiple frames (e.g. 2 to 8 frames at once).
+        input_data has shape [B, C, H, W].
+        Returns per-frame detection results and batch metrics.
+        """
+        if not model_name or not model_name.strip():
+            raise InferenceServiceError("model_name cannot be empty.")
+
+        if not isinstance(input_data, np.ndarray) or input_data.size == 0:
+            raise InferenceServiceError("input_data must be a non-empty NumPy ndarray.")
+
+        if input_data.ndim != 4:
+            raise InferenceServiceError(f"Expected 4D batch tensor [B, C, H, W], got {input_data.ndim}D tensor.")
+
+        batch_size = input_data.shape[0]
+        model_name = model_name.strip()
+        start_time = time.perf_counter()
+
+        try:
+            if not self.model_manager.is_loaded(model_name):
+                raise ModelNotFoundError(f"Model '{model_name}' is not loaded.")
+
+            with self.resource_manager.inference_slot(timeout=self.inference_timeout_seconds):
+                outputs = self.model_manager.predict(
+                    model_name=model_name,
+                    input_data=input_data,
+                    input_name=input_name,
+                )
+
+            elapsed_seconds = time.perf_counter() - start_time
+
+            output_metadata = []
+            for index, output in enumerate(outputs):
+                if isinstance(output, np.ndarray):
+                    output_metadata.append({
+                        "index": index,
+                        "type": "numpy.ndarray",
+                        "shape": list(output.shape),
+                        "dtype": str(output.dtype),
+                    })
+                else:
+                    output_metadata.append({"index": index, "type": type(output).__name__})
+
+            batch_detections: list[list[dict[str, Any]]] = [[] for _ in range(batch_size)]
+
+            if postprocess and outputs:
+                model_input_size = (int(input_data.shape[3]), int(input_data.shape[2]))
+                active_class_labels = class_labels
+                if active_class_labels is None:
+                    try:
+                        engine = self.model_manager.get_model(model_name)
+                        if getattr(engine, "class_labels", None):
+                            active_class_labels = engine.class_labels
+                    except Exception:
+                        pass
+
+                postprocessor = Postprocessor(
+                    config=PostprocessorConfig(
+                        conf_threshold=conf_threshold,
+                        iou_threshold=iou_threshold,
+                        class_labels=active_class_labels,
+                    )
+                )
+
+                batch_detections = postprocessor.decode_batch(
+                    outputs=outputs,
+                    model_input_size=model_input_size,
+                    original_image_sizes=original_image_sizes,
+                )
+
+            total_dets = sum(len(d) for d in batch_detections)
+            logger.info(
+                "Batch inference completed | model=%s | batch_size=%d | latency=%.4fs (%.2f ms/frame) | total_detections=%d",
+                model_name,
+                batch_size,
+                elapsed_seconds,
+                (elapsed_seconds * 1000) / max(1, batch_size),
+                total_dets,
+            )
+
+            return {
+                "model_name": model_name,
+                "status": "success",
+                "batch_size": batch_size,
+                "latency_seconds": round(elapsed_seconds, 6),
+                "latency_ms": round(elapsed_seconds * 1000, 2),
+                "per_frame_latency_ms": round((elapsed_seconds * 1000) / max(1, batch_size), 2),
+                "input": {
+                    "shape": list(input_data.shape),
+                    "dtype": str(input_data.dtype),
+                },
+                "total_detections_count": total_dets,
+                "batch_detections": batch_detections,
+                "outputs": output_metadata,
+            }
+
+        except ModelNotFoundError:
+            raise
+
+        except ResourceManagerError as exc:
+            logger.warning("Inference resource unavailable | model=%s", model_name)
+            raise InferenceResourceError(str(exc)) from exc
+
+        except ModelManagerError as exc:
+            logger.exception("Model inference failed | model=%s", model_name)
+            raise InferenceServiceError(f"Inference failed for model '{model_name}': {exc}") from exc
+
+        except Exception as exc:
+            logger.exception("Unexpected inference service error | model=%s", model_name)
+            raise InferenceServiceError(f"Unexpected inference error: {exc}") from exc

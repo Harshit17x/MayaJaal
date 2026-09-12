@@ -22,7 +22,7 @@ class ResourceManager:
     resources simultaneously.
     """
 
-    def __init__(self, max_concurrent_inference: int = 2) -> None:
+    def __init__(self, max_concurrent_inference: int = 8) -> None:
         if max_concurrent_inference < 1:
             raise ValueError(
                 "max_concurrent_inference must be at least 1."
