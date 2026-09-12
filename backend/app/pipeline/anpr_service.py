@@ -332,10 +332,18 @@ class ANPRPipeline:
         allowed_classes: list[int] | None = None,
     ) -> list[dict[str, Any]]:
         """Decode YOLOv8 [1, num_classes + 4, 8400] output tensor with NMS."""
-        if output.ndim == 3 and output.shape[1] < output.shape[2]:
-            transposed = output[0].T  # [8400, 4 + classes]
+        if output.ndim == 3:
+            if output.shape[1] < output.shape[2]:
+                transposed = output[0].T  # [8400, 4 + classes]
+            else:
+                transposed = output[0]
+        elif output.ndim == 2:
+            if output.shape[0] < output.shape[1]:
+                transposed = output.T
+            else:
+                transposed = output
         else:
-            transposed = output[0]
+            transposed = output
 
         pad_x, pad_y = pad
         orig_h, orig_w = orig_shape
@@ -398,6 +406,27 @@ class ANPRPipeline:
 
         return detections
 
+    def _preprocess_batch(
+        self,
+        images_bgr: list[np.ndarray],
+        target_size: int = 640,
+    ) -> tuple[np.ndarray, list[float], list[tuple[int, int]], list[tuple[int, int]]]:
+        """Resize with padding (letterbox) a list of 2 to 6 frames into a 4D batch tensor."""
+        tensors = []
+        scales = []
+        pads = []
+        orig_shapes = []
+
+        for img in images_bgr:
+            tensor_single, scale, pad = self._preprocess_image(img, target_size=target_size)
+            tensors.append(tensor_single[0])  # [3, 640, 640]
+            scales.append(scale)
+            pads.append(pad)
+            orig_shapes.append(img.shape[:2])
+
+        batch_tensor = np.stack(tensors, axis=0)  # [B, 3, 640, 640]
+        return batch_tensor, scales, pads, orig_shapes
+
     def detect_vehicles(self, image_bgr: np.ndarray, conf_thresh: float = 0.45) -> list[dict[str, Any]]:
         """Detect vehicles (cars, bikes, buses, trucks) using vehicle_detector.onnx."""
         if self.vehicle_engine is None:
@@ -422,6 +451,44 @@ class ANPRPipeline:
             d["class_name"] = VEHICLE_CLASSES.get(d["class_id"], "vehicle")
 
         return raw_dets
+
+    def detect_vehicles_batch(
+        self,
+        images_bgr: list[np.ndarray],
+        conf_thresh: float = 0.45,
+    ) -> list[list[dict[str, Any]]]:
+        """Detect vehicles across 2 to 6 frames at once using batched vehicle_detector.onnx."""
+        if not images_bgr:
+            return []
+        if self.vehicle_engine is None:
+            return [[] for _ in images_bgr]
+
+        if len(images_bgr) == 1:
+            return [self.detect_vehicles(images_bgr[0], conf_thresh=conf_thresh)]
+
+        batch_tensor, scales, pads, orig_shapes = self._preprocess_batch(images_bgr)
+        outputs = self.vehicle_engine.predict(batch_tensor)
+        if not outputs:
+            return [[] for _ in images_bgr]
+
+        output = outputs[0]  # [B, 84, anchors]
+        batch_results: list[list[dict[str, Any]]] = []
+
+        for b in range(len(images_bgr)):
+            slice_b = output[b : b + 1]
+            raw_dets = self._decode_yolov8(
+                slice_b,
+                scale=scales[b],
+                pad=pads[b],
+                orig_shape=orig_shapes[b],
+                conf_thresh=conf_thresh,
+                allowed_classes=list(VEHICLE_CLASSES.keys()),
+            )
+            for d in raw_dets:
+                d["class_name"] = VEHICLE_CLASSES.get(d["class_id"], "vehicle")
+            batch_results.append(raw_dets)
+
+        return batch_results
 
     def detect_plates(self, crop_bgr: np.ndarray, conf_thresh: float = 0.35) -> list[dict[str, Any]]:
         """Detect license plates within a vehicle crop using anpr_plate.onnx."""
@@ -453,10 +520,11 @@ class ANPRPipeline:
         run_ocr: bool | None = None,
         frame_idx: int | None = None,
         ocr_stride: int | None = None,
+        precomputed_vehicles: list[dict[str, Any]] | None = None,
     ) -> tuple[np.ndarray, list[dict[str, Any]], list[str]]:
         """
         Execute two-stage ANPR pipeline on a frame:
-        1. Vehicle Detection via ONNX (every frame)
+        1. Vehicle Detection via ONNX (every frame, batched 2..6 when processing video)
         2. Dynamic Vehicle-Crop License Plate Detection & Character OCR (every 10th frame)
         3. Plate Tracking & HUD Retention via Cache (intermediate frames)
         4. Tactical HUD Annotation & Snapshot Capture
@@ -480,7 +548,10 @@ class ANPRPipeline:
             # Run EasyOCR on the first frame, and every 10th frame thereafter
             should_run_ocr = (current_frame == 1 or current_frame % stride == 0)
 
-        raw_vehicles = self.detect_vehicles(image_bgr, conf_thresh=0.25)
+        if precomputed_vehicles is not None:
+            raw_vehicles = precomputed_vehicles
+        else:
+            raw_vehicles = self.detect_vehicles(image_bgr, conf_thresh=0.25)
         frame_records: list[dict[str, Any]] = []
         extracted_plates: list[str] = []
 
@@ -847,29 +918,46 @@ class ANPRPipeline:
         all_records: list[dict[str, Any]] = []
         frame_idx = 0
         last_annotated = None
+        batch_size = max(2, min(6, getattr(settings, "batch_size", 4)))
 
-        while True:
-            ret, frame = cap.read()
-            if not ret or frame is None:
+        eof = False
+        while not eof:
+            batch_frames: list[np.ndarray] = []
+            while len(batch_frames) < batch_size:
+                ret, frame = cap.read()
+                if not ret or frame is None:
+                    eof = True
+                    break
+                batch_frames.append(frame)
+
+            if not batch_frames:
                 break
-            frame_idx += 1
 
-            # Run EasyOCR every `stride` frames (every 10th frame by default)
-            run_ocr = (frame_idx == 1 or frame_idx % stride == 0)
-            annotated, records, _ = self.process_frame(
-                frame,
-                camera_id=camera_id,
-                save_snapshots=run_ocr,
-                seen_plates=seen_plates,
-                run_ocr=run_ocr,
-                frame_idx=frame_idx,
-                ocr_stride=stride,
-            )
-            if records and run_ocr:
-                all_records.extend(records)
-            last_annotated = annotated
+            # Batch detect vehicles across 2 to 6 frames in a single ONNX pass
+            if len(batch_frames) > 1:
+                batch_vehicles = self.detect_vehicles_batch(batch_frames, conf_thresh=0.25)
+            else:
+                batch_vehicles = [self.detect_vehicles(batch_frames[0], conf_thresh=0.25)]
 
-            writer.write(annotated)
+            for i, frame in enumerate(batch_frames):
+                frame_idx += 1
+                # Run EasyOCR every `stride` frames (every 10th frame by default)
+                run_ocr = (frame_idx == 1 or frame_idx % stride == 0)
+                annotated, records, _ = self.process_frame(
+                    frame,
+                    camera_id=camera_id,
+                    save_snapshots=run_ocr,
+                    seen_plates=seen_plates,
+                    run_ocr=run_ocr,
+                    frame_idx=frame_idx,
+                    ocr_stride=stride,
+                    precomputed_vehicles=batch_vehicles[i],
+                )
+                if records and run_ocr:
+                    all_records.extend(records)
+                last_annotated = annotated
+
+                writer.write(annotated)
 
         cap.release()
         writer.release()

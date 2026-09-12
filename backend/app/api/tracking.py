@@ -136,9 +136,10 @@ async def video_tracking(
     tracker_matching_threshold: float = Form(0.8),
     tracker_frame_rate: int = Form(30),
     tracker_min_consecutive_frames: int = Form(1),
+    batch_size: int = Form(settings.batch_size),
 ) -> dict:
     """
-    Run ByteTrack multi-object tracking on an uploaded video.
+    Run ByteTrack multi-object tracking on an uploaded video using ONNX batching (2 to 6 frames at once).
 
     A **fresh** tracker is created per request (stateless).
     Returns per-frame tracked objects with persistent ``track_id`` values.
@@ -158,6 +159,14 @@ async def video_tracking(
         max_frames = int(getattr(max_frames, "default", max_frames))
     except Exception:
         max_frames = 300
+
+    try:
+        batch_size = int(getattr(batch_size, "default", batch_size))
+    except Exception:
+        batch_size = settings.batch_size
+
+    if not isinstance(batch_size, int) or batch_size < 2 or batch_size > 6:
+        raise HTTPException(status_code=400, detail="batch_size must be an integer between 2 and 6.")
 
     # ── Model validation ────────────────────────────────────────────────
     model_name = (model_name or "").strip()
@@ -258,34 +267,52 @@ async def video_tracking(
             except VideoLoaderError as exc:
                 raise HTTPException(status_code=400, detail=str(exc)) from exc
 
-            while frames_processed < max_frames:
-                try:
-                    success, frame = video.read_frame()
-                except VideoLoaderError as exc:
-                    raise HTTPException(status_code=400, detail=str(exc)) from exc
-                except Exception as exc:
-                    raise HTTPException(
-                        status_code=500,
-                        detail="Unexpected error while reading video frame.",
-                    ) from exc
+            eof = False
+            while frames_processed < max_frames and not eof:
+                batch_frames: list[np.ndarray] = []
+                batch_indices: list[int] = []
+                batch_sizes: list[tuple[int, int]] = []
+                target_count = min(batch_size, max_frames - frames_processed)
 
-                if not success or frame is None:
+                while len(batch_frames) < target_count:
+                    try:
+                        success, frame = video.read_frame()
+                    except VideoLoaderError as exc:
+                        raise HTTPException(status_code=400, detail=str(exc)) from exc
+                    except Exception as exc:
+                        raise HTTPException(
+                            status_code=500,
+                            detail="Unexpected error while reading video frame.",
+                        ) from exc
+
+                    if not success or frame is None:
+                        eof = True
+                        break
+
+                    if not isinstance(frame, np.ndarray) or frame.size == 0:
+                        raise HTTPException(status_code=500, detail="VideoLoader returned an invalid frame.")
+
+                    if frame.ndim != 3 or frame.shape[2] != 3:
+                        raise HTTPException(status_code=400, detail="Video frame must be a 3-channel color image.")
+
+                    orig_h, orig_w = frame.shape[:2]
+                    batch_indices.append(frames_processed + len(batch_frames))
+                    batch_frames.append(frame)
+                    batch_sizes.append((orig_w, orig_h))
+
+                if not batch_frames:
                     break
 
-                if not isinstance(frame, np.ndarray) or frame.size == 0:
-                    raise HTTPException(status_code=500, detail="VideoLoader returned an invalid frame.")
-
-                if frame.ndim != 3 or frame.shape[2] != 3:
-                    raise HTTPException(status_code=400, detail="Video frame must be a 3-channel color image.")
-
-                # ── Preprocess ───────────────────────────────────────────
+                # ── Preprocess batch ─────────────────────────────────────
                 try:
-                    tensor = preprocessor.process(frame)
+                    if len(batch_frames) == 1:
+                        tensor = preprocessor.process(batch_frames[0])
+                    else:
+                        tensor = preprocessor.process_batch(batch_frames)
                 except PreprocessingError as exc:
                     raise HTTPException(status_code=400, detail=str(exc)) from exc
 
-                # ── Detect ───────────────────────────────────────────────
-                orig_h, orig_w = frame.shape[:2]
+                # ── Batch Detect (2 to 6 frames at once) ─────────────────
                 try:
                     inference_result = inference_service.predict(
                         model_name=model_name,
@@ -293,151 +320,158 @@ async def video_tracking(
                         postprocess=True,
                         conf_threshold=conf_threshold,
                         iou_threshold=iou_threshold,
-                        original_image_size=(orig_w, orig_h),
+                        original_image_size=batch_sizes[0] if len(batch_sizes) == 1 else None,
+                        original_image_sizes=batch_sizes if len(batch_sizes) > 1 else None,
                     )
                 except KeyError as exc:
                     raise HTTPException(status_code=404, detail=str(exc)) from exc
                 except Exception as exc:
                     raise HTTPException(status_code=500, detail="Video frame inference failed.") from exc
 
-                raw_detections: list[dict] = inference_result.get("detections", [])
+                if len(batch_frames) > 1:
+                    batch_dets = inference_result.get("batch_detections")
+                    if not batch_dets:
+                        batch_dets = [inference_result.get("detections", []) for _ in batch_frames]
+                else:
+                    batch_dets = [inference_result.get("detections", [])]
 
-                # ── Track ─────────────────────────────────────────────────
-                try:
-                    tracked_objects = tracker.update(
-                        detections=raw_detections,
-                        frame_resolution=(orig_w, orig_h),
-                    )
-                except ByteTrackerError as exc:
-                    raise HTTPException(status_code=500, detail=str(exc)) from exc
-
-                tracked_dicts = [t.to_dict() for t in tracked_objects]
-
-                # ── Global Person Re-ID Assignment across Cameras ────────
-                for td in tracked_dicts:
-                    c_name = str(td.get("class_name", "")).lower()
-                    if (c_name in ("person", "human", "pedestrian") or td.get("class_id") == 0) and td.get("track_id") is not None:
-                        try:
-                            gtid, is_cross, r_score = global_trace_manager.update_track(
-                                camera_id=f"video_upload_{session_video_id}",
-                                camera_name=f"Video Analysis ({file.filename or 'Upload'})",
-                                local_track_id=td["track_id"],
-                                box=td.get("box", []),
-                                frame_bgr=frame,
-                                confidence=float(td.get("confidence", 0.8)),
-                            )
-                            td["global_trace_id"] = gtid
-                            td["is_cross_camera"] = is_cross
-                            td["reid_score"] = r_score
-                        except Exception as reid_err:
-                            logger.debug("ReID update skip in video tracking: %s", reid_err)
-
-                # ── Periodic Biometric Suspect Facial Scan ───────────────
-                if frames_processed % face_scan_interval == 0:
+                # ── Sequential Tracking & Annotation ─────────────────────
+                for frame, f_idx, (orig_w, orig_h), raw_detections in zip(batch_frames, batch_indices, batch_sizes, batch_dets):
                     try:
-                        detected_faces = face_service.detect_and_recognize(
-                            frame,
-                            min_match_score=0.40,
-                            min_face_size=35,
-                            use_temporal_smoothing=True,
+                        tracked_objects = tracker.update(
+                            detections=raw_detections,
+                            frame_resolution=(orig_w, orig_h),
                         )
-                        for f in detected_faces:
-                            is_threat = bool(f.get("is_threat", False))
-                            suspect_name = f.get("name")
-                            is_known = bool(f.get("is_known", False))
+                    except ByteTrackerError as exc:
+                        raise HTTPException(status_code=500, detail=str(exc)) from exc
 
-                            if is_threat or is_known:
-                                conf = float(f.get("calibrated_conf") or f.get("match_score") or f.get("confidence") or 0.85)
-                                face_dict = {
-                                    "box": [float(c) for c in f["bbox"]],
-                                    "confidence": round(conf, 3),
-                                    "class_id": 999,
-                                    "class_name": f"suspect_{suspect_name.lower()}" if is_threat else f"face_{suspect_name.lower()}",
-                                    "is_threat": is_threat,
-                                    "threat_level": f.get("threat_level") or ("HIGH" if is_threat else None),
-                                    "suspect_name": suspect_name,
-                                    "category": f.get("category"),
-                                }
-                                tracked_dicts.append(face_dict)
+                    tracked_dicts = [t.to_dict() for t in tracked_objects]
 
-                                if is_threat and suspect_name and suspect_name not in session_alerted_suspects:
-                                    session_alerted_suspects.add(suspect_name)
-                                    snap_name = f"suspect_vid_{session_video_id}_{frames_processed}.jpg"
-                                    snap_path = SNAPSHOTS_DIR / snap_name
-                                    try:
-                                        cv2.imwrite(str(snap_path), frame, [cv2.IMWRITE_JPEG_QUALITY, 90])
-                                    except Exception:
-                                        snap_name = None
+                    # ── Global Person Re-ID Assignment across Cameras ────────
+                    for td in tracked_dicts:
+                        c_name = str(td.get("class_name", "")).lower()
+                        if (c_name in ("person", "human", "pedestrian") or td.get("class_id") == 0) and td.get("track_id") is not None:
+                            try:
+                                gtid, is_cross, r_score = global_trace_manager.update_track(
+                                    camera_id=f"video_upload_{session_video_id}",
+                                    camera_name=f"Video Analysis ({file.filename or 'Upload'})",
+                                    local_track_id=td["track_id"],
+                                    box=td.get("box", []),
+                                    frame_bgr=frame,
+                                    confidence=float(td.get("confidence", 0.8)),
+                                )
+                                td["global_trace_id"] = gtid
+                                td["is_cross_camera"] = is_cross
+                                td["reid_score"] = r_score
+                            except Exception as reid_err:
+                                logger.debug("ReID update skip in video tracking: %s", reid_err)
 
-                                    t_level = f.get("threat_level") or "HIGH"
-                                    sev = "Critical" if t_level == "CRITICAL" else "High"
-                                    alert_service.create_alert(
-                                        title=f"SUSPECT DETECTED: {suspect_name.upper()}",
-                                        location=f"Video Analysis Stream ({file.filename or 'Upload'})",
-                                        severity=sev,
-                                        camera_id=f"video_upload_{session_video_id}",
-                                        camera_name=f"Video Upload ({file.filename or 'Video'})",
-                                        class_name="suspect",
-                                        confidence=conf,
-                                        box=[float(c) for c in f["bbox"]],
-                                        snapshot_filename=snap_name,
-                                        suspect_name=suspect_name,
-                                        threat_level=t_level,
-                                        category=f.get("category"),
-                                        notes=f"Identified in uploaded video at frame {frames_processed} with {int(conf * 100)}% biometric match confidence.",
-                                    )
-                                    suspects_detected_summary.append({
-                                        "name": suspect_name,
-                                        "threat_level": t_level,
-                                        "frame_index": frames_processed,
+                    # ── Periodic Biometric Suspect Facial Scan ───────────────
+                    if f_idx % face_scan_interval == 0:
+                        try:
+                            detected_faces = face_service.detect_and_recognize(
+                                frame,
+                                min_match_score=0.40,
+                                min_face_size=35,
+                                use_temporal_smoothing=True,
+                            )
+                            for f in detected_faces:
+                                is_threat = bool(f.get("is_threat", False))
+                                suspect_name = f.get("name")
+                                is_known = bool(f.get("is_known", False))
+
+                                if is_threat or is_known:
+                                    conf = float(f.get("calibrated_conf") or f.get("match_score") or f.get("confidence") or 0.85)
+                                    face_dict = {
+                                        "box": [float(c) for c in f["bbox"]],
                                         "confidence": round(conf, 3),
+                                        "class_id": 999,
+                                        "class_name": f"suspect_{suspect_name.lower()}" if is_threat else f"face_{suspect_name.lower()}",
+                                        "is_threat": is_threat,
+                                        "threat_level": f.get("threat_level") or ("HIGH" if is_threat else None),
+                                        "suspect_name": suspect_name,
                                         "category": f.get("category"),
-                                    })
-                    except Exception as face_err:
-                        logger.debug("Face scan error during video tracking: %s", face_err)
+                                    }
+                                    tracked_dicts.append(face_dict)
 
-                # ── Server-Side Bounding Box & Track ID Creation ─────────
-                annotated_frame = frame.copy()
-                draw_tracked_boxes(
-                    annotated_frame,
-                    tracked_dicts,
-                    frame_idx=frames_processed,
-                    draw_hud=True,
-                )
+                                    if is_threat and suspect_name and suspect_name not in session_alerted_suspects:
+                                        session_alerted_suspects.add(suspect_name)
+                                        snap_name = f"suspect_vid_{session_video_id}_{f_idx}.jpg"
+                                        snap_path = SNAPSHOTS_DIR / snap_name
+                                        try:
+                                            cv2.imwrite(str(snap_path), frame, [cv2.IMWRITE_JPEG_QUALITY, 90])
+                                        except Exception:
+                                            snap_name = None
 
-                if writer is None:
-                    fps_val = float(metadata.get("fps") or 25.0)
-                    if fps_val <= 0 or fps_val > 120:
-                        fps_val = 25.0
-                    writer = cv2.VideoWriter(
-                        str(raw_annotated_path),
-                        cv2.VideoWriter_fourcc(*"mp4v"),
-                        fps_val,
-                        (orig_w, orig_h),
+                                        t_level = f.get("threat_level") or "HIGH"
+                                        sev = "Critical" if t_level == "CRITICAL" else "High"
+                                        alert_service.create_alert(
+                                            title=f"SUSPECT DETECTED: {suspect_name.upper()}",
+                                            location=f"Video Analysis Stream ({file.filename or 'Upload'})",
+                                            severity=sev,
+                                            camera_id=f"video_upload_{session_video_id}",
+                                            camera_name=f"Video Upload ({file.filename or 'Video'})",
+                                            class_name="suspect",
+                                            confidence=conf,
+                                            box=[float(c) for c in f["bbox"]],
+                                            snapshot_filename=snap_name,
+                                            suspect_name=suspect_name,
+                                            threat_level=t_level,
+                                            category=f.get("category"),
+                                            notes=f"Identified in uploaded video at frame {f_idx} with {int(conf * 100)}% biometric match confidence.",
+                                        )
+                                        suspects_detected_summary.append({
+                                            "name": suspect_name,
+                                            "threat_level": t_level,
+                                            "frame_index": f_idx,
+                                            "confidence": round(conf, 3),
+                                            "category": f.get("category"),
+                                        })
+                        except Exception as face_err:
+                            logger.debug("Face scan error during video tracking: %s", face_err)
+
+                    # ── Server-Side Bounding Box & Track ID Creation ─────────
+                    annotated_frame = frame.copy()
+                    draw_tracked_boxes(
+                        annotated_frame,
+                        tracked_dicts,
+                        frame_idx=f_idx,
+                        draw_hud=True,
                     )
 
-                if writer is not None and writer.isOpened():
-                    writer.write(annotated_frame)
-                    has_written_frames = True
+                    if writer is None:
+                        fps_val = float(metadata.get("fps") or 25.0)
+                        if fps_val <= 0 or fps_val > 120:
+                            fps_val = 25.0
+                        writer = cv2.VideoWriter(
+                            str(raw_annotated_path),
+                            cv2.VideoWriter_fourcc(*"mp4v"),
+                            fps_val,
+                            (orig_w, orig_h),
+                        )
 
-                # Save individual frame JPEG for frame inspector
-                frame_jpg_path = frames_dir / f"frame_{frames_processed:05d}.jpg"
-                try:
-                    cv2.imwrite(str(frame_jpg_path), annotated_frame, [cv2.IMWRITE_JPEG_QUALITY, 85])
-                except Exception:
-                    pass
+                    if writer is not None and writer.isOpened():
+                        writer.write(annotated_frame)
+                        has_written_frames = True
 
-                frame_results.append(
-                    {
-                        "frame_index": frames_processed,
-                        "tracked_objects": tracked_dicts,
-                        "detections_count": len(raw_detections),
-                        "tracks_count": len(tracked_objects),
-                        "annotated_frame_url": f"/api/tracking/video/frame/{session_video_id}/{frames_processed}",
-                    }
-                )
+                    # Save individual frame JPEG for frame inspector
+                    frame_jpg_path = frames_dir / f"frame_{f_idx:05d}.jpg"
+                    try:
+                        cv2.imwrite(str(frame_jpg_path), annotated_frame, [cv2.IMWRITE_JPEG_QUALITY, 85])
+                    except Exception:
+                        pass
 
-                frames_processed += 1
+                    frame_results.append(
+                        {
+                            "frame_index": f_idx,
+                            "tracked_objects": tracked_dicts,
+                            "detections_count": len(raw_detections),
+                            "tracks_count": len(tracked_objects),
+                            "annotated_frame_url": f"/api/tracking/video/frame/{session_video_id}/{f_idx}",
+                        }
+                    )
+
+                    frames_processed += 1
 
         if writer is not None:
             writer.release()
@@ -461,6 +495,7 @@ async def video_tracking(
             "video_id": session_video_id,
             "frames_requested": max_frames,
             "frames_processed": frames_processed,
+            "batch_size": batch_size,
             "annotated_video_url": annotated_video_url,
             "suspects_detected": suspects_detected_summary,
             "tracker_config": {
