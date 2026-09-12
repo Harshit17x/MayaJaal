@@ -228,62 +228,6 @@ class Preprocessor:
                 f"Frame preprocessing failed: {exc}"
             ) from exc
 
-    def process_batch(self, frames: list[np.ndarray]) -> np.ndarray:
-        """
-        Convert a list of OpenCV BGR frames into an ONNX-ready 4D batch tensor [B, C, H, W].
-        Supports 2 to 8 frames at once (or any custom batch size).
-        """
-        if not frames:
-            raise PreprocessingError("Input frames list for batch processing cannot be empty.")
-
-        tensors: list[np.ndarray] = []
-        for i, frame in enumerate(frames):
-            self.validate_frame(frame)
-            try:
-                resized = cv2.resize(
-                    frame,
-                    (
-                        self.config.target_width,
-                        self.config.target_height,
-                    ),
-                    interpolation=cv2.INTER_LINEAR,
-                )
-
-                processed = resized
-                if self.config.convert_bgr_to_rgb:
-                    processed = cv2.cvtColor(
-                        processed,
-                        cv2.COLOR_BGR2RGB,
-                    )
-
-                t = processed.astype(np.float32, copy=False)
-
-                if self.config.normalize:
-                    t *= self.config.scale
-                    if self.config.mean is not None:
-                        t -= np.asarray(self.config.mean, dtype=np.float32)
-                    if self.config.std is not None:
-                        t /= np.asarray(self.config.std, dtype=np.float32)
-                elif self.config.scale != 1.0:
-                    t *= self.config.scale
-
-                if self.config.channel_first:
-                    t = np.transpose(t, (2, 0, 1))
-
-                tensors.append(t)
-            except Exception as exc:
-                raise PreprocessingError(f"Batch preprocessing failed on frame index {i}: {exc}") from exc
-
-        batch_tensor = np.stack(tensors, axis=0)
-        self._validate_tensor(batch_tensor)
-
-        logger.debug(
-            "Batch preprocessing successful | batch_size=%d | output_shape=%s",
-            len(frames),
-            batch_tensor.shape,
-        )
-        return batch_tensor
-
     @staticmethod
     def _validate_tensor(tensor: np.ndarray) -> None:
         """Validate the final tensor."""

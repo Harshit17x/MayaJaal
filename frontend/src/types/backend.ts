@@ -116,7 +116,6 @@ export interface VideoInferenceResponse {
   frames_requested?: number;
   frames_processed?: number;
   total_frames_processed?: number;
-  batch_size?: number;
   duration_seconds?: number;
   fps?: number;
   results?: VideoFrameResult[];
@@ -131,7 +130,6 @@ export interface TrackingVideoResponse {
   video_id?: string;
   frames_requested?: number;
   frames_processed?: number;
-  batch_size?: number;
   annotated_video_url?: string;
   suspects_detected?: SuspectSummary[];
   results: VideoFrameResult[];

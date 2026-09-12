@@ -28,14 +28,8 @@ class Settings(BaseSettings):
     intra_op_threads: int = Field(default=2, ge=1)
     inter_op_threads: int = Field(default=1, ge=1)
 
-    # Inference concurrency and batch settings
-    max_concurrent_inference: int = Field(default=8, ge=1)
-    onnx_batch_size: int = Field(
-        default=8,
-        ge=1,
-        le=32,
-        description="Default ONNX batch size for multi-frame inference (e.g. 2 to 8 frames at once)",
-    )
+    # Inference concurrency
+    max_concurrent_inference: int = Field(default=2, ge=1)
 
     # Request/resource limits
     max_upload_size_mb: int = Field(default=200, ge=1)

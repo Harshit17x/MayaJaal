@@ -199,7 +199,6 @@ export const api = {
     iouThreshold?: number;
     frameStride?: number;
     maxFrames?: number;
-    batchSize?: number;
     postprocess?: boolean;
   }): Promise<VideoInferenceResponse> {
     const formData = new FormData();
@@ -213,8 +212,6 @@ export const api = {
       formData.append("frame_stride", params.frameStride.toString());
     if (params.maxFrames !== undefined)
       formData.append("max_frames", params.maxFrames.toString());
-    if (params.batchSize !== undefined)
-      formData.append("batch_size", params.batchSize.toString());
     if (params.postprocess !== undefined)
       formData.append("postprocess", params.postprocess.toString());
 
@@ -259,7 +256,6 @@ export const api = {
     confThreshold?: number;
     iouThreshold?: number;
     maxFrames?: number;
-    batchSize?: number;
     activationThreshold?: number;
     lostTrackBuffer?: number;
     matchingThreshold?: number;
@@ -273,8 +269,6 @@ export const api = {
       formData.append("iou_threshold", params.iouThreshold.toString());
     if (params.maxFrames !== undefined)
       formData.append("max_frames", params.maxFrames.toString());
-    if (params.batchSize !== undefined)
-      formData.append("batch_size", params.batchSize.toString());
     if (params.activationThreshold !== undefined)
       formData.append("activation_threshold", params.activationThreshold.toString());
     if (params.lostTrackBuffer !== undefined)
