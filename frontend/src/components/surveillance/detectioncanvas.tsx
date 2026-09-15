@@ -158,12 +158,14 @@ export function DetectionCanvas({
         // 4. Label Badge
         const confStr = formatConfidence(det.confidence);
         const trackTag = det.track_id !== undefined ? `ID #${det.track_id} · ` : "";
-        let labelText = `${trackTag}${det.class_name.replace(/_/g, " ").toUpperCase()} ${confStr}`;
+        const tempTag = (det as any).temp_celsius !== undefined ? ` · 🌡️ ${(det as any).temp_celsius}°C` : "";
+        const spectrumTag = (det as any).spectrum_status ? ` [${(det as any).spectrum_status}]` : "";
+        let labelText = `${trackTag}${det.class_name.replace(/_/g, " ").toUpperCase()} ${confStr}${tempTag}${spectrumTag}`;
 
         if (isSuspect) {
           const name = (det.suspect_name || det.class_name.replace(/^suspect_/i, "")).toUpperCase();
           const tLevel = det.threat_level || "ALERT";
-          labelText = `🚨 SUSPECT: ${name} [${tLevel}] ${confStr}`;
+          labelText = `🚨 SUSPECT: ${name} [${tLevel}] ${confStr}${tempTag}`;
         } else if (isFace) {
           const name = (det.suspect_name || det.class_name.replace(/^face_/i, "")).toUpperCase();
           labelText = `👤 ${name} ${confStr}`;

@@ -30,19 +30,6 @@
       "source_location": "L13"
     },
     {
-      "id": "backend_app_tracking_models_trackedobject",
-      "label": "TrackedObject",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "ByteTrackerWrapper",
-      "file_type": "code",
-      "norm_label": "trackedobject",
-      "source_file": "backend/app/tracking/models.py",
-      "source_location": "L17"
-    },
-    {
       "id": "backend_app_tracking_session_store_sessioninfo",
       "label": "SessionInfo",
       "_callable": true,
@@ -54,19 +41,6 @@
       "norm_label": "sessioninfo",
       "source_file": "backend/app/tracking/session_store.py",
       "source_location": "L25"
-    },
-    {
-      "id": "backend_app_tracking_session_store_trackersessionstore",
-      "label": "TrackerSessionStore",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "ByteTrackerWrapper",
-      "file_type": "code",
-      "norm_label": "trackersessionstore",
-      "source_file": "backend/app/tracking/session_store.py",
-      "source_location": "L42"
     },
     {
       "id": "backend_app_tracking_tracker_bytetrackerwrapper",
@@ -394,6 +368,97 @@
       "source_location": "L7"
     },
     {
+      "id": "frontend_src_types_alert_alertfilter",
+      "label": "AlertFilter",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "liveworkspace.tsx",
+      "file_type": "code",
+      "norm_label": "alertfilter",
+      "source_file": "frontend/src/types/alert.ts",
+      "source_location": "L31"
+    },
+    {
+      "id": "frontend_src_types_alert_alertitem",
+      "label": "AlertItem",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "liveworkspace.tsx",
+      "file_type": "code",
+      "norm_label": "alertitem",
+      "source_file": "frontend/src/types/alert.ts",
+      "source_location": "L10"
+    },
+    {
+      "id": "frontend_src_types_alert_globaltraceitem",
+      "label": "GlobalTraceItem",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "liveworkspace.tsx",
+      "file_type": "code",
+      "norm_label": "globaltraceitem",
+      "source_file": "frontend/src/types/alert.ts",
+      "source_location": "L85"
+    },
+    {
+      "id": "frontend_src_types_alert_qrtdispatchrecord",
+      "label": "QrtDispatchRecord",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "liveworkspace.tsx",
+      "file_type": "code",
+      "norm_label": "qrtdispatchrecord",
+      "source_file": "frontend/src/types/alert.ts",
+      "source_location": "L3"
+    },
+    {
+      "id": "frontend_src_types_alert_scannerstatus",
+      "label": "ScannerStatus",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "liveworkspace.tsx",
+      "file_type": "code",
+      "norm_label": "scannerstatus",
+      "source_file": "frontend/src/types/alert.ts",
+      "source_location": "L37"
+    },
+    {
+      "id": "frontend_src_types_alert_suspecttrajectory",
+      "label": "SuspectTrajectory",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "liveworkspace.tsx",
+      "file_type": "code",
+      "norm_label": "suspecttrajectory",
+      "source_file": "frontend/src/types/alert.ts",
+      "source_location": "L69"
+    },
+    {
+      "id": "frontend_src_types_alert_suspectwaypoint",
+      "label": "SuspectWaypoint",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "liveworkspace.tsx",
+      "file_type": "code",
+      "norm_label": "suspectwaypoint",
+      "source_file": "frontend/src/types/alert.ts",
+      "source_location": "L48"
+    },
+    {
       "id": "frontend_src_types_backend_detection",
       "label": "Detection",
       "_callable": true,
@@ -459,17 +524,30 @@
       "source_location": "L76"
     },
     {
-      "id": "backend_app_pipeline_preprocessor_preprocessingconfig",
-      "label": "PreprocessingConfig",
+      "id": "backend_app_pipeline_thermal_fusion_service_fusedtarget",
+      "label": "FusedTarget",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
-      "community": 23,
-      "community_name": "inference.py",
+      "community": 25,
+      "community_name": "ThermalFusionService",
       "file_type": "code",
-      "norm_label": "preprocessingconfig",
-      "source_file": "backend/app/pipeline/preprocessor.py",
-      "source_location": "L30"
+      "norm_label": "fusedtarget",
+      "source_file": "backend/app/pipeline/thermal_fusion_service.py",
+      "source_location": "L35"
+    },
+    {
+      "id": "backend_app_pipeline_thermal_fusion_service_radiometriccalibration",
+      "label": "RadiometricCalibration",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 25,
+      "community_name": "ThermalFusionService",
+      "file_type": "code",
+      "norm_label": "radiometriccalibration",
+      "source_file": "backend/app/pipeline/thermal_fusion_service.py",
+      "source_location": "L25"
     },
     {
       "id": "backend_app_pipeline_thermal_fusion_service_thermalfusionservice",
@@ -483,6 +561,32 @@
       "norm_label": "thermalfusionservice",
       "source_file": "backend/app/pipeline/thermal_fusion_service.py",
       "source_location": "L62"
+    },
+    {
+      "id": "backend_app_pipeline_thermal_fusion_service_thermalpalette",
+      "label": "ThermalPalette",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 25,
+      "community_name": "ThermalFusionService",
+      "file_type": "code",
+      "norm_label": "thermalpalette",
+      "source_file": "backend/app/pipeline/thermal_fusion_service.py",
+      "source_location": "L14"
+    },
+    {
+      "id": "backend_tests_test_thermal_fusion_testthermalfusion",
+      "label": "TestThermalFusion",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 25,
+      "community_name": "ThermalFusionService",
+      "file_type": "code",
+      "norm_label": "testthermalfusion",
+      "source_file": "backend/tests/test_thermal_fusion.py",
+      "source_location": "L25"
     },
     {
       "id": "frontend_src_lib_alertsstore_alertlistener",
@@ -509,6 +613,19 @@
       "norm_label": "connectionlistener",
       "source_file": "frontend/src/lib/alertsStore.ts",
       "source_location": "L63"
+    },
+    {
+      "id": "frontend_src_types_alert_alertseverity",
+      "label": "AlertSeverity",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "alertsStore.ts",
+      "file_type": "code",
+      "norm_label": "alertseverity",
+      "source_file": "frontend/src/types/alert.ts",
+      "source_location": "L1"
     },
     {
       "id": "frontend_src_app_operator_geofences_page_feedviewmode",
@@ -563,56 +680,199 @@
       "source_location": "L94"
     },
     {
-      "id": "frontend_src_types_anpr_anprrecord",
-      "label": "AnprRecord",
+      "id": "frontend_src_types_backend_inferenceresponse",
+      "label": "InferenceResponse",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 3,
       "community_name": "api.ts",
       "file_type": "code",
-      "norm_label": "anprrecord",
-      "source_file": "frontend/src/types/anpr.ts",
-      "source_location": "L1"
+      "norm_label": "inferenceresponse",
+      "source_file": "frontend/src/types/backend.ts",
+      "source_location": "L75"
     },
     {
-      "id": "frontend_src_types_anpr_anprscanresponse",
-      "label": "AnprScanResponse",
+      "id": "frontend_src_types_backend_modelmetadata",
+      "label": "ModelMetadata",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 3,
       "community_name": "api.ts",
       "file_type": "code",
-      "norm_label": "anprscanresponse",
-      "source_file": "frontend/src/types/anpr.ts",
-      "source_location": "L15"
+      "norm_label": "modelmetadata",
+      "source_file": "frontend/src/types/backend.ts",
+      "source_location": "L16"
     },
     {
-      "id": "frontend_src_types_anpr_anprvideoresponse",
-      "label": "AnprVideoResponse",
+      "id": "frontend_src_types_backend_modelstatusresponse",
+      "label": "ModelStatusResponse",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 3,
       "community_name": "api.ts",
       "file_type": "code",
-      "norm_label": "anprvideoresponse",
-      "source_file": "frontend/src/types/anpr.ts",
+      "norm_label": "modelstatusresponse",
+      "source_file": "frontend/src/types/backend.ts",
       "source_location": "L26"
     },
     {
-      "id": "frontend_src_types_anpr_watchlistentry",
-      "label": "WatchlistEntry",
+      "id": "frontend_src_types_backend_modeltensorinfo",
+      "label": "ModelTensorInfo",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 3,
       "community_name": "api.ts",
       "file_type": "code",
-      "norm_label": "watchlistentry",
-      "source_file": "frontend/src/types/anpr.ts",
-      "source_location": "L36"
+      "norm_label": "modeltensorinfo",
+      "source_file": "frontend/src/types/backend.ts",
+      "source_location": "L10"
+    },
+    {
+      "id": "frontend_src_types_backend_outputtensormetadata",
+      "label": "OutputTensorMetadata",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "api.ts",
+      "file_type": "code",
+      "norm_label": "outputtensormetadata",
+      "source_file": "frontend/src/types/backend.ts",
+      "source_location": "L68"
+    },
+    {
+      "id": "frontend_src_types_backend_resourcestatus",
+      "label": "ResourceStatus",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "api.ts",
+      "file_type": "code",
+      "norm_label": "resourcestatus",
+      "source_file": "frontend/src/types/backend.ts",
+      "source_location": "L34"
+    },
+    {
+      "id": "frontend_src_types_backend_rtspinferenceresponse",
+      "label": "RTSPInferenceResponse",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "api.ts",
+      "file_type": "code",
+      "norm_label": "rtspinferenceresponse",
+      "source_file": "frontend/src/types/backend.ts",
+      "source_location": "L139"
+    },
+    {
+      "id": "frontend_src_types_backend_rtsptrackingresponse",
+      "label": "RTSPTrackingResponse",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "api.ts",
+      "file_type": "code",
+      "norm_label": "rtsptrackingresponse",
+      "source_file": "frontend/src/types/backend.ts",
+      "source_location": "L147"
+    },
+    {
+      "id": "frontend_src_types_backend_suspectsummary",
+      "label": "SuspectSummary",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "api.ts",
+      "file_type": "code",
+      "norm_label": "suspectsummary",
+      "source_file": "frontend/src/types/backend.ts",
+      "source_location": "L58"
+    },
+    {
+      "id": "frontend_src_types_backend_trackedobject",
+      "label": "TrackedObject",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "api.ts",
+      "file_type": "code",
+      "norm_label": "trackedobject",
+      "source_file": "frontend/src/types/backend.ts",
+      "source_location": "L66"
+    },
+    {
+      "id": "frontend_src_types_backend_trackingvideoresponse",
+      "label": "TrackingVideoResponse",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "api.ts",
+      "file_type": "code",
+      "norm_label": "trackingvideoresponse",
+      "source_file": "frontend/src/types/backend.ts",
+      "source_location": "L126"
+    },
+    {
+      "id": "frontend_src_types_backend_videoframeinference",
+      "label": "VideoFrameInference",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "api.ts",
+      "file_type": "code",
+      "norm_label": "videoframeinference",
+      "source_file": "frontend/src/types/backend.ts",
+      "source_location": "L110"
+    },
+    {
+      "id": "frontend_src_types_backend_videoframeresult",
+      "label": "VideoFrameResult",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "api.ts",
+      "file_type": "code",
+      "norm_label": "videoframeresult",
+      "source_file": "frontend/src/types/backend.ts",
+      "source_location": "L94"
+    },
+    {
+      "id": "frontend_src_types_backend_videoinferenceresponse",
+      "label": "VideoInferenceResponse",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "api.ts",
+      "file_type": "code",
+      "norm_label": "videoinferenceresponse",
+      "source_file": "frontend/src/types/backend.ts",
+      "source_location": "L112"
+    },
+    {
+      "id": "frontend_src_types_backend_videometadata",
+      "label": "VideoMetadata",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "api.ts",
+      "file_type": "code",
+      "norm_label": "videometadata",
+      "source_file": "frontend/src/types/backend.ts",
+      "source_location": "L85"
     },
     {
       "id": "frontend_src_types_face_enrolledperson",
@@ -829,11 +1089,37 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 31,
-      "community_name": "Detection",
+      "community_name": "Postprocessor",
       "file_type": "code",
       "norm_label": "detection",
       "source_file": "backend/app/pipeline/postprocessor.py",
       "source_location": "L34"
+    },
+    {
+      "id": "backend_app_pipeline_postprocessor_postprocessor",
+      "label": "Postprocessor",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 31,
+      "community_name": "Postprocessor",
+      "file_type": "code",
+      "norm_label": "postprocessor",
+      "source_file": "backend/app/pipeline/postprocessor.py",
+      "source_location": "L63"
+    },
+    {
+      "id": "backend_app_pipeline_postprocessor_postprocessorerror",
+      "label": "PostprocessorError",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 31,
+      "community_name": "Postprocessor",
+      "file_type": "code",
+      "norm_label": "postprocessorerror",
+      "source_file": "backend/app/pipeline/postprocessor.py",
+      "source_location": "L29"
     },
     {
       "id": "backend_app_pipeline_anpr_service_anprpipeline",
@@ -862,199 +1148,17 @@
       "source_location": "L47"
     },
     {
-      "id": "frontend_src_types_backend_inferenceresponse",
-      "label": "InferenceResponse",
+      "id": "backend_app_tracking_session_store_trackersessionstore",
+      "label": "TrackerSessionStore",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 33,
-      "community_name": "backend.ts",
+      "community_name": "TrackerSessionStore",
       "file_type": "code",
-      "norm_label": "inferenceresponse",
-      "source_file": "frontend/src/types/backend.ts",
-      "source_location": "L75"
-    },
-    {
-      "id": "frontend_src_types_backend_modelmetadata",
-      "label": "ModelMetadata",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 33,
-      "community_name": "backend.ts",
-      "file_type": "code",
-      "norm_label": "modelmetadata",
-      "source_file": "frontend/src/types/backend.ts",
-      "source_location": "L16"
-    },
-    {
-      "id": "frontend_src_types_backend_modelstatusresponse",
-      "label": "ModelStatusResponse",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 33,
-      "community_name": "backend.ts",
-      "file_type": "code",
-      "norm_label": "modelstatusresponse",
-      "source_file": "frontend/src/types/backend.ts",
-      "source_location": "L26"
-    },
-    {
-      "id": "frontend_src_types_backend_modeltensorinfo",
-      "label": "ModelTensorInfo",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 33,
-      "community_name": "backend.ts",
-      "file_type": "code",
-      "norm_label": "modeltensorinfo",
-      "source_file": "frontend/src/types/backend.ts",
-      "source_location": "L10"
-    },
-    {
-      "id": "frontend_src_types_backend_outputtensormetadata",
-      "label": "OutputTensorMetadata",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 33,
-      "community_name": "backend.ts",
-      "file_type": "code",
-      "norm_label": "outputtensormetadata",
-      "source_file": "frontend/src/types/backend.ts",
-      "source_location": "L68"
-    },
-    {
-      "id": "frontend_src_types_backend_resourcestatus",
-      "label": "ResourceStatus",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 33,
-      "community_name": "backend.ts",
-      "file_type": "code",
-      "norm_label": "resourcestatus",
-      "source_file": "frontend/src/types/backend.ts",
-      "source_location": "L34"
-    },
-    {
-      "id": "frontend_src_types_backend_rtspinferenceresponse",
-      "label": "RTSPInferenceResponse",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 33,
-      "community_name": "backend.ts",
-      "file_type": "code",
-      "norm_label": "rtspinferenceresponse",
-      "source_file": "frontend/src/types/backend.ts",
-      "source_location": "L139"
-    },
-    {
-      "id": "frontend_src_types_backend_rtsptrackingresponse",
-      "label": "RTSPTrackingResponse",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 33,
-      "community_name": "backend.ts",
-      "file_type": "code",
-      "norm_label": "rtsptrackingresponse",
-      "source_file": "frontend/src/types/backend.ts",
-      "source_location": "L147"
-    },
-    {
-      "id": "frontend_src_types_backend_suspectsummary",
-      "label": "SuspectSummary",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 33,
-      "community_name": "backend.ts",
-      "file_type": "code",
-      "norm_label": "suspectsummary",
-      "source_file": "frontend/src/types/backend.ts",
-      "source_location": "L58"
-    },
-    {
-      "id": "frontend_src_types_backend_trackedobject",
-      "label": "TrackedObject",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 33,
-      "community_name": "backend.ts",
-      "file_type": "code",
-      "norm_label": "trackedobject",
-      "source_file": "frontend/src/types/backend.ts",
-      "source_location": "L66"
-    },
-    {
-      "id": "frontend_src_types_backend_trackingvideoresponse",
-      "label": "TrackingVideoResponse",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 33,
-      "community_name": "backend.ts",
-      "file_type": "code",
-      "norm_label": "trackingvideoresponse",
-      "source_file": "frontend/src/types/backend.ts",
-      "source_location": "L126"
-    },
-    {
-      "id": "frontend_src_types_backend_videoframeinference",
-      "label": "VideoFrameInference",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 33,
-      "community_name": "backend.ts",
-      "file_type": "code",
-      "norm_label": "videoframeinference",
-      "source_file": "frontend/src/types/backend.ts",
-      "source_location": "L110"
-    },
-    {
-      "id": "frontend_src_types_backend_videoframeresult",
-      "label": "VideoFrameResult",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 33,
-      "community_name": "backend.ts",
-      "file_type": "code",
-      "norm_label": "videoframeresult",
-      "source_file": "frontend/src/types/backend.ts",
-      "source_location": "L94"
-    },
-    {
-      "id": "frontend_src_types_backend_videoinferenceresponse",
-      "label": "VideoInferenceResponse",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 33,
-      "community_name": "backend.ts",
-      "file_type": "code",
-      "norm_label": "videoinferenceresponse",
-      "source_file": "frontend/src/types/backend.ts",
-      "source_location": "L112"
-    },
-    {
-      "id": "frontend_src_types_backend_videometadata",
-      "label": "VideoMetadata",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 33,
-      "community_name": "backend.ts",
-      "file_type": "code",
-      "norm_label": "videometadata",
-      "source_file": "frontend/src/types/backend.ts",
-      "source_location": "L85"
+      "norm_label": "trackersessionstore",
+      "source_file": "backend/app/tracking/session_store.py",
+      "source_location": "L42"
     },
     {
       "id": "backend_app_core_config_settings",
@@ -1120,19 +1224,6 @@
       "norm_label": "modelmanagererror",
       "source_file": "backend/app/inference/model_manager.py",
       "source_location": "L17"
-    },
-    {
-      "id": "backend_app_inference_model_manager_modelnotfounderror",
-      "label": "ModelNotFoundError",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 36,
-      "community_name": "ModelManagerError",
-      "file_type": "code",
-      "norm_label": "modelnotfounderror",
-      "source_file": "backend/app/inference/model_manager.py",
-      "source_location": "L21"
     },
     {
       "id": "frontend_src_components_map_bordermap_bordermapprops",
@@ -1375,7 +1466,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 43,
-      "community_name": "ONNXEngineError",
+      "community_name": "logging.py",
       "file_type": "code",
       "norm_label": "onnxengineerror",
       "source_file": "backend/app/inference/onnx_engine.py",
@@ -1388,7 +1479,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 43,
-      "community_name": "ONNXEngineError",
+      "community_name": "logging.py",
       "file_type": "code",
       "norm_label": "onnxinferenceerror",
       "source_file": "backend/app/inference/onnx_engine.py",
@@ -1408,56 +1499,17 @@
       "source_location": "L98"
     },
     {
-      "id": "backend_tests_test_thermal_fusion_testthermalfusion",
-      "label": "TestThermalFusion",
+      "id": "backend_app_tracking_models_trackedobject",
+      "label": "TrackedObject",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 45,
-      "community_name": "TestThermalFusion",
+      "community_name": "TrackedObject",
       "file_type": "code",
-      "norm_label": "testthermalfusion",
-      "source_file": "backend/tests/test_thermal_fusion.py",
-      "source_location": "L25"
-    },
-    {
-      "id": "backend_app_pipeline_thermal_fusion_service_fusedtarget",
-      "label": "FusedTarget",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 46,
-      "community_name": "ThermalPalette",
-      "file_type": "code",
-      "norm_label": "fusedtarget",
-      "source_file": "backend/app/pipeline/thermal_fusion_service.py",
-      "source_location": "L35"
-    },
-    {
-      "id": "backend_app_pipeline_thermal_fusion_service_radiometriccalibration",
-      "label": "RadiometricCalibration",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 46,
-      "community_name": "ThermalPalette",
-      "file_type": "code",
-      "norm_label": "radiometriccalibration",
-      "source_file": "backend/app/pipeline/thermal_fusion_service.py",
-      "source_location": "L25"
-    },
-    {
-      "id": "backend_app_pipeline_thermal_fusion_service_thermalpalette",
-      "label": "ThermalPalette",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 46,
-      "community_name": "ThermalPalette",
-      "file_type": "code",
-      "norm_label": "thermalpalette",
-      "source_file": "backend/app/pipeline/thermal_fusion_service.py",
-      "source_location": "L14"
+      "norm_label": "trackedobject",
+      "source_file": "backend/app/tracking/models.py",
+      "source_location": "L17"
     },
     {
       "id": "backend_app_inference_inference_service_inferenceresourceerror",
@@ -1466,7 +1518,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 47,
-      "community_name": ".predict",
+      "community_name": "inference_service.py",
       "file_type": "code",
       "norm_label": "inferenceresourceerror",
       "source_file": "backend/app/inference/inference_service.py",
@@ -1479,63 +1531,24 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 47,
-      "community_name": ".predict",
+      "community_name": "inference_service.py",
       "file_type": "code",
       "norm_label": "inferenceserviceerror",
       "source_file": "backend/app/inference/inference_service.py",
       "source_location": "L27"
     },
     {
-      "id": "backend_app_pipeline_postprocessor_postprocessor",
-      "label": "Postprocessor",
+      "id": "backend_app_inference_model_manager_modelnotfounderror",
+      "label": "ModelNotFoundError",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
-      "community": 48,
-      "community_name": "Postprocessor",
+      "community": 47,
+      "community_name": "inference_service.py",
       "file_type": "code",
-      "norm_label": "postprocessor",
-      "source_file": "backend/app/pipeline/postprocessor.py",
-      "source_location": "L63"
-    },
-    {
-      "id": "backend_app_pipeline_postprocessor_postprocessorconfig",
-      "label": "PostprocessorConfig",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 48,
-      "community_name": "Postprocessor",
-      "file_type": "code",
-      "norm_label": "postprocessorconfig",
-      "source_file": "backend/app/pipeline/postprocessor.py",
-      "source_location": "L53"
-    },
-    {
-      "id": "backend_app_pipeline_postprocessor_postprocessorerror",
-      "label": "PostprocessorError",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 48,
-      "community_name": "Postprocessor",
-      "file_type": "code",
-      "norm_label": "postprocessorerror",
-      "source_file": "backend/app/pipeline/postprocessor.py",
-      "source_location": "L29"
-    },
-    {
-      "id": "backend_app_inference_onnx_engine_onnxmodelerror",
-      "label": "ONNXModelError",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 49,
-      "community_name": "ONNXModelError",
-      "file_type": "code",
-      "norm_label": "onnxmodelerror",
-      "source_file": "backend/app/inference/onnx_engine.py",
-      "source_location": "L32"
+      "norm_label": "modelnotfounderror",
+      "source_file": "backend/app/inference/model_manager.py",
+      "source_location": "L21"
     },
     {
       "id": "backend_app_inference_onnx_engine_onnxengine",
@@ -1551,6 +1564,19 @@
       "source_location": "L40"
     },
     {
+      "id": "backend_app_inference_onnx_engine_onnxmodelerror",
+      "label": "ONNXModelError",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "ONNXEngine",
+      "file_type": "code",
+      "norm_label": "onnxmodelerror",
+      "source_file": "backend/app/inference/onnx_engine.py",
+      "source_location": "L32"
+    },
+    {
       "id": "backend_app_api_thermal_paletteinfo",
       "label": "PaletteInfo",
       "_callable": true,
@@ -1561,6 +1587,32 @@
       "file_type": "code",
       "norm_label": "paletteinfo",
       "source_file": "backend/app/api/thermal.py",
+      "source_location": "L30"
+    },
+    {
+      "id": "backend_app_pipeline_postprocessor_postprocessorconfig",
+      "label": "PostprocessorConfig",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 51,
+      "community_name": "thermal.py",
+      "file_type": "code",
+      "norm_label": "postprocessorconfig",
+      "source_file": "backend/app/pipeline/postprocessor.py",
+      "source_location": "L53"
+    },
+    {
+      "id": "backend_app_pipeline_preprocessor_preprocessingconfig",
+      "label": "PreprocessingConfig",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 51,
+      "community_name": "thermal.py",
+      "file_type": "code",
+      "norm_label": "preprocessingconfig",
+      "source_file": "backend/app/pipeline/preprocessor.py",
       "source_location": "L30"
     },
     {
@@ -1752,7 +1804,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 77,
-      "community_name": "useBackendStatus.ts",
+      "community_name": "api",
       "file_type": "code",
       "norm_label": "metriccardprops",
       "source_file": "frontend/src/components/dashboard/metriccard.tsx",
@@ -1765,7 +1817,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 77,
-      "community_name": "useBackendStatus.ts",
+      "community_name": "api",
       "file_type": "code",
       "norm_label": "backendstatusstate",
       "source_file": "frontend/src/lib/hooks/useBackendStatus.ts",
@@ -1778,7 +1830,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 77,
-      "community_name": "useBackendStatus.ts",
+      "community_name": "api",
       "file_type": "code",
       "norm_label": "healthresponse",
       "source_file": "frontend/src/types/backend.ts",
@@ -1791,115 +1843,11 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 77,
-      "community_name": "useBackendStatus.ts",
+      "community_name": "api",
       "file_type": "code",
       "norm_label": "inferencestatusresponse",
       "source_file": "frontend/src/types/backend.ts",
       "source_location": "L40"
-    },
-    {
-      "id": "frontend_src_types_alert_alertfilter",
-      "label": "AlertFilter",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 78,
-      "community_name": "lucide-react",
-      "file_type": "code",
-      "norm_label": "alertfilter",
-      "source_file": "frontend/src/types/alert.ts",
-      "source_location": "L31"
-    },
-    {
-      "id": "frontend_src_types_alert_alertitem",
-      "label": "AlertItem",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 78,
-      "community_name": "lucide-react",
-      "file_type": "code",
-      "norm_label": "alertitem",
-      "source_file": "frontend/src/types/alert.ts",
-      "source_location": "L10"
-    },
-    {
-      "id": "frontend_src_types_alert_alertseverity",
-      "label": "AlertSeverity",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 78,
-      "community_name": "lucide-react",
-      "file_type": "code",
-      "norm_label": "alertseverity",
-      "source_file": "frontend/src/types/alert.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "frontend_src_types_alert_globaltraceitem",
-      "label": "GlobalTraceItem",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 78,
-      "community_name": "lucide-react",
-      "file_type": "code",
-      "norm_label": "globaltraceitem",
-      "source_file": "frontend/src/types/alert.ts",
-      "source_location": "L85"
-    },
-    {
-      "id": "frontend_src_types_alert_qrtdispatchrecord",
-      "label": "QrtDispatchRecord",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 78,
-      "community_name": "lucide-react",
-      "file_type": "code",
-      "norm_label": "qrtdispatchrecord",
-      "source_file": "frontend/src/types/alert.ts",
-      "source_location": "L3"
-    },
-    {
-      "id": "frontend_src_types_alert_scannerstatus",
-      "label": "ScannerStatus",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 78,
-      "community_name": "lucide-react",
-      "file_type": "code",
-      "norm_label": "scannerstatus",
-      "source_file": "frontend/src/types/alert.ts",
-      "source_location": "L37"
-    },
-    {
-      "id": "frontend_src_types_alert_suspecttrajectory",
-      "label": "SuspectTrajectory",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 78,
-      "community_name": "lucide-react",
-      "file_type": "code",
-      "norm_label": "suspecttrajectory",
-      "source_file": "frontend/src/types/alert.ts",
-      "source_location": "L69"
-    },
-    {
-      "id": "frontend_src_types_alert_suspectwaypoint",
-      "label": "SuspectWaypoint",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 78,
-      "community_name": "lucide-react",
-      "file_type": "code",
-      "norm_label": "suspectwaypoint",
-      "source_file": "frontend/src/types/alert.ts",
-      "source_location": "L48"
     },
     {
       "id": "backend_app_pipeline_reid_service_reidservice",
@@ -1967,6 +1915,19 @@
       "source_location": "L31"
     },
     {
+      "id": "backend_app_pipeline_video_loader_videoloadererror",
+      "label": "VideoLoaderError",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 8,
+      "community_name": "VideoLoader",
+      "file_type": "code",
+      "norm_label": "videoloadererror",
+      "source_file": "backend/app/pipeline/video_loader.py",
+      "source_location": "L15"
+    },
+    {
       "id": "backend_app_api_auth_loginrequest",
       "label": "LoginRequest",
       "_callable": true,
@@ -2006,17 +1967,56 @@
       "source_location": "L6"
     },
     {
-      "id": "backend_app_pipeline_video_loader_videoloadererror",
-      "label": "VideoLoaderError",
+      "id": "frontend_src_types_anpr_anprrecord",
+      "label": "AnprRecord",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
-      "community": 9,
-      "community_name": "tracking.py",
+      "community": 83,
+      "community_name": "useCameras",
       "file_type": "code",
-      "norm_label": "videoloadererror",
-      "source_file": "backend/app/pipeline/video_loader.py",
+      "norm_label": "anprrecord",
+      "source_file": "frontend/src/types/anpr.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "frontend_src_types_anpr_anprscanresponse",
+      "label": "AnprScanResponse",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 83,
+      "community_name": "useCameras",
+      "file_type": "code",
+      "norm_label": "anprscanresponse",
+      "source_file": "frontend/src/types/anpr.ts",
       "source_location": "L15"
+    },
+    {
+      "id": "frontend_src_types_anpr_anprvideoresponse",
+      "label": "AnprVideoResponse",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 83,
+      "community_name": "useCameras",
+      "file_type": "code",
+      "norm_label": "anprvideoresponse",
+      "source_file": "frontend/src/types/anpr.ts",
+      "source_location": "L26"
+    },
+    {
+      "id": "frontend_src_types_anpr_watchlistentry",
+      "label": "WatchlistEntry",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 83,
+      "community_name": "useCameras",
+      "file_type": "code",
+      "norm_label": "watchlistentry",
+      "source_file": "frontend/src/types/anpr.ts",
+      "source_location": "L36"
     },
     {
       "id": "backend_app_tracking_tracker_bytetrackererror",
@@ -2224,18 +2224,6 @@
       "source_location": "L51"
     },
     {
-      "id": "backend_app_tracking_models_trackedobject_to_dict",
-      "label": ".to_dict()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "ByteTrackerWrapper",
-      "file_type": "code",
-      "norm_label": ".to_dict()",
-      "source_file": "backend/app/tracking/models.py",
-      "source_location": "L41"
-    },
-    {
       "id": "backend_app_tracking_session_store_sessioninfo_init",
       "label": ".__init__()",
       "_callable": true,
@@ -2260,18 +2248,6 @@
       "source_location": "L37"
     },
     {
-      "id": "backend_app_tracking_session_store_trackersessionstore_contains",
-      "label": ".__contains__()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "ByteTrackerWrapper",
-      "file_type": "code",
-      "norm_label": ".__contains__()",
-      "source_file": "backend/app/tracking/session_store.py",
-      "source_location": "L168"
-    },
-    {
       "id": "backend_app_tracking_session_store_trackersessionstore_get_or_create",
       "label": ".get_or_create()",
       "_callable": true,
@@ -2282,78 +2258,6 @@
       "norm_label": ".get_or_create()",
       "source_file": "backend/app/tracking/session_store.py",
       "source_location": "L69"
-    },
-    {
-      "id": "backend_app_tracking_session_store_trackersessionstore_init",
-      "label": ".__init__()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "ByteTrackerWrapper",
-      "file_type": "code",
-      "norm_label": ".__init__()",
-      "source_file": "backend/app/tracking/session_store.py",
-      "source_location": "L61"
-    },
-    {
-      "id": "backend_app_tracking_session_store_trackersessionstore_list_sessions",
-      "label": ".list_sessions()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "ByteTrackerWrapper",
-      "file_type": "code",
-      "norm_label": ".list_sessions()",
-      "source_file": "backend/app/tracking/session_store.py",
-      "source_location": "L150"
-    },
-    {
-      "id": "backend_app_tracking_session_store_trackersessionstore_reset",
-      "label": ".reset()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "ByteTrackerWrapper",
-      "file_type": "code",
-      "norm_label": ".reset()",
-      "source_file": "backend/app/tracking/session_store.py",
-      "source_location": "L106"
-    },
-    {
-      "id": "backend_app_tracking_session_store_trackersessionstore_reset_all",
-      "label": ".reset_all()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "ByteTrackerWrapper",
-      "file_type": "code",
-      "norm_label": ".reset_all()",
-      "source_file": "backend/app/tracking/session_store.py",
-      "source_location": "L127"
-    },
-    {
-      "id": "backend_app_tracking_session_store_trackersessionstore_session_count",
-      "label": ".session_count()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "ByteTrackerWrapper",
-      "file_type": "code",
-      "norm_label": ".session_count()",
-      "source_file": "backend/app/tracking/session_store.py",
-      "source_location": "L164"
-    },
-    {
-      "id": "backend_app_tracking_session_store_trackersessionstore_touch",
-      "label": ".touch()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "ByteTrackerWrapper",
-      "file_type": "code",
-      "norm_label": ".touch()",
-      "source_file": "backend/app/tracking/session_store.py",
-      "source_location": "L100"
     },
     {
       "id": "backend_app_tracking_tracker_bytetrackerwrapper_build_tracker",
@@ -2402,18 +2306,6 @@
       "norm_label": ".reset()",
       "source_file": "backend/app/tracking/tracker.py",
       "source_location": "L183"
-    },
-    {
-      "id": "backend_app_tracking_tracker_bytetrackerwrapper_update",
-      "label": ".update()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "ByteTrackerWrapper",
-      "file_type": "code",
-      "norm_label": ".update()",
-      "source_file": "backend/app/tracking/tracker.py",
-      "source_location": "L69"
     },
     {
       "id": "backend_app_pipeline_rtsp_loader_rtspstream_connect",
@@ -3700,6 +3592,18 @@
       "source_location": "L93"
     },
     {
+      "id": "backend_app_api_inference_inference_status",
+      "label": "inference_status()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 23,
+      "community_name": "inference.py",
+      "file_type": "code",
+      "norm_label": "inference_status()",
+      "source_file": "backend/app/api/inference.py",
+      "source_location": "L75"
+    },
+    {
       "id": "backend_app_api_inference_rtsp_inference",
       "label": "rtsp_inference()",
       "_callable": true,
@@ -3710,42 +3614,6 @@
       "norm_label": "rtsp_inference()",
       "source_file": "backend/app/api/inference.py",
       "source_location": "L747"
-    },
-    {
-      "id": "backend_app_api_inference_video_inference",
-      "label": "video_inference()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 23,
-      "community_name": "inference.py",
-      "file_type": "code",
-      "norm_label": "video_inference()",
-      "source_file": "backend/app/api/inference.py",
-      "source_location": "L279"
-    },
-    {
-      "id": "backend_app_api_stream_stream_generator",
-      "label": "stream_generator()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 23,
-      "community_name": "inference.py",
-      "file_type": "code",
-      "norm_label": "stream_generator()",
-      "source_file": "backend/app/api/stream.py",
-      "source_location": "L395"
-    },
-    {
-      "id": "backend_tests_test_onnx_batch_inference_run_tests",
-      "label": "run_tests()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 23,
-      "community_name": "inference.py",
-      "file_type": "code",
-      "norm_label": "run_tests()",
-      "source_file": "backend/tests/test_onnx_batch_inference.py",
-      "source_location": "L24"
     },
     {
       "id": "backend_tests_test_auth_test_auth_login_invalid_password",
@@ -3808,6 +3676,18 @@
       "source_location": "L8"
     },
     {
+      "id": "backend_app_pipeline_thermal_fusion_service_fusedtarget_to_dict",
+      "label": ".to_dict()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 25,
+      "community_name": "ThermalFusionService",
+      "file_type": "code",
+      "norm_label": ".to_dict()",
+      "source_file": "backend/app/pipeline/thermal_fusion_service.py",
+      "source_location": "L48"
+    },
+    {
       "id": "backend_app_pipeline_thermal_fusion_service_thermalfusionservice_analyze_bbox_radiometrics",
       "label": ".analyze_bbox_radiometrics()",
       "_callable": true,
@@ -3818,6 +3698,18 @@
       "norm_label": ".analyze_bbox_radiometrics()",
       "source_file": "backend/app/pipeline/thermal_fusion_service.py",
       "source_location": "L334"
+    },
+    {
+      "id": "backend_app_pipeline_thermal_fusion_service_thermalfusionservice_apply_palette",
+      "label": ".apply_palette()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 25,
+      "community_name": "ThermalFusionService",
+      "file_type": "code",
+      "norm_label": ".apply_palette()",
+      "source_file": "backend/app/pipeline/thermal_fusion_service.py",
+      "source_location": "L140"
     },
     {
       "id": "backend_app_pipeline_thermal_fusion_service_thermalfusionservice_build_amber_lut",
@@ -3880,6 +3772,30 @@
       "source_location": "L463"
     },
     {
+      "id": "backend_app_pipeline_thermal_fusion_service_thermalfusionservice_draw_thermal_hud",
+      "label": ".draw_thermal_hud()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 25,
+      "community_name": "ThermalFusionService",
+      "file_type": "code",
+      "norm_label": ".draw_thermal_hud()",
+      "source_file": "backend/app/pipeline/thermal_fusion_service.py",
+      "source_location": "L586"
+    },
+    {
+      "id": "backend_app_pipeline_thermal_fusion_service_thermalfusionservice_estimate_spot_temperature",
+      "label": ".estimate_spot_temperature()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 25,
+      "community_name": "ThermalFusionService",
+      "file_type": "code",
+      "norm_label": ".estimate_spot_temperature()",
+      "source_file": "backend/app/pipeline/thermal_fusion_service.py",
+      "source_location": "L300"
+    },
+    {
       "id": "backend_app_pipeline_thermal_fusion_service_thermalfusionservice_extract_high_frequency_edges",
       "label": ".extract_high_frequency_edges()",
       "_callable": true,
@@ -3926,6 +3842,102 @@
       "norm_label": ".__init__()",
       "source_file": "backend/app/pipeline/thermal_fusion_service.py",
       "source_location": "L69"
+    },
+    {
+      "id": "backend_app_pipeline_thermal_fusion_service_thermalfusionservice_simulate_thermal_from_optical",
+      "label": ".simulate_thermal_from_optical()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 25,
+      "community_name": "ThermalFusionService",
+      "file_type": "code",
+      "norm_label": ".simulate_thermal_from_optical()",
+      "source_file": "backend/app/pipeline/thermal_fusion_service.py",
+      "source_location": "L388"
+    },
+    {
+      "id": "backend_tests_test_thermal_fusion_testthermalfusion_setup",
+      "label": ".setUp()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 25,
+      "community_name": "ThermalFusionService",
+      "file_type": "code",
+      "norm_label": ".setup()",
+      "source_file": "backend/tests/test_thermal_fusion.py",
+      "source_location": "L27"
+    },
+    {
+      "id": "backend_tests_test_thermal_fusion_testthermalfusion_test_cross_spectral_decision_fusion",
+      "label": ".test_cross_spectral_decision_fusion()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 25,
+      "community_name": "ThermalFusionService",
+      "file_type": "code",
+      "norm_label": ".test_cross_spectral_decision_fusion()",
+      "source_file": "backend/tests/test_thermal_fusion.py",
+      "source_location": "L99"
+    },
+    {
+      "id": "backend_tests_test_thermal_fusion_testthermalfusion_test_msx_edge_extraction_and_fusion",
+      "label": ".test_msx_edge_extraction_and_fusion()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 25,
+      "community_name": "ThermalFusionService",
+      "file_type": "code",
+      "norm_label": ".test_msx_edge_extraction_and_fusion()",
+      "source_file": "backend/tests/test_thermal_fusion.py",
+      "source_location": "L58"
+    },
+    {
+      "id": "backend_tests_test_thermal_fusion_testthermalfusion_test_radiometric_temperature_estimation",
+      "label": ".test_radiometric_temperature_estimation()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 25,
+      "community_name": "ThermalFusionService",
+      "file_type": "code",
+      "norm_label": ".test_radiometric_temperature_estimation()",
+      "source_file": "backend/tests/test_thermal_fusion.py",
+      "source_location": "L73"
+    },
+    {
+      "id": "backend_tests_test_thermal_fusion_testthermalfusion_test_synthetic_thermal_simulator",
+      "label": ".test_synthetic_thermal_simulator()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 25,
+      "community_name": "ThermalFusionService",
+      "file_type": "code",
+      "norm_label": ".test_synthetic_thermal_simulator()",
+      "source_file": "backend/tests/test_thermal_fusion.py",
+      "source_location": "L88"
+    },
+    {
+      "id": "backend_tests_test_thermal_fusion_testthermalfusion_test_thermal_api_endpoints",
+      "label": ".test_thermal_api_endpoints()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 25,
+      "community_name": "ThermalFusionService",
+      "file_type": "code",
+      "norm_label": ".test_thermal_api_endpoints()",
+      "source_file": "backend/tests/test_thermal_fusion.py",
+      "source_location": "L129"
+    },
+    {
+      "id": "backend_tests_test_thermal_fusion_testthermalfusion_test_thermal_palettes_generation",
+      "label": ".test_thermal_palettes_generation()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 25,
+      "community_name": "ThermalFusionService",
+      "file_type": "code",
+      "norm_label": ".test_thermal_palettes_generation()",
+      "source_file": "backend/tests/test_thermal_fusion.py",
+      "source_location": "L30"
     },
     {
       "id": "backend_app_api_anpr_add_to_watchlist",
@@ -4036,28 +4048,28 @@
       "source_location": "L147"
     },
     {
-      "id": "frontend_src_app_operator_gis_map_page_gismappage",
-      "label": "GisMapPage()",
+      "id": "frontend_src_components_dashboard_recentalerts_recentalerts",
+      "label": "RecentAlerts()",
       "_callable": true,
       "_origin": "ast",
       "community": 29,
       "community_name": "alertsStore.ts",
       "file_type": "code",
-      "norm_label": "gismappage()",
-      "source_file": "frontend/src/app/(operator)/gis-map/page.tsx",
-      "source_location": "L24"
+      "norm_label": "recentalerts()",
+      "source_file": "frontend/src/components/dashboard/recentalerts.tsx",
+      "source_location": "L38"
     },
     {
-      "id": "frontend_src_app_operator_gis_map_page_gismappage_fetchtraces",
-      "label": "fetchTraces()",
+      "id": "frontend_src_components_dashboard_recentalerts_severitybadge",
+      "label": "SeverityBadge()",
       "_callable": true,
       "_origin": "ast",
       "community": 29,
       "community_name": "alertsStore.ts",
       "file_type": "code",
-      "norm_label": "fetchtraces()",
-      "source_file": "frontend/src/app/(operator)/gis-map/page.tsx",
-      "source_location": "L35"
+      "norm_label": "severitybadge()",
+      "source_file": "frontend/src/components/dashboard/recentalerts.tsx",
+      "source_location": "L9"
     },
     {
       "id": "frontend_src_lib_alertsstore_getalertswsurl",
@@ -4209,7 +4221,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 31,
-      "community_name": "Detection",
+      "community_name": "Postprocessor",
       "file_type": "code",
       "norm_label": ".to_dict()",
       "source_file": "backend/app/pipeline/postprocessor.py",
@@ -4221,7 +4233,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 31,
-      "community_name": "Detection",
+      "community_name": "Postprocessor",
       "file_type": "code",
       "norm_label": "._apply_nms()",
       "source_file": "backend/app/pipeline/postprocessor.py",
@@ -4233,7 +4245,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 31,
-      "community_name": "Detection",
+      "community_name": "Postprocessor",
       "file_type": "code",
       "norm_label": ".decode()",
       "source_file": "backend/app/pipeline/postprocessor.py",
@@ -4245,7 +4257,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 31,
-      "community_name": "Detection",
+      "community_name": "Postprocessor",
       "file_type": "code",
       "norm_label": ".decode_batch()",
       "source_file": "backend/app/pipeline/postprocessor.py",
@@ -4257,7 +4269,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 31,
-      "community_name": "Detection",
+      "community_name": "Postprocessor",
       "file_type": "code",
       "norm_label": "._decode_end2end()",
       "source_file": "backend/app/pipeline/postprocessor.py",
@@ -4269,7 +4281,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 31,
-      "community_name": "Detection",
+      "community_name": "Postprocessor",
       "file_type": "code",
       "norm_label": "._decode_end2end_slice()",
       "source_file": "backend/app/pipeline/postprocessor.py",
@@ -4281,7 +4293,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 31,
-      "community_name": "Detection",
+      "community_name": "Postprocessor",
       "file_type": "code",
       "norm_label": "._decode_yolo_transposed()",
       "source_file": "backend/app/pipeline/postprocessor.py",
@@ -4293,7 +4305,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 31,
-      "community_name": "Detection",
+      "community_name": "Postprocessor",
       "file_type": "code",
       "norm_label": "._decode_yolo_transposed_slice()",
       "source_file": "backend/app/pipeline/postprocessor.py",
@@ -4305,7 +4317,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 31,
-      "community_name": "Detection",
+      "community_name": "Postprocessor",
       "file_type": "code",
       "norm_label": "._decode_yolov8()",
       "source_file": "backend/app/pipeline/postprocessor.py",
@@ -4317,7 +4329,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 31,
-      "community_name": "Detection",
+      "community_name": "Postprocessor",
       "file_type": "code",
       "norm_label": "._decode_yolov8_slice()",
       "source_file": "backend/app/pipeline/postprocessor.py",
@@ -4329,11 +4341,23 @@
       "_callable": true,
       "_origin": "ast",
       "community": 31,
-      "community_name": "Detection",
+      "community_name": "Postprocessor",
       "file_type": "code",
       "norm_label": ".get_class_name()",
       "source_file": "backend/app/pipeline/postprocessor.py",
       "source_location": "L77"
+    },
+    {
+      "id": "backend_app_pipeline_postprocessor_postprocessor_init",
+      "label": ".__init__()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 31,
+      "community_name": "Postprocessor",
+      "file_type": "code",
+      "norm_label": ".__init__()",
+      "source_file": "backend/app/pipeline/postprocessor.py",
+      "source_location": "L73"
     },
     {
       "id": "backend_app_pipeline_postprocessor_postprocessor_rescale_boxes",
@@ -4341,7 +4365,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 31,
-      "community_name": "Detection",
+      "community_name": "Postprocessor",
       "file_type": "code",
       "norm_label": "._rescale_boxes()",
       "source_file": "backend/app/pipeline/postprocessor.py",
@@ -4550,6 +4574,90 @@
       "norm_label": ".read_vehicle_plate()",
       "source_file": "backend/app/pipeline/anpr_service.py",
       "source_location": "L134"
+    },
+    {
+      "id": "backend_app_tracking_session_store_trackersessionstore_contains",
+      "label": ".__contains__()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 33,
+      "community_name": "TrackerSessionStore",
+      "file_type": "code",
+      "norm_label": ".__contains__()",
+      "source_file": "backend/app/tracking/session_store.py",
+      "source_location": "L168"
+    },
+    {
+      "id": "backend_app_tracking_session_store_trackersessionstore_init",
+      "label": ".__init__()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 33,
+      "community_name": "TrackerSessionStore",
+      "file_type": "code",
+      "norm_label": ".__init__()",
+      "source_file": "backend/app/tracking/session_store.py",
+      "source_location": "L61"
+    },
+    {
+      "id": "backend_app_tracking_session_store_trackersessionstore_list_sessions",
+      "label": ".list_sessions()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 33,
+      "community_name": "TrackerSessionStore",
+      "file_type": "code",
+      "norm_label": ".list_sessions()",
+      "source_file": "backend/app/tracking/session_store.py",
+      "source_location": "L150"
+    },
+    {
+      "id": "backend_app_tracking_session_store_trackersessionstore_reset",
+      "label": ".reset()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 33,
+      "community_name": "TrackerSessionStore",
+      "file_type": "code",
+      "norm_label": ".reset()",
+      "source_file": "backend/app/tracking/session_store.py",
+      "source_location": "L106"
+    },
+    {
+      "id": "backend_app_tracking_session_store_trackersessionstore_reset_all",
+      "label": ".reset_all()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 33,
+      "community_name": "TrackerSessionStore",
+      "file_type": "code",
+      "norm_label": ".reset_all()",
+      "source_file": "backend/app/tracking/session_store.py",
+      "source_location": "L127"
+    },
+    {
+      "id": "backend_app_tracking_session_store_trackersessionstore_session_count",
+      "label": ".session_count()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 33,
+      "community_name": "TrackerSessionStore",
+      "file_type": "code",
+      "norm_label": ".session_count()",
+      "source_file": "backend/app/tracking/session_store.py",
+      "source_location": "L164"
+    },
+    {
+      "id": "backend_app_tracking_session_store_trackersessionstore_touch",
+      "label": ".touch()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 33,
+      "community_name": "TrackerSessionStore",
+      "file_type": "code",
+      "norm_label": ".touch()",
+      "source_file": "backend/app/tracking/session_store.py",
+      "source_location": "L100"
     },
     {
       "id": "backend_app_tracking_global_tracker_calc_haversine_km",
@@ -5205,11 +5313,23 @@
       "_callable": true,
       "_origin": "ast",
       "community": 43,
-      "community_name": "ONNXEngineError",
+      "community_name": "logging.py",
       "file_type": "code",
       "norm_label": ".predict()",
       "source_file": "backend/app/inference/onnx_engine.py",
       "source_location": "L265"
+    },
+    {
+      "id": "backend_app_pipeline_anpr_service_mock_check_torch_load_is_safe",
+      "label": "_mock_check_torch_load_is_safe()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 43,
+      "community_name": "logging.py",
+      "file_type": "code",
+      "norm_label": "_mock_check_torch_load_is_safe()",
+      "source_file": "backend/app/pipeline/anpr_service.py",
+      "source_location": "L29"
     },
     {
       "id": "frontend_src_components_map_suspecttrailoverlay_suspecttrailanimator_clearpolyline",
@@ -5356,112 +5476,28 @@
       "source_location": "L325"
     },
     {
-      "id": "backend_tests_test_thermal_fusion_testthermalfusion_setup",
-      "label": ".setUp()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 45,
-      "community_name": "TestThermalFusion",
-      "file_type": "code",
-      "norm_label": ".setup()",
-      "source_file": "backend/tests/test_thermal_fusion.py",
-      "source_location": "L27"
-    },
-    {
-      "id": "backend_tests_test_thermal_fusion_testthermalfusion_test_cross_spectral_decision_fusion",
-      "label": ".test_cross_spectral_decision_fusion()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 45,
-      "community_name": "TestThermalFusion",
-      "file_type": "code",
-      "norm_label": ".test_cross_spectral_decision_fusion()",
-      "source_file": "backend/tests/test_thermal_fusion.py",
-      "source_location": "L99"
-    },
-    {
-      "id": "backend_tests_test_thermal_fusion_testthermalfusion_test_msx_edge_extraction_and_fusion",
-      "label": ".test_msx_edge_extraction_and_fusion()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 45,
-      "community_name": "TestThermalFusion",
-      "file_type": "code",
-      "norm_label": ".test_msx_edge_extraction_and_fusion()",
-      "source_file": "backend/tests/test_thermal_fusion.py",
-      "source_location": "L58"
-    },
-    {
-      "id": "backend_tests_test_thermal_fusion_testthermalfusion_test_radiometric_temperature_estimation",
-      "label": ".test_radiometric_temperature_estimation()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 45,
-      "community_name": "TestThermalFusion",
-      "file_type": "code",
-      "norm_label": ".test_radiometric_temperature_estimation()",
-      "source_file": "backend/tests/test_thermal_fusion.py",
-      "source_location": "L73"
-    },
-    {
-      "id": "backend_tests_test_thermal_fusion_testthermalfusion_test_synthetic_thermal_simulator",
-      "label": ".test_synthetic_thermal_simulator()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 45,
-      "community_name": "TestThermalFusion",
-      "file_type": "code",
-      "norm_label": ".test_synthetic_thermal_simulator()",
-      "source_file": "backend/tests/test_thermal_fusion.py",
-      "source_location": "L88"
-    },
-    {
-      "id": "backend_tests_test_thermal_fusion_testthermalfusion_test_thermal_api_endpoints",
-      "label": ".test_thermal_api_endpoints()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 45,
-      "community_name": "TestThermalFusion",
-      "file_type": "code",
-      "norm_label": ".test_thermal_api_endpoints()",
-      "source_file": "backend/tests/test_thermal_fusion.py",
-      "source_location": "L129"
-    },
-    {
-      "id": "backend_tests_test_thermal_fusion_testthermalfusion_test_thermal_palettes_generation",
-      "label": ".test_thermal_palettes_generation()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 45,
-      "community_name": "TestThermalFusion",
-      "file_type": "code",
-      "norm_label": ".test_thermal_palettes_generation()",
-      "source_file": "backend/tests/test_thermal_fusion.py",
-      "source_location": "L30"
-    },
-    {
-      "id": "backend_app_pipeline_thermal_fusion_service_fusedtarget_to_dict",
+      "id": "backend_app_tracking_models_trackedobject_to_dict",
       "label": ".to_dict()",
       "_callable": true,
       "_origin": "ast",
-      "community": 46,
-      "community_name": "ThermalPalette",
+      "community": 45,
+      "community_name": "TrackedObject",
       "file_type": "code",
       "norm_label": ".to_dict()",
-      "source_file": "backend/app/pipeline/thermal_fusion_service.py",
-      "source_location": "L48"
+      "source_file": "backend/app/tracking/models.py",
+      "source_location": "L41"
     },
     {
-      "id": "backend_app_pipeline_thermal_fusion_service_thermalfusionservice_simulate_thermal_from_optical",
-      "label": ".simulate_thermal_from_optical()",
+      "id": "backend_app_tracking_tracker_bytetrackerwrapper_update",
+      "label": ".update()",
       "_callable": true,
       "_origin": "ast",
-      "community": 46,
-      "community_name": "ThermalPalette",
+      "community": 45,
+      "community_name": "TrackedObject",
       "file_type": "code",
-      "norm_label": ".simulate_thermal_from_optical()",
-      "source_file": "backend/app/pipeline/thermal_fusion_service.py",
-      "source_location": "L388"
+      "norm_label": ".update()",
+      "source_file": "backend/app/tracking/tracker.py",
+      "source_location": "L69"
     },
     {
       "id": "backend_app_inference_inference_service_inferenceservice_predict",
@@ -5469,95 +5505,23 @@
       "_callable": true,
       "_origin": "ast",
       "community": 47,
-      "community_name": ".predict",
+      "community_name": "inference_service.py",
       "file_type": "code",
       "norm_label": ".predict()",
       "source_file": "backend/app/inference/inference_service.py",
       "source_location": "L64"
     },
     {
-      "id": "backend_app_api_thermal_run_detection_if_model_loaded",
-      "label": "_run_detection_if_model_loaded()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 48,
-      "community_name": "Postprocessor",
-      "file_type": "code",
-      "norm_label": "_run_detection_if_model_loaded()",
-      "source_file": "backend/app/api/thermal.py",
-      "source_location": "L108"
-    },
-    {
-      "id": "backend_app_pipeline_postprocessor_postprocessor_init",
-      "label": ".__init__()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 48,
-      "community_name": "Postprocessor",
-      "file_type": "code",
-      "norm_label": ".__init__()",
-      "source_file": "backend/app/pipeline/postprocessor.py",
-      "source_location": "L73"
-    },
-    {
       "id": "backend_app_inference_onnx_engine_onnxengine_close",
       "label": ".close()",
       "_callable": true,
       "_origin": "ast",
-      "community": 49,
-      "community_name": "ONNXModelError",
+      "community": 5,
+      "community_name": "ONNXEngine",
       "file_type": "code",
       "norm_label": ".close()",
       "source_file": "backend/app/inference/onnx_engine.py",
       "source_location": "L342"
-    },
-    {
-      "id": "backend_app_inference_onnx_engine_onnxengine_exit",
-      "label": ".__exit__()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 49,
-      "community_name": "ONNXModelError",
-      "file_type": "code",
-      "norm_label": ".__exit__()",
-      "source_file": "backend/app/inference/onnx_engine.py",
-      "source_location": "L356"
-    },
-    {
-      "id": "backend_app_inference_onnx_engine_onnxengine_get_inputs",
-      "label": ".get_inputs()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 49,
-      "community_name": "ONNXModelError",
-      "file_type": "code",
-      "norm_label": ".get_inputs()",
-      "source_file": "backend/app/inference/onnx_engine.py",
-      "source_location": "L227"
-    },
-    {
-      "id": "backend_app_inference_onnx_engine_onnxengine_get_model_info",
-      "label": ".get_model_info()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 49,
-      "community_name": "ONNXModelError",
-      "file_type": "code",
-      "norm_label": ".get_model_info()",
-      "source_file": "backend/app/inference/onnx_engine.py",
-      "source_location": "L323"
-    },
-    {
-      "id": "backend_app_inference_onnx_engine_onnxengine_get_outputs",
-      "label": ".get_outputs()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 49,
-      "community_name": "ONNXModelError",
-      "file_type": "code",
-      "norm_label": ".get_outputs()",
-      "source_file": "backend/app/inference/onnx_engine.py",
-      "source_location": "L246"
     },
     {
       "id": "backend_app_inference_onnx_engine_onnxengine_create_session",
@@ -5584,6 +5548,18 @@
       "source_location": "L353"
     },
     {
+      "id": "backend_app_inference_onnx_engine_onnxengine_exit",
+      "label": ".__exit__()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "ONNXEngine",
+      "file_type": "code",
+      "norm_label": ".__exit__()",
+      "source_file": "backend/app/inference/onnx_engine.py",
+      "source_location": "L356"
+    },
+    {
       "id": "backend_app_inference_onnx_engine_onnxengine_extract_metadata",
       "label": "._extract_metadata()",
       "_callable": true,
@@ -5606,6 +5582,42 @@
       "norm_label": "._get_execution_providers()",
       "source_file": "backend/app/inference/onnx_engine.py",
       "source_location": "L95"
+    },
+    {
+      "id": "backend_app_inference_onnx_engine_onnxengine_get_inputs",
+      "label": ".get_inputs()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "ONNXEngine",
+      "file_type": "code",
+      "norm_label": ".get_inputs()",
+      "source_file": "backend/app/inference/onnx_engine.py",
+      "source_location": "L227"
+    },
+    {
+      "id": "backend_app_inference_onnx_engine_onnxengine_get_model_info",
+      "label": ".get_model_info()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "ONNXEngine",
+      "file_type": "code",
+      "norm_label": ".get_model_info()",
+      "source_file": "backend/app/inference/onnx_engine.py",
+      "source_location": "L323"
+    },
+    {
+      "id": "backend_app_inference_onnx_engine_onnxengine_get_outputs",
+      "label": ".get_outputs()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "ONNXEngine",
+      "file_type": "code",
+      "norm_label": ".get_outputs()",
+      "source_file": "backend/app/inference/onnx_engine.py",
+      "source_location": "L246"
     },
     {
       "id": "backend_app_inference_onnx_engine_onnxengine_init",
@@ -5632,40 +5644,16 @@
       "source_location": "L72"
     },
     {
-      "id": "backend_app_pipeline_thermal_fusion_service_thermalfusionservice_apply_palette",
-      "label": ".apply_palette()",
+      "id": "backend_app_api_inference_video_inference",
+      "label": "video_inference()",
       "_callable": true,
       "_origin": "ast",
-      "community": 50,
-      "community_name": ".apply_palette",
+      "community": 51,
+      "community_name": "thermal.py",
       "file_type": "code",
-      "norm_label": ".apply_palette()",
-      "source_file": "backend/app/pipeline/thermal_fusion_service.py",
-      "source_location": "L140"
-    },
-    {
-      "id": "backend_app_pipeline_thermal_fusion_service_thermalfusionservice_draw_thermal_hud",
-      "label": ".draw_thermal_hud()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 50,
-      "community_name": ".apply_palette",
-      "file_type": "code",
-      "norm_label": ".draw_thermal_hud()",
-      "source_file": "backend/app/pipeline/thermal_fusion_service.py",
-      "source_location": "L586"
-    },
-    {
-      "id": "backend_app_pipeline_thermal_fusion_service_thermalfusionservice_estimate_spot_temperature",
-      "label": ".estimate_spot_temperature()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 50,
-      "community_name": ".apply_palette",
-      "file_type": "code",
-      "norm_label": ".estimate_spot_temperature()",
-      "source_file": "backend/app/pipeline/thermal_fusion_service.py",
-      "source_location": "L300"
+      "norm_label": "video_inference()",
+      "source_file": "backend/app/api/inference.py",
+      "source_location": "L279"
     },
     {
       "id": "backend_app_api_thermal_decode_image_upload",
@@ -5716,6 +5704,18 @@
       "source_location": "L270"
     },
     {
+      "id": "backend_app_api_thermal_run_detection_if_model_loaded",
+      "label": "_run_detection_if_model_loaded()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 51,
+      "community_name": "thermal.py",
+      "file_type": "code",
+      "norm_label": "_run_detection_if_model_loaded()",
+      "source_file": "backend/app/api/thermal.py",
+      "source_location": "L108"
+    },
+    {
       "id": "backend_app_api_thermal_simulate_thermal",
       "label": "simulate_thermal()",
       "_callable": true,
@@ -5726,6 +5726,18 @@
       "norm_label": "simulate_thermal()",
       "source_file": "backend/app/api/thermal.py",
       "source_location": "L149"
+    },
+    {
+      "id": "backend_tests_test_onnx_batch_inference_run_tests",
+      "label": "run_tests()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 51,
+      "community_name": "thermal.py",
+      "file_type": "code",
+      "norm_label": "run_tests()",
+      "source_file": "backend/tests/test_onnx_batch_inference.py",
+      "source_location": "L24"
     },
     {
       "id": "backend_tests_test_reid_and_global_tracking_test_cross_camera_global_tracking",
@@ -5896,6 +5908,18 @@
       "source_location": "L186"
     },
     {
+      "id": "backend_app_api_stream_stream_generator",
+      "label": "stream_generator()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "stream.py",
+      "file_type": "code",
+      "norm_label": "stream_generator()",
+      "source_file": "backend/app/api/stream.py",
+      "source_location": "L395"
+    },
+    {
       "id": "backend_app_api_stream_validate_stream",
       "label": "validate_stream()",
       "_callable": true,
@@ -6040,28 +6064,28 @@
       "source_location": "L152"
     },
     {
-      "id": "backend_app_main_lifespan",
-      "label": "lifespan()",
+      "id": "backend_app_api_tracking_get_annotated_frame",
+      "label": "get_annotated_frame()",
       "_callable": true,
       "_origin": "ast",
       "community": 61,
-      "community_name": "FastAPI",
+      "community_name": "get_annotated_frame",
       "file_type": "code",
-      "norm_label": "lifespan()",
-      "source_file": "backend/app/main.py",
-      "source_location": "L30"
+      "norm_label": "get_annotated_frame()",
+      "source_file": "backend/app/api/tracking.py",
+      "source_location": "L847"
     },
     {
-      "id": "backend_app_main_root",
-      "label": "root()",
+      "id": "backend_app_api_tracking_get_annotated_video",
+      "label": "get_annotated_video()",
       "_callable": true,
       "_origin": "ast",
       "community": 61,
-      "community_name": "FastAPI",
+      "community_name": "get_annotated_frame",
       "file_type": "code",
-      "norm_label": "root()",
-      "source_file": "backend/app/main.py",
-      "source_location": "L155"
+      "norm_label": "get_annotated_video()",
+      "source_file": "backend/app/api/tracking.py",
+      "source_location": "L826"
     },
     {
       "id": "frontend_src_middleware_middleware",
@@ -6388,40 +6412,64 @@
       "source_location": "L158"
     },
     {
-      "id": "backend_app_pipeline_anpr_service_mock_check_torch_load_is_safe",
-      "label": "_mock_check_torch_load_is_safe()",
+      "id": "backend_app_api_health_health",
+      "label": "health()",
       "_callable": true,
       "_origin": "ast",
-      "community": 72,
-      "community_name": "logging.py",
+      "community": 73,
+      "community_name": "FastAPI",
       "file_type": "code",
-      "norm_label": "_mock_check_torch_load_is_safe()",
-      "source_file": "backend/app/pipeline/anpr_service.py",
-      "source_location": "L29"
+      "norm_label": "health()",
+      "source_file": "backend/app/api/health.py",
+      "source_location": "L15"
+    },
+    {
+      "id": "backend_app_main_lifespan",
+      "label": "lifespan()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 73,
+      "community_name": "FastAPI",
+      "file_type": "code",
+      "norm_label": "lifespan()",
+      "source_file": "backend/app/main.py",
+      "source_location": "L30"
+    },
+    {
+      "id": "backend_app_main_root",
+      "label": "root()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 73,
+      "community_name": "FastAPI",
+      "file_type": "code",
+      "norm_label": "root()",
+      "source_file": "backend/app/main.py",
+      "source_location": "L155"
+    },
+    {
+      "id": "backend_app_utils_logging_get_logger",
+      "label": "get_logger()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 73,
+      "community_name": "FastAPI",
+      "file_type": "code",
+      "norm_label": "get_logger()",
+      "source_file": "backend/app/utils/logging.py",
+      "source_location": "L53"
     },
     {
       "id": "backend_app_utils_logging_setup_logging",
       "label": "setup_logging()",
       "_callable": true,
       "_origin": "ast",
-      "community": 72,
-      "community_name": "logging.py",
+      "community": 73,
+      "community_name": "FastAPI",
       "file_type": "code",
       "norm_label": "setup_logging()",
       "source_file": "backend/app/utils/logging.py",
       "source_location": "L10"
-    },
-    {
-      "id": "backend_app_api_health_health",
-      "label": "health()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 73,
-      "community_name": "health",
-      "file_type": "code",
-      "norm_label": "health()",
-      "source_file": "backend/app/api/health.py",
-      "source_location": "L15"
     },
     {
       "id": "backend_app_api_geofences_create_tripwire",
@@ -6556,24 +6604,12 @@
       "source_location": "L9"
     },
     {
-      "id": "backend_app_api_inference_inference_status",
-      "label": "inference_status()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 76,
-      "community_name": "inference_status",
-      "file_type": "code",
-      "norm_label": "inference_status()",
-      "source_file": "backend/app/api/inference.py",
-      "source_location": "L75"
-    },
-    {
       "id": "frontend_src_app_operator_live_page_livepage",
       "label": "LivePage()",
       "_callable": true,
       "_origin": "ast",
       "community": 77,
-      "community_name": "useBackendStatus.ts",
+      "community_name": "api",
       "file_type": "code",
       "norm_label": "livepage()",
       "source_file": "frontend/src/app/(operator)/live/page.tsx",
@@ -6585,7 +6621,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 77,
-      "community_name": "useBackendStatus.ts",
+      "community_name": "api",
       "file_type": "code",
       "norm_label": "metriccard()",
       "source_file": "frontend/src/components/dashboard/metriccard.tsx",
@@ -6597,7 +6633,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 77,
-      "community_name": "useBackendStatus.ts",
+      "community_name": "api",
       "file_type": "code",
       "norm_label": "metricsrow()",
       "source_file": "frontend/src/components/dashboard/metricsrow.tsx",
@@ -6609,7 +6645,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 77,
-      "community_name": "useBackendStatus.ts",
+      "community_name": "api",
       "file_type": "code",
       "norm_label": "systemstatus()",
       "source_file": "frontend/src/components/dashboard/systemstatus.tsx",
@@ -6621,7 +6657,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 77,
-      "community_name": "useBackendStatus.ts",
+      "community_name": "api",
       "file_type": "code",
       "norm_label": "connectionstatus()",
       "source_file": "frontend/src/components/status/connectionstatus.tsx",
@@ -6633,7 +6669,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 77,
-      "community_name": "useBackendStatus.ts",
+      "community_name": "api",
       "file_type": "code",
       "norm_label": "usebackendstatus()",
       "source_file": "frontend/src/lib/hooks/useBackendStatus.ts",
@@ -6650,6 +6686,30 @@
       "norm_label": "diagnosticspage()",
       "source_file": "frontend/src/app/(operator)/diagnostics/page.tsx",
       "source_location": "L5"
+    },
+    {
+      "id": "frontend_src_app_operator_gis_map_page_gismappage",
+      "label": "GisMapPage()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 78,
+      "community_name": "lucide-react",
+      "file_type": "code",
+      "norm_label": "gismappage()",
+      "source_file": "frontend/src/app/(operator)/gis-map/page.tsx",
+      "source_location": "L24"
+    },
+    {
+      "id": "frontend_src_app_operator_gis_map_page_gismappage_fetchtraces",
+      "label": "fetchTraces()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 78,
+      "community_name": "lucide-react",
+      "file_type": "code",
+      "norm_label": "fetchtraces()",
+      "source_file": "frontend/src/app/(operator)/gis-map/page.tsx",
+      "source_location": "L35"
     },
     {
       "id": "frontend_src_app_operator_settings_page_settingspage",
@@ -6674,30 +6734,6 @@
       "norm_label": "camerafeedstrip()",
       "source_file": "frontend/src/components/dashboard/camerafeedstrip.tsx",
       "source_location": "L10"
-    },
-    {
-      "id": "frontend_src_components_dashboard_recentalerts_recentalerts",
-      "label": "RecentAlerts()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 78,
-      "community_name": "lucide-react",
-      "file_type": "code",
-      "norm_label": "recentalerts()",
-      "source_file": "frontend/src/components/dashboard/recentalerts.tsx",
-      "source_location": "L38"
-    },
-    {
-      "id": "frontend_src_components_dashboard_recentalerts_severitybadge",
-      "label": "SeverityBadge()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 78,
-      "community_name": "lucide-react",
-      "file_type": "code",
-      "norm_label": "severitybadge()",
-      "source_file": "frontend/src/components/dashboard/recentalerts.tsx",
-      "source_location": "L9"
     },
     {
       "id": "frontend_src_components_landing_livesurveillancecard_livesurveillancecard",
@@ -6976,18 +7012,6 @@
       "source_location": "L165"
     },
     {
-      "id": "backend_app_utils_logging_get_logger",
-      "label": "get_logger()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 80,
-      "community_name": "auth.py",
-      "file_type": "code",
-      "norm_label": "get_logger()",
-      "source_file": "backend/app/utils/logging.py",
-      "source_location": "L53"
-    },
-    {
       "id": "backend_tests_test_facial_recognition_test_face_api_endpoints",
       "label": "test_face_api_endpoints()",
       "_callable": true,
@@ -7178,30 +7202,6 @@
       "norm_label": "_create_preprocessor()",
       "source_file": "backend/app/api/tracking.py",
       "source_location": "L81"
-    },
-    {
-      "id": "backend_app_api_tracking_get_annotated_frame",
-      "label": "get_annotated_frame()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 9,
-      "community_name": "tracking.py",
-      "file_type": "code",
-      "norm_label": "get_annotated_frame()",
-      "source_file": "backend/app/api/tracking.py",
-      "source_location": "L847"
-    },
-    {
-      "id": "backend_app_api_tracking_get_annotated_video",
-      "label": "get_annotated_video()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 9,
-      "community_name": "tracking.py",
-      "file_type": "code",
-      "norm_label": "get_annotated_video()",
-      "source_file": "backend/app/api/tracking.py",
-      "source_location": "L826"
     },
     {
       "id": "backend_app_api_tracking_get_global_trace_trajectory",
@@ -7441,28 +7441,6 @@
       "source_location": "L1"
     },
     {
-      "id": "backend_app_tracking_models",
-      "label": "tracking/models.py",
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "ByteTrackerWrapper",
-      "file_type": "code",
-      "norm_label": "tracking/models.py",
-      "source_file": "backend/app/tracking/models.py",
-      "source_location": "L1"
-    },
-    {
-      "id": "backend_app_tracking_models_py_any",
-      "label": "Any",
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "ByteTrackerWrapper",
-      "file_type": "code",
-      "norm_label": "any",
-      "source_file": "",
-      "source_location": ""
-    },
-    {
       "id": "backend_app_tracking_session_store",
       "label": "session_store.py",
       "_origin": "ast",
@@ -7483,28 +7461,6 @@
       "norm_label": "tracker.py",
       "source_file": "backend/app/tracking/tracker.py",
       "source_location": "L1"
-    },
-    {
-      "id": "backend_app_tracking_tracker_py_any",
-      "label": "Any",
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "ByteTrackerWrapper",
-      "file_type": "code",
-      "norm_label": "any",
-      "source_file": "",
-      "source_location": ""
-    },
-    {
-      "id": "trackedobject",
-      "label": "TrackedObject",
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "ByteTrackerWrapper",
-      "file_type": "code",
-      "norm_label": "trackedobject",
-      "source_file": "",
-      "source_location": ""
     },
     {
       "id": "backend_app_tracking_config_rationale_1",
@@ -7540,39 +7496,6 @@
       "source_location": "L1"
     },
     {
-      "id": "backend_app_tracking_models_rationale_1",
-      "label": "Data models for tracking output. TrackedObject extends a raw Detection with a\u2026",
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "ByteTrackerWrapper",
-      "file_type": "rationale",
-      "norm_label": "data models for tracking output. trackedobject extends a raw detection with a...",
-      "source_file": "backend/app/tracking/models.py",
-      "source_location": "L1"
-    },
-    {
-      "id": "backend_app_tracking_models_rationale_18",
-      "label": "Snapshot of a tracked object within a single video frame. Attributes: track_id:\u2026",
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "ByteTrackerWrapper",
-      "file_type": "rationale",
-      "norm_label": "snapshot of a tracked object within a single video frame. attributes: track_id:...",
-      "source_file": "backend/app/tracking/models.py",
-      "source_location": "L18"
-    },
-    {
-      "id": "backend_app_tracking_models_rationale_42",
-      "label": "Return a JSON-serialisable representation.",
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "ByteTrackerWrapper",
-      "file_type": "rationale",
-      "norm_label": "return a json-serialisable representation.",
-      "source_file": "backend/app/tracking/models.py",
-      "source_location": "L42"
-    },
-    {
       "id": "backend_app_tracking_session_store_rationale_1",
       "label": "Thread-safe store for per-camera ByteTracker sessions. Each RTSP camera is\u2026",
       "_origin": "ast",
@@ -7584,50 +7507,6 @@
       "source_location": "L1"
     },
     {
-      "id": "backend_app_tracking_session_store_rationale_101",
-      "label": "Record that a frame was processed for ``camera_id``.",
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "ByteTrackerWrapper",
-      "file_type": "rationale",
-      "norm_label": "record that a frame was processed for ``camera_id``.",
-      "source_file": "backend/app/tracking/session_store.py",
-      "source_location": "L101"
-    },
-    {
-      "id": "backend_app_tracking_session_store_rationale_107",
-      "label": "Reset and remove the tracker session for ``camera_id``. Returns: True if the\u2026",
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "ByteTrackerWrapper",
-      "file_type": "rationale",
-      "norm_label": "reset and remove the tracker session for ``camera_id``. returns: true if the...",
-      "source_file": "backend/app/tracking/session_store.py",
-      "source_location": "L107"
-    },
-    {
-      "id": "backend_app_tracking_session_store_rationale_128",
-      "label": "Reset and remove all tracker sessions. Returns: Number of sessions that were\u2026",
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "ByteTrackerWrapper",
-      "file_type": "rationale",
-      "norm_label": "reset and remove all tracker sessions. returns: number of sessions that were...",
-      "source_file": "backend/app/tracking/session_store.py",
-      "source_location": "L128"
-    },
-    {
-      "id": "backend_app_tracking_session_store_rationale_151",
-      "label": "Return a JSON-serialisable summary of all active sessions.",
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "ByteTrackerWrapper",
-      "file_type": "rationale",
-      "norm_label": "return a json-serialisable summary of all active sessions.",
-      "source_file": "backend/app/tracking/session_store.py",
-      "source_location": "L151"
-    },
-    {
       "id": "backend_app_tracking_session_store_rationale_26",
       "label": "Metadata wrapper around a tracker session.",
       "_origin": "ast",
@@ -7637,17 +7516,6 @@
       "norm_label": "metadata wrapper around a tracker session.",
       "source_file": "backend/app/tracking/session_store.py",
       "source_location": "L26"
-    },
-    {
-      "id": "backend_app_tracking_session_store_rationale_43",
-      "label": "Thread-safe registry mapping ``camera_id`` \u2192 ``ByteTrackerWrapper``. Typical\u2026",
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "ByteTrackerWrapper",
-      "file_type": "rationale",
-      "norm_label": "thread-safe registry mapping ``camera_id`` \u2192 ``bytetrackerwrapper``. typical...",
-      "source_file": "backend/app/tracking/session_store.py",
-      "source_location": "L43"
     },
     {
       "id": "backend_app_tracking_session_store_rationale_74",
@@ -7714,17 +7582,6 @@
       "norm_label": "thin stateful wrapper around supervision.bytetracker. accepts the raw detection...",
       "source_file": "backend/app/tracking/tracker.py",
       "source_location": "L42"
-    },
-    {
-      "id": "backend_app_tracking_tracker_rationale_74",
-      "label": "Feed one frame's detections into ByteTracker and return tracked objects. Args:\u2026",
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "ByteTrackerWrapper",
-      "file_type": "rationale",
-      "norm_label": "feed one frame's detections into bytetracker and return tracked objects. args:...",
-      "source_file": "backend/app/tracking/tracker.py",
-      "source_location": "L74"
     },
     {
       "id": "backend_app_pipeline_rtsp_loader",
@@ -8156,17 +8013,6 @@
       "source_location": "L30"
     },
     {
-      "id": "backend_app_core_resource_manager",
-      "label": "resource_manager.py",
-      "_origin": "ast",
-      "community": 13,
-      "community_name": "ResourceManager",
-      "file_type": "code",
-      "norm_label": "resource_manager.py",
-      "source_file": "backend/app/core/resource_manager.py",
-      "source_location": "L1"
-    },
-    {
       "id": "backend_app_core_resource_manager_py_exception",
       "label": "Exception",
       "_origin": "ast",
@@ -8189,17 +8035,6 @@
       "source_location": "L1"
     },
     {
-      "id": "backend_app_inference_inference_service",
-      "label": "inference_service.py",
-      "_origin": "ast",
-      "community": 13,
-      "community_name": "ResourceManager",
-      "file_type": "code",
-      "norm_label": "inference_service.py",
-      "source_file": "backend/app/inference/inference_service.py",
-      "source_location": "L1"
-    },
-    {
       "id": "backend_tests_test_detection_integration",
       "label": "test_detection_integration.py",
       "_origin": "ast",
@@ -8208,17 +8043,6 @@
       "file_type": "code",
       "norm_label": "test_detection_integration.py",
       "source_file": "backend/tests/test_detection_integration.py",
-      "source_location": "L1"
-    },
-    {
-      "id": "backend_tests_test_inference_service",
-      "label": "test_inference_service.py",
-      "_origin": "ast",
-      "community": 13,
-      "community_name": "ResourceManager",
-      "file_type": "code",
-      "norm_label": "test_inference_service.py",
-      "source_file": "backend/tests/test_inference_service.py",
       "source_location": "L1"
     },
     {
@@ -9329,17 +9153,6 @@
       "source_location": "L1"
     },
     {
-      "id": "frontend_src_lib_api_api",
-      "label": "api",
-      "_origin": "ast",
-      "community": 18,
-      "community_name": "liveworkspace.tsx",
-      "file_type": "code",
-      "norm_label": "api",
-      "source_file": "frontend/src/lib/api.ts",
-      "source_location": "L108"
-    },
-    {
       "id": "frontend_src_lib_utils",
       "label": "utils.ts",
       "_origin": "ast",
@@ -9348,6 +9161,17 @@
       "file_type": "code",
       "norm_label": "utils.ts",
       "source_file": "frontend/src/lib/utils.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "frontend_src_types_alert",
+      "label": "alert.ts",
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "liveworkspace.tsx",
+      "file_type": "code",
+      "norm_label": "alert.ts",
+      "source_file": "frontend/src/types/alert.ts",
       "source_location": "L1"
     },
     {
@@ -10583,6 +10407,17 @@
       "source_location": "L1"
     },
     {
+      "id": "backend_app_api_inference_py_get",
+      "label": "get",
+      "_origin": "ast",
+      "community": 23,
+      "community_name": "inference.py",
+      "file_type": "code",
+      "norm_label": "get",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
       "id": "backend_app_api_inference_py_post",
       "label": "post",
       "_origin": "ast",
@@ -10605,17 +10440,6 @@
       "source_location": ""
     },
     {
-      "id": "backend_tests_test_onnx_batch_inference",
-      "label": "test_onnx_batch_inference.py",
-      "_origin": "ast",
-      "community": 23,
-      "community_name": "inference.py",
-      "file_type": "code",
-      "norm_label": "test_onnx_batch_inference.py",
-      "source_file": "backend/tests/test_onnx_batch_inference.py",
-      "source_location": "L1"
-    },
-    {
       "id": "backend_app_api_inference_rationale_100",
       "label": "Run inference on a single uploaded image.",
       "_origin": "ast",
@@ -10636,17 +10460,6 @@
       "norm_label": "run onnx batch inference on multiple uploaded images in parallel chunks of 2 to...",
       "source_file": "backend/app/api/inference.py",
       "source_location": "L1129"
-    },
-    {
-      "id": "backend_app_api_inference_rationale_288",
-      "label": "Run bounded inference on frames from an uploaded video using ONNX batching (2\u2026",
-      "_origin": "ast",
-      "community": 23,
-      "community_name": "inference.py",
-      "file_type": "rationale",
-      "norm_label": "run bounded inference on frames from an uploaded video using onnx batching (2...",
-      "source_file": "backend/app/api/inference.py",
-      "source_location": "L288"
     },
     {
       "id": "backend_app_api_inference_rationale_41",
@@ -10682,37 +10495,15 @@
       "source_location": "L756"
     },
     {
-      "id": "backend_app_api_stream_rationale_409",
-      "label": "Generator yielding multipart JPEG frames from RTSP or IP Webcam Pro stream.\u2026",
+      "id": "backend_app_api_inference_rationale_76",
+      "label": "Return inference service and resource status.",
       "_origin": "ast",
       "community": 23,
       "community_name": "inference.py",
       "file_type": "rationale",
-      "norm_label": "generator yielding multipart jpeg frames from rtsp or ip webcam pro stream....",
-      "source_file": "backend/app/api/stream.py",
-      "source_location": "L409"
-    },
-    {
-      "id": "backend_app_pipeline_preprocessor_rationale_31",
-      "label": "Generic preprocessing configuration. Model-specific values can be changed later\u2026",
-      "_origin": "ast",
-      "community": 23,
-      "community_name": "inference.py",
-      "file_type": "rationale",
-      "norm_label": "generic preprocessing configuration. model-specific values can be changed later...",
-      "source_file": "backend/app/pipeline/preprocessor.py",
-      "source_location": "L31"
-    },
-    {
-      "id": "backend_tests_test_onnx_batch_inference_rationale_1",
-      "label": "Verification test script for ONNX Batch Inference (2 to 6 frames at once).\u2026",
-      "_origin": "ast",
-      "community": 23,
-      "community_name": "inference.py",
-      "file_type": "rationale",
-      "norm_label": "verification test script for onnx batch inference (2 to 6 frames at once)....",
-      "source_file": "backend/tests/test_onnx_batch_inference.py",
-      "source_location": "L1"
+      "norm_label": "return inference service and resource status.",
+      "source_file": "backend/app/api/inference.py",
+      "source_location": "L76"
     },
     {
       "id": "backend_tests_test_auth",
@@ -10726,6 +10517,28 @@
       "source_location": "L1"
     },
     {
+      "id": "backend_app_pipeline_thermal_fusion_service",
+      "label": "thermal_fusion_service.py",
+      "_origin": "ast",
+      "community": 25,
+      "community_name": "ThermalFusionService",
+      "file_type": "code",
+      "norm_label": "thermal_fusion_service.py",
+      "source_file": "backend/app/pipeline/thermal_fusion_service.py",
+      "source_location": "L1"
+    },
+    {
+      "id": "backend_app_pipeline_thermal_fusion_service_py_any",
+      "label": "Any",
+      "_origin": "ast",
+      "community": 25,
+      "community_name": "ThermalFusionService",
+      "file_type": "code",
+      "norm_label": "any",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
       "id": "backend_app_pipeline_thermal_fusion_service_py_ndarray",
       "label": "ndarray",
       "_origin": "ast",
@@ -10733,6 +10546,39 @@
       "community_name": "ThermalFusionService",
       "file_type": "code",
       "norm_label": "ndarray",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "backend_tests_test_thermal_fusion",
+      "label": "test_thermal_fusion.py",
+      "_origin": "ast",
+      "community": 25,
+      "community_name": "ThermalFusionService",
+      "file_type": "code",
+      "norm_label": "test_thermal_fusion.py",
+      "source_file": "backend/tests/test_thermal_fusion.py",
+      "source_location": "L1"
+    },
+    {
+      "id": "enum",
+      "label": "Enum",
+      "_origin": "ast",
+      "community": 25,
+      "community_name": "ThermalFusionService",
+      "file_type": "code",
+      "norm_label": "enum",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "str",
+      "label": "str",
+      "_origin": "ast",
+      "community": 25,
+      "community_name": "ThermalFusionService",
+      "file_type": "code",
+      "norm_label": "str",
       "source_file": "",
       "source_location": ""
     },
@@ -10757,6 +10603,17 @@
       "norm_label": "builds a tactical amber phosphor lut (low eye fatigue in dark toc).",
       "source_file": "backend/app/pipeline/thermal_fusion_service.py",
       "source_location": "L125"
+    },
+    {
+      "id": "backend_app_pipeline_thermal_fusion_service_rationale_145",
+      "label": "Applies radiometric color palette to an input frame (BGR). Runs in < 1.5ms via\u2026",
+      "_origin": "ast",
+      "community": 25,
+      "community_name": "ThermalFusionService",
+      "file_type": "rationale",
+      "norm_label": "applies radiometric color palette to an input frame (bgr). runs in < 1.5ms via...",
+      "source_file": "backend/app/pipeline/thermal_fusion_service.py",
+      "source_location": "L145"
     },
     {
       "id": "backend_app_pipeline_thermal_fusion_service_rationale_201",
@@ -10792,6 +10649,28 @@
       "source_location": "L253"
     },
     {
+      "id": "backend_app_pipeline_thermal_fusion_service_rationale_26",
+      "label": "Calibration constants to translate 8-bit pixel intensity to estimated Celsius.",
+      "_origin": "ast",
+      "community": 25,
+      "community_name": "ThermalFusionService",
+      "file_type": "rationale",
+      "norm_label": "calibration constants to translate 8-bit pixel intensity to estimated celsius.",
+      "source_file": "backend/app/pipeline/thermal_fusion_service.py",
+      "source_location": "L26"
+    },
+    {
+      "id": "backend_app_pipeline_thermal_fusion_service_rationale_307",
+      "label": "Computes calibrated temperature in \u00b0C at pixel coordinates (x, y). Uses local\u2026",
+      "_origin": "ast",
+      "community": 25,
+      "community_name": "ThermalFusionService",
+      "file_type": "rationale",
+      "norm_label": "computes calibrated temperature in \u00b0c at pixel coordinates (x, y). uses local...",
+      "source_file": "backend/app/pipeline/thermal_fusion_service.py",
+      "source_location": "L307"
+    },
+    {
       "id": "backend_app_pipeline_thermal_fusion_service_rationale_340",
       "label": "Analyzes thermal radiometric profile within a bounding box. Returns:\u2026",
       "_origin": "ast",
@@ -10801,6 +10680,28 @@
       "norm_label": "analyzes thermal radiometric profile within a bounding box. returns:...",
       "source_file": "backend/app/pipeline/thermal_fusion_service.py",
       "source_location": "L340"
+    },
+    {
+      "id": "backend_app_pipeline_thermal_fusion_service_rationale_36",
+      "label": "Represents an object detection correlated across optical and thermal spectrums.",
+      "_origin": "ast",
+      "community": 25,
+      "community_name": "ThermalFusionService",
+      "file_type": "rationale",
+      "norm_label": "represents an object detection correlated across optical and thermal spectrums.",
+      "source_file": "backend/app/pipeline/thermal_fusion_service.py",
+      "source_location": "L36"
+    },
+    {
+      "id": "backend_app_pipeline_thermal_fusion_service_rationale_394",
+      "label": "Physically calibrated Synthetic FLIR Radiometric Thermal Simulator. Enables\u2026",
+      "_origin": "ast",
+      "community": 25,
+      "community_name": "ThermalFusionService",
+      "file_type": "rationale",
+      "norm_label": "physically calibrated synthetic flir radiometric thermal simulator. enables...",
+      "source_file": "backend/app/pipeline/thermal_fusion_service.py",
+      "source_location": "L394"
     },
     {
       "id": "backend_app_pipeline_thermal_fusion_service_rationale_464",
@@ -10825,6 +10726,17 @@
       "source_location": "L486"
     },
     {
+      "id": "backend_app_pipeline_thermal_fusion_service_rationale_593",
+      "label": "Draws tactical military thermal telemetry: - Radiometric color scale graduation\u2026",
+      "_origin": "ast",
+      "community": 25,
+      "community_name": "ThermalFusionService",
+      "file_type": "rationale",
+      "norm_label": "draws tactical military thermal telemetry: - radiometric color scale graduation...",
+      "source_file": "backend/app/pipeline/thermal_fusion_service.py",
+      "source_location": "L593"
+    },
+    {
       "id": "backend_app_pipeline_thermal_fusion_service_rationale_63",
       "label": "High-performance, zero-stutter thermal and night-vision radiometric engine.\u2026",
       "_origin": "ast",
@@ -10845,6 +10757,72 @@
       "norm_label": "builds a realistic 256-entry flir ironbow bgr lookup table. color trajectory:...",
       "source_file": "backend/app/pipeline/thermal_fusion_service.py",
       "source_location": "L79"
+    },
+    {
+      "id": "backend_tests_test_thermal_fusion_rationale_100",
+      "label": "Verify Bayesian confidence boosting and status assignment in cross-spectral\u2026",
+      "_origin": "ast",
+      "community": 25,
+      "community_name": "ThermalFusionService",
+      "file_type": "rationale",
+      "norm_label": "verify bayesian confidence boosting and status assignment in cross-spectral...",
+      "source_file": "backend/tests/test_thermal_fusion.py",
+      "source_location": "L100"
+    },
+    {
+      "id": "backend_tests_test_thermal_fusion_rationale_130",
+      "label": "Test FastAPI thermal REST endpoints.",
+      "_origin": "ast",
+      "community": 25,
+      "community_name": "ThermalFusionService",
+      "file_type": "rationale",
+      "norm_label": "test fastapi thermal rest endpoints.",
+      "source_file": "backend/tests/test_thermal_fusion.py",
+      "source_location": "L130"
+    },
+    {
+      "id": "backend_tests_test_thermal_fusion_rationale_31",
+      "label": "Verify all radiometric palettes transform a sample frame and produce valid\u2026",
+      "_origin": "ast",
+      "community": 25,
+      "community_name": "ThermalFusionService",
+      "file_type": "rationale",
+      "norm_label": "verify all radiometric palettes transform a sample frame and produce valid...",
+      "source_file": "backend/tests/test_thermal_fusion.py",
+      "source_location": "L31"
+    },
+    {
+      "id": "backend_tests_test_thermal_fusion_rationale_59",
+      "label": "Verify FLIR MSX detail fusion injects optical physical contours into thermal\u2026",
+      "_origin": "ast",
+      "community": 25,
+      "community_name": "ThermalFusionService",
+      "file_type": "rationale",
+      "norm_label": "verify flir msx detail fusion injects optical physical contours into thermal...",
+      "source_file": "backend/tests/test_thermal_fusion.py",
+      "source_location": "L59"
+    },
+    {
+      "id": "backend_tests_test_thermal_fusion_rationale_74",
+      "label": "Verify spot temperature calculation and human body radiometric analysis.",
+      "_origin": "ast",
+      "community": 25,
+      "community_name": "ThermalFusionService",
+      "file_type": "rationale",
+      "norm_label": "verify spot temperature calculation and human body radiometric analysis.",
+      "source_file": "backend/tests/test_thermal_fusion.py",
+      "source_location": "L74"
+    },
+    {
+      "id": "backend_tests_test_thermal_fusion_rationale_89",
+      "label": "Verify that optical frame can be transformed into simulated FLIR radiometric\u2026",
+      "_origin": "ast",
+      "community": 25,
+      "community_name": "ThermalFusionService",
+      "file_type": "rationale",
+      "norm_label": "verify that optical frame can be transformed into simulated flir radiometric...",
+      "source_file": "backend/tests/test_thermal_fusion.py",
+      "source_location": "L89"
     },
     {
       "id": "backend_app_api_anpr",
@@ -11348,6 +11326,17 @@
       "source_location": "L225"
     },
     {
+      "id": "frontend_src_components_dashboard_recentalerts",
+      "label": "recentalerts.tsx",
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "alertsStore.ts",
+      "file_type": "code",
+      "norm_label": "recentalerts.tsx",
+      "source_file": "frontend/src/components/dashboard/recentalerts.tsx",
+      "source_location": "L1"
+    },
+    {
       "id": "frontend_src_lib_alertsstore",
       "label": "alertsStore.ts",
       "_origin": "ast",
@@ -11425,17 +11414,6 @@
       "source_location": "L10"
     },
     {
-      "id": "frontend_src_app_operator_anpr_page",
-      "label": "anpr/page.tsx",
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "api.ts",
-      "file_type": "code",
-      "norm_label": "anpr/page.tsx",
-      "source_file": "frontend/src/app/(operator)/anpr/page.tsx",
-      "source_location": "L1"
-    },
-    {
       "id": "frontend_src_app_operator_facial_recognition_page",
       "label": "facial-recognition/page.tsx",
       "_origin": "ast",
@@ -11480,14 +11458,14 @@
       "source_location": "L1"
     },
     {
-      "id": "frontend_src_types_anpr",
-      "label": "anpr.ts",
+      "id": "frontend_src_types_backend",
+      "label": "backend.ts",
       "_origin": "ast",
       "community": 3,
       "community_name": "api.ts",
       "file_type": "code",
-      "norm_label": "anpr.ts",
-      "source_file": "frontend/src/types/anpr.ts",
+      "norm_label": "backend.ts",
+      "source_file": "frontend/src/types/backend.ts",
       "source_location": "L1"
     },
     {
@@ -11669,13 +11647,35 @@
       "source_location": "L990"
     },
     {
+      "id": "backend_app_pipeline_postprocessor",
+      "label": "postprocessor.py",
+      "_origin": "ast",
+      "community": 31,
+      "community_name": "Postprocessor",
+      "file_type": "code",
+      "norm_label": "postprocessor.py",
+      "source_file": "backend/app/pipeline/postprocessor.py",
+      "source_location": "L1"
+    },
+    {
       "id": "backend_app_pipeline_postprocessor_py_any",
       "label": "Any",
       "_origin": "ast",
       "community": 31,
-      "community_name": "Detection",
+      "community_name": "Postprocessor",
       "file_type": "code",
       "norm_label": "any",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "backend_app_pipeline_postprocessor_py_exception",
+      "label": "Exception",
+      "_origin": "ast",
+      "community": 31,
+      "community_name": "Postprocessor",
+      "file_type": "code",
+      "norm_label": "exception",
       "source_file": "",
       "source_location": ""
     },
@@ -11684,18 +11684,29 @@
       "label": "ndarray",
       "_origin": "ast",
       "community": 31,
-      "community_name": "Detection",
+      "community_name": "Postprocessor",
       "file_type": "code",
       "norm_label": "ndarray",
       "source_file": "",
       "source_location": ""
     },
     {
+      "id": "backend_tests_test_postprocessor",
+      "label": "test_postprocessor.py",
+      "_origin": "ast",
+      "community": 31,
+      "community_name": "Postprocessor",
+      "file_type": "code",
+      "norm_label": "test_postprocessor.py",
+      "source_file": "backend/tests/test_postprocessor.py",
+      "source_location": "L1"
+    },
+    {
       "id": "backend_app_pipeline_postprocessor_rationale_106",
       "label": "Decode output tensors into a list of detection lists (one list per frame in the\u2026",
       "_origin": "ast",
       "community": 31,
-      "community_name": "Detection",
+      "community_name": "Postprocessor",
       "file_type": "rationale",
       "norm_label": "decode output tensors into a list of detection lists (one list per frame in the...",
       "source_file": "backend/app/pipeline/postprocessor.py",
@@ -11706,7 +11717,7 @@
       "label": "Decode single-frame YOLOv8/v9/v11 output [4 + C, N].",
       "_origin": "ast",
       "community": 31,
-      "community_name": "Detection",
+      "community_name": "Postprocessor",
       "file_type": "rationale",
       "norm_label": "decode single-frame yolov8/v9/v11 output [4 + c, n].",
       "source_file": "backend/app/pipeline/postprocessor.py",
@@ -11717,7 +11728,7 @@
       "label": "Decode standard YOLOv8/v9/v11 output with shape [1, 4 + C, N] or [4 + C, N].",
       "_origin": "ast",
       "community": 31,
-      "community_name": "Detection",
+      "community_name": "Postprocessor",
       "file_type": "rationale",
       "norm_label": "decode standard yolov8/v9/v11 output with shape [1, 4 + c, n] or [4 + c, n].",
       "source_file": "backend/app/pipeline/postprocessor.py",
@@ -11728,7 +11739,7 @@
       "label": "Decode single-frame YOLOv5/v7 [N, 5 + C] or transposed YOLOv8 [N, 4 + C].",
       "_origin": "ast",
       "community": 31,
-      "community_name": "Detection",
+      "community_name": "Postprocessor",
       "file_type": "rationale",
       "norm_label": "decode single-frame yolov5/v7 [n, 5 + c] or transposed yolov8 [n, 4 + c].",
       "source_file": "backend/app/pipeline/postprocessor.py",
@@ -11739,7 +11750,7 @@
       "label": "Decode YOLOv5/v7 [1, N, 5 + C] or transposed YOLOv8 [1, N, 4 + C].",
       "_origin": "ast",
       "community": 31,
-      "community_name": "Detection",
+      "community_name": "Postprocessor",
       "file_type": "rationale",
       "norm_label": "decode yolov5/v7 [1, n, 5 + c] or transposed yolov8 [1, n, 4 + c].",
       "source_file": "backend/app/pipeline/postprocessor.py",
@@ -11750,7 +11761,7 @@
       "label": "Decode single-frame pre-NMS / End-to-End detections [N, 6] -> [x1, y1, x2, y2,\u2026",
       "_origin": "ast",
       "community": 31,
-      "community_name": "Detection",
+      "community_name": "Postprocessor",
       "file_type": "rationale",
       "norm_label": "decode single-frame pre-nms / end-to-end detections [n, 6] -> [x1, y1, x2, y2,...",
       "source_file": "backend/app/pipeline/postprocessor.py",
@@ -11761,7 +11772,7 @@
       "label": "Decode pre-NMS / End-to-End detections [1, N, 6] -> [x1, y1, x2, y2, conf,\u2026",
       "_origin": "ast",
       "community": 31,
-      "community_name": "Detection",
+      "community_name": "Postprocessor",
       "file_type": "rationale",
       "norm_label": "decode pre-nms / end-to-end detections [1, n, 6] -> [x1, y1, x2, y2, conf,...",
       "source_file": "backend/app/pipeline/postprocessor.py",
@@ -11772,18 +11783,29 @@
       "label": "Convert cx, cy, w, h boxes to x, y, w, h for cv2.dnn.NMSBoxes, execute NMS, and\u2026",
       "_origin": "ast",
       "community": 31,
-      "community_name": "Detection",
+      "community_name": "Postprocessor",
       "file_type": "rationale",
       "norm_label": "convert cx, cy, w, h boxes to x, y, w, h for cv2.dnn.nmsboxes, execute nms, and...",
       "source_file": "backend/app/pipeline/postprocessor.py",
       "source_location": "L258"
     },
     {
+      "id": "backend_app_pipeline_postprocessor_rationale_30",
+      "label": "Base exception for postprocessing errors.",
+      "_origin": "ast",
+      "community": 31,
+      "community_name": "Postprocessor",
+      "file_type": "rationale",
+      "norm_label": "base exception for postprocessing errors.",
+      "source_file": "backend/app/pipeline/postprocessor.py",
+      "source_location": "L30"
+    },
+    {
       "id": "backend_app_pipeline_postprocessor_rationale_317",
       "label": "Rescale bounding boxes from model input dimensions to original frame dimensions.",
       "_origin": "ast",
       "community": 31,
-      "community_name": "Detection",
+      "community_name": "Postprocessor",
       "file_type": "rationale",
       "norm_label": "rescale bounding boxes from model input dimensions to original frame dimensions.",
       "source_file": "backend/app/pipeline/postprocessor.py",
@@ -11794,18 +11816,29 @@
       "label": "Structured object detection representation.",
       "_origin": "ast",
       "community": 31,
-      "community_name": "Detection",
+      "community_name": "Postprocessor",
       "file_type": "rationale",
       "norm_label": "structured object detection representation.",
       "source_file": "backend/app/pipeline/postprocessor.py",
       "source_location": "L35"
     },
     {
+      "id": "backend_app_pipeline_postprocessor_rationale_64",
+      "label": "Decodes raw model output tensors into structured bounding boxes. Supported\u2026",
+      "_origin": "ast",
+      "community": 31,
+      "community_name": "Postprocessor",
+      "file_type": "rationale",
+      "norm_label": "decodes raw model output tensors into structured bounding boxes. supported...",
+      "source_file": "backend/app/pipeline/postprocessor.py",
+      "source_location": "L64"
+    },
+    {
       "id": "backend_app_pipeline_postprocessor_rationale_78",
       "label": "Return the label for a class index or a fallback name.",
       "_origin": "ast",
       "community": 31,
-      "community_name": "Detection",
+      "community_name": "Postprocessor",
       "file_type": "rationale",
       "norm_label": "return the label for a class index or a fallback name.",
       "source_file": "backend/app/pipeline/postprocessor.py",
@@ -11816,7 +11849,7 @@
       "label": "Decode output tensors into a list of detection dictionaries for a single frame\u2026",
       "_origin": "ast",
       "community": 31,
-      "community_name": "Detection",
+      "community_name": "Postprocessor",
       "file_type": "rationale",
       "norm_label": "decode output tensors into a list of detection dictionaries for a single frame...",
       "source_file": "backend/app/pipeline/postprocessor.py",
@@ -11999,15 +12032,59 @@
       "source_location": "L901"
     },
     {
-      "id": "frontend_src_types_backend",
-      "label": "backend.ts",
+      "id": "backend_app_tracking_session_store_rationale_101",
+      "label": "Record that a frame was processed for ``camera_id``.",
       "_origin": "ast",
       "community": 33,
-      "community_name": "backend.ts",
-      "file_type": "code",
-      "norm_label": "backend.ts",
-      "source_file": "frontend/src/types/backend.ts",
-      "source_location": "L1"
+      "community_name": "TrackerSessionStore",
+      "file_type": "rationale",
+      "norm_label": "record that a frame was processed for ``camera_id``.",
+      "source_file": "backend/app/tracking/session_store.py",
+      "source_location": "L101"
+    },
+    {
+      "id": "backend_app_tracking_session_store_rationale_107",
+      "label": "Reset and remove the tracker session for ``camera_id``. Returns: True if the\u2026",
+      "_origin": "ast",
+      "community": 33,
+      "community_name": "TrackerSessionStore",
+      "file_type": "rationale",
+      "norm_label": "reset and remove the tracker session for ``camera_id``. returns: true if the...",
+      "source_file": "backend/app/tracking/session_store.py",
+      "source_location": "L107"
+    },
+    {
+      "id": "backend_app_tracking_session_store_rationale_128",
+      "label": "Reset and remove all tracker sessions. Returns: Number of sessions that were\u2026",
+      "_origin": "ast",
+      "community": 33,
+      "community_name": "TrackerSessionStore",
+      "file_type": "rationale",
+      "norm_label": "reset and remove all tracker sessions. returns: number of sessions that were...",
+      "source_file": "backend/app/tracking/session_store.py",
+      "source_location": "L128"
+    },
+    {
+      "id": "backend_app_tracking_session_store_rationale_151",
+      "label": "Return a JSON-serialisable summary of all active sessions.",
+      "_origin": "ast",
+      "community": 33,
+      "community_name": "TrackerSessionStore",
+      "file_type": "rationale",
+      "norm_label": "return a json-serialisable summary of all active sessions.",
+      "source_file": "backend/app/tracking/session_store.py",
+      "source_location": "L151"
+    },
+    {
+      "id": "backend_app_tracking_session_store_rationale_43",
+      "label": "Thread-safe registry mapping ``camera_id`` \u2192 ``ByteTrackerWrapper``. Typical\u2026",
+      "_origin": "ast",
+      "community": 33,
+      "community_name": "TrackerSessionStore",
+      "file_type": "rationale",
+      "norm_label": "thread-safe registry mapping ``camera_id`` \u2192 ``bytetrackerwrapper``. typical...",
+      "source_file": "backend/app/tracking/session_store.py",
+      "source_location": "L43"
     },
     {
       "id": "backend_app_core_config",
@@ -12230,17 +12307,6 @@
       "source_location": "L189"
     },
     {
-      "id": "backend_app_inference_model_manager_rationale_22",
-      "label": "Raised when a requested model is not loaded.",
-      "_origin": "ast",
-      "community": 36,
-      "community_name": "ModelManagerError",
-      "file_type": "rationale",
-      "norm_label": "raised when a requested model is not loaded.",
-      "source_file": "backend/app/inference/model_manager.py",
-      "source_location": "L22"
-    },
-    {
       "id": "backend_app_inference_model_manager_rationale_26",
       "label": "Raised when attempting to load an already loaded model.",
       "_origin": "ast",
@@ -12283,6 +12349,17 @@
       "norm_label": "config",
       "source_file": "frontend/middleware.ts",
       "source_location": "L8"
+    },
+    {
+      "id": "postcss_load_config",
+      "label": "postcss-load-config",
+      "_origin": "ast",
+      "community": 38,
+      "community_name": "postcss.config.mjs",
+      "confidence": "EXTRACTED",
+      "file_type": "code",
+      "norm_label": "postcss-load-config",
+      "source_file": "postcss-load-config"
     },
     {
       "id": "frontend_postcss_config",
@@ -12725,11 +12802,22 @@
       "source_location": "L1"
     },
     {
+      "id": "backend_app_core_resource_manager",
+      "label": "resource_manager.py",
+      "_origin": "ast",
+      "community": 43,
+      "community_name": "logging.py",
+      "file_type": "code",
+      "norm_label": "resource_manager.py",
+      "source_file": "backend/app/core/resource_manager.py",
+      "source_location": "L1"
+    },
+    {
       "id": "backend_app_inference_onnx_engine",
       "label": "onnx_engine.py",
       "_origin": "ast",
       "community": 43,
-      "community_name": "ONNXEngineError",
+      "community_name": "logging.py",
       "file_type": "code",
       "norm_label": "onnx_engine.py",
       "source_file": "backend/app/inference/onnx_engine.py",
@@ -12740,7 +12828,7 @@
       "label": "Exception",
       "_origin": "ast",
       "community": 43,
-      "community_name": "ONNXEngineError",
+      "community_name": "logging.py",
       "file_type": "code",
       "norm_label": "exception",
       "source_file": "",
@@ -12751,18 +12839,40 @@
       "label": "ndarray",
       "_origin": "ast",
       "community": 43,
-      "community_name": "ONNXEngineError",
+      "community_name": "logging.py",
       "file_type": "code",
       "norm_label": "ndarray",
       "source_file": "",
       "source_location": ""
     },
     {
+      "id": "backend_app_pipeline_anpr_service",
+      "label": "anpr_service.py",
+      "_origin": "ast",
+      "community": 43,
+      "community_name": "logging.py",
+      "file_type": "code",
+      "norm_label": "anpr_service.py",
+      "source_file": "backend/app/pipeline/anpr_service.py",
+      "source_location": "L1"
+    },
+    {
+      "id": "backend_app_utils_logging",
+      "label": "logging.py",
+      "_origin": "ast",
+      "community": 43,
+      "community_name": "logging.py",
+      "file_type": "code",
+      "norm_label": "logging.py",
+      "source_file": "backend/app/utils/logging.py",
+      "source_location": "L1"
+    },
+    {
       "id": "backend_app_inference_onnx_engine_rationale_270",
       "label": "Run inference using a NumPy array. Preprocessing is intentionally kept outside\u2026",
       "_origin": "ast",
       "community": 43,
-      "community_name": "ONNXEngineError",
+      "community_name": "logging.py",
       "file_type": "rationale",
       "norm_label": "run inference using a numpy array. preprocessing is intentionally kept outside...",
       "source_file": "backend/app/inference/onnx_engine.py",
@@ -12773,7 +12883,7 @@
       "label": "Base exception for ONNX engine errors.",
       "_origin": "ast",
       "community": 43,
-      "community_name": "ONNXEngineError",
+      "community_name": "logging.py",
       "file_type": "rationale",
       "norm_label": "base exception for onnx engine errors.",
       "source_file": "backend/app/inference/onnx_engine.py",
@@ -12784,172 +12894,117 @@
       "label": "Raised when inference fails.",
       "_origin": "ast",
       "community": 43,
-      "community_name": "ONNXEngineError",
+      "community_name": "logging.py",
       "file_type": "rationale",
       "norm_label": "raised when inference fails.",
       "source_file": "backend/app/inference/onnx_engine.py",
       "source_location": "L37"
     },
     {
-      "id": "backend_tests_test_thermal_fusion_rationale_100",
-      "label": "Verify Bayesian confidence boosting and status assignment in cross-spectral\u2026",
+      "id": "backend_app_tracking_models",
+      "label": "tracking/models.py",
       "_origin": "ast",
       "community": 45,
-      "community_name": "TestThermalFusion",
-      "file_type": "rationale",
-      "norm_label": "verify bayesian confidence boosting and status assignment in cross-spectral...",
-      "source_file": "backend/tests/test_thermal_fusion.py",
-      "source_location": "L100"
-    },
-    {
-      "id": "backend_tests_test_thermal_fusion_rationale_130",
-      "label": "Test FastAPI thermal REST endpoints.",
-      "_origin": "ast",
-      "community": 45,
-      "community_name": "TestThermalFusion",
-      "file_type": "rationale",
-      "norm_label": "test fastapi thermal rest endpoints.",
-      "source_file": "backend/tests/test_thermal_fusion.py",
-      "source_location": "L130"
-    },
-    {
-      "id": "backend_tests_test_thermal_fusion_rationale_31",
-      "label": "Verify all radiometric palettes transform a sample frame and produce valid\u2026",
-      "_origin": "ast",
-      "community": 45,
-      "community_name": "TestThermalFusion",
-      "file_type": "rationale",
-      "norm_label": "verify all radiometric palettes transform a sample frame and produce valid...",
-      "source_file": "backend/tests/test_thermal_fusion.py",
-      "source_location": "L31"
-    },
-    {
-      "id": "backend_tests_test_thermal_fusion_rationale_59",
-      "label": "Verify FLIR MSX detail fusion injects optical physical contours into thermal\u2026",
-      "_origin": "ast",
-      "community": 45,
-      "community_name": "TestThermalFusion",
-      "file_type": "rationale",
-      "norm_label": "verify flir msx detail fusion injects optical physical contours into thermal...",
-      "source_file": "backend/tests/test_thermal_fusion.py",
-      "source_location": "L59"
-    },
-    {
-      "id": "backend_tests_test_thermal_fusion_rationale_74",
-      "label": "Verify spot temperature calculation and human body radiometric analysis.",
-      "_origin": "ast",
-      "community": 45,
-      "community_name": "TestThermalFusion",
-      "file_type": "rationale",
-      "norm_label": "verify spot temperature calculation and human body radiometric analysis.",
-      "source_file": "backend/tests/test_thermal_fusion.py",
-      "source_location": "L74"
-    },
-    {
-      "id": "backend_tests_test_thermal_fusion_rationale_89",
-      "label": "Verify that optical frame can be transformed into simulated FLIR radiometric\u2026",
-      "_origin": "ast",
-      "community": 45,
-      "community_name": "TestThermalFusion",
-      "file_type": "rationale",
-      "norm_label": "verify that optical frame can be transformed into simulated flir radiometric...",
-      "source_file": "backend/tests/test_thermal_fusion.py",
-      "source_location": "L89"
-    },
-    {
-      "id": "backend_app_pipeline_thermal_fusion_service",
-      "label": "thermal_fusion_service.py",
-      "_origin": "ast",
-      "community": 46,
-      "community_name": "ThermalPalette",
+      "community_name": "TrackedObject",
       "file_type": "code",
-      "norm_label": "thermal_fusion_service.py",
-      "source_file": "backend/app/pipeline/thermal_fusion_service.py",
+      "norm_label": "tracking/models.py",
+      "source_file": "backend/app/tracking/models.py",
       "source_location": "L1"
     },
     {
-      "id": "backend_app_pipeline_thermal_fusion_service_py_any",
+      "id": "backend_app_tracking_models_py_any",
       "label": "Any",
       "_origin": "ast",
-      "community": 46,
-      "community_name": "ThermalPalette",
+      "community": 45,
+      "community_name": "TrackedObject",
       "file_type": "code",
       "norm_label": "any",
       "source_file": "",
       "source_location": ""
     },
     {
-      "id": "backend_tests_test_thermal_fusion",
-      "label": "test_thermal_fusion.py",
+      "id": "backend_app_tracking_tracker_py_any",
+      "label": "Any",
       "_origin": "ast",
-      "community": 46,
-      "community_name": "ThermalPalette",
+      "community": 45,
+      "community_name": "TrackedObject",
       "file_type": "code",
-      "norm_label": "test_thermal_fusion.py",
-      "source_file": "backend/tests/test_thermal_fusion.py",
+      "norm_label": "any",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "trackedobject",
+      "label": "TrackedObject",
+      "_origin": "ast",
+      "community": 45,
+      "community_name": "TrackedObject",
+      "file_type": "code",
+      "norm_label": "trackedobject",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "backend_app_tracking_models_rationale_1",
+      "label": "Data models for tracking output. TrackedObject extends a raw Detection with a\u2026",
+      "_origin": "ast",
+      "community": 45,
+      "community_name": "TrackedObject",
+      "file_type": "rationale",
+      "norm_label": "data models for tracking output. trackedobject extends a raw detection with a...",
+      "source_file": "backend/app/tracking/models.py",
       "source_location": "L1"
     },
     {
-      "id": "enum",
-      "label": "Enum",
+      "id": "backend_app_tracking_models_rationale_18",
+      "label": "Snapshot of a tracked object within a single video frame. Attributes: track_id:\u2026",
       "_origin": "ast",
-      "community": 46,
-      "community_name": "ThermalPalette",
+      "community": 45,
+      "community_name": "TrackedObject",
+      "file_type": "rationale",
+      "norm_label": "snapshot of a tracked object within a single video frame. attributes: track_id:...",
+      "source_file": "backend/app/tracking/models.py",
+      "source_location": "L18"
+    },
+    {
+      "id": "backend_app_tracking_models_rationale_42",
+      "label": "Return a JSON-serialisable representation.",
+      "_origin": "ast",
+      "community": 45,
+      "community_name": "TrackedObject",
+      "file_type": "rationale",
+      "norm_label": "return a json-serialisable representation.",
+      "source_file": "backend/app/tracking/models.py",
+      "source_location": "L42"
+    },
+    {
+      "id": "backend_app_tracking_tracker_rationale_74",
+      "label": "Feed one frame's detections into ByteTracker and return tracked objects. Args:\u2026",
+      "_origin": "ast",
+      "community": 45,
+      "community_name": "TrackedObject",
+      "file_type": "rationale",
+      "norm_label": "feed one frame's detections into bytetracker and return tracked objects. args:...",
+      "source_file": "backend/app/tracking/tracker.py",
+      "source_location": "L74"
+    },
+    {
+      "id": "backend_app_inference_inference_service",
+      "label": "inference_service.py",
+      "_origin": "ast",
+      "community": 47,
+      "community_name": "inference_service.py",
       "file_type": "code",
-      "norm_label": "enum",
-      "source_file": "",
-      "source_location": ""
-    },
-    {
-      "id": "str",
-      "label": "str",
-      "_origin": "ast",
-      "community": 46,
-      "community_name": "ThermalPalette",
-      "file_type": "code",
-      "norm_label": "str",
-      "source_file": "",
-      "source_location": ""
-    },
-    {
-      "id": "backend_app_pipeline_thermal_fusion_service_rationale_26",
-      "label": "Calibration constants to translate 8-bit pixel intensity to estimated Celsius.",
-      "_origin": "ast",
-      "community": 46,
-      "community_name": "ThermalPalette",
-      "file_type": "rationale",
-      "norm_label": "calibration constants to translate 8-bit pixel intensity to estimated celsius.",
-      "source_file": "backend/app/pipeline/thermal_fusion_service.py",
-      "source_location": "L26"
-    },
-    {
-      "id": "backend_app_pipeline_thermal_fusion_service_rationale_36",
-      "label": "Represents an object detection correlated across optical and thermal spectrums.",
-      "_origin": "ast",
-      "community": 46,
-      "community_name": "ThermalPalette",
-      "file_type": "rationale",
-      "norm_label": "represents an object detection correlated across optical and thermal spectrums.",
-      "source_file": "backend/app/pipeline/thermal_fusion_service.py",
-      "source_location": "L36"
-    },
-    {
-      "id": "backend_app_pipeline_thermal_fusion_service_rationale_394",
-      "label": "Physically calibrated Synthetic FLIR Radiometric Thermal Simulator. Enables\u2026",
-      "_origin": "ast",
-      "community": 46,
-      "community_name": "ThermalPalette",
-      "file_type": "rationale",
-      "norm_label": "physically calibrated synthetic flir radiometric thermal simulator. enables...",
-      "source_file": "backend/app/pipeline/thermal_fusion_service.py",
-      "source_location": "L394"
+      "norm_label": "inference_service.py",
+      "source_file": "backend/app/inference/inference_service.py",
+      "source_location": "L1"
     },
     {
       "id": "backend_app_inference_inference_service_py_any",
       "label": "Any",
       "_origin": "ast",
       "community": 47,
-      "community_name": ".predict",
+      "community_name": "inference_service.py",
       "file_type": "code",
       "norm_label": "any",
       "source_file": "",
@@ -12960,7 +13015,7 @@
       "label": "Exception",
       "_origin": "ast",
       "community": 47,
-      "community_name": ".predict",
+      "community_name": "inference_service.py",
       "file_type": "code",
       "norm_label": "exception",
       "source_file": "",
@@ -12971,18 +13026,29 @@
       "label": "ndarray",
       "_origin": "ast",
       "community": 47,
-      "community_name": ".predict",
+      "community_name": "inference_service.py",
       "file_type": "code",
       "norm_label": "ndarray",
       "source_file": "",
       "source_location": ""
     },
     {
+      "id": "backend_tests_test_inference_service",
+      "label": "test_inference_service.py",
+      "_origin": "ast",
+      "community": 47,
+      "community_name": "inference_service.py",
+      "file_type": "code",
+      "norm_label": "test_inference_service.py",
+      "source_file": "backend/tests/test_inference_service.py",
+      "source_location": "L1"
+    },
+    {
       "id": "backend_app_inference_inference_service_rationale_28",
       "label": "Base exception for inference service errors.",
       "_origin": "ast",
       "community": 47,
-      "community_name": ".predict",
+      "community_name": "inference_service.py",
       "file_type": "rationale",
       "norm_label": "base exception for inference service errors.",
       "source_file": "backend/app/inference/inference_service.py",
@@ -12993,7 +13059,7 @@
       "label": "Raised when inference resources are unavailable.",
       "_origin": "ast",
       "community": 47,
-      "community_name": ".predict",
+      "community_name": "inference_service.py",
       "file_type": "rationale",
       "norm_label": "raised when inference resources are unavailable.",
       "source_file": "backend/app/inference/inference_service.py",
@@ -13004,154 +13070,33 @@
       "label": "Run inference using a loaded model, supporting both single-frame and batch\u2026",
       "_origin": "ast",
       "community": 47,
-      "community_name": ".predict",
+      "community_name": "inference_service.py",
       "file_type": "rationale",
       "norm_label": "run inference using a loaded model, supporting both single-frame and batch...",
       "source_file": "backend/app/inference/inference_service.py",
       "source_location": "L76"
     },
     {
-      "id": "backend_app_pipeline_postprocessor",
-      "label": "postprocessor.py",
+      "id": "backend_app_inference_model_manager_rationale_22",
+      "label": "Raised when a requested model is not loaded.",
       "_origin": "ast",
-      "community": 48,
-      "community_name": "Postprocessor",
-      "file_type": "code",
-      "norm_label": "postprocessor.py",
-      "source_file": "backend/app/pipeline/postprocessor.py",
-      "source_location": "L1"
-    },
-    {
-      "id": "backend_app_pipeline_postprocessor_py_exception",
-      "label": "Exception",
-      "_origin": "ast",
-      "community": 48,
-      "community_name": "Postprocessor",
-      "file_type": "code",
-      "norm_label": "exception",
-      "source_file": "",
-      "source_location": ""
-    },
-    {
-      "id": "backend_tests_test_postprocessor",
-      "label": "test_postprocessor.py",
-      "_origin": "ast",
-      "community": 48,
-      "community_name": "Postprocessor",
-      "file_type": "code",
-      "norm_label": "test_postprocessor.py",
-      "source_file": "backend/tests/test_postprocessor.py",
-      "source_location": "L1"
-    },
-    {
-      "id": "backend_app_api_thermal_rationale_113",
-      "label": "Runs threat detection if the ONNX model is available.",
-      "_origin": "ast",
-      "community": 48,
-      "community_name": "Postprocessor",
+      "community": 47,
+      "community_name": "inference_service.py",
       "file_type": "rationale",
-      "norm_label": "runs threat detection if the onnx model is available.",
-      "source_file": "backend/app/api/thermal.py",
-      "source_location": "L113"
-    },
-    {
-      "id": "backend_app_pipeline_postprocessor_rationale_30",
-      "label": "Base exception for postprocessing errors.",
-      "_origin": "ast",
-      "community": 48,
-      "community_name": "Postprocessor",
-      "file_type": "rationale",
-      "norm_label": "base exception for postprocessing errors.",
-      "source_file": "backend/app/pipeline/postprocessor.py",
-      "source_location": "L30"
-    },
-    {
-      "id": "backend_app_pipeline_postprocessor_rationale_54",
-      "label": "Configuration for bounding box decoding and NMS.",
-      "_origin": "ast",
-      "community": 48,
-      "community_name": "Postprocessor",
-      "file_type": "rationale",
-      "norm_label": "configuration for bounding box decoding and nms.",
-      "source_file": "backend/app/pipeline/postprocessor.py",
-      "source_location": "L54"
-    },
-    {
-      "id": "backend_app_pipeline_postprocessor_rationale_64",
-      "label": "Decodes raw model output tensors into structured bounding boxes. Supported\u2026",
-      "_origin": "ast",
-      "community": 48,
-      "community_name": "Postprocessor",
-      "file_type": "rationale",
-      "norm_label": "decodes raw model output tensors into structured bounding boxes. supported...",
-      "source_file": "backend/app/pipeline/postprocessor.py",
-      "source_location": "L64"
+      "norm_label": "raised when a requested model is not loaded.",
+      "source_file": "backend/app/inference/model_manager.py",
+      "source_location": "L22"
     },
     {
       "id": "backend_app_inference_onnx_engine_py_any",
       "label": "Any",
       "_origin": "ast",
-      "community": 49,
-      "community_name": "ONNXModelError",
+      "community": 5,
+      "community_name": "ONNXEngine",
       "file_type": "code",
       "norm_label": "any",
       "source_file": "",
       "source_location": ""
-    },
-    {
-      "id": "backend_app_inference_onnx_engine_rationale_228",
-      "label": "Return information about model inputs.",
-      "_origin": "ast",
-      "community": 49,
-      "community_name": "ONNXModelError",
-      "file_type": "rationale",
-      "norm_label": "return information about model inputs.",
-      "source_file": "backend/app/inference/onnx_engine.py",
-      "source_location": "L228"
-    },
-    {
-      "id": "backend_app_inference_onnx_engine_rationale_247",
-      "label": "Return information about model outputs.",
-      "_origin": "ast",
-      "community": 49,
-      "community_name": "ONNXModelError",
-      "file_type": "rationale",
-      "norm_label": "return information about model outputs.",
-      "source_file": "backend/app/inference/onnx_engine.py",
-      "source_location": "L247"
-    },
-    {
-      "id": "backend_app_inference_onnx_engine_rationale_324",
-      "label": "Return useful information about the loaded model.",
-      "_origin": "ast",
-      "community": 49,
-      "community_name": "ONNXModelError",
-      "file_type": "rationale",
-      "norm_label": "return useful information about the loaded model.",
-      "source_file": "backend/app/inference/onnx_engine.py",
-      "source_location": "L324"
-    },
-    {
-      "id": "backend_app_inference_onnx_engine_rationale_33",
-      "label": "Raised when an ONNX model cannot be loaded or is invalid.",
-      "_origin": "ast",
-      "community": 49,
-      "community_name": "ONNXModelError",
-      "file_type": "rationale",
-      "norm_label": "raised when an onnx model cannot be loaded or is invalid.",
-      "source_file": "backend/app/inference/onnx_engine.py",
-      "source_location": "L33"
-    },
-    {
-      "id": "backend_app_inference_onnx_engine_rationale_343",
-      "label": "Release the ONNX Runtime session.",
-      "_origin": "ast",
-      "community": 49,
-      "community_name": "ONNXModelError",
-      "file_type": "rationale",
-      "norm_label": "release the onnx runtime session.",
-      "source_file": "backend/app/inference/onnx_engine.py",
-      "source_location": "L343"
     },
     {
       "id": "backend_app_inference_onnx_engine_py_path",
@@ -13187,6 +13132,61 @@
       "source_location": "L164"
     },
     {
+      "id": "backend_app_inference_onnx_engine_rationale_228",
+      "label": "Return information about model inputs.",
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "ONNXEngine",
+      "file_type": "rationale",
+      "norm_label": "return information about model inputs.",
+      "source_file": "backend/app/inference/onnx_engine.py",
+      "source_location": "L228"
+    },
+    {
+      "id": "backend_app_inference_onnx_engine_rationale_247",
+      "label": "Return information about model outputs.",
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "ONNXEngine",
+      "file_type": "rationale",
+      "norm_label": "return information about model outputs.",
+      "source_file": "backend/app/inference/onnx_engine.py",
+      "source_location": "L247"
+    },
+    {
+      "id": "backend_app_inference_onnx_engine_rationale_324",
+      "label": "Return useful information about the loaded model.",
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "ONNXEngine",
+      "file_type": "rationale",
+      "norm_label": "return useful information about the loaded model.",
+      "source_file": "backend/app/inference/onnx_engine.py",
+      "source_location": "L324"
+    },
+    {
+      "id": "backend_app_inference_onnx_engine_rationale_33",
+      "label": "Raised when an ONNX model cannot be loaded or is invalid.",
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "ONNXEngine",
+      "file_type": "rationale",
+      "norm_label": "raised when an onnx model cannot be loaded or is invalid.",
+      "source_file": "backend/app/inference/onnx_engine.py",
+      "source_location": "L33"
+    },
+    {
+      "id": "backend_app_inference_onnx_engine_rationale_343",
+      "label": "Release the ONNX Runtime session.",
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "ONNXEngine",
+      "file_type": "rationale",
+      "norm_label": "release the onnx runtime session.",
+      "source_file": "backend/app/inference/onnx_engine.py",
+      "source_location": "L343"
+    },
+    {
       "id": "backend_app_inference_onnx_engine_rationale_41",
       "label": "Safe, reusable ONNX Runtime inference engine. Designed for: - GPU acceleration\u2026",
       "_origin": "ast",
@@ -13218,39 +13218,6 @@
       "norm_label": "detect and return preferred execution providers (gpu / cpu).",
       "source_file": "backend/app/inference/onnx_engine.py",
       "source_location": "L96"
-    },
-    {
-      "id": "backend_app_pipeline_thermal_fusion_service_rationale_145",
-      "label": "Applies radiometric color palette to an input frame (BGR). Runs in < 1.5ms via\u2026",
-      "_origin": "ast",
-      "community": 50,
-      "community_name": ".apply_palette",
-      "file_type": "rationale",
-      "norm_label": "applies radiometric color palette to an input frame (bgr). runs in < 1.5ms via...",
-      "source_file": "backend/app/pipeline/thermal_fusion_service.py",
-      "source_location": "L145"
-    },
-    {
-      "id": "backend_app_pipeline_thermal_fusion_service_rationale_307",
-      "label": "Computes calibrated temperature in \u00b0C at pixel coordinates (x, y). Uses local\u2026",
-      "_origin": "ast",
-      "community": 50,
-      "community_name": ".apply_palette",
-      "file_type": "rationale",
-      "norm_label": "computes calibrated temperature in \u00b0c at pixel coordinates (x, y). uses local...",
-      "source_file": "backend/app/pipeline/thermal_fusion_service.py",
-      "source_location": "L307"
-    },
-    {
-      "id": "backend_app_pipeline_thermal_fusion_service_rationale_593",
-      "label": "Draws tactical military thermal telemetry: - Radiometric color scale graduation\u2026",
-      "_origin": "ast",
-      "community": 50,
-      "community_name": ".apply_palette",
-      "file_type": "rationale",
-      "norm_label": "draws tactical military thermal telemetry: - radiometric color scale graduation...",
-      "source_file": "backend/app/pipeline/thermal_fusion_service.py",
-      "source_location": "L593"
     },
     {
       "id": "backend_app_api_thermal",
@@ -13330,7 +13297,7 @@
       "source_location": ""
     },
     {
-      "id": "uploadfile",
+      "id": "backend_app_api_thermal_py_uploadfile",
       "label": "UploadFile",
       "_origin": "ast",
       "community": 51,
@@ -13339,6 +13306,39 @@
       "norm_label": "uploadfile",
       "source_file": "",
       "source_location": ""
+    },
+    {
+      "id": "backend_tests_test_onnx_batch_inference",
+      "label": "test_onnx_batch_inference.py",
+      "_origin": "ast",
+      "community": 51,
+      "community_name": "thermal.py",
+      "file_type": "code",
+      "norm_label": "test_onnx_batch_inference.py",
+      "source_file": "backend/tests/test_onnx_batch_inference.py",
+      "source_location": "L1"
+    },
+    {
+      "id": "backend_app_api_inference_rationale_288",
+      "label": "Run bounded inference on frames from an uploaded video using ONNX batching (2\u2026",
+      "_origin": "ast",
+      "community": 51,
+      "community_name": "thermal.py",
+      "file_type": "rationale",
+      "norm_label": "run bounded inference on frames from an uploaded video using onnx batching (2...",
+      "source_file": "backend/app/api/inference.py",
+      "source_location": "L288"
+    },
+    {
+      "id": "backend_app_api_thermal_rationale_113",
+      "label": "Runs threat detection if the ONNX model is available.",
+      "_origin": "ast",
+      "community": 51,
+      "community_name": "thermal.py",
+      "file_type": "rationale",
+      "norm_label": "runs threat detection if the onnx model is available.",
+      "source_file": "backend/app/api/thermal.py",
+      "source_location": "L113"
     },
     {
       "id": "backend_app_api_thermal_rationale_144",
@@ -13394,6 +13394,39 @@
       "norm_label": "safely decodes an uploaded image buffer to a bgr numpy array.",
       "source_file": "backend/app/api/thermal.py",
       "source_location": "L92"
+    },
+    {
+      "id": "backend_app_pipeline_postprocessor_rationale_54",
+      "label": "Configuration for bounding box decoding and NMS.",
+      "_origin": "ast",
+      "community": 51,
+      "community_name": "thermal.py",
+      "file_type": "rationale",
+      "norm_label": "configuration for bounding box decoding and nms.",
+      "source_file": "backend/app/pipeline/postprocessor.py",
+      "source_location": "L54"
+    },
+    {
+      "id": "backend_app_pipeline_preprocessor_rationale_31",
+      "label": "Generic preprocessing configuration. Model-specific values can be changed later\u2026",
+      "_origin": "ast",
+      "community": 51,
+      "community_name": "thermal.py",
+      "file_type": "rationale",
+      "norm_label": "generic preprocessing configuration. model-specific values can be changed later...",
+      "source_file": "backend/app/pipeline/preprocessor.py",
+      "source_location": "L31"
+    },
+    {
+      "id": "backend_tests_test_onnx_batch_inference_rationale_1",
+      "label": "Verification test script for ONNX Batch Inference (2 to 6 frames at once).\u2026",
+      "_origin": "ast",
+      "community": 51,
+      "community_name": "thermal.py",
+      "file_type": "rationale",
+      "norm_label": "verification test script for onnx batch inference (2 to 6 frames at once)....",
+      "source_file": "backend/tests/test_onnx_batch_inference.py",
+      "source_location": "L1"
     },
     {
       "id": "backend_tests_create_corrupt_image",
@@ -13583,7 +13616,7 @@
       "source_location": ""
     },
     {
-      "id": "streamingresponse",
+      "id": "backend_app_api_stream_py_streamingresponse",
       "label": "StreamingResponse",
       "_origin": "ast",
       "community": 6,
@@ -13669,6 +13702,17 @@
       "norm_label": "draw tactical ai threat detection boxes and labels on frame.",
       "source_file": "backend/app/api/stream.py",
       "source_location": "L316"
+    },
+    {
+      "id": "backend_app_api_stream_rationale_409",
+      "label": "Generator yielding multipart JPEG frames from RTSP or IP Webcam Pro stream.\u2026",
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "stream.py",
+      "file_type": "rationale",
+      "norm_label": "generator yielding multipart jpeg frames from rtsp or ip webcam pro stream....",
+      "source_file": "backend/app/api/stream.py",
+      "source_location": "L409"
     },
     {
       "id": "backend_app_api_stream_rationale_51",
@@ -13913,37 +13957,37 @@
       "source_location": "L94"
     },
     {
-      "id": "backend_app_main",
-      "label": "main.py",
+      "id": "api_route",
+      "label": "api_route",
       "_origin": "ast",
       "community": 61,
-      "community_name": "FastAPI",
+      "community_name": "get_annotated_frame",
       "file_type": "code",
-      "norm_label": "main.py",
-      "source_file": "backend/app/main.py",
-      "source_location": "L1"
-    },
-    {
-      "id": "backend_app_main_py_get",
-      "label": "get",
-      "_origin": "ast",
-      "community": 61,
-      "community_name": "FastAPI",
-      "file_type": "code",
-      "norm_label": "get",
+      "norm_label": "api_route",
       "source_file": "",
       "source_location": ""
     },
     {
-      "id": "fastapi",
-      "label": "FastAPI",
+      "id": "backend_app_api_tracking_rationale_827",
+      "label": "Serve a server-annotated ByteTrack video with burned-in bounding boxes (H.264\u2026",
       "_origin": "ast",
       "community": 61,
-      "community_name": "FastAPI",
-      "file_type": "code",
-      "norm_label": "fastapi",
-      "source_file": "",
-      "source_location": ""
+      "community_name": "get_annotated_frame",
+      "file_type": "rationale",
+      "norm_label": "serve a server-annotated bytetrack video with burned-in bounding boxes (h.264...",
+      "source_file": "backend/app/api/tracking.py",
+      "source_location": "L827"
+    },
+    {
+      "id": "backend_app_api_tracking_rationale_848",
+      "label": "Serve a single server-annotated JPEG frame from tracked video.",
+      "_origin": "ast",
+      "community": 61,
+      "community_name": "get_annotated_frame",
+      "file_type": "rationale",
+      "norm_label": "serve a single server-annotated jpeg frame from tracked video.",
+      "source_file": "backend/app/api/tracking.py",
+      "source_location": "L848"
     },
     {
       "id": "backend_readme_37_troubleshooting",
@@ -14384,6 +14428,17 @@
       "source_location": ""
     },
     {
+      "id": "backend_app_api_cameras_py_delete",
+      "label": "delete",
+      "_origin": "ast",
+      "community": 7,
+      "community_name": "cameras.py",
+      "file_type": "code",
+      "norm_label": "delete",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
       "id": "backend_app_api_cameras_py_get",
       "label": "get",
       "_origin": "ast",
@@ -14402,6 +14457,17 @@
       "community_name": "cameras.py",
       "file_type": "code",
       "norm_label": "post",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "backend_app_api_cameras_py_put",
+      "label": "put",
+      "_origin": "ast",
+      "community": 7,
+      "community_name": "cameras.py",
+      "file_type": "code",
+      "norm_label": "put",
       "source_file": "",
       "source_location": ""
     },
@@ -14428,17 +14494,6 @@
       "source_location": ""
     },
     {
-      "id": "delete",
-      "label": "delete",
-      "_origin": "ast",
-      "community": 7,
-      "community_name": "cameras.py",
-      "file_type": "code",
-      "norm_label": "delete",
-      "source_file": "",
-      "source_location": ""
-    },
-    {
       "id": "event",
       "label": "Event",
       "_origin": "ast",
@@ -14446,17 +14501,6 @@
       "community_name": "cameras.py",
       "file_type": "code",
       "norm_label": "event",
-      "source_file": "",
-      "source_location": ""
-    },
-    {
-      "id": "put",
-      "label": "put",
-      "_origin": "ast",
-      "community": 7,
-      "community_name": "cameras.py",
-      "file_type": "code",
-      "norm_label": "put",
       "source_file": "",
       "source_location": ""
     },
@@ -14692,44 +14736,11 @@
       "source_location": "L97"
     },
     {
-      "id": "backend_app_pipeline_anpr_service",
-      "label": "anpr_service.py",
-      "_origin": "ast",
-      "community": 72,
-      "community_name": "logging.py",
-      "file_type": "code",
-      "norm_label": "anpr_service.py",
-      "source_file": "backend/app/pipeline/anpr_service.py",
-      "source_location": "L1"
-    },
-    {
-      "id": "backend_app_utils_logging",
-      "label": "logging.py",
-      "_origin": "ast",
-      "community": 72,
-      "community_name": "logging.py",
-      "file_type": "code",
-      "norm_label": "logging.py",
-      "source_file": "backend/app/utils/logging.py",
-      "source_location": "L1"
-    },
-    {
-      "id": "backend_app_utils_logging_rationale_11",
-      "label": "Configure application-wide logging. Logs are written to both: - the console - a\u2026",
-      "_origin": "ast",
-      "community": 72,
-      "community_name": "logging.py",
-      "file_type": "rationale",
-      "norm_label": "configure application-wide logging. logs are written to both: - the console - a...",
-      "source_file": "backend/app/utils/logging.py",
-      "source_location": "L11"
-    },
-    {
       "id": "backend_app_api_health",
       "label": "health.py",
       "_origin": "ast",
       "community": 73,
-      "community_name": "health",
+      "community_name": "FastAPI",
       "file_type": "code",
       "norm_label": "health.py",
       "source_file": "backend/app/api/health.py",
@@ -14740,7 +14751,7 @@
       "label": "Any",
       "_origin": "ast",
       "community": 73,
-      "community_name": "health",
+      "community_name": "FastAPI",
       "file_type": "code",
       "norm_label": "any",
       "source_file": "",
@@ -14751,9 +14762,53 @@
       "label": "get",
       "_origin": "ast",
       "community": 73,
-      "community_name": "health",
+      "community_name": "FastAPI",
       "file_type": "code",
       "norm_label": "get",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "backend_app_main",
+      "label": "main.py",
+      "_origin": "ast",
+      "community": 73,
+      "community_name": "FastAPI",
+      "file_type": "code",
+      "norm_label": "main.py",
+      "source_file": "backend/app/main.py",
+      "source_location": "L1"
+    },
+    {
+      "id": "backend_app_main_py_get",
+      "label": "get",
+      "_origin": "ast",
+      "community": 73,
+      "community_name": "FastAPI",
+      "file_type": "code",
+      "norm_label": "get",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "fastapi",
+      "label": "FastAPI",
+      "_origin": "ast",
+      "community": 73,
+      "community_name": "FastAPI",
+      "file_type": "code",
+      "norm_label": "fastapi",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "logger",
+      "label": "Logger",
+      "_origin": "ast",
+      "community": 73,
+      "community_name": "FastAPI",
+      "file_type": "code",
+      "norm_label": "logger",
       "source_file": "",
       "source_location": ""
     },
@@ -14762,11 +14817,33 @@
       "label": "Return backend health, device config, and execution providers.",
       "_origin": "ast",
       "community": 73,
-      "community_name": "health",
+      "community_name": "FastAPI",
       "file_type": "rationale",
       "norm_label": "return backend health, device config, and execution providers.",
       "source_file": "backend/app/api/health.py",
       "source_location": "L16"
+    },
+    {
+      "id": "backend_app_utils_logging_rationale_11",
+      "label": "Configure application-wide logging. Logs are written to both: - the console - a\u2026",
+      "_origin": "ast",
+      "community": 73,
+      "community_name": "FastAPI",
+      "file_type": "rationale",
+      "norm_label": "configure application-wide logging. logs are written to both: - the console - a...",
+      "source_file": "backend/app/utils/logging.py",
+      "source_location": "L11"
+    },
+    {
+      "id": "backend_app_utils_logging_rationale_54",
+      "label": "Return a logger for a specific application module.",
+      "_origin": "ast",
+      "community": 73,
+      "community_name": "FastAPI",
+      "file_type": "rationale",
+      "norm_label": "return a logger for a specific application module.",
+      "source_file": "backend/app/utils/logging.py",
+      "source_location": "L54"
     },
     {
       "id": "backend_app_api_geofences",
@@ -14978,33 +15055,11 @@
       "source_location": ""
     },
     {
-      "id": "backend_app_api_inference_py_get",
-      "label": "get",
-      "_origin": "ast",
-      "community": 76,
-      "community_name": "inference_status",
-      "file_type": "code",
-      "norm_label": "get",
-      "source_file": "",
-      "source_location": ""
-    },
-    {
-      "id": "backend_app_api_inference_rationale_76",
-      "label": "Return inference service and resource status.",
-      "_origin": "ast",
-      "community": 76,
-      "community_name": "inference_status",
-      "file_type": "rationale",
-      "norm_label": "return inference service and resource status.",
-      "source_file": "backend/app/api/inference.py",
-      "source_location": "L76"
-    },
-    {
       "id": "frontend_src_app_operator_live_page",
       "label": "live/page.tsx",
       "_origin": "ast",
       "community": 77,
-      "community_name": "useBackendStatus.ts",
+      "community_name": "api",
       "file_type": "code",
       "norm_label": "live/page.tsx",
       "source_file": "frontend/src/app/(operator)/live/page.tsx",
@@ -15015,7 +15070,7 @@
       "label": "metriccard.tsx",
       "_origin": "ast",
       "community": 77,
-      "community_name": "useBackendStatus.ts",
+      "community_name": "api",
       "file_type": "code",
       "norm_label": "metriccard.tsx",
       "source_file": "frontend/src/components/dashboard/metriccard.tsx",
@@ -15026,7 +15081,7 @@
       "label": "metricsrow.tsx",
       "_origin": "ast",
       "community": 77,
-      "community_name": "useBackendStatus.ts",
+      "community_name": "api",
       "file_type": "code",
       "norm_label": "metricsrow.tsx",
       "source_file": "frontend/src/components/dashboard/metricsrow.tsx",
@@ -15037,7 +15092,7 @@
       "label": "systemstatus.tsx",
       "_origin": "ast",
       "community": 77,
-      "community_name": "useBackendStatus.ts",
+      "community_name": "api",
       "file_type": "code",
       "norm_label": "systemstatus.tsx",
       "source_file": "frontend/src/components/dashboard/systemstatus.tsx",
@@ -15048,18 +15103,29 @@
       "label": "connectionstatus.tsx",
       "_origin": "ast",
       "community": 77,
-      "community_name": "useBackendStatus.ts",
+      "community_name": "api",
       "file_type": "code",
       "norm_label": "connectionstatus.tsx",
       "source_file": "frontend/src/components/status/connectionstatus.tsx",
       "source_location": "L1"
     },
     {
+      "id": "frontend_src_lib_api_api",
+      "label": "api",
+      "_origin": "ast",
+      "community": 77,
+      "community_name": "api",
+      "file_type": "code",
+      "norm_label": "api",
+      "source_file": "frontend/src/lib/api.ts",
+      "source_location": "L108"
+    },
+    {
       "id": "frontend_src_lib_hooks_usebackendstatus",
       "label": "useBackendStatus.ts",
       "_origin": "ast",
       "community": 77,
-      "community_name": "useBackendStatus.ts",
+      "community_name": "api",
       "file_type": "code",
       "norm_label": "usebackendstatus.ts",
       "source_file": "frontend/src/lib/hooks/useBackendStatus.ts",
@@ -15121,17 +15187,6 @@
       "source_location": "L3"
     },
     {
-      "id": "frontend_src_components_dashboard_recentalerts",
-      "label": "recentalerts.tsx",
-      "_origin": "ast",
-      "community": 78,
-      "community_name": "lucide-react",
-      "file_type": "code",
-      "norm_label": "recentalerts.tsx",
-      "source_file": "frontend/src/components/dashboard/recentalerts.tsx",
-      "source_location": "L1"
-    },
-    {
       "id": "frontend_src_components_landing_livesurveillancecard",
       "label": "LiveSurveillanceCard.tsx",
       "_origin": "ast",
@@ -15162,17 +15217,6 @@
       "file_type": "code",
       "norm_label": "camerafeedplaceholder.tsx",
       "source_file": "frontend/src/components/surveillance/camerafeedplaceholder.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "frontend_src_types_alert",
-      "label": "alert.ts",
-      "_origin": "ast",
-      "community": 78,
-      "community_name": "lucide-react",
-      "file_type": "code",
-      "norm_label": "alert.ts",
-      "source_file": "frontend/src/types/alert.ts",
       "source_location": "L1"
     },
     {
@@ -15308,6 +15352,17 @@
       "source_location": ""
     },
     {
+      "id": "backend_app_pipeline_video_loader_py_exception",
+      "label": "Exception",
+      "_origin": "ast",
+      "community": 8,
+      "community_name": "VideoLoader",
+      "file_type": "code",
+      "norm_label": "exception",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
       "id": "backend_app_pipeline_video_loader_py_path",
       "label": "Path",
       "_origin": "ast",
@@ -15361,6 +15416,17 @@
       "norm_label": "read the next frame with orientation correction. returns: (true, frame) when...",
       "source_file": "backend/app/pipeline/video_loader.py",
       "source_location": "L153"
+    },
+    {
+      "id": "backend_app_pipeline_video_loader_rationale_16",
+      "label": "Base exception for video loading errors.",
+      "_origin": "ast",
+      "community": 8,
+      "community_name": "VideoLoader",
+      "file_type": "rationale",
+      "norm_label": "base exception for video loading errors.",
+      "source_file": "backend/app/pipeline/video_loader.py",
+      "source_location": "L16"
     },
     {
       "id": "backend_app_pipeline_video_loader_rationale_20",
@@ -15506,17 +15572,6 @@
       "source_location": ""
     },
     {
-      "id": "logger",
-      "label": "Logger",
-      "_origin": "ast",
-      "community": 80,
-      "community_name": "auth.py",
-      "file_type": "code",
-      "norm_label": "logger",
-      "source_file": "",
-      "source_location": ""
-    },
-    {
       "id": "backend_app_api_auth_rationale_1",
       "label": "FastAPI authentication and session validation router for MayaJaal (MAATRIX).\u2026",
       "_origin": "ast",
@@ -15570,17 +15625,6 @@
       "norm_label": "return public roster metadata for authorized demo personnel.",
       "source_file": "backend/app/api/auth.py",
       "source_location": "L228"
-    },
-    {
-      "id": "backend_app_utils_logging_rationale_54",
-      "label": "Return a logger for a specific application module.",
-      "_origin": "ast",
-      "community": 80,
-      "community_name": "auth.py",
-      "file_type": "rationale",
-      "norm_label": "return a logger for a specific application module.",
-      "source_file": "backend/app/utils/logging.py",
-      "source_location": "L54"
     },
     {
       "id": "backend_tests_test_facial_recognition",
@@ -15638,15 +15682,15 @@
       "source_location": "L86"
     },
     {
-      "id": "backend_app_api_cameras_py_delete",
-      "label": "delete",
+      "id": "frontend_src_app_operator_anpr_page",
+      "label": "anpr/page.tsx",
       "_origin": "ast",
-      "community": 82,
-      "community_name": "delete",
+      "community": 83,
+      "community_name": "useCameras",
       "file_type": "code",
-      "norm_label": "delete",
-      "source_file": "",
-      "source_location": ""
+      "norm_label": "anpr/page.tsx",
+      "source_file": "frontend/src/app/(operator)/anpr/page.tsx",
+      "source_location": "L1"
     },
     {
       "id": "frontend_src_components_surveillance_cameracard",
@@ -15671,18 +15715,18 @@
       "source_location": "L1"
     },
     {
-      "id": "backend_app_api_cameras_py_put",
-      "label": "put",
+      "id": "frontend_src_types_anpr",
+      "label": "anpr.ts",
       "_origin": "ast",
-      "community": 84,
-      "community_name": "put",
+      "community": 83,
+      "community_name": "useCameras",
       "file_type": "code",
-      "norm_label": "put",
-      "source_file": "",
-      "source_location": ""
+      "norm_label": "anpr.ts",
+      "source_file": "frontend/src/types/anpr.ts",
+      "source_location": "L1"
     },
     {
-      "id": "exception",
+      "id": "backend_app_main_py_exception",
       "label": "Exception",
       "_origin": "ast",
       "community": 85,
@@ -15737,17 +15781,6 @@
       "source_location": ""
     },
     {
-      "id": "backend_app_api_stream_py_streamingresponse",
-      "label": "StreamingResponse",
-      "_origin": "ast",
-      "community": 86,
-      "community_name": "StreamingResponse",
-      "file_type": "code",
-      "norm_label": "streamingresponse",
-      "source_file": "",
-      "source_location": ""
-    },
-    {
       "id": "backend_scripts_quantize_model",
       "label": "quantize_model.py",
       "_origin": "ast",
@@ -15768,39 +15801,6 @@
       "norm_label": "backend/scripts/quantize_model.py quantizes fp32 onnx models in backend/models...",
       "source_file": "backend/scripts/quantize_model.py",
       "source_location": "L1"
-    },
-    {
-      "id": "backend_app_api_thermal_py_uploadfile",
-      "label": "UploadFile",
-      "_origin": "ast",
-      "community": 88,
-      "community_name": "UploadFile",
-      "file_type": "code",
-      "norm_label": "uploadfile",
-      "source_file": "",
-      "source_location": ""
-    },
-    {
-      "id": "backend_app_main_py_exception",
-      "label": "Exception",
-      "_origin": "ast",
-      "community": 89,
-      "community_name": "Exception",
-      "file_type": "code",
-      "norm_label": "exception",
-      "source_file": "",
-      "source_location": ""
-    },
-    {
-      "id": "api_route",
-      "label": "api_route",
-      "_origin": "ast",
-      "community": 9,
-      "community_name": "tracking.py",
-      "file_type": "code",
-      "norm_label": "api_route",
-      "source_file": "",
-      "source_location": ""
     },
     {
       "id": "backend_app_api_tracking",
@@ -15854,17 +15854,6 @@
       "community_name": "tracking.py",
       "file_type": "code",
       "norm_label": "uploadfile",
-      "source_file": "",
-      "source_location": ""
-    },
-    {
-      "id": "backend_app_pipeline_video_loader_py_exception",
-      "label": "Exception",
-      "_origin": "ast",
-      "community": 9,
-      "community_name": "tracking.py",
-      "file_type": "code",
-      "norm_label": "exception",
       "source_file": "",
       "source_location": ""
     },
@@ -15935,28 +15924,6 @@
       "source_location": "L782"
     },
     {
-      "id": "backend_app_api_tracking_rationale_827",
-      "label": "Serve a server-annotated ByteTrack video with burned-in bounding boxes (H.264\u2026",
-      "_origin": "ast",
-      "community": 9,
-      "community_name": "tracking.py",
-      "file_type": "rationale",
-      "norm_label": "serve a server-annotated bytetrack video with burned-in bounding boxes (h.264...",
-      "source_file": "backend/app/api/tracking.py",
-      "source_location": "L827"
-    },
-    {
-      "id": "backend_app_api_tracking_rationale_848",
-      "label": "Serve a single server-annotated JPEG frame from tracked video.",
-      "_origin": "ast",
-      "community": 9,
-      "community_name": "tracking.py",
-      "file_type": "rationale",
-      "norm_label": "serve a single server-annotated jpeg frame from tracked video.",
-      "source_file": "backend/app/api/tracking.py",
-      "source_location": "L848"
-    },
-    {
       "id": "backend_app_api_tracking_rationale_871",
       "label": "List all active cross-camera person traces with recent sightings and trajectory\u2026",
       "_origin": "ast",
@@ -15977,17 +15944,6 @@
       "norm_label": "retrieve full chronological gps multi-camera trajectory for a specific global...",
       "source_file": "backend/app/api/tracking.py",
       "source_location": "L882"
-    },
-    {
-      "id": "backend_app_pipeline_video_loader_rationale_16",
-      "label": "Base exception for video loading errors.",
-      "_origin": "ast",
-      "community": 9,
-      "community_name": "tracking.py",
-      "file_type": "rationale",
-      "norm_label": "base exception for video loading errors.",
-      "source_file": "backend/app/pipeline/video_loader.py",
-      "source_location": "L16"
     },
     {
       "id": "backend_app_tracking_tracker_rationale_38",
@@ -16364,7 +16320,7 @@
     },
     {
       "source": "backend_app_api_stream_get_live_stream",
-      "target": "streamingresponse",
+      "target": "backend_app_api_stream_py_streamingresponse",
       "relation": "calls",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -16472,6 +16428,42 @@
     },
     {
       "source": "backend_app_api_stream_stream_generator",
+      "target": "backend_app_pipeline_preprocessor_preprocessor",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "backend/app/api/stream.py",
+      "source_location": "L429",
+      "weight": 1.0
+    },
+    {
+      "source": "backend_app_api_stream_stream_generator",
+      "target": "backend_app_pipeline_preprocessor_preprocessingconfig",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "backend/app/api/stream.py",
+      "source_location": "L430",
+      "weight": 1.0
+    },
+    {
+      "source": "backend_app_api_stream_stream_generator",
+      "target": "backend_app_tracking_tracker_bytetrackerwrapper",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "backend/app/api/stream.py",
+      "source_location": "L448",
+      "weight": 1.0
+    },
+    {
+      "source": "backend_app_api_stream_stream_generator",
       "target": "backend_app_api_stream_create_standby_frame",
       "relation": "calls",
       "_origin": "ast",
@@ -16552,6 +16544,54 @@
       "context": "call",
       "source_file": "backend/app/api/thermal.py",
       "source_location": "L202",
+      "weight": 1.0
+    },
+    {
+      "source": "backend_app_api_thermal_run_detection_if_model_loaded",
+      "target": "backend_app_pipeline_preprocessor_preprocessor",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "backend/app/api/thermal.py",
+      "source_location": "L118",
+      "weight": 1.0
+    },
+    {
+      "source": "backend_app_api_thermal_run_detection_if_model_loaded",
+      "target": "backend_app_pipeline_preprocessor_preprocessingconfig",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "backend/app/api/thermal.py",
+      "source_location": "L119",
+      "weight": 1.0
+    },
+    {
+      "source": "backend_app_api_thermal_run_detection_if_model_loaded",
+      "target": "backend_app_pipeline_postprocessor_postprocessor",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "backend/app/api/thermal.py",
+      "source_location": "L134",
+      "weight": 1.0
+    },
+    {
+      "source": "backend_app_api_thermal_run_detection_if_model_loaded",
+      "target": "backend_app_pipeline_postprocessor_postprocessorconfig",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "backend/app/api/thermal.py",
+      "source_location": "L134",
       "weight": 1.0
     },
     {
@@ -20228,7 +20268,7 @@
     },
     {
       "source": "backend_app_api_cameras_delete_camera",
-      "target": "delete",
+      "target": "backend_app_api_cameras_py_delete",
       "relation": "references",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -20276,7 +20316,7 @@
     },
     {
       "source": "backend_app_api_cameras_update_camera",
-      "target": "put",
+      "target": "backend_app_api_cameras_py_put",
       "relation": "references",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -20947,6 +20987,18 @@
       "weight": 1.0
     },
     {
+      "source": "frontend_src_components_surveillance_detectioncanvas_detectioncanvasprops",
+      "target": "frontend_src_types_backend_detection",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "field",
+      "source_file": "frontend/src/components/surveillance/detectioncanvas.tsx",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
       "source": "frontend_src_lib_hooks_usebackendstatus_backendstatusstate",
       "target": "frontend_src_types_backend_healthresponse",
       "relation": "references",
@@ -21440,7 +21492,7 @@
     },
     {
       "source": "backend_app_api_thermal_fuse_dual_spectrum_images",
-      "target": "uploadfile",
+      "target": "backend_app_api_thermal_py_uploadfile",
       "relation": "references",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -22423,6 +22475,18 @@
       "weight": 1.0
     },
     {
+      "source": "backend_app_api_cameras",
+      "target": "backend_app_utils_logging_get_logger",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "backend/app/api/cameras.py",
+      "source_location": "L13",
+      "weight": 1.0
+    },
+    {
       "source": "backend_app_api_faces",
       "target": "backend_app_utils_logging",
       "relation": "imports",
@@ -22568,6 +22632,42 @@
     },
     {
       "source": "backend_app_api_stream",
+      "target": "backend_app_pipeline_preprocessor_preprocessingconfig",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "backend/app/api/stream.py",
+      "source_location": "L18",
+      "weight": 1.0
+    },
+    {
+      "source": "backend_app_api_stream",
+      "target": "backend_app_pipeline_preprocessor_preprocessor",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "backend/app/api/stream.py",
+      "source_location": "L18",
+      "weight": 1.0
+    },
+    {
+      "source": "backend_app_api_stream",
+      "target": "backend_app_tracking_tracker_bytetrackerwrapper",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "backend/app/api/stream.py",
+      "source_location": "L447",
+      "weight": 1.0
+    },
+    {
+      "source": "backend_app_api_stream",
       "target": "backend_app_utils_logging",
       "relation": "imports",
       "_origin": "ast",
@@ -22576,6 +22676,54 @@
       "context": "import",
       "source_file": "backend/app/api/stream.py",
       "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "backend_app_api_thermal",
+      "target": "backend_app_pipeline_postprocessor_postprocessor",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "backend/app/api/thermal.py",
+      "source_location": "L132",
+      "weight": 1.0
+    },
+    {
+      "source": "backend_app_api_thermal",
+      "target": "backend_app_pipeline_postprocessor_postprocessorconfig",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "backend/app/api/thermal.py",
+      "source_location": "L132",
+      "weight": 1.0
+    },
+    {
+      "source": "backend_app_api_thermal",
+      "target": "backend_app_pipeline_preprocessor_preprocessingconfig",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "backend/app/api/thermal.py",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "backend_app_api_thermal",
+      "target": "backend_app_pipeline_preprocessor_preprocessor",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "backend/app/api/thermal.py",
+      "source_location": "L14",
       "weight": 1.0
     },
     {
@@ -23020,6 +23168,30 @@
       "context": "import",
       "source_file": "backend/app/inference/onnx_engine.py",
       "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "backend_app_main",
+      "target": "backend_app_utils_logging_get_logger",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "backend/app/main.py",
+      "source_location": "L22",
+      "weight": 1.0
+    },
+    {
+      "source": "backend_app_main",
+      "target": "backend_app_utils_logging_setup_logging",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "backend/app/main.py",
+      "source_location": "L22",
       "weight": 1.0
     },
     {
@@ -28427,7 +28599,7 @@
     },
     {
       "source": "backend_app_api_thermal_simulate_thermal",
-      "target": "uploadfile",
+      "target": "backend_app_api_thermal_py_uploadfile",
       "relation": "references",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -28547,7 +28719,7 @@
     },
     {
       "source": "backend_app_main_unexpected_exception_handler",
-      "target": "exception",
+      "target": "backend_app_main_py_exception",
       "relation": "references",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -35557,6 +35729,15 @@
       "weight": 1.0
     },
     {
+      "source": "frontend_postcss_config",
+      "target": "postcss_load_config",
+      "relation": "dynamic_import",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "frontend/postcss.config.mjs"
+    },
+    {
       "source": "backend_app_api_alerts_alertcreaterequest",
       "target": "backend_app_api_alerts_py_basemodel",
       "relation": "inherits",
@@ -41917,114 +42098,6 @@
       "weight": 1.0
     },
     {
-      "source": "backend_app_api_stream_get_snapshot",
-      "target": "backend_app_pipeline_preprocessor_preprocessor",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "context": "call",
-      "source_file": "backend/app/api/stream.py",
-      "source_location": "L857",
-      "weight": 1.0
-    },
-    {
-      "source": "backend_app_api_stream_get_snapshot",
-      "target": "backend_app_pipeline_preprocessor_preprocessingconfig",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "context": "call",
-      "source_file": "backend/app/api/stream.py",
-      "source_location": "L858",
-      "weight": 1.0
-    },
-    {
-      "source": "backend_app_api_stream_stream_generator",
-      "target": "backend_app_pipeline_preprocessor_preprocessor",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "context": "call",
-      "source_file": "backend/app/api/stream.py",
-      "source_location": "L429",
-      "weight": 1.0
-    },
-    {
-      "source": "backend_app_api_stream_stream_generator",
-      "target": "backend_app_pipeline_preprocessor_preprocessingconfig",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "context": "call",
-      "source_file": "backend/app/api/stream.py",
-      "source_location": "L430",
-      "weight": 1.0
-    },
-    {
-      "source": "backend_app_api_stream_stream_generator",
-      "target": "backend_app_tracking_tracker_bytetrackerwrapper",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "context": "call",
-      "source_file": "backend/app/api/stream.py",
-      "source_location": "L448",
-      "weight": 1.0
-    },
-    {
-      "source": "backend_app_api_thermal_run_detection_if_model_loaded",
-      "target": "backend_app_pipeline_preprocessor_preprocessor",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "context": "call",
-      "source_file": "backend/app/api/thermal.py",
-      "source_location": "L118",
-      "weight": 1.0
-    },
-    {
-      "source": "backend_app_api_thermal_run_detection_if_model_loaded",
-      "target": "backend_app_pipeline_preprocessor_preprocessingconfig",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "context": "call",
-      "source_file": "backend/app/api/thermal.py",
-      "source_location": "L119",
-      "weight": 1.0
-    },
-    {
-      "source": "backend_app_api_thermal_run_detection_if_model_loaded",
-      "target": "backend_app_pipeline_postprocessor_postprocessor",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "context": "call",
-      "source_file": "backend/app/api/thermal.py",
-      "source_location": "L134",
-      "weight": 1.0
-    },
-    {
-      "source": "backend_app_api_thermal_run_detection_if_model_loaded",
-      "target": "backend_app_pipeline_postprocessor_postprocessorconfig",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "context": "call",
-      "source_file": "backend/app/api/thermal.py",
-      "source_location": "L134",
-      "weight": 1.0
-    },
-    {
       "source": "backend_tests_test_onnx_batch_inference_run_tests",
       "target": "backend_app_api_inference_video_inference",
       "relation": "indirect_call",
@@ -42191,6 +42264,28 @@
       "confidence_score": 0.95,
       "source_file": "backend/app/api/inference.py",
       "source_location": "L568",
+      "weight": 0.8
+    },
+    {
+      "source": "backend_app_api_stream_get_snapshot",
+      "target": "backend_app_pipeline_preprocessor_preprocessor",
+      "relation": "uses",
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "backend/app/api/stream.py",
+      "source_location": "L857",
+      "weight": 0.8
+    },
+    {
+      "source": "backend_app_api_stream_get_snapshot",
+      "target": "backend_app_pipeline_preprocessor_preprocessingconfig",
+      "relation": "uses",
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "backend/app/api/stream.py",
+      "source_location": "L858",
       "weight": 0.8
     },
     {
@@ -42525,5 +42620,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "0f61c029ca7b5572fc69fb4574e313a4c6bad5f6"
+  "built_at_commit": "05096a7648decb94fcd48e3cae23a9041aa9b237"
 }

@@ -16,6 +16,7 @@ from app.api.health import router as health_router
 from app.api.inference import router as inference_router
 from app.api.models import router as models_router
 from app.api.stream import router as stream_router
+from app.api.thermal import router as thermal_router
 from app.api.tracking import router as tracking_router
 from app.core.config import settings
 from app.utils.logging import get_logger, setup_logging
@@ -147,6 +148,7 @@ app.include_router(anpr_router)
 app.include_router(faces_router)
 app.include_router(geofences_router)
 app.include_router(alerts_router)
+app.include_router(thermal_router)
 
 
 @app.get("/")

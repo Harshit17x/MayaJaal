@@ -713,5 +713,55 @@ export const api = {
       method: "POST",
     });
   },
+
+  /**
+   * Thermal & Dual-Spectrum Sensor Fusion APIs
+   */
+  async getThermalPalettes(): Promise<Array<{
+    id: string;
+    name: string;
+    description: string;
+    military_role: string;
+    icon: string;
+  }>> {
+    return request("/api/thermal/palettes");
+  },
+
+  async fuseThermalImages(formData: FormData): Promise<{
+    status: string;
+    palette: string;
+    fusion_mode: string;
+    fused_image_base64: string;
+    radiometrics: {
+      center_spot_temp_celsius: number;
+      min_ambient_celsius: number;
+      max_target_celsius: number;
+    };
+    target_count: number;
+    fused_targets: Array<{
+      box: number[];
+      class_name: string;
+      confidence: number;
+      optical_confidence?: number | null;
+      thermal_confidence?: number | null;
+      spectrum_status: string;
+      temp_celsius_approx: number;
+      is_warm_body: boolean;
+      heat_intensity: number;
+    }>;
+  }> {
+    return request("/api/thermal/fuse-images", {
+      method: "POST",
+      body: formData,
+    });
+  },
+
+  async getThermalSpotTemp(intensity: number): Promise<{
+    intensity: number;
+    temp_celsius: number;
+    classification: string;
+  }> {
+    return request(`/api/thermal/spot-temp?intensity=${intensity}`);
+  },
 };
 

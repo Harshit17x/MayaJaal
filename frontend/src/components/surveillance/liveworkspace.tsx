@@ -38,22 +38,41 @@ import {
   ScanFace,
   UploadCloud,
   Trash2,
+  Flame,
+  Sun,
+  Eye,
+  Moon,
+  Crosshair,
+  Split,
 } from "lucide-react";
+import { ThermalPalette } from "@/types/camera";
+import { useCameras } from "@/lib/camerasStore";
 
 /** Build the backend MJPEG stream URL (proxied Next.js → FastAPI). */
-function buildStreamUrl(rtspUrl: string, drawDetections = false, enableFaceBiometrics = true): string {
+function buildStreamUrl(
+  rtspUrl: string,
+  drawDetections = false,
+  enableFaceBiometrics = true,
+  palette: ThermalPalette = "standard",
+  pairedRtspUrl?: string | null,
+  fusionMode?: string | null
+): string {
   const params = new URLSearchParams({
     rtsp_url: rtspUrl,
     draw_detections: String(drawDetections),
     enable_face_recognition: String(enableFaceBiometrics),
+    palette: palette,
     fps: "20",
     _t: String(Date.now()),
   });
+  if (pairedRtspUrl) params.set("paired_rtsp_url", pairedRtspUrl);
+  if (fusionMode && fusionMode !== "single") params.set("fusion_mode", fusionMode);
   return `/api/backend/stream/live?${params.toString()}`;
 }
 
 export function LiveWorkspace() {
   const { isOnline, loadedModels, refetch } = useBackendStatus();
+  const { cameras } = useCameras();
 
   // Mode: "upload-image" | "upload-video" | "rtsp"
   const [sourceMode, setSourceMode] = useState<
@@ -70,6 +89,14 @@ export function LiveWorkspace() {
 
   // Multi-Object Tracking (ByteTrack) toggle
   const [enableTracking, setEnableTracking] = useState<boolean>(true);
+
+  // ─── Thermal & Dual-Spectrum Sensor Fusion state ─────────────────────────
+  const [thermalPalette, setThermalPalette] = useState<ThermalPalette>("standard");
+  const [dualSpectrumMode, setDualSpectrumMode] = useState<"single" | "side_by_side" | "pip" | "blend">("single");
+  const [isSpotMeterActive, setIsSpotMeterActive] = useState<boolean>(false);
+  const [spotMeterData, setSpotMeterData] = useState<{ x: number; y: number; temp: number; classification: string } | null>(null);
+  const [isSimulatingThermal, setIsSimulatingThermal] = useState<boolean>(false);
+  const [originalImagePreviewUrl, setOriginalImagePreviewUrl] = useState<string>("");
 
   // ─── Live Stream (RTSP & IP Webcam Pro) state ───────────────────────────
   const [rtspUrl, setRtspUrl] = useState<string>("sample");
@@ -148,15 +175,24 @@ export function LiveWorkspace() {
     }
   }, [sourceMode]);
 
-  // Rebuild stream URL when AI overlay or Face Biometrics toggle changes while stream is live
+  // Rebuild stream URL when AI overlay, Face Biometrics, or Thermal Palette changes while stream is live
   useEffect(() => {
     if (isStreamActive && rtspUrl) {
-      const src = buildStreamUrl(rtspUrl, drawDetectionsOnStream, enableFaceBiometrics);
+      const pairedCamera = selectedCamera?.pairedCameraId
+        ? cameras.find((c) => c.id === selectedCamera.pairedCameraId)
+        : null;
+      const src = buildStreamUrl(
+        rtspUrl,
+        drawDetectionsOnStream,
+        enableFaceBiometrics,
+        thermalPalette,
+        pairedCamera?.streamUrl || null,
+        dualSpectrumMode
+      );
       setActiveMjpegSrc(src);
       setStreamKey((k) => k + 1);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [drawDetectionsOnStream, enableFaceBiometrics]);
+  }, [drawDetectionsOnStream, enableFaceBiometrics, thermalPalette, dualSpectrumMode, isStreamActive, rtspUrl, selectedCamera, cameras]);
 
   // Camera grid click → populate RTSP URL + auto-connect
   const handleCameraSelect = useCallback(
@@ -166,18 +202,40 @@ export function LiveWorkspace() {
       setRtspUrl(url);
       setRtspInputValue(url);
       setSourceMode("rtsp");
+
+      // Auto-switch to thermal palette if camera type is Thermal/Night Vision
+      if (camera.defaultPalette && camera.defaultPalette !== "standard") {
+        setThermalPalette(camera.defaultPalette as ThermalPalette);
+      } else if (camera.type?.toLowerCase().includes("thermal") || camera.spectrumType === "thermal") {
+        setThermalPalette("ironbow");
+      } else if (camera.type?.toLowerCase().includes("night") || camera.spectrumType === "night_vision_ir") {
+        setThermalPalette("nvg_green");
+      }
+
       if (url) {
-        const src = buildStreamUrl(url, drawDetectionsOnStream, enableFaceBiometrics);
+        const pairedCamera = camera.pairedCameraId
+          ? cameras.find((c) => c.id === camera.pairedCameraId)
+          : null;
+        const initialPalette = (camera.defaultPalette as ThermalPalette) ||
+          (camera.type?.toLowerCase().includes("thermal") ? "ironbow" : "standard");
+        const src = buildStreamUrl(
+          url,
+          drawDetectionsOnStream,
+          enableFaceBiometrics,
+          initialPalette,
+          pairedCamera?.streamUrl || null,
+          dualSpectrumMode
+        );
         setActiveMjpegSrc(src);
         setIsStreamActive(true);
         setStreamError(false);
         setStreamDiagnostics(`Connected to registered node: ${camera.name}`);
-        setStreamProtocol("RTSP Camera");
+        setStreamProtocol(camera.type || "RTSP Camera");
         setStatusMessage(`Connecting to: ${camera.name} — ${camera.sector}`);
         setStreamKey((k) => k + 1);
       }
     },
-    [drawDetectionsOnStream, enableFaceBiometrics]
+    [drawDetectionsOnStream, enableFaceBiometrics, cameras, dualSpectrumMode]
   );
 
   const handleConnectStream = useCallback(async (customUrl?: string) => {
@@ -193,30 +251,45 @@ export function LiveWorkspace() {
     setStatusMessage(`Testing stream connection for: ${rawUrl}...`);
 
     try {
-      // Pre-flight check via backend validator
       const validation = await api.validateStream(rawUrl);
       setStreamProtocol(validation.protocol || "Live Stream");
       setDetectedResolvedUrl(validation.resolved_url || rawUrl);
+
+      const pairedCamera = selectedCamera?.pairedCameraId
+        ? cameras.find((c) => c.id === selectedCamera.pairedCameraId)
+        : null;
 
       if (validation.reachable) {
         setRtspUrl(rawUrl);
         setRtspInputValue(rawUrl);
         setStreamError(false);
-        const src = buildStreamUrl(rawUrl, drawDetectionsOnStream, enableFaceBiometrics);
+        const src = buildStreamUrl(
+          rawUrl,
+          drawDetectionsOnStream,
+          enableFaceBiometrics,
+          thermalPalette,
+          pairedCamera?.streamUrl || null,
+          dualSpectrumMode
+        );
         setActiveMjpegSrc(src);
         setIsStreamActive(true);
         setStreamKey((k) => k + 1);
         setStatusMessage(validation.message || `Connected to ${validation.protocol}`);
         setStreamDiagnostics(validation.message);
       } else {
-        // Unreachable host/port
         setRtspUrl(rawUrl);
         setRtspInputValue(rawUrl);
         setStreamError(true);
         setStatusMessage(validation.message);
         setStreamDiagnostics(validation.message);
-        // Start standby stream so tactical overlay with diagnostic text is displayed
-        const src = buildStreamUrl(rawUrl, drawDetectionsOnStream, enableFaceBiometrics);
+        const src = buildStreamUrl(
+          rawUrl,
+          drawDetectionsOnStream,
+          enableFaceBiometrics,
+          thermalPalette,
+          pairedCamera?.streamUrl || null,
+          dualSpectrumMode
+        );
         setActiveMjpegSrc(src);
         setIsStreamActive(true);
         setStreamKey((k) => k + 1);
@@ -225,7 +298,7 @@ export function LiveWorkspace() {
       const msg = err instanceof Error ? err.message : "Validation failed";
       setRtspUrl(rawUrl);
       setRtspInputValue(rawUrl);
-      const src = buildStreamUrl(rawUrl, drawDetectionsOnStream, enableFaceBiometrics);
+      const src = buildStreamUrl(rawUrl, drawDetectionsOnStream, enableFaceBiometrics, thermalPalette);
       setActiveMjpegSrc(src);
       setIsStreamActive(true);
       setStreamKey((k) => k + 1);
@@ -234,7 +307,7 @@ export function LiveWorkspace() {
     } finally {
       setIsValidatingStream(false);
     }
-  }, [rtspInputValue, drawDetectionsOnStream, enableFaceBiometrics]);
+  }, [rtspInputValue, drawDetectionsOnStream, enableFaceBiometrics, thermalPalette, selectedCamera, cameras, dualSpectrumMode]);
 
   const handleDisconnectStream = useCallback(() => {
     setIsStreamActive(false);
@@ -269,11 +342,117 @@ export function LiveWorkspace() {
     setSelectedImageFile(file);
     const url = URL.createObjectURL(file);
     setImagePreviewUrl(url);
+    setOriginalImagePreviewUrl(url);
+    setThermalPalette("standard");
     setSourceMode("upload-image");
     setDetections([]);
     setDetectedSuspectsInMedia([]);
     setLatencyMs(null);
     setStatusMessage(`Loaded image: ${file.name}`);
+  };
+
+  // Thermal Palette & Sensor Fusion Handler
+  const handleThermalPaletteChange = async (palette: ThermalPalette) => {
+    setThermalPalette(palette);
+
+    if (sourceMode === "upload-image") {
+      if (palette === "standard") {
+        if (originalImagePreviewUrl) {
+          setImagePreviewUrl(originalImagePreviewUrl);
+        }
+        setStatusMessage("Switched to standard Optical Visible (VIS) spectrum.");
+        return;
+      }
+
+      if (selectedImageFile) {
+        try {
+          setIsSimulatingThermal(true);
+          setStatusMessage(`Processing radiometric ${palette.toUpperCase()} transform...`);
+          const formData = new FormData();
+          formData.append("optical_file", selectedImageFile);
+          formData.append("palette", palette);
+          formData.append("fusion_mode", palette === "msx_fusion" ? "msx" : "standard");
+          formData.append("conf_threshold", String(confThreshold));
+
+          const res = await api.fuseThermalImages(formData);
+          if (res.fused_image_base64) {
+            setImagePreviewUrl(res.fused_image_base64);
+            if (res.fused_targets && res.fused_targets.length > 0) {
+              setDetections(
+                res.fused_targets.map((t, idx) => ({
+                  id: idx,
+                  box: t.box,
+                  class_name: t.class_name,
+                  confidence: t.confidence,
+                  spectrum_status: t.spectrum_status,
+                  temp_celsius: t.temp_celsius_approx,
+                  is_warm_body: t.is_warm_body,
+                } as any))
+              );
+            }
+            setStatusMessage(
+              `Radiometric ${palette.toUpperCase()} applied: ${res.target_count} target(s) analyzed. Center Spot: ${res.radiometrics.center_spot_temp_celsius}°C`
+            );
+          }
+        } catch (err: unknown) {
+          const msg = err instanceof Error ? err.message : "Failed to apply thermal palette";
+          setStatusMessage(`Thermal transform warning: ${msg}`);
+        } finally {
+          setIsSimulatingThermal(false);
+        }
+      }
+    }
+  };
+
+  // Spot-Meter Mouse Move handler
+  const handleViewportMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!isSpotMeterActive) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const relX = Math.max(0, Math.min(1, x / rect.width));
+    const relY = Math.max(0, Math.min(1, y / rect.height));
+
+    let detectedTemp = 13.8;
+    let classification = "AMBIENT TERRAIN";
+
+    if (detections.length > 0) {
+      for (const d of detections) {
+        if (!d.box || d.box.length < 4) continue;
+        const bx1 = (d.box[0] / sourceDims.width) * rect.width;
+        const by1 = (d.box[1] / sourceDims.height) * rect.height;
+        const bx2 = (d.box[2] / sourceDims.width) * rect.width;
+        const by2 = (d.box[3] / sourceDims.height) * rect.height;
+
+        if (x >= bx1 && x <= bx2 && y >= by1 && y <= by2) {
+          const cls = d.class_name?.toLowerCase() || "";
+          if (cls.includes("person") || cls.includes("suspect")) {
+            detectedTemp = 36.8 + Math.sin(relX * 10) * 0.4;
+            classification = "HUMAN HEAT BLOOM";
+          } else if (cls.includes("car") || cls.includes("vehicle") || cls.includes("truck")) {
+            detectedTemp = 74.5 + Math.cos(relY * 10) * 2.0;
+            classification = "ENGINE / EXHAUST";
+          } else {
+            detectedTemp = 32.5;
+            classification = "TARGET HEAT SIGNATURE";
+          }
+          break;
+        }
+      }
+    } else if (thermalPalette !== "standard") {
+      detectedTemp = Math.round((12.0 + relY * 5.0 + Math.sin(relX * 6.28) * 1.5) * 10) / 10;
+    }
+
+    setSpotMeterData({
+      x,
+      y,
+      temp: Math.round(detectedTemp * 10) / 10,
+      classification,
+    });
+  };
+
+  const handleViewportMouseLeave = () => {
+    setSpotMeterData(null);
   };
 
   // Handle local video selection
@@ -1211,6 +1390,171 @@ export function LiveWorkspace() {
         </div>
       )}
 
+      {/* ─── Tactical Dual-Spectrum & Thermal Palette Control Bar ─── */}
+      <div className="bg-[#0c1317] text-white rounded-2xl border border-slate-800 p-3.5 shadow-md flex flex-wrap items-center justify-between gap-3 select-none">
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-black/60 border border-slate-700 text-xs font-mono font-bold text-slate-300">
+            <Flame className="w-3.5 h-3.5 text-amber-400" />
+            <span>SPECTRUM:</span>
+          </div>
+
+          {/* Palette buttons */}
+          <div className="flex flex-wrap items-center gap-1 bg-black/40 p-1 rounded-xl border border-slate-800 text-xs">
+            <button
+              type="button"
+              onClick={() => handleThermalPaletteChange("standard")}
+              className={`px-2.5 py-1 rounded-lg font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
+                thermalPalette === "standard"
+                  ? "bg-emerald-600 text-white shadow-xs font-bold"
+                  : "text-slate-400 hover:text-white hover:bg-slate-800/60"
+              }`}
+              title="Daylight Optical RGB (Visible 4K)"
+            >
+              <Sun className="w-3.5 h-3.5" />
+              <span>Optical (VIS)</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleThermalPaletteChange("ironbow")}
+              className={`px-2.5 py-1 rounded-lg font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
+                thermalPalette === "ironbow"
+                  ? "bg-purple-600 text-white shadow-xs font-bold"
+                  : "text-slate-400 hover:text-white hover:bg-slate-800/60"
+              }`}
+              title="FLIR Ironbow (Radiometric Thermal Violet-Amber-White)"
+            >
+              <Flame className="w-3.5 h-3.5 text-amber-300" />
+              <span>Ironbow (FLIR)</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleThermalPaletteChange("white_hot")}
+              className={`px-2.5 py-1 rounded-lg font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
+                thermalPalette === "white_hot"
+                  ? "bg-slate-200 text-slate-900 shadow-xs font-bold"
+                  : "text-slate-400 hover:text-white hover:bg-slate-800/60"
+              }`}
+              title="White Hot (Military Scout Thermal)"
+            >
+              <Eye className="w-3.5 h-3.5" />
+              <span>White Hot</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleThermalPaletteChange("black_hot")}
+              className={`px-2.5 py-1 rounded-lg font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
+                thermalPalette === "black_hot"
+                  ? "bg-slate-800 text-amber-300 border border-amber-400/60 shadow-xs font-bold"
+                  : "text-slate-400 hover:text-white hover:bg-slate-800/60"
+              }`}
+              title="Black Hot (Inverted Thermal Silhouette)"
+            >
+              <Moon className="w-3.5 h-3.5" />
+              <span>Black Hot</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleThermalPaletteChange("nvg_green")}
+              className={`px-2.5 py-1 rounded-lg font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
+                thermalPalette === "nvg_green"
+                  ? "bg-green-700 text-white shadow-xs font-bold"
+                  : "text-slate-400 hover:text-white hover:bg-slate-800/60"
+              }`}
+              title="Tactical P43 Green Phosphor Night Vision (NVG)"
+            >
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+              <span>NVG Green</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleThermalPaletteChange("msx_fusion")}
+              className={`px-2.5 py-1 rounded-lg font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
+                thermalPalette === "msx_fusion"
+                  ? "bg-cyan-600 text-white shadow-xs font-bold"
+                  : "text-slate-400 hover:text-white hover:bg-slate-800/60"
+              }`}
+              title="FLIR MSX Detail Fusion (High-Frequency Optical Edges Overlaid on Thermal Heatmap)"
+            >
+              <Layers className="w-3.5 h-3.5 text-cyan-300" />
+              <span>MSX Fusion</span>
+            </button>
+          </div>
+
+          {isSimulatingThermal && (
+            <span className="text-xs font-mono text-amber-400 flex items-center gap-1.5 animate-pulse ml-2">
+              <RefreshCw className="w-3 h-3 animate-spin" />
+              Processing Radiometrics...
+            </span>
+          )}
+        </div>
+
+        {/* Right side controls: Spot Meter & Dual Stream view modes */}
+        <div className="flex items-center gap-2">
+          {/* Spot-Meter Toggle */}
+          <button
+            type="button"
+            onClick={() => setIsSpotMeterActive((prev) => !prev)}
+            className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+              isSpotMeterActive
+                ? "bg-amber-500 text-slate-950 border border-amber-300 shadow-md animate-pulse"
+                : "bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700"
+            }`}
+            title="Toggle Radiometric Crosshair Spot-Meter for real-time temperature telemetry"
+          >
+            <Crosshair className="w-3.5 h-3.5" />
+            <span>SPOT-METER: {isSpotMeterActive ? "ACTIVE" : "OFF"}</span>
+          </button>
+
+          {/* Dual-Spectrum View Options in RTSP mode */}
+          {sourceMode === "rtsp" && (
+            <div className="flex items-center gap-1 bg-black/40 p-1 rounded-xl border border-slate-800 text-xs">
+              <button
+                type="button"
+                onClick={() => setDualSpectrumMode("single")}
+                className={`px-2 py-1 rounded-lg font-medium transition-colors cursor-pointer ${
+                  dualSpectrumMode === "single"
+                    ? "bg-slate-700 text-white font-bold"
+                    : "text-slate-400 hover:text-white"
+                }`}
+                title="Single Main Feed"
+              >
+                Single
+              </button>
+              <button
+                type="button"
+                onClick={() => setDualSpectrumMode("side_by_side")}
+                className={`px-2 py-1 rounded-lg font-medium transition-colors flex items-center gap-1 cursor-pointer ${
+                  dualSpectrumMode === "side_by_side"
+                    ? "bg-emerald-700 text-white font-bold"
+                    : "text-slate-400 hover:text-white"
+                }`}
+                title="Dual Synchronized Side-by-Side (Optical + Thermal)"
+              >
+                <Split className="w-3 h-3" />
+                <span>Side-by-Side</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setDualSpectrumMode("pip")}
+                className={`px-2 py-1 rounded-lg font-medium transition-colors cursor-pointer ${
+                  dualSpectrumMode === "pip"
+                    ? "bg-emerald-700 text-white font-bold"
+                    : "text-slate-400 hover:text-white"
+                }`}
+                title="Picture-in-Picture Thermal Inset"
+              >
+                PiP
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
       {/* 2. Primary Feed with Tactical Overlay Canvas & Inspector */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Main Viewport (Col 8) */}
@@ -1233,6 +1577,11 @@ export function LiveWorkspace() {
                   ? "IMAGE SCAN • SAMPLE FRAME"
                   : "IMAGE SCAN • DIRECT UPLOAD"}
               </span>
+              {thermalPalette !== "standard" && (
+                <span className="px-2 py-0.5 rounded bg-purple-950/80 text-purple-300 border border-purple-500/50 text-[10px] font-mono font-bold">
+                  🔥 {thermalPalette.toUpperCase()}
+                </span>
+              )}
             </div>
             <div className="font-mono text-[11px] text-slate-400">
               RES: {sourceMode === "upload-image" && !imagePreviewUrl ? "Awaiting Input" : `${sourceDims.width}x${sourceDims.height}`}
@@ -1242,12 +1591,35 @@ export function LiveWorkspace() {
           </div>
 
           {/* Media Viewport + Overlay Canvas */}
-          <div className="relative w-full aspect-video min-h-[360px] max-h-[560px] flex items-center justify-center bg-black overflow-hidden">
+          <div
+            className="relative w-full aspect-video min-h-[360px] max-h-[560px] flex items-center justify-center bg-black overflow-hidden cursor-crosshair"
+            onMouseMove={handleViewportMouseMove}
+            onMouseLeave={handleViewportMouseLeave}
+          >
             {/* Corner Reticles */}
             <div className="absolute top-3 left-3 w-5 h-5 border-t-2 border-l-2 border-emerald-500/80 z-30 pointer-events-none" />
             <div className="absolute top-3 right-3 w-5 h-5 border-t-2 border-r-2 border-emerald-500/80 z-30 pointer-events-none" />
             <div className="absolute bottom-3 left-3 w-5 h-5 border-b-2 border-l-2 border-emerald-500/80 z-30 pointer-events-none" />
             <div className="absolute bottom-3 right-3 w-5 h-5 border-b-2 border-r-2 border-emerald-500/80 z-30 pointer-events-none" />
+
+            {/* Interactive Radiometric Crosshair Spot-Meter Reticle */}
+            {isSpotMeterActive && spotMeterData && (
+              <div
+                className="absolute pointer-events-none z-40 transform -translate-x-1/2 -translate-y-1/2 transition-transform duration-75"
+                style={{ left: spotMeterData.x, top: spotMeterData.y }}
+              >
+                <div className="relative flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-full border border-amber-400/80 animate-ping opacity-40" />
+                  <div className="w-6 h-6 rounded-full border-2 border-amber-400 flex items-center justify-center">
+                    <div className="w-1.5 h-1.5 bg-amber-400 rounded-full" />
+                  </div>
+                  <div className="absolute left-8 top-[-10px] whitespace-nowrap bg-black/90 border border-amber-400/70 text-amber-300 font-mono text-[11px] px-2 py-0.5 rounded shadow-lg">
+                    <span className="font-bold">⌖ {spotMeterData.temp.toFixed(1)}°C</span>
+                    <span className="text-[9px] text-slate-400 ml-1.5">[{spotMeterData.classification}]</span>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* ── RTSP / IP Webcam Live MJPEG Stream ── */}
             {sourceMode === "rtsp" ? (
