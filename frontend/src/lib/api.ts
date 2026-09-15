@@ -200,6 +200,7 @@ export const api = {
     frameStride?: number;
     maxFrames?: number;
     postprocess?: boolean;
+    palette?: string;
   }): Promise<VideoInferenceResponse> {
     const formData = new FormData();
     formData.append("file", params.file);
@@ -214,6 +215,8 @@ export const api = {
       formData.append("max_frames", params.maxFrames.toString());
     if (params.postprocess !== undefined)
       formData.append("postprocess", params.postprocess.toString());
+    if (params.palette !== undefined)
+      formData.append("palette", params.palette);
 
     return request<VideoInferenceResponse>("/api/inference/video", {
       method: "POST",
@@ -259,6 +262,7 @@ export const api = {
     activationThreshold?: number;
     lostTrackBuffer?: number;
     matchingThreshold?: number;
+    palette?: string;
   }): Promise<TrackingVideoResponse> {
     const formData = new FormData();
     formData.append("file", params.file);
@@ -275,6 +279,8 @@ export const api = {
       formData.append("lost_track_buffer", params.lostTrackBuffer.toString());
     if (params.matchingThreshold !== undefined)
       formData.append("matching_threshold", params.matchingThreshold.toString());
+    if (params.palette !== undefined)
+      formData.append("palette", params.palette);
 
     return request<TrackingVideoResponse>("/api/tracking/video", {
       method: "POST",
@@ -762,6 +768,40 @@ export const api = {
     classification: string;
   }> {
     return request(`/api/thermal/spot-temp?intensity=${intensity}`);
+  },
+
+  /**
+   * Run full radiometric thermal transformation & sensor fusion on an uploaded video
+   */
+  async runThermalVideo(params: {
+    file: File | Blob;
+    palette?: string;
+    maxFrames?: number;
+    fusionMode?: string;
+    confThreshold?: number;
+    modelName?: string;
+  }): Promise<{
+    status: string;
+    palette: string;
+    fusion_mode: string;
+    frames_requested: number;
+    frames_processed: number;
+    target_count: number;
+    annotated_video_url?: string;
+    results: any[];
+  }> {
+    const formData = new FormData();
+    formData.append("file", params.file);
+    if (params.palette) formData.append("palette", params.palette);
+    if (params.maxFrames) formData.append("max_frames", params.maxFrames.toString());
+    if (params.fusionMode) formData.append("fusion_mode", params.fusionMode);
+    if (params.confThreshold) formData.append("conf_threshold", params.confThreshold.toString());
+    if (params.modelName) formData.append("model_name", params.modelName);
+
+    return request("/api/thermal/video", {
+      method: "POST",
+      body: formData,
+    });
   },
 };
 

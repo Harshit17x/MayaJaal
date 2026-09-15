@@ -2,16 +2,22 @@ from __future__ import annotations
 
 import base64
 import logging
+from pathlib import Path
+import tempfile
+import uuid
 from typing import Any, Dict, List, Optional
 
 import cv2
 from fastapi import APIRouter, File, Form, HTTPException, Query, UploadFile, status
-from fastapi.responses import Response
+from fastapi.responses import FileResponse, Response
 import numpy as np
 from pydantic import BaseModel, Field
 
+from app.core.config import settings
 from app.core.runtime import inference_service, model_manager
 from app.pipeline.preprocessor import PreprocessingConfig, Preprocessor
+from app.pipeline.video_loader import VideoLoader, VideoLoaderError
+from app.tracking.annotator import convert_video_to_h264
 from app.pipeline.thermal_fusion_service import (
     FusedTarget,
     RadiometricCalibration,
@@ -127,13 +133,15 @@ def _run_detection_if_model_loaded(
             )
         )
         tensor = prep.process(img_bgr)
-        raw_res = inference_service.predict(model_name, tensor)
-
-        from app.pipeline.postprocessor import Postprocessor, PostprocessorConfig
-
-        post = Postprocessor(PostprocessorConfig(conf_threshold=conf_threshold))
-        detections = post.process(raw_res, original_size=(img_bgr.shape[0], img_bgr.shape[1]))
-        return [d.to_dict() for d in detections]
+        h, w = img_bgr.shape[:2]
+        res = inference_service.predict(
+            model_name=model_name,
+            input_data=tensor,
+            postprocess=True,
+            conf_threshold=conf_threshold,
+            original_image_size=(w, h),
+        )
+        return res.get("detections", [])
     except Exception as exc:
         logger.warning("Threat detection inference skipped in thermal pipeline: %s", exc)
         return []
@@ -279,3 +287,188 @@ def get_spot_temperature(
         "temp_celsius": temp,
         "classification": "HUMAN_CORE" if 35.0 <= temp <= 39.0 else "VEHICLE_EXHAUST" if temp >= 50.0 else "AMBIENT_COLD",
     }
+
+
+@router.post("/video")
+async def process_thermal_video(
+    file: UploadFile = File(...),
+    palette: str = Form("ironbow"),
+    max_frames: int = Form(300),
+    fusion_mode: str = Form("msx"),
+    conf_threshold: float = Form(0.25),
+    model_name: str = Form("best"),
+) -> Dict[str, Any]:
+    """
+    Transforms an uploaded visible video into a synthetic radiometric FLIR / NVG video sequence (H.264 MP4).
+    Applies real-time thermal calibration, heat-bloom synthesis on targets, and tactical thermal HUD.
+    """
+    if file is None or not file.filename:
+        raise HTTPException(status_code=400, detail="Video file is required.")
+
+    extension = Path(file.filename).suffix.lower()
+    if not extension or extension not in settings.allowed_video_extensions:
+        raise HTTPException(
+            status_code=415,
+            detail=f"Unsupported video type: {extension}. Allowed: {settings.allowed_video_extensions}",
+        )
+
+    try:
+        data = await file.read()
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail="Unable to read uploaded video.") from exc
+
+    if not data:
+        raise HTTPException(status_code=400, detail="Uploaded video is empty.")
+
+    max_size = settings.max_upload_size_mb * 1024 * 1024
+    if len(data) > max_size:
+        raise HTTPException(
+            status_code=413,
+            detail=f"Uploaded video exceeds maximum allowed size of {settings.max_upload_size_mb} MB.",
+        )
+
+    settings.temp_directory.mkdir(parents=True, exist_ok=True)
+    thermal_dir = settings.temp_directory / "thermal_videos"
+    thermal_dir.mkdir(parents=True, exist_ok=True)
+
+    session_id = uuid.uuid4().hex[:12]
+    temp_input_path = settings.temp_directory / f"thm_in_{session_id}{extension}"
+    raw_out_path = settings.temp_directory / f"thm_raw_{session_id}.mp4"
+    final_out_path = thermal_dir / f"thermal_{session_id}.mp4"
+
+    try:
+        temp_input_path.write_bytes(data)
+
+        # Ensure model is available for heat-blooming
+        if not model_manager.is_loaded(model_name):
+            cand = settings.model_directory / f"{model_name}.onnx"
+            if cand.exists():
+                try:
+                    model_manager.load_model(model_name, cand)
+                except Exception:
+                    pass
+
+        writer: cv2.VideoWriter | None = None
+        has_written = False
+        frames_processed = 0
+        total_targets = 0
+        frame_results: List[Dict[str, Any]] = []
+
+        with VideoLoader(temp_input_path) as video:
+            metadata = video.get_metadata()
+            fps = float(metadata.get("fps") or 25.0)
+            if fps <= 0 or fps > 120:
+                fps = 25.0
+
+            while frames_processed < max_frames:
+                success, frame = video.read_frame()
+                if not success or frame is None:
+                    break
+
+                h, w = frame.shape[:2]
+                if writer is None:
+                    writer = cv2.VideoWriter(
+                        str(raw_out_path),
+                        cv2.VideoWriter_fourcc(*"mp4v"),
+                        fps,
+                        (w, h),
+                    )
+
+                # Threat detection for thermal blooming
+                dets = _run_detection_if_model_loaded(frame, model_name=model_name, conf_threshold=conf_threshold)
+
+                # Thermal transform
+                if palette == "standard":
+                    thermal_frame = frame.copy()
+                else:
+                    thermal_frame = thermal_fusion_service.simulate_thermal_from_optical(
+                        frame,
+                        detections=dets,
+                        palette=palette,
+                    )
+                    if fusion_mode == "msx" and palette not in ("standard",):
+                        thermal_frame = thermal_fusion_service.fuse_msx_detail(frame, thermal_frame)
+
+                # Fuse detections to target models
+                fused_targets = thermal_fusion_service.fuse_detections(
+                    optical_detections=dets,
+                    thermal_detections=dets,
+                    thermal_frame=thermal_frame,
+                )
+                total_targets += len(fused_targets)
+
+                # Tactical HUD
+                annotated = thermal_fusion_service.draw_thermal_hud(
+                    thermal_frame,
+                    palette_name=palette,
+                    fused_targets=fused_targets,
+                )
+
+                if writer is not None and writer.isOpened():
+                    writer.write(annotated)
+                    has_written = True
+
+                frame_results.append({
+                    "frame_index": frames_processed,
+                    "target_count": len(fused_targets),
+                    "fused_targets": [t.to_dict() for t in fused_targets],
+                })
+                frames_processed += 1
+
+        if writer is not None:
+            writer.release()
+
+        annotated_video_url: Optional[str] = None
+        if has_written and raw_out_path.exists():
+            success = convert_video_to_h264(raw_out_path, final_out_path)
+            if success and final_out_path.exists():
+                annotated_video_url = f"/api/thermal/videos/thermal_{session_id}.mp4"
+            if raw_out_path.exists():
+                try:
+                    raw_out_path.unlink()
+                except OSError:
+                    pass
+
+        return {
+            "status": "success",
+            "palette": palette,
+            "fusion_mode": fusion_mode,
+            "frames_requested": max_frames,
+            "frames_processed": frames_processed,
+            "target_count": total_targets,
+            "annotated_video_url": annotated_video_url,
+            "results": frame_results,
+        }
+
+    except HTTPException:
+        raise
+    except Exception as exc:
+        logger.exception("Error processing thermal video: %s", exc)
+        raise HTTPException(status_code=500, detail=f"Thermal video processing failed: {exc}") from exc
+    finally:
+        if temp_input_path.exists():
+            try:
+                temp_input_path.unlink()
+            except OSError:
+                pass
+
+
+@router.api_route("/videos/{filename}", methods=["GET", "HEAD"])
+async def get_thermal_video(filename: str):
+    """
+    Serve a generated radiometric FLIR / NVG H.264 MP4 video.
+    """
+    safe_name = Path(filename).name
+    target_path = settings.temp_directory / "thermal_videos" / safe_name
+    if not target_path.exists() or not target_path.is_file():
+        raise HTTPException(status_code=404, detail="Thermal video not found.")
+    return FileResponse(
+        str(target_path),
+        media_type="video/mp4",
+        content_disposition_type="inline",
+        headers={
+            "Accept-Ranges": "bytes",
+            "Cache-Control": "public, max-age=3600",
+        },
+    )
+
