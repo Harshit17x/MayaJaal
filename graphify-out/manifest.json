@@ -18,9 +18,9 @@
     "semantic_hash": "9f3b839914bb3bfbcabd7c16a5cb5708"
   },
   "backend/app/api/inference.py": {
-    "mtime": 1789226360.9353077,
-    "seen": 1789232338.3521633,
-    "ast_hash": "574d5272cbd1258ea7544ace4695bb23",
+    "mtime": 1789503106.1098146,
+    "seen": 1789503393.9779165,
+    "ast_hash": "adb42ff202005ae9ac9e8cae7eb65adc",
     "semantic_hash": ""
   },
   "backend/app/api/models.py": {
@@ -36,9 +36,9 @@
     "semantic_hash": ""
   },
   "backend/app/api/tracking.py": {
-    "mtime": 1789226399.2574613,
-    "seen": 1789232338.352171,
-    "ast_hash": "e01e2c87182ec12cbf8484915fee4c6d",
+    "mtime": 1789503128.4589336,
+    "seen": 1789503393.9779286,
+    "ast_hash": "e2c5ba32ada33d3d9455914a2e2a0d64",
     "semantic_hash": ""
   },
   "backend/app/core/config.py": {
@@ -522,9 +522,9 @@
     "semantic_hash": ""
   },
   "frontend/src/components/surveillance/liveworkspace.tsx": {
-    "mtime": 1789501753.2668445,
-    "seen": 1789501835.837265,
-    "ast_hash": "6514fc91451fadd5c0c2a6c08ce83d02",
+    "mtime": 1789503237.91514,
+    "seen": 1789503393.9781544,
+    "ast_hash": "a0749f4045398241f52b6380f974493b",
     "semantic_hash": ""
   },
   "frontend/src/components/ui/badge.tsx": {
@@ -552,9 +552,9 @@
     "semantic_hash": ""
   },
   "frontend/src/lib/api.ts": {
-    "mtime": 1789500897.327183,
-    "seen": 1789501835.8372767,
-    "ast_hash": "8a784d7bd7a9297231ddcb97705581c1",
+    "mtime": 1789503167.125948,
+    "seen": 1789503393.978165,
+    "ast_hash": "4236bbacd393854dd67755544653f206",
     "semantic_hash": ""
   },
   "frontend/src/lib/authStore.ts": {
@@ -3156,9 +3156,9 @@
     "semantic_hash": ""
   },
   "backend/app/api/thermal.py": {
-    "mtime": 1789500437.5969346,
-    "seen": 1789501835.836987,
-    "ast_hash": "ac08307b075f3ce6836e9206f1e68148",
+    "mtime": 1789503309.22774,
+    "seen": 1789503393.9779258,
+    "ast_hash": "5b8619d9cc6b4fcc9dc8624748febc00",
     "semantic_hash": ""
   },
   "backend/app/pipeline/thermal_fusion_service.py": {
