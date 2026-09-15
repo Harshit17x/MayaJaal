@@ -108,6 +108,9 @@ def normalize_stream_url(raw_url: str) -> tuple[str, list[str], str]:
     if not clean or clean.lower() in ("sample", "demo", "test"):
         return "sample", ["sample"], "Sample Video Simulation"
 
+    if clean.lower() in ("webcam", "0", "cam0", "camera0", "integrated", "local"):
+        return "webcam", ["webcam"], "Local Hardware Webcam (Device 0)"
+
     if Path(clean).is_file():
         return clean, [clean], "Local Video Source"
 
@@ -199,6 +202,24 @@ def open_video_source(source_url: str) -> tuple[cv2.VideoCapture | None, str, st
             if cap.isOpened():
                 return cap, "Sample Surveillance Feed Active", str(SAMPLE_VIDEO_PATH), protocol
         return None, "Sample video file not found on server", "sample", protocol
+
+    # --- Local Hardware Webcam keyword ---
+    if canonical_url == "webcam":
+        import platform
+        cap = None
+        if platform.system() == "Windows":
+            try:
+                cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+            except Exception:
+                cap = None
+        if cap is None or not cap.isOpened():
+            cap = cv2.VideoCapture(0)
+        if cap is not None and cap.isOpened():
+            cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+            cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+            cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+            return cap, "Local USB / Integrated Webcam Active", "webcam", protocol
+        return None, "Could not open local webcam (Device 0). Ensure camera is not used by another application.", "webcam", protocol
 
     # --- Local file ---
     if Path(canonical_url).is_file():
@@ -723,6 +744,18 @@ def validate_stream(
             "resolved_url": "sample",
             "latency_ms": 1,
             "message": "Sample demonstration video ready on server.",
+            "is_ip_webcam": False,
+        }
+
+    if canonical_url == "webcam":
+        return {
+            "reachable": True,
+            "status": "ready",
+            "protocol": protocol,
+            "target_url": "webcam",
+            "resolved_url": "webcam",
+            "latency_ms": 5,
+            "message": "Local hardware USB / integrated webcam connected.",
             "is_ip_webcam": False,
         }
 

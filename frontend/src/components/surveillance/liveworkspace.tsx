@@ -1250,7 +1250,7 @@ export function LiveWorkspace() {
                       handleConnectStream();
                     }
                   }}
-                  placeholder="e.g. http://12.10.5.194:8080, rtsp://10.20.72.101:554/live, or 'sample'"
+                  placeholder="e.g. 'webcam', http://192.168.1.5:8080, rtsp://10.20.72.101:554/live, or 'sample'"
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 pr-8 text-xs font-mono text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-700/20 focus:border-emerald-700 shadow-2xs"
                 />
                 {rtspInputValue && (
@@ -1331,6 +1331,17 @@ export function LiveWorkspace() {
             {/* Quick preset links */}
             <div className="flex flex-wrap items-center gap-1.5 pt-2 border-t border-slate-100 text-[11px]">
               <span className="text-slate-400 font-medium">Presets:</span>
+              <button
+                type="button"
+                onClick={() => {
+                  setRtspInputValue("webcam");
+                  handleConnectStream("webcam");
+                }}
+                className="px-2 py-0.5 rounded-md bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-300 transition-colors font-mono font-medium cursor-pointer flex items-center gap-1 shadow-2xs"
+              >
+                <Camera className="w-3 h-3 text-emerald-600" />
+                Live Webcam (Device 0)
+              </button>
               <button
                 type="button"
                 onClick={() => {
