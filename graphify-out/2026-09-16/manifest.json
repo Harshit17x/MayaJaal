@@ -6,10 +6,10 @@
     "semantic_hash": ""
   },
   "backend/app/api/cameras.py": {
-    "mtime": 1789014885.050972,
-    "seen": 1789026248.1500294,
-    "ast_hash": "ec22ec9fe520012c3a39e02c1df174c5",
-    "semantic_hash": "ec22ec9fe520012c3a39e02c1df174c5"
+    "mtime": 1789500614.3507829,
+    "seen": 1789501835.8369598,
+    "ast_hash": "809ef0a95d13168caef97f84758aacdf",
+    "semantic_hash": ""
   },
   "backend/app/api/health.py": {
     "mtime": 1788946168.7286623,
@@ -30,9 +30,9 @@
     "semantic_hash": "11152d95bd04cf7eed28c956479cc8ef"
   },
   "backend/app/api/stream.py": {
-    "mtime": 1789117663.9979439,
-    "seen": 1789118047.8308277,
-    "ast_hash": "995923bb9276f1d50134ee44dc00999a",
+    "mtime": 1789500592.9747186,
+    "seen": 1789501835.8369827,
+    "ast_hash": "40d34fe418844634f3bbfc9158141906",
     "semantic_hash": ""
   },
   "backend/app/api/tracking.py": {
@@ -84,9 +84,9 @@
     "semantic_hash": "51fe8a063a7216e3a2df9d4774e8d700"
   },
   "backend/app/main.py": {
-    "mtime": 1789119669.6521487,
-    "seen": 1789119982.8383324,
-    "ast_hash": "71ece2d8176b8ab37e7b9879315c993a",
+    "mtime": 1789500494.053773,
+    "seen": 1789501835.8370228,
+    "ast_hash": "3d9856d8b404e13d03a6e44cff93de87",
     "semantic_hash": ""
   },
   "backend/app/pipeline/anpr_service.py": {
@@ -498,9 +498,9 @@
     "semantic_hash": "22210d8a5bdbe9870aa97c3014411100"
   },
   "frontend/src/components/surveillance/cameracard.tsx": {
-    "mtime": 1789038071.7120216,
-    "seen": 1789038236.722288,
-    "ast_hash": "ae6f3581b89150dd44f35dc6ec946d31",
+    "mtime": 1789501162.142653,
+    "seen": 1789501835.8372557,
+    "ast_hash": "a90fc3949c4f19c22c0505ee8f3f70b6",
     "semantic_hash": ""
   },
   "frontend/src/components/surveillance/camerafeedplaceholder.tsx": {
@@ -510,21 +510,21 @@
     "semantic_hash": "17a2abf928fa0cc353f73ea3c263139f"
   },
   "frontend/src/components/surveillance/cameragrid.tsx": {
-    "mtime": 1789038083.1026695,
-    "seen": 1789038236.7222912,
-    "ast_hash": "3b948a4d41ab324b77a511b727661bf0",
+    "mtime": 1789501191.2334142,
+    "seen": 1789501835.8372605,
+    "ast_hash": "69b313ca650b716aceab70fc683c5814",
     "semantic_hash": ""
   },
   "frontend/src/components/surveillance/detectioncanvas.tsx": {
-    "mtime": 1789056943.1637213,
-    "seen": 1789059522.5937521,
-    "ast_hash": "d1c7ad499b2235adcd51188fb301480c",
+    "mtime": 1789501482.213884,
+    "seen": 1789501835.837263,
+    "ast_hash": "5fccf02c4e1e44a306d79a9877f2c9cf",
     "semantic_hash": ""
   },
   "frontend/src/components/surveillance/liveworkspace.tsx": {
-    "mtime": 1789064766.6870446,
-    "seen": 1789072973.6513474,
-    "ast_hash": "f1b76c7310461009d95f5b92a307aa6c",
+    "mtime": 1789501753.2668445,
+    "seen": 1789501835.837265,
+    "ast_hash": "6514fc91451fadd5c0c2a6c08ce83d02",
     "semantic_hash": ""
   },
   "frontend/src/components/ui/badge.tsx": {
@@ -552,9 +552,9 @@
     "semantic_hash": ""
   },
   "frontend/src/lib/api.ts": {
-    "mtime": 1789225855.0489311,
-    "seen": 1789225957.4850163,
-    "ast_hash": "1fc8044cb4ee8448f69ff27d5a6b5f4b",
+    "mtime": 1789500897.327183,
+    "seen": 1789501835.8372767,
+    "ast_hash": "8a784d7bd7a9297231ddcb97705581c1",
     "semantic_hash": ""
   },
   "frontend/src/lib/authStore.ts": {
@@ -606,10 +606,10 @@
     "semantic_hash": ""
   },
   "frontend/src/types/camera.ts": {
-    "mtime": 1788946168.8560262,
-    "seen": 1789026248.1501758,
-    "ast_hash": "78b0131b3b155c8e44ae70030973941b",
-    "semantic_hash": "78b0131b3b155c8e44ae70030973941b"
+    "mtime": 1789500851.5703118,
+    "seen": 1789501835.8372998,
+    "ast_hash": "cdac487990f9bfb2230c273a0bf8baf5",
+    "semantic_hash": ""
   },
   "frontend/tailwind.config.ts": {
     "mtime": 1788946168.8560262,
@@ -3153,6 +3153,24 @@
     "mtime": 1789226495.0541947,
     "seen": 1789232338.3522635,
     "ast_hash": "24722bd80baef6a18308987f6f2f94e3",
+    "semantic_hash": ""
+  },
+  "backend/app/api/thermal.py": {
+    "mtime": 1789500437.5969346,
+    "seen": 1789501835.836987,
+    "ast_hash": "ac08307b075f3ce6836e9206f1e68148",
+    "semantic_hash": ""
+  },
+  "backend/app/pipeline/thermal_fusion_service.py": {
+    "mtime": 1789501057.6461115,
+    "seen": 1789501835.8370516,
+    "ast_hash": "fa5525de45e78cd6b4488cea614f6036",
+    "semantic_hash": ""
+  },
+  "backend/tests/test_thermal_fusion.py": {
+    "mtime": 1789500746.6414363,
+    "seen": 1789501835.8371384,
+    "ast_hash": "3155b8f8d457fde60a87d503a997cddd",
     "semantic_hash": ""
   }
 }
