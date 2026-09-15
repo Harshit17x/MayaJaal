@@ -5,12 +5,12 @@
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1379 nodes · 2333 edges · 81 communities (62 shown, 9 thin omitted)
-- Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 50 edges (avg confidence: 0.94)
+- 1382 nodes · 2329 edges · 81 communities (59 shown, 12 thin omitted)
+- Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 53 edges (avg confidence: 0.93)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `31d5a708`
+- Built from commit: `fceb652d`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -21,33 +21,33 @@
 - inference.py
 - BorderMap.tsx
 - ONNXEngine
-- logging.py
+- get
 - cameras.py
-- VideoLoader
+- thermal.py
 - tracking.py
 - RTSPStream
 - Preprocessor
-- Any
 - ModelManager
+- ResourceManager
 - load_image
 - compilerOptions
 - README.md
-- lucide-react
+- AnalyticsDashboard.tsx
 - react
 - faces.py
 - FaceService
 - AlertService
-- liveworkspace.tsx
-- ContinuousFaceScanner
+- api.ts
+- lucide-react
 - ThermalFusionService
 - anpr.py
 - scripts
 - MayaJaal (मायाजाल)
 - alertsStore.ts
 - 34. Recommended Final Model Integration Process
-- Postprocessor
+- Detection
 - ANPRPipeline
-- api.ts
+- facial-recognition/page.tsx
 - Settings
 - GlobalTraceManager
 - ModelManagerError
@@ -55,18 +55,18 @@
 - postcss.config.mjs
 - next-env.d.ts
 - GeofenceEngine
-- ResourceManagerError
-- RTSPError
-- draw_tracked_boxes
-- get_global_trace_trajectory
-- .predict
-- PostprocessorConfig
+- liveworkspace.tsx
+- ONNXEngineError
 - convert_video_to_h264
+- ONNXModelError
+- inference_service.py
+- Postprocessor
+- ndarray
 - get_annotated_frame
-- thermal.py
+- Response
 - test_reid_and_global_tracking.py
 - alerts.py
-- FastAPI
+- logging.py
 - 37. Troubleshooting
 - 39. Development Notes
 - 2. Current Project Status
@@ -77,13 +77,13 @@
 - api/models.py
 - reset_global_traces
 - test_alerts_and_scanner.py
+- StreamingResponse
 - health
 - geofences.py
 - test_cameras_security.py
-- gis-map/page.tsx
+- alert.ts
 - ReIDService
 - test_facial_recognition.py
-- geofences/page.tsx
 - unexpected_exception_handler
 - quantize_model.py
 
@@ -93,28 +93,28 @@
 3. `react` - 23 edges
 4. `ModelManager` - 22 edges
 5. `ONNXEngine` - 21 edges
-6. `Preprocessor` - 21 edges
+6. `Preprocessor` - 20 edges
 7. `Postprocessor` - 20 edges
-8. `ByteTrackerWrapper` - 19 edges
-9. `GeofenceEngine` - 18 edges
-10. `PreprocessingError` - 18 edges
+8. `ByteTrackerWrapper` - 18 edges
+9. `PreprocessingError` - 18 edges
+10. `GeofenceEngine` - 18 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `image_inference()` --uses--> `PreprocessingError`  [INFERRED]
-  backend/app/api/inference.py → backend/app/pipeline/preprocessor.py
-- `video_inference()` --uses--> `PreprocessingError`  [INFERRED]
-  backend/app/api/inference.py → backend/app/pipeline/preprocessor.py
-- `video_inference()` --uses--> `VideoLoader`  [INFERRED]
-  backend/app/api/inference.py → backend/app/pipeline/video_loader.py
-- `video_inference()` --uses--> `VideoLoaderError`  [INFERRED]
-  backend/app/api/inference.py → backend/app/pipeline/video_loader.py
-- `rtsp_inference()` --uses--> `PreprocessingError`  [INFERRED]
-  backend/app/api/inference.py → backend/app/pipeline/preprocessor.py
+- `stream_generator()` --calls--> `PreprocessingConfig`  [INFERRED]
+  backend/app/api/stream.py → backend/app/pipeline/preprocessor.py
+- `stream_generator()` --calls--> `Preprocessor`  [INFERRED]
+  backend/app/api/stream.py → backend/app/pipeline/preprocessor.py
+- `stream_generator()` --calls--> `ByteTrackerWrapper`  [INFERRED]
+  backend/app/api/stream.py → backend/app/tracking/tracker.py
+- `get_snapshot()` --calls--> `PreprocessingConfig`  [INFERRED]
+  backend/app/api/stream.py → backend/app/pipeline/preprocessor.py
+- `get_snapshot()` --calls--> `Preprocessor`  [INFERRED]
+  backend/app/api/stream.py → backend/app/pipeline/preprocessor.py
 
 ## Import Cycles
 - None detected.
 
-## Communities (81 total, 9 thin omitted)
+## Communities (81 total, 12 thin omitted)
 
 ### Community 0 - "authStore.ts"
 Cohesion: 0.13
@@ -129,48 +129,44 @@ Cohesion: 0.04
 Nodes (42): nextConfig, dependencies, clsx, lucide-react, maplibre-gl, next, react, react-dom (+34 more)
 
 ### Community 3 - "inference.py"
-Cohesion: 0.17
-Nodes (21): batch_inference(), create_preprocessor(), get_model_input_size(), image_inference(), inference_status(), get, post, UploadFile (+13 more)
+Cohesion: 0.18
+Nodes (19): batch_inference(), create_preprocessor(), get_model_input_size(), image_inference(), inference_status(), get, post, UploadFile (+11 more)
 
 ### Community 4 - "BorderMap.tsx"
-Cohesion: 0.05
-Nodes (44): AnprPage(), CAMERA_TYPES, CamerasPage(), COORDINATE_PRESETS, SECTORS, BorderMap(), BorderMapProps, DEMO_ALERT (+36 more)
+Cohesion: 0.06
+Nodes (39): CAMERA_TYPES, CamerasPage(), COORDINATE_PRESETS, SECTORS, BorderMap(), BorderMapProps, DEMO_ALERT, escapeHtml() (+31 more)
 
 ### Community 5 - "ONNXEngine"
-Cohesion: 0.09
-Nodes (21): ONNXEngine, ONNXEngineError, ONNXInferenceError, ONNXModelError, Any, Exception, ndarray, Path (+13 more)
-
-### Community 6 - "logging.py"
-Cohesion: 0.10
-Nodes (27): create_standby_frame(), draw_bounding_boxes(), draw_tactical_hud(), get_live_stream(), get_snapshot(), is_host_reachable(), is_rtsp_host_reachable(), normalize_stream_url() (+19 more)
+Cohesion: 0.17
+Nodes (8): ONNXEngine, Path, Create the ONNX Runtime session., Extract embedded model metadata, class labels, and input image size., Release the ONNX Runtime session., Safe, reusable ONNX Runtime inference engine. Designed for: - GPU acceleration…, Validate the ONNX model path before loading., Detect and return preferred execution providers (GPU / CPU).
 
 ### Community 7 - "cameras.py"
-Cohesion: 0.15
-Nodes (26): CameraCreateRequest, CameraUpdateRequest, create_camera(), delete_camera(), _ensure_data_file(), get_camera(), get_cameras(), HealthStats (+18 more)
+Cohesion: 0.09
+Nodes (34): CameraCreateRequest, CameraUpdateRequest, create_camera(), delete_camera(), _ensure_data_file(), get_camera(), get_cameras(), HealthStats (+26 more)
 
-### Community 8 - "VideoLoader"
-Cohesion: 0.11
-Nodes (18): InvalidVideoError, Any, Exception, Path, Return useful video metadata., Read the next frame with orientation correction. Returns: (True, frame) when…, Base exception for video loading errors., Raised when a video file does not exist. (+10 more)
+### Community 8 - "thermal.py"
+Cohesion: 0.06
+Nodes (43): _decode_image_upload(), fuse_dual_spectrum_images(), get_available_palettes(), get_spot_temperature(), get_thermal_video(), PaletteInfo, process_thermal_video(), Any (+35 more)
 
 ### Community 9 - "tracking.py"
-Cohesion: 0.20
-Nodes (15): _build_tracker_config(), _create_preprocessor(), _get_model_input_size(), Any, post, UploadFile, /api/tracking — ByteTrack multi-object tracking endpoints. Endpoints ---------…, Run ByteTrack multi-object tracking on an uploaded video using ONNX batching (2… (+7 more)
+Cohesion: 0.12
+Nodes (24): _build_tracker_config(), _create_preprocessor(), get_global_trace_trajectory(), _get_model_input_size(), list_global_traces(), list_rtsp_sessions(), Any, get (+16 more)
 
 ### Community 10 - "RTSPStream"
-Cohesion: 0.16
-Nodes (10): Any, Open the stream (RTSP or HTTP IP Webcam) with candidate fallbacks and bounded…, Read one frame from the RTSP stream., Attempt bounded reconnection attempts. Returns: True if reconnection succeeds.…, Raised when an RTSP stream cannot be opened., Return current RTSP stream status., Release the RTSP capture resource., Safe RTSP stream reader for CCTV cameras. Features: - RTSP URL validation -… (+2 more)
+Cohesion: 0.12
+Nodes (17): InvalidRTSPUrlError, Any, Exception, Open the stream (RTSP or HTTP IP Webcam) with candidate fallbacks and bounded…, Base exception for RTSP stream errors., Read one frame from the RTSP stream., Raised when an RTSP URL is invalid., Attempt bounded reconnection attempts. Returns: True if reconnection succeeds.… (+9 more)
 
 ### Community 11 - "Preprocessor"
 Cohesion: 0.14
 Nodes (18): InvalidFrameError, InvalidTargetSizeError, PreprocessingError, Preprocessor, Exception, ndarray, Validate an OpenCV frame., Base exception for preprocessing errors. (+10 more)
 
-### Community 12 - "Any"
-Cohesion: 0.33
-Nodes (3): Any, Return the status of all loaded models., Unload all models safely.
+### Community 12 - "ModelManager"
+Cohesion: 0.14
+Nodes (9): ModelManager, Any, Return a loaded model., Check whether a model is currently loaded., Return names of all loaded models., Return the status of all loaded models., Unload all models safely., Run inference using a named cached model. (+1 more)
 
-### Community 13 - "ModelManager"
+### Community 13 - "ResourceManager"
 Cohesion: 0.13
-Nodes (10): Return current resource usage., Return whether an inference slot is currently available., Controls concurrent inference execution. Designed for a CPU-first system where…, ResourceManager, InferenceService, High-level inference service. Connects: ModelManager + ResourceManager + ONNX…, ModelManager, Check whether a model is currently loaded. (+2 more)
+Nodes (12): Exception, Context manager for safe inference execution. Example: with…, Base exception for resource manager errors., Return current resource usage., Return whether an inference slot is currently available., Controls concurrent inference execution. Designed for a CPU-first system where…, Acquire an inference slot. Returns: True if a slot was acquired. False if the…, Release an inference slot. (+4 more)
 
 ### Community 14 - "load_image"
 Cohesion: 0.18
@@ -184,9 +180,13 @@ Nodes (18): compilerOptions, allowJs, esModuleInterop, incremental, isolatedModu
 Cohesion: 0.05
 Nodes (39): 10. Health Check, 11. Runtime Status, 12. Model Management, 13. Adding an ONNX Model, 14. Loading an ONNX Model, 15. Checking Loaded Models, 16. Unloading a Model, 17. ONNX Model Inspection (+31 more)
 
-### Community 17 - "lucide-react"
-Cohesion: 0.09
-Nodes (12): ActivityOverviewChart(), DayData, WEEK_DATA, AnalyticsDashboard(), CameraOutpostGrid(), OutpostItem, OUTPOSTS, CATEGORIES (+4 more)
+### Community 17 - "AnalyticsDashboard.tsx"
+Cohesion: 0.14
+Nodes (11): ActivityOverviewChart(), DayData, WEEK_DATA, AnalyticsDashboard(), CameraOutpostGrid(), OutpostItem, OUTPOSTS, CATEGORIES (+3 more)
+
+### Community 18 - "react"
+Cohesion: 0.16
+Nodes (11): AnprPage(), GeofencesPage(), CameraCard(), CameraCardProps, CameraGrid(), useCameras(), AnprRecord, AnprScanResponse (+3 more)
 
 ### Community 19 - "faces.py"
 Cohesion: 0.07
@@ -200,13 +200,13 @@ Nodes (17): calibrate_match_confidence(), compute_iou(), enhance_aligned_face(),
 Cohesion: 0.06
 Nodes (32): AbstractEventLoop, create_token(), get_roster(), login(), LoginRequest, logout(), Any, BaseModel (+24 more)
 
-### Community 22 - "liveworkspace.tsx"
+### Community 22 - "api.ts"
 Cohesion: 0.09
-Nodes (30): SystemStatus(), ConnectionStatus(), CLASS_COLORS, DetectionCanvas(), DetectionCanvasProps, buildStreamUrl(), getThermalVideoFilter(), LiveWorkspace() (+22 more)
+Nodes (32): COLOR_PRESETS, FeedViewMode, ToolMode, ApiError, request(), StreamValidationResult, BackendStatusState, HealthResponse (+24 more)
 
-### Community 23 - "ContinuousFaceScanner"
-Cohesion: 0.19
-Nodes (8): ContinuousFaceScanner, Any, Return operational telemetry for the feed scanner., Dedicated worker loop for an individual camera stream., Continuous Multi-Feed Background Video Scanner for MAATRIX. Monitors registered…, Start continuous scanning across all active camera feeds., Gracefully stop all camera feed scanner worker threads., Event
+### Community 23 - "lucide-react"
+Cohesion: 0.13
+Nodes (5): GisMapPage(), CameraFeedStrip(), cameras, SystemStatus(), lucide-react
 
 ### Community 25 - "ThermalFusionService"
 Cohesion: 0.06
@@ -226,23 +226,23 @@ Nodes (16): 10. Contributors & Acknowledgments, 1. Overview, 2. Key Capabilities
 
 ### Community 29 - "alertsStore.ts"
 Cohesion: 0.13
-Nodes (20): GisMapPage(), MetricCard(), MetricCardProps, MetricsRow(), AlertListener, ConnectionListener, connectionListeners, getAlertsWsUrl() (+12 more)
+Nodes (21): MetricCard(), MetricCardProps, MetricsRow(), RecentAlerts(), AlertListener, ConnectionListener, connectionListeners, getAlertsWsUrl() (+13 more)
 
 ### Community 30 - "34. Recommended Final Model Integration Process"
 Cohesion: 0.15
 Nodes (13): 34. Recommended Final Model Integration Process, Step 1, Step 10, Step 11, Step 12, Step 2, Step 3, Step 4 (+5 more)
 
-### Community 31 - "Postprocessor"
-Cohesion: 0.14
-Nodes (17): Detection, Postprocessor, Any, ndarray, Decode output tensors into a list of detection lists (one list per frame in the…, Decode single-frame YOLOv8/v9/v11 output [4 + C, N]., Decode standard YOLOv8/v9/v11 output with shape [1, 4 + C, N] or [4 + C, N]., Decode single-frame YOLOv5/v7 [N, 5 + C] or transposed YOLOv8 [N, 4 + C]. (+9 more)
+### Community 31 - "Detection"
+Cohesion: 0.13
+Nodes (15): Detection, Any, ndarray, Decode output tensors into a list of detection lists (one list per frame in the…, Decode single-frame YOLOv8/v9/v11 output [4 + C, N]., Decode standard YOLOv8/v9/v11 output with shape [1, 4 + C, N] or [4 + C, N]., Decode single-frame YOLOv5/v7 [N, 5 + C] or transposed YOLOv8 [N, 4 + C]., Decode YOLOv5/v7 [1, N, 5 + C] or transposed YOLOv8 [1, N, 4 + C]. (+7 more)
 
 ### Community 32 - "ANPRPipeline"
-Cohesion: 0.12
-Nodes (18): ANPRPipeline, Any, ndarray, Path, Generator yielding MJPEG multipart stream with real-time ANPR overlays (EasyOCR…, Find license plate text and its bounding box directly within a vehicle crop., End-to-end ANPR Pipeline using ONNX models on GPU: 1. Vehicle detection via…, Resize with padding (letterbox) to square tensor for YOLOv8. (+10 more)
+Cohesion: 0.06
+Nodes (45): create_standby_frame(), draw_bounding_boxes(), draw_tactical_hud(), get_live_stream(), get_snapshot(), is_host_reachable(), is_rtsp_host_reachable(), normalize_stream_url() (+37 more)
 
-### Community 33 - "api.ts"
-Cohesion: 0.20
-Nodes (14): ApiError, request(), StreamValidationResult, AnprRecord, AnprScanResponse, AnprVideoResponse, WatchlistEntry, EnrolledPerson (+6 more)
+### Community 33 - "facial-recognition/page.tsx"
+Cohesion: 0.31
+Nodes (7): EnrolledPerson, FaceDetection, FaceEngineStatus, FaceEvent, FaceScanResponse, RegisterFaceResponse, ThreatLevel
 
 ### Community 34 - "Settings"
 Cohesion: 0.50
@@ -253,48 +253,40 @@ Cohesion: 0.10
 Nodes (14): calc_haversine_km(), GlobalTrace, GlobalTraceManager, Any, ndarray, Update the aggregated appearance feature using Exponential Moving Average…, Convert GlobalTrace into JSON-serializable representation., Central Thread-Safe Manager for Cross-Camera Multi-Target Multi-Camera Tracking… (+6 more)
 
 ### Community 36 - "ModelManagerError"
-Cohesion: 0.15
-Nodes (12): ModelAlreadyLoadedError, ModelManagerError, ModelNotFoundError, Exception, Path, Return a loaded model., Base exception for model manager errors., Unload one model and release its ONNX session. (+4 more)
+Cohesion: 0.22
+Nodes (8): ModelAlreadyLoadedError, ModelManagerError, Exception, Path, Base exception for model manager errors., Unload one model and release its ONNX session., Raised when attempting to load an already loaded model., Load an ONNX model into the cache. A model is loaded only once. If loading…
 
 ### Community 41 - "GeofenceEngine"
 Cohesion: 0.09
 Nodes (19): ccw(), check_tripwire_crossing(), compute_footpoint(), GeofenceEngine, is_point_in_polygon(), Any, ndarray, Virtual Geofencing & Directional Tripwire Engine. Provides mathematical… (+11 more)
 
-### Community 43 - "ResourceManagerError"
-Cohesion: 0.22
-Nodes (6): Exception, Context manager for safe inference execution. Example: with…, Base exception for resource manager errors., Acquire an inference slot. Returns: True if a slot was acquired. False if the…, Release an inference slot., ResourceManagerError
+### Community 43 - "liveworkspace.tsx"
+Cohesion: 0.20
+Nodes (12): ConnectionStatus(), CLASS_COLORS, DetectionCanvas(), DetectionCanvasProps, buildStreamUrl(), getThermalVideoFilter(), LiveWorkspace(), alertsStore (+4 more)
 
-### Community 44 - "RTSPError"
-Cohesion: 0.27
-Nodes (7): InvalidRTSPUrlError, Exception, Base exception for RTSP stream errors., Raised when an RTSP URL is invalid., Raised when a frame cannot be read from the stream., RTSPError, RTSPReadError
-
-### Community 45 - "draw_tracked_boxes"
-Cohesion: 0.29
-Nodes (6): draw_tracked_boxes(), Any, ndarray, Annotate a video frame in-place with tactical bounding boxes and track ID…, Test suspect facial recognition integration in video and photo upload…, test_annotator_suspect_rendering()
-
-### Community 46 - "get_global_trace_trajectory"
-Cohesion: 0.29
-Nodes (7): get_global_trace_trajectory(), list_global_traces(), list_rtsp_sessions(), get, List all active per-camera ByteTracker sessions., List all active cross-camera person traces with recent sightings and trajectory…, Retrieve full chronological GPS multi-camera trajectory for a specific Global…
-
-### Community 47 - ".predict"
+### Community 44 - "ONNXEngineError"
 Cohesion: 0.25
-Nodes (8): InferenceResourceError, InferenceServiceError, Any, Exception, ndarray, Base exception for inference service errors., Raised when inference resources are unavailable., Run inference using a loaded model, supporting both single-frame and batch…
+Nodes (7): ONNXEngineError, ONNXInferenceError, Exception, ndarray, Run inference using a NumPy array. Preprocessing is intentionally kept outside…, Base exception for ONNX engine errors., Raised when inference fails.
 
-### Community 48 - "PostprocessorConfig"
-Cohesion: 0.29
-Nodes (5): PostprocessorConfig, PostprocessorError, Exception, Base exception for postprocessing errors., Configuration for bounding box decoding and NMS.
+### Community 45 - "convert_video_to_h264"
+Cohesion: 0.16
+Nodes (12): convert_video_to_h264(), draw_tracked_boxes(), find_ffmpeg_executable(), Any, ndarray, Path, Server-side bounding box and track ID annotator. Draws tactical bounding boxes,…, Locate the FFmpeg executable reliably across system paths, Python scripts,… (+4 more)
 
-### Community 49 - "convert_video_to_h264"
-Cohesion: 0.38
-Nodes (6): convert_video_to_h264(), find_ffmpeg_executable(), Path, Server-side bounding box and track ID annotator. Draws tactical bounding boxes,…, Locate the FFmpeg executable reliably across system paths, Python scripts,…, Convert an OpenCV-encoded MP4 to browser-compatible H.264 MP4 with faststart.
+### Community 46 - "ONNXModelError"
+Cohesion: 0.33
+Nodes (6): ONNXModelError, Any, Return information about model inputs., Return information about model outputs., Return useful information about the loaded model., Raised when an ONNX model cannot be loaded or is invalid.
+
+### Community 47 - "inference_service.py"
+Cohesion: 0.21
+Nodes (10): InferenceResourceError, InferenceServiceError, Any, Exception, ndarray, Base exception for inference service errors., Raised when inference resources are unavailable., Run inference using a loaded model, supporting both single-frame and batch… (+2 more)
+
+### Community 48 - "Postprocessor"
+Cohesion: 0.24
+Nodes (7): Postprocessor, PostprocessorConfig, PostprocessorError, Exception, Base exception for postprocessing errors., Configuration for bounding box decoding and NMS., Decodes raw model output tensors into structured bounding boxes. Supported…
 
 ### Community 50 - "get_annotated_frame"
 Cohesion: 0.40
 Nodes (5): get_annotated_frame(), get_annotated_video(), api_route, Serve a server-annotated ByteTrack video with burned-in bounding boxes (H.264…, Serve a single server-annotated JPEG frame from tracked video.
-
-### Community 51 - "thermal.py"
-Cohesion: 0.12
-Nodes (25): _decode_image_upload(), fuse_dual_spectrum_images(), get_available_palettes(), get_spot_temperature(), get_thermal_video(), PaletteInfo, process_thermal_video(), Any (+17 more)
 
 ### Community 59 - "test_reid_and_global_tracking.py"
 Cohesion: 0.18
@@ -304,7 +296,7 @@ Nodes (10): Verify that when a trace is recognized as an enrolled suspect on Cam
 Cohesion: 0.10
 Nodes (30): acknowledge_alert(), AlertCreateRequest, alerts_websocket_endpoint(), clear_alerts(), create_alert(), dispatch_qrt(), get_alert_snapshot(), get_scanner_status() (+22 more)
 
-### Community 61 - "FastAPI"
+### Community 61 - "logging.py"
 Cohesion: 0.22
 Nodes (9): lifespan(), get, root(), get_logger(), Configure application-wide logging. Logs are written to both: - the console - a…, Return a logger for a specific application module., setup_logging(), FastAPI (+1 more)
 
@@ -344,9 +336,9 @@ Nodes (31): create_tripwire(), create_zone(), delete_tripwire(), delete_zone(), 
 Cohesion: 0.67
 Nodes (3): test_stream_target_rejects_addresses_outside_camera_network(), test_stream_target_uses_allowlisted_resolved_address(), MonkeyPatch
 
-### Community 78 - "gis-map/page.tsx"
-Cohesion: 0.15
-Nodes (17): AlertsPage(), TacticalThreatToast(), CameraFeedStrip(), cameras, RecentAlerts(), SuspectTrajectoryModal(), SuspectTrajectoryModalProps, api (+9 more)
+### Community 78 - "alert.ts"
+Cohesion: 0.20
+Nodes (13): AlertsPage(), TacticalThreatToast(), SuspectTrajectoryModal(), SuspectTrajectoryModalProps, api, formatConfidence(), AlertFilter, AlertItem (+5 more)
 
 ### Community 79 - "ReIDService"
 Cohesion: 0.18
@@ -356,33 +348,29 @@ Nodes (9): ndarray, Extract a single 512-D L2-normalized feature vector from a p
 Cohesion: 0.22
 Nodes (8): Ensure user's custom threat detection model best.onnx is 100% untouched., Verify YuNet and SFace models are properly initialized and database is loaded., Test the REST API endpoints using FastAPI TestClient., Test suspect classification, threat levels, and PATCH metadata updates., test_face_api_endpoints(), test_face_service_initialization(), test_model_preservation(), test_suspect_classification()
 
-### Community 83 - "geofences/page.tsx"
-Cohesion: 0.17
-Nodes (13): COLOR_PRESETS, FeedViewMode, GeofencesPage(), ToolMode, CreateTripwirePayload, CreateZonePayload, DirectionalTripwire, GeofenceBreachEvent (+5 more)
-
 ### Community 85 - "unexpected_exception_handler"
 Cohesion: 0.38
 Nodes (7): Exception, unexpected_exception_handler(), validation_exception_handler(), exception_handler, JSONResponse, Request, RequestValidationError
 
 ## Knowledge Gaps
-- **206 isolated node(s):** `config`, `nextConfig`, `name`, `version`, `private` (+201 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 654 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **9 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **206 isolated node(s):** `NavItem`, `DayData`, `OutpostItem`, `CategoryStat`, `ModelMetadata` (+201 more)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 658 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **12 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `ANPRPipeline` connect `ANPRPipeline` to `ONNXEngine`, `logging.py`?**
-  _High betweenness centrality (0.036) - this node is a cross-community bridge._
-- **Why does `ONNXEngine` connect `ONNXEngine` to `ANPRPipeline`, `ModelManagerError`, `ModelManager`, `logging.py`?**
-  _High betweenness centrality (0.026) - this node is a cross-community bridge._
+- **Why does `VideoLoader` connect `thermal.py` to `tracking.py`, `inference.py`?**
+  _High betweenness centrality (0.028) - this node is a cross-community bridge._
 - **Are the 4 inferred relationships involving `ModelManager` (e.g. with `InferenceService` and `ONNXEngine`) actually correct?**
   _`ModelManager` has 4 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 2 inferred relationships involving `ONNXEngine` (e.g. with `ModelManager` and `ANPRPipeline`) actually correct?**
   _`ONNXEngine` has 2 INFERRED edges - model-reasoned connections that need verification._
-- **What connects `config`, `nextConfig`, `name` to the rest of the system?**
+- **What connects `NavItem`, `DayData`, `OutpostItem` to the rest of the system?**
   _206 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `authStore.ts` be split into smaller, more focused modules?**
   _Cohesion score 0.12688172043010754 - nodes in this community are weakly interconnected._
 - **Should `ByteTrackerWrapper` be split into smaller, more focused modules?**
   _Cohesion score 0.05714285714285714 - nodes in this community are weakly interconnected._
+- **Should `frontend/package.json` be split into smaller, more focused modules?**
+  _Cohesion score 0.0425531914893617 - nodes in this community are weakly interconnected._
