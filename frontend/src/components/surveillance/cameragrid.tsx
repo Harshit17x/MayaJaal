@@ -36,6 +36,9 @@ export function CameraGrid({ selectedCameraId, onSelectCamera }: CameraGridProps
             name={camera.name}
             location={camera.location}
             sector={camera.sector}
+            type={camera.type}
+            spectrumType={camera.spectrumType}
+            defaultPalette={camera.defaultPalette}
             isOnline={camera.status !== "offline"}
             streamUrl={camera.streamUrl}
             ipAddress={camera.ipAddress}
