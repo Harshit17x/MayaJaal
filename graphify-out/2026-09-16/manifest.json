@@ -30,9 +30,9 @@
     "semantic_hash": "11152d95bd04cf7eed28c956479cc8ef"
   },
   "backend/app/api/stream.py": {
-    "mtime": 1789500592.9747186,
-    "seen": 1789501835.8369827,
-    "ast_hash": "40d34fe418844634f3bbfc9158141906",
+    "mtime": 1789504081.1757646,
+    "seen": 1789504177.7460523,
+    "ast_hash": "568e1fe7f848d15f73225f69cea5168f",
     "semantic_hash": ""
   },
   "backend/app/api/tracking.py": {
@@ -522,9 +522,9 @@
     "semantic_hash": ""
   },
   "frontend/src/components/surveillance/liveworkspace.tsx": {
-    "mtime": 1789503237.91514,
-    "seen": 1789503393.9781544,
-    "ast_hash": "a0749f4045398241f52b6380f974493b",
+    "mtime": 1789504729.1201503,
+    "seen": 1789504791.2236202,
+    "ast_hash": "45f4091c69ed2d3e40860ba37ef1c9e0",
     "semantic_hash": ""
   },
   "frontend/src/components/ui/badge.tsx": {

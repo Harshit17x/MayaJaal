@@ -95,9 +95,9 @@ export function LiveWorkspace() {
   const { isOnline, loadedModels, refetch } = useBackendStatus();
   const { cameras } = useCameras();
 
-  // Mode: "upload-image" | "upload-video" | "rtsp"
+  // Mode: "upload-image" | "upload-video" | "rtsp" | "webcam"
   const [sourceMode, setSourceMode] = useState<
-    "upload-image" | "upload-video" | "rtsp"
+    "upload-image" | "upload-video" | "rtsp" | "webcam"
   >("upload-image");
 
   // Selected Model
@@ -176,6 +176,127 @@ export function LiveWorkspace() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamImgRef = useRef<HTMLImageElement>(null);
 
+  // ─── Client-Side Browser Webcam state & refs ─────────────────────────────
+  const webcamVideoRef = useRef<HTMLVideoElement>(null);
+  const webcamStreamRef = useRef<MediaStream | null>(null);
+  const [webcamActive, setWebcamActive] = useState<boolean>(false);
+  const [webcamError, setWebcamError] = useState<string | null>(null);
+  const [availableCameras, setAvailableCameras] = useState<MediaDeviceInfo[]>([]);
+  const [selectedCameraDeviceId, setSelectedCameraDeviceId] = useState<string>("");
+  const [autoAiDetection, setAutoAiDetection] = useState<boolean>(false);
+  const [isSecureOriginWarning, setIsSecureOriginWarning] = useState<boolean>(false);
+
+  // Stop client webcam helper
+  const stopWebcam = useCallback(() => {
+    if (webcamStreamRef.current) {
+      webcamStreamRef.current.getTracks().forEach((track) => track.stop());
+      webcamStreamRef.current = null;
+    }
+    if (webcamVideoRef.current) {
+      webcamVideoRef.current.srcObject = null;
+    }
+    setWebcamActive(false);
+    setAutoAiDetection(false);
+  }, []);
+
+  // Start client webcam helper
+  const startWebcam = useCallback(async (deviceId?: string) => {
+    setWebcamError(null);
+    setIsSecureOriginWarning(false);
+
+    if (typeof window !== "undefined") {
+      const isLocalhost =
+        window.location.hostname === "localhost" ||
+        window.location.hostname === "127.0.0.1";
+      if (!window.isSecureContext && !isLocalhost) {
+        setIsSecureOriginWarning(true);
+      }
+    }
+
+    if (!navigator?.mediaDevices?.getUserMedia) {
+      const errMsg =
+        "Camera API (navigator.mediaDevices.getUserMedia) is unavailable. Browsers require HTTPS or an insecure origin exception when accessed over LAN IP.";
+      setWebcamError(errMsg);
+      setIsSecureOriginWarning(true);
+      setStatusMessage(errMsg);
+      return;
+    }
+
+    try {
+      if (webcamStreamRef.current) {
+        webcamStreamRef.current.getTracks().forEach((t) => t.stop());
+        webcamStreamRef.current = null;
+      }
+
+      const constraints: MediaStreamConstraints = {
+        video: deviceId
+          ? { deviceId: { exact: deviceId } }
+          : { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: "user" },
+        audio: false,
+      };
+
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      webcamStreamRef.current = stream;
+
+      if (webcamVideoRef.current) {
+        webcamVideoRef.current.srcObject = stream;
+        try {
+          await webcamVideoRef.current.play();
+        } catch {
+          // Handled
+        }
+      }
+
+      setWebcamActive(true);
+      setStatusMessage("Client webcam active (Local Browser Device).");
+
+      try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const videoDevices = devices.filter((d) => d.kind === "videoinput");
+        setAvailableCameras(videoDevices);
+        if (deviceId) {
+          setSelectedCameraDeviceId(deviceId);
+        } else if (videoDevices.length > 0 && !selectedCameraDeviceId) {
+          setSelectedCameraDeviceId(videoDevices[0].deviceId);
+        }
+      } catch (enumErr) {
+        console.debug("Could not enumerate camera devices:", enumErr);
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to open camera";
+      setWebcamError(msg);
+      setWebcamActive(false);
+      setStatusMessage(`Webcam access error: ${msg}`);
+    }
+  }, [selectedCameraDeviceId]);
+
+  // Frame capture helper for client webcam
+  const captureWebcamBlob = useCallback(async (): Promise<Blob | null> => {
+    if (!webcamVideoRef.current || !webcamStreamRef.current) return null;
+    const video = webcamVideoRef.current;
+    if (video.videoWidth === 0 || video.videoHeight === 0) return null;
+
+    const canvas = document.createElement("canvas");
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return null;
+
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    return new Promise<Blob | null>((resolve) => {
+      canvas.toBlob((blob) => resolve(blob), "image/jpeg", 0.88);
+    });
+  }, []);
+
+  // Update dims when webcam metadata is ready
+  const handleWebcamLoaded = () => {
+    if (webcamVideoRef.current) {
+      const w = webcamVideoRef.current.videoWidth || 1280;
+      const h = webcamVideoRef.current.videoHeight || 720;
+      setSourceDims({ width: w, height: h });
+    }
+  };
+
   // Set default model when models list updates (prioritize 'best')
   useEffect(() => {
     if (loadedModels.length > 0) {
@@ -186,7 +307,7 @@ export function LiveWorkspace() {
     }
   }, [loadedModels, selectedModel]);
 
-  // Auto-stop stream when leaving RTSP mode
+  // Auto-stop stream when leaving RTSP mode & stop webcam when leaving webcam mode
   useEffect(() => {
     if (sourceMode !== "rtsp") {
       setIsStreamActive(false);
@@ -194,7 +315,17 @@ export function LiveWorkspace() {
       setStreamError(false);
       setStreamDiagnostics(null);
     }
-  }, [sourceMode]);
+    if (sourceMode !== "webcam") {
+      stopWebcam();
+    }
+  }, [sourceMode, stopWebcam]);
+
+  // Cleanup webcam tracks on component unmount
+  useEffect(() => {
+    return () => {
+      stopWebcam();
+    };
+  }, [stopWebcam]);
 
   // Rebuild stream URL when AI overlay, Face Biometrics, or Thermal Palette changes while stream is live
   useEffect(() => {
@@ -376,12 +507,12 @@ export function LiveWorkspace() {
   const handleThermalPaletteChange = async (palette: ThermalPalette) => {
     setThermalPalette(palette);
 
-    if (sourceMode === "upload-video") {
+    if (sourceMode === "upload-video" || sourceMode === "webcam") {
       if (palette === "standard") {
-        setStatusMessage("Switched video to standard Optical Visible (VIS) spectrum.");
+        setStatusMessage("Switched feed to standard Optical Visible (VIS) spectrum.");
       } else {
         setStatusMessage(
-          `Tactical ${palette.toUpperCase()} radiometric spectrum filter engaged for video playback.`
+          `Tactical ${palette.toUpperCase()} radiometric spectrum filter engaged for real-time feed.`
         );
       }
       return;
@@ -979,6 +1110,109 @@ export function LiveWorkspace() {
             `Sampled ${result.frames_sampled} frames from RTSP stream.`
           );
         }
+      } else if (sourceMode === "webcam") {
+        if (!webcamActive) {
+          setStatusMessage("Client webcam is not active. Click start or grant camera permission.");
+          setIsInferencing(false);
+          return;
+        }
+
+        const blob = await captureWebcamBlob();
+        if (!blob) {
+          setStatusMessage("Waiting for webcam video frame...");
+          setIsInferencing(false);
+          return;
+        }
+
+        const fileToSubmit = new File([blob], "webcam_capture.jpg", {
+          type: "image/jpeg",
+        });
+
+        setStatusMessage("Scanning client webcam frame with ONNX + Biometrics...");
+
+        const [result, faceScanResult] = await Promise.all([
+          api.runImageInference({
+            file: fileToSubmit,
+            modelName: modelToUse,
+            confThreshold,
+            iouThreshold,
+            postprocess: true,
+          }),
+          api.scanFaceImage(fileToSubmit, 0.40, 35).catch((err) => {
+            console.debug("Facial scan fallback:", err);
+            return null;
+          }),
+        ]);
+
+        const elapsed = Math.round(performance.now() - t0);
+        setLatencyMs(
+          result.inference_time_ms
+            ? Math.round(result.inference_time_ms)
+            : elapsed
+        );
+
+        const faceDetections: Detection[] = [];
+        const suspectsFound: Array<{ name: string; threat_level: string; confidence: number; category?: string }> = [];
+
+        if (faceScanResult && faceScanResult.faces && faceScanResult.faces.length > 0) {
+          for (const face of faceScanResult.faces) {
+            const isThreat = Boolean(face.is_threat);
+            const isKnown = Boolean(face.is_known);
+            const conf = normalizeConfidence(
+              face.calibrated_conf || face.match_score || face.confidence || 0.85
+            );
+
+            if (isThreat || isKnown) {
+              const faceDet: Detection = {
+                box: face.bbox,
+                confidence: conf,
+                class_id: 999,
+                class_name: isThreat ? `suspect_${face.name.toLowerCase()}` : `face_${face.name.toLowerCase()}`,
+                is_threat: isThreat,
+                threat_level: face.threat_level || (isThreat ? "HIGH" : undefined),
+                suspect_name: face.name,
+                category: face.category || (isThreat ? "Suspect Target" : "Personnel"),
+              };
+              faceDetections.push(faceDet);
+
+              if (isThreat) {
+                const tLevel = face.threat_level || "HIGH";
+                const sev: "High" | "Medium" | "Low" = "High";
+                suspectsFound.push({
+                  name: face.name,
+                  threat_level: tLevel,
+                  confidence: conf,
+                  category: face.category,
+                });
+
+                api.createAlert({
+                  title: `SUSPECT DETECTED: ${face.name.toUpperCase()}`,
+                  location: "Client Webcam Live Feed",
+                  severity: sev,
+                  cameraName: "Client Webcam",
+                  className: "suspect",
+                  confidence: conf,
+                  box: face.bbox,
+                  suspectName: face.name,
+                  threatLevel: tLevel,
+                  category: face.category,
+                  notes: `Biometric facial match verified via client webcam (${formatConfidence(conf)} match).`,
+                }).catch(() => {});
+              }
+            }
+          }
+        }
+
+        const combinedDetections = [...(result.detections || []), ...faceDetections];
+        setDetections(combinedDetections);
+        setDetectedSuspectsInMedia(suspectsFound);
+
+        const suspectNotice = suspectsFound.length > 0
+          ? ` • 🚨 ${suspectsFound.length} SUSPECT(S) IDENTIFIED: ${suspectsFound.map((s) => s.name).join(", ")}`
+          : "";
+        setStatusMessage(
+          `Webcam scanned: ${result.detections?.length || 0} objects, ${faceDetections.length} faces in ${elapsed}ms${suspectNotice}.`
+        );
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Inference failed";
@@ -987,6 +1221,21 @@ export function LiveWorkspace() {
       setIsInferencing(false);
     }
   };
+
+  // Auto AI scan loop for client webcam
+  useEffect(() => {
+    if (!autoAiDetection || sourceMode !== "webcam" || !webcamActive) {
+      return;
+    }
+
+    const timer = setInterval(() => {
+      if (!isInferencing && isOnline && webcamActive) {
+        handleRunInference();
+      }
+    }, 1200);
+
+    return () => clearInterval(timer);
+  }, [autoAiDetection, sourceMode, webcamActive, isInferencing, isOnline]);
 
   return (
     <div className="space-y-6">
@@ -1052,6 +1301,23 @@ export function LiveWorkspace() {
           >
             <Radio className="w-3.5 h-3.5" />
             Live Surveillance (RTSP / IP Webcam)
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setSourceMode("webcam");
+              startWebcam();
+            }}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-colors ${
+              sourceMode === "webcam"
+                ? "bg-white text-slate-900 shadow-xs"
+                : "text-slate-600 hover:text-slate-900"
+            }`}
+            title="Access this computer/device's webcam directly via the browser"
+          >
+            <Camera className="w-3.5 h-3.5 text-emerald-600" />
+            Client Webcam
           </button>
         </div>
 
@@ -1153,6 +1419,52 @@ export function LiveWorkspace() {
                 ? `Video: ${selectedVideoFile.name.slice(0, 14)}...`
                 : "Upload Video"}
             </button>
+          ) : sourceMode === "webcam" ? (
+            <div className="flex items-center gap-2">
+              {availableCameras.length > 1 && (
+                <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5">
+                  <Camera className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+                  <select
+                    value={selectedCameraDeviceId}
+                    onChange={(e) => {
+                      setSelectedCameraDeviceId(e.target.value);
+                      startWebcam(e.target.value);
+                    }}
+                    className="bg-transparent text-xs text-slate-700 font-semibold focus:outline-none cursor-pointer max-w-[130px] truncate"
+                  >
+                    {availableCameras.map((cam, idx) => (
+                      <option key={cam.deviceId || idx} value={cam.deviceId}>
+                        {cam.label || `Camera ${idx + 1}`}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              <button
+                type="button"
+                onClick={() => setAutoAiDetection((prev) => !prev)}
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
+                  autoAiDetection
+                    ? "bg-emerald-700 hover:bg-emerald-600 text-white border-emerald-500 shadow-xs"
+                    : "bg-slate-100 hover:bg-slate-200 text-slate-600 border-slate-300"
+                }`}
+                title="Continuously scan webcam frames for threats & biometric matches"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                <span>Auto AI: {autoAiDetection ? "ON" : "OFF"}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => startWebcam(selectedCameraDeviceId)}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 transition-colors cursor-pointer"
+                title="Restart client webcam"
+              >
+                <RefreshCw className="w-3.5 h-3.5" />
+                <span>Reconnect</span>
+              </button>
+            </div>
           ) : null}
 
           {/* ByteTrack MOT Toggle (for Video & RTSP) */}
@@ -1177,17 +1489,21 @@ export function LiveWorkspace() {
             type="button"
             onClick={handleRunInference}
             disabled={isInferencing || !isOnline}
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-lg text-xs font-semibold bg-[#1e4b38] hover:bg-[#163a2b] text-white shadow-xs transition-all duration-150 disabled:opacity-50"
+            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-lg text-xs font-semibold bg-[#1e4b38] hover:bg-[#163a2b] text-white shadow-xs transition-all duration-150 disabled:opacity-50 cursor-pointer"
           >
             {isInferencing ? (
               <>
                 <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                {enableTracking && sourceMode !== "upload-image" ? "Tracking..." : "Inferencing..."}
+                {enableTracking && sourceMode !== "upload-image" && sourceMode !== "webcam" ? "Tracking..." : "Inferencing..."}
               </>
             ) : (
               <>
                 <Play className="w-3.5 h-3.5 fill-current" />
-                {enableTracking && sourceMode !== "upload-image" ? "Run ByteTrack Tracking" : "Run AI Detection"}
+                {sourceMode === "webcam"
+                  ? "Scan Webcam Frame"
+                  : enableTracking && sourceMode !== "upload-image"
+                  ? "Run ByteTrack Tracking"
+                  : "Run AI Detection"}
               </>
             )}
           </button>
@@ -1338,9 +1654,22 @@ export function LiveWorkspace() {
                   handleConnectStream("webcam");
                 }}
                 className="px-2 py-0.5 rounded-md bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-300 transition-colors font-mono font-medium cursor-pointer flex items-center gap-1 shadow-2xs"
+                title="Connect to webcam physically plugged into the backend server host"
               >
                 <Camera className="w-3 h-3 text-emerald-600" />
-                Live Webcam (Device 0)
+                Backend Host Cam (Server Cam 0)
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setSourceMode("webcam");
+                  startWebcam();
+                }}
+                className="px-2 py-0.5 rounded-md bg-sky-50 hover:bg-sky-100 text-sky-900 border border-sky-300 transition-colors font-mono font-medium cursor-pointer flex items-center gap-1 shadow-2xs"
+                title="Access this computer's local webcam via browser"
+              >
+                <Camera className="w-3 h-3 text-sky-600" />
+                Client Webcam (This Machine) ↗
               </button>
               <button
                 type="button"
@@ -1411,6 +1740,31 @@ export function LiveWorkspace() {
             </div>
           )}
 
+          {/* Helpful banner when 'webcam' is entered in RTSP input */}
+          {rtspInputValue.toLowerCase().trim() === "webcam" && (
+            <div className="bg-blue-950/40 border border-blue-500/40 rounded-xl p-3 text-xs text-blue-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5">
+              <div className="flex items-start gap-2">
+                <HelpCircle className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
+                <div>
+                  <span className="font-bold text-blue-100">Frontend &amp; Backend on Different Machines?</span>
+                  <p className="text-slate-300 text-[11px] mt-0.5">
+                    Connecting to <code className="bg-black/40 px-1 py-0.5 rounded text-blue-300 font-mono">&quot;webcam&quot;</code> in RTSP mode looks for a camera physically plugged into the <strong>backend server</strong>. To use the webcam on <strong>this device</strong>, switch to the Client Webcam tab.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setSourceMode("webcam");
+                  startWebcam();
+                }}
+                className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs shrink-0 cursor-pointer shadow-xs whitespace-nowrap"
+              >
+                Switch to Client Webcam
+              </button>
+            </div>
+          )}
+
           {isStreamActive && !streamError && streamDiagnostics && (
             <div className="bg-emerald-950/30 border border-emerald-500/30 rounded-lg px-3 py-1.5 text-xs text-emerald-300 flex items-center justify-between">
               <span className="flex items-center gap-2 font-mono">
@@ -1424,6 +1778,45 @@ export function LiveWorkspace() {
               )}
             </div>
           )}
+        </div>
+      )}
+
+      {/* Client Webcam Insecure Origin Guidance Banner */}
+      {sourceMode === "webcam" && isSecureOriginWarning && (
+        <div className="bg-amber-950/40 border border-amber-500/50 rounded-2xl p-4 text-xs text-amber-200 shadow-xs flex flex-col gap-2.5">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+            <div className="space-y-1.5">
+              <p className="font-bold text-sm text-amber-100">
+                Network Origin Notice: Browser Camera Security Policy
+              </p>
+              <p className="text-slate-300 text-xs leading-relaxed">
+                You are accessing this frontend over LAN / IP (
+                <code className="bg-black/50 px-1.5 py-0.5 rounded text-amber-300 font-mono">
+                  {typeof window !== "undefined" ? window.location.origin : ""}
+                </code>
+                ). Modern browsers (Chrome, Edge, Safari) restrict webcam API (<code className="text-slate-200 font-mono">getUserMedia</code>) over non-localhost HTTP unless served over <strong className="text-white">HTTPS</strong> or explicitly whitelisted in browser flags.
+              </p>
+              <div className="mt-2 bg-black/60 p-3 rounded-xl border border-amber-500/30 text-[11px] font-mono space-y-1.5">
+                <p className="text-amber-200 font-semibold">How to enable webcam in Chrome/Edge over LAN in 30 seconds:</p>
+                <ol className="list-decimal list-inside text-slate-300 space-y-1 ml-1">
+                  <li>
+                    Open a new tab and paste:{" "}
+                    <span className="text-cyan-300 select-all font-bold">chrome://flags/#unsafely-treat-insecure-origin-as-secure</span>
+                  </li>
+                  <li>
+                    Add your frontend address in the box:{" "}
+                    <span className="text-emerald-300 select-all font-bold">
+                      {typeof window !== "undefined" ? window.location.origin : "http://<YOUR_FRONTEND_IP>:3000"}
+                    </span>
+                  </li>
+                  <li>
+                    Change dropdown to <strong className="text-white">Enabled</strong> and click <strong className="text-white">Relaunch</strong>.
+                  </li>
+                </ol>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
@@ -1683,6 +2076,8 @@ export function LiveWorkspace() {
                   ? "VIDEO FEED • BORDER SURVEILLANCE"
                   : sourceMode === "rtsp"
                   ? `${streamProtocol.toUpperCase()} • LIVE STREAM`
+                  : sourceMode === "webcam"
+                  ? "CLIENT WEBCAM • LIVE BROWSER FEED"
                   : selectedImageFile
                   ? `IMAGE SCAN • ${selectedImageFile.name.toUpperCase()}`
                   : imagePreviewUrl
@@ -1733,8 +2128,47 @@ export function LiveWorkspace() {
               </div>
             )}
 
-            {/* ── RTSP / IP Webcam Live MJPEG Stream ── */}
-            {sourceMode === "rtsp" ? (
+            {/* ── Client Webcam Feed ── */}
+            {sourceMode === "webcam" ? (
+              <div className="relative w-full h-full flex items-center justify-center bg-black">
+                <video
+                  ref={webcamVideoRef}
+                  autoPlay
+                  playsInline
+                  muted
+                  onLoadedMetadata={handleWebcamLoaded}
+                  style={{
+                    filter: getThermalVideoFilter(thermalPalette),
+                    transition: "filter 0.3s ease-in-out",
+                  }}
+                  className="w-full h-full object-contain"
+                />
+
+                {!webcamActive && !webcamError && (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/85 z-20 p-6 text-center">
+                    <Camera className="w-10 h-10 text-emerald-400 mb-3 animate-pulse" />
+                    <p className="text-white text-sm font-semibold">Initializing Client Webcam...</p>
+                    <p className="text-slate-400 text-xs mt-1">Please grant camera permissions in your browser.</p>
+                  </div>
+                )}
+
+                {webcamError && (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/90 z-20 p-6 text-center">
+                    <AlertTriangle className="w-10 h-10 text-amber-400 mb-3" />
+                    <p className="text-white text-sm font-semibold">Unable to Access Client Webcam</p>
+                    <p className="text-rose-300 text-xs mt-1 max-w-md font-mono">{webcamError}</p>
+                    <button
+                      type="button"
+                      onClick={() => startWebcam(selectedCameraDeviceId)}
+                      className="mt-4 px-4 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white flex items-center gap-2 shadow-xs cursor-pointer"
+                    >
+                      <RefreshCw className="w-3.5 h-3.5" />
+                      Retry Camera Access
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : sourceMode === "rtsp" ? (
               isStreamActive && activeMjpegSrc ? (
                 <div className="relative w-full h-full">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -2027,9 +2461,10 @@ export function LiveWorkspace() {
               </div>
             )}
 
-            {/* Detection overlay canvas — rendered for image scan and live video frames */}
+            {/* Detection overlay canvas — rendered for image scan, live video frames, and client webcam */}
             {((sourceMode === "upload-image" && imagePreviewUrl) ||
-              (sourceMode === "upload-video" && videoPreviewUrl && (!annotatedVideoUrl || detections.length > 0))) && (
+              (sourceMode === "upload-video" && videoPreviewUrl && (!annotatedVideoUrl || detections.length > 0)) ||
+              (sourceMode === "webcam" && webcamActive)) && (
               <DetectionCanvas
                 detections={detections}
                 sourceWidth={sourceDims.width}
@@ -2105,6 +2540,12 @@ export function LiveWorkspace() {
                 isStreamActive && !streamError ? "text-emerald-400" : "text-slate-500"
               }`}>
                 {isStreamActive && !streamError ? "● LIVE" : streamError ? "● ERROR" : "○ STANDBY"}
+              </span>
+            ) : sourceMode === "webcam" ? (
+              <span className={`font-semibold text-xs font-mono ${
+                webcamActive ? "text-emerald-400" : "text-amber-400"
+              }`}>
+                {webcamActive ? `● WEBCAM LIVE (${detections.length} TARGETS)` : "○ CAMERA OFF"}
               </span>
             ) : (
               <span className="font-semibold text-emerald-400 text-xs font-mono">
