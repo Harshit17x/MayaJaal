@@ -522,9 +522,9 @@
     "semantic_hash": ""
   },
   "frontend/src/components/surveillance/liveworkspace.tsx": {
-    "mtime": 1789504123.0952404,
-    "seen": 1789504177.7462516,
-    "ast_hash": "1871629847aefeed32b45bc60f0a875e",
+    "mtime": 1789504729.1201503,
+    "seen": 1789504791.2236202,
+    "ast_hash": "45f4091c69ed2d3e40860ba37ef1c9e0",
     "semantic_hash": ""
   },
   "frontend/src/components/ui/badge.tsx": {
