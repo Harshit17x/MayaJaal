@@ -11,6 +11,7 @@ model_manager = ModelManager(
     max_models=settings.max_models,
     intra_op_threads=settings.intra_op_threads,
     inter_op_threads=settings.inter_op_threads,
+    gpu_mem_limit_gb=settings.gpu_mem_limit_gb or None,  # 0 → None → unlimited
 )
 
 inference_service = InferenceService(

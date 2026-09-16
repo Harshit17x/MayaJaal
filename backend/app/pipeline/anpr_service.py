@@ -286,13 +286,19 @@ class ANPRPipeline:
     def _initialize_engines(self) -> None:
         try:
             if self.vehicle_model_path.exists():
-                self.vehicle_engine = ONNXEngine(self.vehicle_model_path)
+                self.vehicle_engine = ONNXEngine(
+                    self.vehicle_model_path,
+                    gpu_mem_limit_gb=settings.gpu_mem_limit_gb or None,
+                )
                 logger.info("ANPR: Vehicle detector ONNX engine initialized.")
             else:
                 logger.warning("ANPR: vehicle_detector.onnx not found at %s", self.vehicle_model_path)
 
             if self.plate_model_path.exists():
-                self.plate_engine = ONNXEngine(self.plate_model_path)
+                self.plate_engine = ONNXEngine(
+                    self.plate_model_path,
+                    gpu_mem_limit_gb=settings.gpu_mem_limit_gb or None,
+                )
                 logger.info("ANPR: Plate detector ONNX engine initialized.")
             else:
                 logger.warning("ANPR: anpr_plate.onnx not found at %s", self.plate_model_path)
