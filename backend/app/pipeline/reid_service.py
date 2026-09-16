@@ -72,7 +72,21 @@ class ReIDService:
                 opts = ort.SessionOptions()
                 opts.intra_op_num_threads = 2
                 opts.graph_optimization_level = ort.GraphOptimizationLevel.ORT_ENABLE_ALL
-                self.session = ort.InferenceSession(str(self.model_path), sess_options=opts, providers=["CPUExecutionProvider"])
+                # Persist optimized graph to skip re-optimization on restarts
+                optimized_path = self.model_path.with_suffix(".optimized.onnx")
+                opts.optimized_model_filepath = str(optimized_path)
+                opts.enable_mem_pattern = True
+                opts.enable_mem_reuse = True
+                opts.enable_cpu_mem_arena = True
+                # Prefer CUDA when available, fall back to CPU
+                _available = ort.get_available_providers()
+                _providers = (
+                    [("CUDAExecutionProvider", {"device_id": 0, "arena_extend_strategy": "kNextPowerOfTwo"}),
+                     ("CPUExecutionProvider", {})]
+                    if "CUDAExecutionProvider" in _available
+                    else ["CPUExecutionProvider"]
+                )
+                self.session = ort.InferenceSession(str(self.model_path), sess_options=opts, providers=_providers)
                 inputs = self.session.get_inputs()
                 outputs = self.session.get_outputs()
                 self.input_name = inputs[0].name
