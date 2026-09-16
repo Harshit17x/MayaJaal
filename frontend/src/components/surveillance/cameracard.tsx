@@ -8,9 +8,6 @@ export interface CameraCardProps {
   name: string;
   location: string;
   sector?: string;
-  type?: string;
-  spectrumType?: string;
-  defaultPalette?: string;
   isOnline?: boolean;
   streamUrl?: string;
   ipAddress?: string;
@@ -26,9 +23,6 @@ export function CameraCard({
   name,
   location,
   sector,
-  type,
-  spectrumType,
-  defaultPalette,
   isOnline = true,
   streamUrl,
   ipAddress,
@@ -40,20 +34,6 @@ export function CameraCard({
 }: CameraCardProps) {
   const [imgError, setImgError] = useState(false);
   const targetUrl = streamUrl || (ipAddress ? `rtsp://${ipAddress}:554/live` : "sample");
-  const isThermal = Boolean(
-    type?.toLowerCase().includes("thermal") ||
-    type?.toLowerCase().includes("flir") ||
-    spectrumType === "thermal"
-  );
-  const isNightVision = Boolean(
-    type?.toLowerCase().includes("night") ||
-    type?.toLowerCase().includes("ir") ||
-    spectrumType === "night_vision_ir"
-  );
-  const isDualSpectrum = Boolean(
-    type?.toLowerCase().includes("dual") ||
-    spectrumType === "dual_spectrum"
-  );
 
   return (
     <div
@@ -71,9 +51,7 @@ export function CameraCard({
         {!imgError ? (
           /* eslint-disable-next-line @next/next/no-img-element */
           <img
-            src={`/api/backend/stream/snapshot?rtsp_url=${encodeURIComponent(targetUrl)}${
-              isThermal ? "&palette=ironbow" : isNightVision ? "&palette=nvg_green" : ""
-            }`}
+            src={`/api/backend/stream/snapshot?rtsp_url=${encodeURIComponent(targetUrl)}`}
             alt={name}
             onError={() => setImgError(true)}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
@@ -87,25 +65,10 @@ export function CameraCard({
           </div>
         )}
 
-        {/* Live overlay indicator & Spectrum badge */}
-        <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5 z-10">
-          <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-sm bg-black/80 backdrop-blur-xs text-[10px] font-mono text-white/90">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span>LIVE</span>
-          </div>
-          {isThermal ? (
-            <span className="px-2 py-0.5 rounded-sm bg-amber-950/85 text-amber-300 border border-amber-500/50 text-[10px] font-mono font-bold">
-              🔥 FLIR THERMAL
-            </span>
-          ) : isNightVision ? (
-            <span className="px-2 py-0.5 rounded-sm bg-emerald-950/85 text-emerald-300 border border-emerald-500/50 text-[10px] font-mono font-bold">
-              🟢 NVG IR
-            </span>
-          ) : isDualSpectrum ? (
-            <span className="px-2 py-0.5 rounded-sm bg-cyan-950/85 text-cyan-300 border border-cyan-500/50 text-[10px] font-mono font-bold">
-              ⚡ DUAL SPECTRUM
-            </span>
-          ) : null}
+        {/* Live overlay indicator */}
+        <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5 px-2 py-0.5 rounded-sm bg-black/70 backdrop-blur-xs text-[10px] font-mono text-white/90 z-10">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span>LIVE</span>
         </div>
 
         {/* Suspect threat banner if active */}
