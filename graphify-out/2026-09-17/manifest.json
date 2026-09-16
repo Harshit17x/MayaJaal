@@ -275,6 +275,12 @@
     "ast_hash": "9f0f2ee60fc3ce537627909b5dda8453",
     "semantic_hash": "9f0f2ee60fc3ce537627909b5dda8453"
   },
+  "frontend/middleware.ts": {
+    "mtime": 1788946168.7528112,
+    "seen": 1789026248.1500945,
+    "ast_hash": "a2380de933042847cc8fbfe5ecf552d9",
+    "semantic_hash": "a2380de933042847cc8fbfe5ecf552d9"
+  },
   "frontend/next-env.d.ts": {
     "mtime": 1788946168.7528112,
     "seen": 1789026248.150096,
@@ -342,9 +348,9 @@
     "semantic_hash": ""
   },
   "frontend/src/app/(operator)/layout.tsx": {
-    "mtime": 1789584536.2023766,
-    "seen": 1789584633.124627,
-    "ast_hash": "61a6e5eb7f4a7f598817c64a75a65251",
+    "mtime": 1789124416.3493478,
+    "seen": 1789124468.5144546,
+    "ast_hash": "f503fbbd2b653244973afbf9f67c26ea",
     "semantic_hash": ""
   },
   "frontend/src/app/(operator)/live/page.tsx": {
