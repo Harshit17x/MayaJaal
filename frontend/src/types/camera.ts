@@ -6,19 +6,7 @@ export type CameraType =
   | "Night Vision / IR"
   | "ANPR Dedicated"
   | "PTZ 360"
-  | "Panoramic"
-  | "Dual Spectrum";
-
-export type SpectrumType = "optical" | "thermal" | "dual_spectrum" | "night_vision_ir";
-
-export type ThermalPalette =
-  | "standard"
-  | "white_hot"
-  | "black_hot"
-  | "ironbow"
-  | "nvg_green"
-  | "amber"
-  | "msx_fusion";
+  | "Panoramic";
 
 export interface CameraHealthStats {
   bitrate: string;
@@ -33,10 +21,6 @@ export interface Camera {
   location: string;
   status: CameraStatus;
   type?: CameraType | string;
-  spectrumType?: SpectrumType | string;
-  pairedCameraId?: string;
-  defaultPalette?: ThermalPalette | string;
-  thermalSensitivity?: string;
   ipAddress?: string;
   port?: number;
   streamUrl?: string;
@@ -70,10 +54,6 @@ export interface CreateCameraInput {
   location: string;
   status?: CameraStatus;
   type?: CameraType | string;
-  spectrumType?: SpectrumType | string;
-  pairedCameraId?: string;
-  defaultPalette?: ThermalPalette | string;
-  thermalSensitivity?: string;
   ipAddress?: string;
   port?: number;
   streamUrl?: string;
@@ -95,10 +75,6 @@ export interface UpdateCameraInput {
   location?: string;
   status?: CameraStatus;
   type?: CameraType | string;
-  spectrumType?: SpectrumType | string;
-  pairedCameraId?: string;
-  defaultPalette?: ThermalPalette | string;
-  thermalSensitivity?: string;
   ipAddress?: string;
   port?: number;
   streamUrl?: string;

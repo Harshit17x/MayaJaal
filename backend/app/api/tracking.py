@@ -137,7 +137,6 @@ async def video_tracking(
     tracker_frame_rate: int = Form(30),
     tracker_min_consecutive_frames: int = Form(1),
     batch_size: int = Form(settings.batch_size),
-    palette: str = Form("standard"),
 ) -> dict:
     """
     Run ByteTrack multi-object tracking on an uploaded video using ONNX batching (2 to 6 frames at once).
@@ -173,23 +172,6 @@ async def video_tracking(
     model_name = (model_name or "").strip()
     if not model_name:
         raise HTTPException(status_code=400, detail="model_name is required.")
-
-    if not model_manager.is_loaded(model_name):
-        candidate = settings.model_directory / f"{model_name}.onnx"
-        if candidate.exists():
-            try:
-                model_manager.load_model(model_name, candidate)
-                logger.info("Auto-loaded requested tracking model '%s' from %s", model_name, candidate)
-            except Exception as exc:
-                raise HTTPException(
-                    status_code=500,
-                    detail=f"Failed to auto-load tracking model '{model_name}': {exc}",
-                ) from exc
-        else:
-            raise HTTPException(
-                status_code=404,
-                detail=f"Model '{model_name}' is not loaded and '{candidate.name}' not found.",
-            )
 
     # ── File validation ──────────────────────────────────────────────────
     if file is None or not file.filename:
@@ -449,16 +431,7 @@ async def video_tracking(
                             logger.debug("Face scan error during video tracking: %s", face_err)
 
                     # ── Server-Side Bounding Box & Track ID Creation ─────────
-                    if palette and palette != "standard":
-                        from app.pipeline.thermal_fusion_service import thermal_fusion_service
-                        annotated_frame = thermal_fusion_service.simulate_thermal_from_optical(
-                            frame,
-                            detections=raw_detections,
-                            palette=palette,
-                        )
-                    else:
-                        annotated_frame = frame.copy()
-
+                    annotated_frame = frame.copy()
                     draw_tracked_boxes(
                         annotated_frame,
                         tracked_dicts,
@@ -518,7 +491,6 @@ async def video_tracking(
         return {
             "model_name": model_name,
             "status": "success",
-            "palette": palette,
             "video": metadata,
             "video_id": session_video_id,
             "frames_requested": max_frames,

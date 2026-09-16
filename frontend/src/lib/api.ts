@@ -200,7 +200,6 @@ export const api = {
     frameStride?: number;
     maxFrames?: number;
     postprocess?: boolean;
-    palette?: string;
   }): Promise<VideoInferenceResponse> {
     const formData = new FormData();
     formData.append("file", params.file);
@@ -215,8 +214,6 @@ export const api = {
       formData.append("max_frames", params.maxFrames.toString());
     if (params.postprocess !== undefined)
       formData.append("postprocess", params.postprocess.toString());
-    if (params.palette !== undefined)
-      formData.append("palette", params.palette);
 
     return request<VideoInferenceResponse>("/api/inference/video", {
       method: "POST",
@@ -262,7 +259,6 @@ export const api = {
     activationThreshold?: number;
     lostTrackBuffer?: number;
     matchingThreshold?: number;
-    palette?: string;
   }): Promise<TrackingVideoResponse> {
     const formData = new FormData();
     formData.append("file", params.file);
@@ -279,8 +275,6 @@ export const api = {
       formData.append("lost_track_buffer", params.lostTrackBuffer.toString());
     if (params.matchingThreshold !== undefined)
       formData.append("matching_threshold", params.matchingThreshold.toString());
-    if (params.palette !== undefined)
-      formData.append("palette", params.palette);
 
     return request<TrackingVideoResponse>("/api/tracking/video", {
       method: "POST",
@@ -717,90 +711,6 @@ export const api = {
     const query = cameraId ? `?camera_id=${encodeURIComponent(cameraId)}` : "";
     return request<{ status: string; message: string }>(`/api/geofences/reset-history${query}`, {
       method: "POST",
-    });
-  },
-
-  /**
-   * Thermal & Dual-Spectrum Sensor Fusion APIs
-   */
-  async getThermalPalettes(): Promise<Array<{
-    id: string;
-    name: string;
-    description: string;
-    military_role: string;
-    icon: string;
-  }>> {
-    return request("/api/thermal/palettes");
-  },
-
-  async fuseThermalImages(formData: FormData): Promise<{
-    status: string;
-    palette: string;
-    fusion_mode: string;
-    fused_image_base64: string;
-    radiometrics: {
-      center_spot_temp_celsius: number;
-      min_ambient_celsius: number;
-      max_target_celsius: number;
-    };
-    target_count: number;
-    fused_targets: Array<{
-      box: number[];
-      class_name: string;
-      confidence: number;
-      optical_confidence?: number | null;
-      thermal_confidence?: number | null;
-      spectrum_status: string;
-      temp_celsius_approx: number;
-      is_warm_body: boolean;
-      heat_intensity: number;
-    }>;
-  }> {
-    return request("/api/thermal/fuse-images", {
-      method: "POST",
-      body: formData,
-    });
-  },
-
-  async getThermalSpotTemp(intensity: number): Promise<{
-    intensity: number;
-    temp_celsius: number;
-    classification: string;
-  }> {
-    return request(`/api/thermal/spot-temp?intensity=${intensity}`);
-  },
-
-  /**
-   * Run full radiometric thermal transformation & sensor fusion on an uploaded video
-   */
-  async runThermalVideo(params: {
-    file: File | Blob;
-    palette?: string;
-    maxFrames?: number;
-    fusionMode?: string;
-    confThreshold?: number;
-    modelName?: string;
-  }): Promise<{
-    status: string;
-    palette: string;
-    fusion_mode: string;
-    frames_requested: number;
-    frames_processed: number;
-    target_count: number;
-    annotated_video_url?: string;
-    results: any[];
-  }> {
-    const formData = new FormData();
-    formData.append("file", params.file);
-    if (params.palette) formData.append("palette", params.palette);
-    if (params.maxFrames) formData.append("max_frames", params.maxFrames.toString());
-    if (params.fusionMode) formData.append("fusion_mode", params.fusionMode);
-    if (params.confThreshold) formData.append("conf_threshold", params.confThreshold.toString());
-    if (params.modelName) formData.append("model_name", params.modelName);
-
-    return request("/api/thermal/video", {
-      method: "POST",
-      body: formData,
     });
   },
 };

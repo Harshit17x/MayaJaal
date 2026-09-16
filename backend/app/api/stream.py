@@ -108,9 +108,6 @@ def normalize_stream_url(raw_url: str) -> tuple[str, list[str], str]:
     if not clean or clean.lower() in ("sample", "demo", "test"):
         return "sample", ["sample"], "Sample Video Simulation"
 
-    if clean.lower() in ("webcam", "0", "cam0", "camera0", "integrated", "local"):
-        return "webcam", ["webcam"], "Local Hardware Webcam (Device 0)"
-
     if Path(clean).is_file():
         return clean, [clean], "Local Video Source"
 
@@ -202,24 +199,6 @@ def open_video_source(source_url: str) -> tuple[cv2.VideoCapture | None, str, st
             if cap.isOpened():
                 return cap, "Sample Surveillance Feed Active", str(SAMPLE_VIDEO_PATH), protocol
         return None, "Sample video file not found on server", "sample", protocol
-
-    # --- Local Hardware Webcam keyword ---
-    if canonical_url == "webcam":
-        import platform
-        cap = None
-        if platform.system() == "Windows":
-            try:
-                cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
-            except Exception:
-                cap = None
-        if cap is None or not cap.isOpened():
-            cap = cv2.VideoCapture(0)
-        if cap is not None and cap.isOpened():
-            cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
-            cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
-            cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
-            return cap, "Local USB / Integrated Webcam Active", "webcam", protocol
-        return None, "Could not open local webcam (Device 0). Ensure camera is not used by another application.", "webcam", protocol
 
     # --- Local file ---
     if Path(canonical_url).is_file():
@@ -423,9 +402,6 @@ def stream_generator(
     enable_face_recognition: bool = False,
     camera_id: Optional[str] = None,
     camera_name: Optional[str] = None,
-    palette: str = "standard",
-    paired_rtsp_url: Optional[str] = None,
-    fusion_mode: Optional[str] = None,
 ) -> Generator[bytes, None, None]:
     """
     Generator yielding multipart JPEG frames from RTSP or IP Webcam Pro stream.
@@ -655,25 +631,6 @@ def stream_generator(
                     except Exception as exc:
                         logger.debug("Live stream face recognition exception: %s", exc)
 
-            # Apply Thermal / Night Vision Palette & MSX Dual-Spectrum Fusion
-            clean_palette = (palette or "standard").strip().lower()
-            if clean_palette != "standard":
-                try:
-                    from app.pipeline.thermal_fusion_service import thermal_fusion_service
-                    optical_clean = frame.copy()
-                    frame = thermal_fusion_service.apply_palette(frame, palette=clean_palette)
-                    # Compose paired dual stream if requested
-                    if paired_rtsp_url:
-                        frame = thermal_fusion_service.compose_dual_stream(
-                            optical_frame=optical_clean,
-                            thermal_frame=frame,
-                            mode=fusion_mode or "side_by_side",
-                        )
-                    # Render tactical thermal HUD telemetry
-                    frame = thermal_fusion_service.draw_thermal_hud(frame, palette_name=clean_palette)
-                except Exception as thm_exc:
-                    logger.debug("Live stream thermal palette render exception: %s", thm_exc)
-
             # Draw AI Threat Boxes (from cached detections)
             if draw_detections and cached_detections:
                 draw_bounding_boxes(frame, cached_detections)
@@ -747,18 +704,6 @@ def validate_stream(
             "is_ip_webcam": False,
         }
 
-    if canonical_url == "webcam":
-        return {
-            "reachable": True,
-            "status": "ready",
-            "protocol": protocol,
-            "target_url": "webcam",
-            "resolved_url": "webcam",
-            "latency_ms": 5,
-            "message": "Local hardware USB / integrated webcam connected.",
-            "is_ip_webcam": False,
-        }
-
     reachable, diag, host, port = is_host_reachable(canonical_url, timeout_seconds=1.5)
     is_ip_webcam = "IP Webcam" in protocol
 
@@ -815,18 +760,6 @@ def get_live_stream(
         None,
         description="Optional friendly camera name (e.g. North Gate)",
     ),
-    palette: str = Query(
-        "standard",
-        description="Thermal / Night Vision palette (standard, white_hot, black_hot, ironbow, nvg_green, amber, msx_fusion)",
-    ),
-    paired_rtsp_url: Optional[str] = Query(
-        None,
-        description="Optional paired camera URL for synchronized dual-spectrum viewing",
-    ),
-    fusion_mode: Optional[str] = Query(
-        None,
-        description="Dual-spectrum display composition mode (side_by_side, pip, blend)",
-    ),
 ) -> StreamingResponse:
     """
     Stream live RTSP or IP Webcam CCTV camera feed as multipart/x-mixed-replace (MJPEG)
@@ -842,9 +775,6 @@ def get_live_stream(
             enable_face_recognition=enable_face_recognition,
             camera_id=camera_id,
             camera_name=camera_name,
-            palette=palette,
-            paired_rtsp_url=paired_rtsp_url,
-            fusion_mode=fusion_mode,
         ),
         media_type="multipart/x-mixed-replace; boundary=frame",
         headers={
@@ -860,7 +790,6 @@ def get_live_stream(
 def get_snapshot(
     rtsp_url: str = Query(..., description="Stream URL (RTSP or IP Webcam) or 'sample'"),
     draw_detections: bool = Query(False),
-    palette: str = Query("standard", description="Thermal palette (standard, white_hot, black_hot, ironbow, nvg_green, amber)"),
 ) -> Response:
     """Capture a single frame snapshot from an RTSP or IP Webcam camera stream."""
     try:
@@ -903,15 +832,6 @@ def get_snapshot(
             draw_bounding_boxes(frame, res.get("detections", []))
         except Exception as exc:
             logger.warning("Snapshot detection failed: %s", exc)
-
-    clean_palette = (palette or "standard").strip().lower()
-    if clean_palette != "standard":
-        try:
-            from app.pipeline.thermal_fusion_service import thermal_fusion_service
-            frame = thermal_fusion_service.apply_palette(frame, palette=clean_palette)
-            frame = thermal_fusion_service.draw_thermal_hud(frame, palette_name=clean_palette)
-        except Exception as thm_exc:
-            logger.debug("Snapshot thermal palette exception: %s", thm_exc)
 
     ret, jpeg = cv2.imencode(".jpg", frame, [cv2.IMWRITE_JPEG_QUALITY, 85])
     if not ret:

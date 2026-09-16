@@ -89,10 +89,6 @@ class CameraCreateRequest(BaseModel):
     iouThreshold: Optional[float] = Field(0.45, ge=0.1, le=1.0)
     isRecording: Optional[bool] = True
     alertTriggerEnabled: Optional[bool] = True
-    spectrumType: Optional[str] = Field("optical")
-    pairedCameraId: Optional[str] = None
-    defaultPalette: Optional[str] = Field("standard")
-    thermalSensitivity: Optional[str] = Field("< 30mK")
 
 
 class CameraUpdateRequest(BaseModel):
@@ -114,10 +110,6 @@ class CameraUpdateRequest(BaseModel):
     iouThreshold: Optional[float] = Field(None, ge=0.1, le=1.0)
     isRecording: Optional[bool] = None
     alertTriggerEnabled: Optional[bool] = None
-    spectrumType: Optional[str] = None
-    pairedCameraId: Optional[str] = None
-    defaultPalette: Optional[str] = None
-    thermalSensitivity: Optional[str] = None
 
 
 class TestStreamRequest(BaseModel):

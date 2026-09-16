@@ -1,4 +1,3 @@
-import logging
 import uuid
 from pathlib import Path
 import tempfile
@@ -31,8 +30,6 @@ from app.pipeline.rtsp_loader import (
 from app.pipeline.face_service import face_service
 from app.pipeline.alert_service import alert_service, SNAPSHOTS_DIR
 
-
-logger = logging.getLogger("SIH26187.InferenceAPI")
 
 router = APIRouter(
     prefix="/api/inference",
@@ -309,23 +306,6 @@ async def video_inference(
             status_code=400,
             detail="model_name is required.",
         )
-
-    if not model_manager.is_loaded(model_name):
-        candidate = settings.model_directory / f"{model_name}.onnx"
-        if candidate.exists():
-            try:
-                model_manager.load_model(model_name, candidate)
-                logger.info("Auto-loaded requested model '%s' from %s", model_name, candidate)
-            except Exception as exc:
-                raise HTTPException(
-                    status_code=500,
-                    detail=f"Failed to auto-load model '{model_name}': {exc}",
-                ) from exc
-        else:
-            raise HTTPException(
-                status_code=404,
-                detail=f"Model '{model_name}' is not loaded and '{candidate.name}' not found.",
-            )
 
     # -------------------------
     # File validation
@@ -619,10 +599,9 @@ async def video_inference(
                     ) from exc
 
                 except Exception as exc:
-                    logger.exception("Video frame inference failed on batch: %s", exc)
                     raise HTTPException(
                         status_code=500,
-                        detail=f"Video frame inference failed: {exc}",
+                        detail="Video frame inference failed.",
                     ) from exc
 
                 if len(batch_frames) > 1:

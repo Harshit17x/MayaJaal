@@ -38,66 +38,26 @@ import {
   ScanFace,
   UploadCloud,
   Trash2,
-  Flame,
-  Sun,
-  Eye,
-  Moon,
-  Crosshair,
-  Split,
 } from "lucide-react";
-import { ThermalPalette } from "@/types/camera";
-import { useCameras } from "@/lib/camerasStore";
 
 /** Build the backend MJPEG stream URL (proxied Next.js → FastAPI). */
-function buildStreamUrl(
-  rtspUrl: string,
-  drawDetections = false,
-  enableFaceBiometrics = true,
-  palette: ThermalPalette = "standard",
-  pairedRtspUrl?: string | null,
-  fusionMode?: string | null
-): string {
+function buildStreamUrl(rtspUrl: string, drawDetections = false, enableFaceBiometrics = true): string {
   const params = new URLSearchParams({
     rtsp_url: rtspUrl,
     draw_detections: String(drawDetections),
     enable_face_recognition: String(enableFaceBiometrics),
-    palette: palette,
     fps: "20",
     _t: String(Date.now()),
   });
-  if (pairedRtspUrl) params.set("paired_rtsp_url", pairedRtspUrl);
-  if (fusionMode && fusionMode !== "single") params.set("fusion_mode", fusionMode);
   return `/api/backend/stream/live?${params.toString()}`;
-}
-
-/** Resolves real-time GPU filter style for client-side HTML video playback. */
-function getThermalVideoFilter(palette: ThermalPalette): string {
-  switch (palette) {
-    case "white_hot":
-      return "grayscale(1) contrast(1.45) brightness(1.1)";
-    case "black_hot":
-      return "grayscale(1) invert(1) contrast(1.5) brightness(1.15)";
-    case "nvg_green":
-      return "contrast(1.6) brightness(1.2) sepia(1) hue-rotate(85deg) saturate(3.8)";
-    case "amber":
-      return "contrast(1.5) brightness(1.1) sepia(1) hue-rotate(352deg) saturate(4.2)";
-    case "ironbow":
-      return "url(#tactical-ironbow) contrast(1.15)";
-    case "msx_fusion":
-      return "contrast(1.65) saturate(1.8) brightness(1.08)";
-    case "standard":
-    default:
-      return "none";
-  }
 }
 
 export function LiveWorkspace() {
   const { isOnline, loadedModels, refetch } = useBackendStatus();
-  const { cameras } = useCameras();
 
-  // Mode: "upload-image" | "upload-video" | "rtsp" | "webcam"
+  // Mode: "upload-image" | "upload-video" | "rtsp"
   const [sourceMode, setSourceMode] = useState<
-    "upload-image" | "upload-video" | "rtsp" | "webcam"
+    "upload-image" | "upload-video" | "rtsp"
   >("upload-image");
 
   // Selected Model
@@ -110,14 +70,6 @@ export function LiveWorkspace() {
 
   // Multi-Object Tracking (ByteTrack) toggle
   const [enableTracking, setEnableTracking] = useState<boolean>(true);
-
-  // ─── Thermal & Dual-Spectrum Sensor Fusion state ─────────────────────────
-  const [thermalPalette, setThermalPalette] = useState<ThermalPalette>("standard");
-  const [dualSpectrumMode, setDualSpectrumMode] = useState<"single" | "side_by_side" | "pip" | "blend">("single");
-  const [isSpotMeterActive, setIsSpotMeterActive] = useState<boolean>(false);
-  const [spotMeterData, setSpotMeterData] = useState<{ x: number; y: number; temp: number; classification: string } | null>(null);
-  const [isSimulatingThermal, setIsSimulatingThermal] = useState<boolean>(false);
-  const [originalImagePreviewUrl, setOriginalImagePreviewUrl] = useState<string>("");
 
   // ─── Live Stream (RTSP & IP Webcam Pro) state ───────────────────────────
   const [rtspUrl, setRtspUrl] = useState<string>("sample");
@@ -176,127 +128,6 @@ export function LiveWorkspace() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamImgRef = useRef<HTMLImageElement>(null);
 
-  // ─── Client-Side Browser Webcam state & refs ─────────────────────────────
-  const webcamVideoRef = useRef<HTMLVideoElement>(null);
-  const webcamStreamRef = useRef<MediaStream | null>(null);
-  const [webcamActive, setWebcamActive] = useState<boolean>(false);
-  const [webcamError, setWebcamError] = useState<string | null>(null);
-  const [availableCameras, setAvailableCameras] = useState<MediaDeviceInfo[]>([]);
-  const [selectedCameraDeviceId, setSelectedCameraDeviceId] = useState<string>("");
-  const [autoAiDetection, setAutoAiDetection] = useState<boolean>(false);
-  const [isSecureOriginWarning, setIsSecureOriginWarning] = useState<boolean>(false);
-
-  // Stop client webcam helper
-  const stopWebcam = useCallback(() => {
-    if (webcamStreamRef.current) {
-      webcamStreamRef.current.getTracks().forEach((track) => track.stop());
-      webcamStreamRef.current = null;
-    }
-    if (webcamVideoRef.current) {
-      webcamVideoRef.current.srcObject = null;
-    }
-    setWebcamActive(false);
-    setAutoAiDetection(false);
-  }, []);
-
-  // Start client webcam helper
-  const startWebcam = useCallback(async (deviceId?: string) => {
-    setWebcamError(null);
-    setIsSecureOriginWarning(false);
-
-    if (typeof window !== "undefined") {
-      const isLocalhost =
-        window.location.hostname === "localhost" ||
-        window.location.hostname === "127.0.0.1";
-      if (!window.isSecureContext && !isLocalhost) {
-        setIsSecureOriginWarning(true);
-      }
-    }
-
-    if (!navigator?.mediaDevices?.getUserMedia) {
-      const errMsg =
-        "Camera API (navigator.mediaDevices.getUserMedia) is unavailable. Browsers require HTTPS or an insecure origin exception when accessed over LAN IP.";
-      setWebcamError(errMsg);
-      setIsSecureOriginWarning(true);
-      setStatusMessage(errMsg);
-      return;
-    }
-
-    try {
-      if (webcamStreamRef.current) {
-        webcamStreamRef.current.getTracks().forEach((t) => t.stop());
-        webcamStreamRef.current = null;
-      }
-
-      const constraints: MediaStreamConstraints = {
-        video: deviceId
-          ? { deviceId: { exact: deviceId } }
-          : { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: "user" },
-        audio: false,
-      };
-
-      const stream = await navigator.mediaDevices.getUserMedia(constraints);
-      webcamStreamRef.current = stream;
-
-      if (webcamVideoRef.current) {
-        webcamVideoRef.current.srcObject = stream;
-        try {
-          await webcamVideoRef.current.play();
-        } catch {
-          // Handled
-        }
-      }
-
-      setWebcamActive(true);
-      setStatusMessage("Client webcam active (Local Browser Device).");
-
-      try {
-        const devices = await navigator.mediaDevices.enumerateDevices();
-        const videoDevices = devices.filter((d) => d.kind === "videoinput");
-        setAvailableCameras(videoDevices);
-        if (deviceId) {
-          setSelectedCameraDeviceId(deviceId);
-        } else if (videoDevices.length > 0 && !selectedCameraDeviceId) {
-          setSelectedCameraDeviceId(videoDevices[0].deviceId);
-        }
-      } catch (enumErr) {
-        console.debug("Could not enumerate camera devices:", enumErr);
-      }
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Failed to open camera";
-      setWebcamError(msg);
-      setWebcamActive(false);
-      setStatusMessage(`Webcam access error: ${msg}`);
-    }
-  }, [selectedCameraDeviceId]);
-
-  // Frame capture helper for client webcam
-  const captureWebcamBlob = useCallback(async (): Promise<Blob | null> => {
-    if (!webcamVideoRef.current || !webcamStreamRef.current) return null;
-    const video = webcamVideoRef.current;
-    if (video.videoWidth === 0 || video.videoHeight === 0) return null;
-
-    const canvas = document.createElement("canvas");
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return null;
-
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-    return new Promise<Blob | null>((resolve) => {
-      canvas.toBlob((blob) => resolve(blob), "image/jpeg", 0.88);
-    });
-  }, []);
-
-  // Update dims when webcam metadata is ready
-  const handleWebcamLoaded = () => {
-    if (webcamVideoRef.current) {
-      const w = webcamVideoRef.current.videoWidth || 1280;
-      const h = webcamVideoRef.current.videoHeight || 720;
-      setSourceDims({ width: w, height: h });
-    }
-  };
-
   // Set default model when models list updates (prioritize 'best')
   useEffect(() => {
     if (loadedModels.length > 0) {
@@ -307,7 +138,7 @@ export function LiveWorkspace() {
     }
   }, [loadedModels, selectedModel]);
 
-  // Auto-stop stream when leaving RTSP mode & stop webcam when leaving webcam mode
+  // Auto-stop stream when leaving RTSP mode
   useEffect(() => {
     if (sourceMode !== "rtsp") {
       setIsStreamActive(false);
@@ -315,36 +146,17 @@ export function LiveWorkspace() {
       setStreamError(false);
       setStreamDiagnostics(null);
     }
-    if (sourceMode !== "webcam") {
-      stopWebcam();
-    }
-  }, [sourceMode, stopWebcam]);
+  }, [sourceMode]);
 
-  // Cleanup webcam tracks on component unmount
-  useEffect(() => {
-    return () => {
-      stopWebcam();
-    };
-  }, [stopWebcam]);
-
-  // Rebuild stream URL when AI overlay, Face Biometrics, or Thermal Palette changes while stream is live
+  // Rebuild stream URL when AI overlay or Face Biometrics toggle changes while stream is live
   useEffect(() => {
     if (isStreamActive && rtspUrl) {
-      const pairedCamera = selectedCamera?.pairedCameraId
-        ? cameras.find((c) => c.id === selectedCamera.pairedCameraId)
-        : null;
-      const src = buildStreamUrl(
-        rtspUrl,
-        drawDetectionsOnStream,
-        enableFaceBiometrics,
-        thermalPalette,
-        pairedCamera?.streamUrl || null,
-        dualSpectrumMode
-      );
+      const src = buildStreamUrl(rtspUrl, drawDetectionsOnStream, enableFaceBiometrics);
       setActiveMjpegSrc(src);
       setStreamKey((k) => k + 1);
     }
-  }, [drawDetectionsOnStream, enableFaceBiometrics, thermalPalette, dualSpectrumMode, isStreamActive, rtspUrl, selectedCamera, cameras]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [drawDetectionsOnStream, enableFaceBiometrics]);
 
   // Camera grid click → populate RTSP URL + auto-connect
   const handleCameraSelect = useCallback(
@@ -354,40 +166,18 @@ export function LiveWorkspace() {
       setRtspUrl(url);
       setRtspInputValue(url);
       setSourceMode("rtsp");
-
-      // Auto-switch to thermal palette if camera type is Thermal/Night Vision
-      if (camera.defaultPalette && camera.defaultPalette !== "standard") {
-        setThermalPalette(camera.defaultPalette as ThermalPalette);
-      } else if (camera.type?.toLowerCase().includes("thermal") || camera.spectrumType === "thermal") {
-        setThermalPalette("ironbow");
-      } else if (camera.type?.toLowerCase().includes("night") || camera.spectrumType === "night_vision_ir") {
-        setThermalPalette("nvg_green");
-      }
-
       if (url) {
-        const pairedCamera = camera.pairedCameraId
-          ? cameras.find((c) => c.id === camera.pairedCameraId)
-          : null;
-        const initialPalette = (camera.defaultPalette as ThermalPalette) ||
-          (camera.type?.toLowerCase().includes("thermal") ? "ironbow" : "standard");
-        const src = buildStreamUrl(
-          url,
-          drawDetectionsOnStream,
-          enableFaceBiometrics,
-          initialPalette,
-          pairedCamera?.streamUrl || null,
-          dualSpectrumMode
-        );
+        const src = buildStreamUrl(url, drawDetectionsOnStream, enableFaceBiometrics);
         setActiveMjpegSrc(src);
         setIsStreamActive(true);
         setStreamError(false);
         setStreamDiagnostics(`Connected to registered node: ${camera.name}`);
-        setStreamProtocol(camera.type || "RTSP Camera");
+        setStreamProtocol("RTSP Camera");
         setStatusMessage(`Connecting to: ${camera.name} — ${camera.sector}`);
         setStreamKey((k) => k + 1);
       }
     },
-    [drawDetectionsOnStream, enableFaceBiometrics, cameras, dualSpectrumMode]
+    [drawDetectionsOnStream, enableFaceBiometrics]
   );
 
   const handleConnectStream = useCallback(async (customUrl?: string) => {
@@ -403,45 +193,30 @@ export function LiveWorkspace() {
     setStatusMessage(`Testing stream connection for: ${rawUrl}...`);
 
     try {
+      // Pre-flight check via backend validator
       const validation = await api.validateStream(rawUrl);
       setStreamProtocol(validation.protocol || "Live Stream");
       setDetectedResolvedUrl(validation.resolved_url || rawUrl);
-
-      const pairedCamera = selectedCamera?.pairedCameraId
-        ? cameras.find((c) => c.id === selectedCamera.pairedCameraId)
-        : null;
 
       if (validation.reachable) {
         setRtspUrl(rawUrl);
         setRtspInputValue(rawUrl);
         setStreamError(false);
-        const src = buildStreamUrl(
-          rawUrl,
-          drawDetectionsOnStream,
-          enableFaceBiometrics,
-          thermalPalette,
-          pairedCamera?.streamUrl || null,
-          dualSpectrumMode
-        );
+        const src = buildStreamUrl(rawUrl, drawDetectionsOnStream, enableFaceBiometrics);
         setActiveMjpegSrc(src);
         setIsStreamActive(true);
         setStreamKey((k) => k + 1);
         setStatusMessage(validation.message || `Connected to ${validation.protocol}`);
         setStreamDiagnostics(validation.message);
       } else {
+        // Unreachable host/port
         setRtspUrl(rawUrl);
         setRtspInputValue(rawUrl);
         setStreamError(true);
         setStatusMessage(validation.message);
         setStreamDiagnostics(validation.message);
-        const src = buildStreamUrl(
-          rawUrl,
-          drawDetectionsOnStream,
-          enableFaceBiometrics,
-          thermalPalette,
-          pairedCamera?.streamUrl || null,
-          dualSpectrumMode
-        );
+        // Start standby stream so tactical overlay with diagnostic text is displayed
+        const src = buildStreamUrl(rawUrl, drawDetectionsOnStream, enableFaceBiometrics);
         setActiveMjpegSrc(src);
         setIsStreamActive(true);
         setStreamKey((k) => k + 1);
@@ -450,7 +225,7 @@ export function LiveWorkspace() {
       const msg = err instanceof Error ? err.message : "Validation failed";
       setRtspUrl(rawUrl);
       setRtspInputValue(rawUrl);
-      const src = buildStreamUrl(rawUrl, drawDetectionsOnStream, enableFaceBiometrics, thermalPalette);
+      const src = buildStreamUrl(rawUrl, drawDetectionsOnStream, enableFaceBiometrics);
       setActiveMjpegSrc(src);
       setIsStreamActive(true);
       setStreamKey((k) => k + 1);
@@ -459,7 +234,7 @@ export function LiveWorkspace() {
     } finally {
       setIsValidatingStream(false);
     }
-  }, [rtspInputValue, drawDetectionsOnStream, enableFaceBiometrics, thermalPalette, selectedCamera, cameras, dualSpectrumMode]);
+  }, [rtspInputValue, drawDetectionsOnStream, enableFaceBiometrics]);
 
   const handleDisconnectStream = useCallback(() => {
     setIsStreamActive(false);
@@ -494,172 +269,11 @@ export function LiveWorkspace() {
     setSelectedImageFile(file);
     const url = URL.createObjectURL(file);
     setImagePreviewUrl(url);
-    setOriginalImagePreviewUrl(url);
-    setThermalPalette("standard");
     setSourceMode("upload-image");
     setDetections([]);
     setDetectedSuspectsInMedia([]);
     setLatencyMs(null);
     setStatusMessage(`Loaded image: ${file.name}`);
-  };
-
-  // Thermal Palette & Sensor Fusion Handler
-  const handleThermalPaletteChange = async (palette: ThermalPalette) => {
-    setThermalPalette(palette);
-
-    if (sourceMode === "upload-video" || sourceMode === "webcam") {
-      if (palette === "standard") {
-        setStatusMessage("Switched feed to standard Optical Visible (VIS) spectrum.");
-      } else {
-        setStatusMessage(
-          `Tactical ${palette.toUpperCase()} radiometric spectrum filter engaged for real-time feed.`
-        );
-      }
-      return;
-    }
-
-    if (sourceMode === "upload-image") {
-      if (palette === "standard") {
-        if (originalImagePreviewUrl) {
-          setImagePreviewUrl(originalImagePreviewUrl);
-        }
-        setStatusMessage("Switched to standard Optical Visible (VIS) spectrum.");
-        return;
-      }
-
-      if (selectedImageFile) {
-        try {
-          setIsSimulatingThermal(true);
-          setStatusMessage(`Processing radiometric ${palette.toUpperCase()} transform...`);
-          const formData = new FormData();
-          formData.append("optical_file", selectedImageFile);
-          formData.append("palette", palette);
-          formData.append("fusion_mode", palette === "msx_fusion" ? "msx" : "standard");
-          formData.append("conf_threshold", String(confThreshold));
-
-          const res = await api.fuseThermalImages(formData);
-          if (res.fused_image_base64) {
-            setImagePreviewUrl(res.fused_image_base64);
-            if (res.fused_targets && res.fused_targets.length > 0) {
-              setDetections(
-                res.fused_targets.map((t, idx) => ({
-                  id: idx,
-                  box: t.box,
-                  class_name: t.class_name,
-                  confidence: t.confidence,
-                  spectrum_status: t.spectrum_status,
-                  temp_celsius: t.temp_celsius_approx,
-                  is_warm_body: t.is_warm_body,
-                } as any))
-              );
-            }
-            setStatusMessage(
-              `Radiometric ${palette.toUpperCase()} applied: ${res.target_count} target(s) analyzed. Center Spot: ${res.radiometrics.center_spot_temp_celsius}°C`
-            );
-          }
-        } catch (err: unknown) {
-          const msg = err instanceof Error ? err.message : "Failed to apply thermal palette";
-          setStatusMessage(`Thermal transform warning: ${msg}`);
-        } finally {
-          setIsSimulatingThermal(false);
-        }
-      }
-    }
-  };
-
-  // Process uploaded video through backend thermal radiometric pipeline
-  const handleProcessThermalVideo = async () => {
-    if (sourceMode !== "upload-video") return;
-    try {
-      setIsSimulatingThermal(true);
-      setStatusMessage(
-        `Processing server-side radiometric ${thermalPalette.toUpperCase()} video sequence (${videoMaxFrames} frames requested)...`
-      );
-
-      let fileToSubmit = selectedVideoFile;
-      if (!fileToSubmit) {
-        const res = await fetch(videoPreviewUrl);
-        const blob = await res.blob();
-        fileToSubmit = new File([blob], "surveillance_sample.mp4", {
-          type: "video/mp4",
-        });
-      }
-
-      const res = await api.runThermalVideo({
-        file: fileToSubmit,
-        palette: thermalPalette,
-        maxFrames: videoMaxFrames,
-        fusionMode: thermalPalette === "msx_fusion" ? "msx" : "standard",
-        confThreshold,
-        modelName: selectedModel || "best",
-      });
-
-      if (res.annotated_video_url) {
-        const backendBase = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
-        const fullAnnUrl = `${backendBase}${res.annotated_video_url}?_t=${Date.now()}`;
-        setAnnotatedVideoUrl(fullAnnUrl);
-        setVideoPreviewUrl(fullAnnUrl);
-        setStatusMessage(
-          `Radiometric ${thermalPalette.toUpperCase()} video synthesized: ${res.frames_processed} frames processed with ${res.target_count} target bloom(s).`
-        );
-      }
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Failed to process thermal video";
-      setStatusMessage(`Thermal video warning: ${msg}`);
-    } finally {
-      setIsSimulatingThermal(false);
-    }
-  };
-
-  // Spot-Meter Mouse Move handler
-  const handleViewportMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!isSpotMeterActive) return;
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    const relX = Math.max(0, Math.min(1, x / rect.width));
-    const relY = Math.max(0, Math.min(1, y / rect.height));
-
-    let detectedTemp = 13.8;
-    let classification = "AMBIENT TERRAIN";
-
-    if (detections.length > 0) {
-      for (const d of detections) {
-        if (!d.box || d.box.length < 4) continue;
-        const bx1 = (d.box[0] / sourceDims.width) * rect.width;
-        const by1 = (d.box[1] / sourceDims.height) * rect.height;
-        const bx2 = (d.box[2] / sourceDims.width) * rect.width;
-        const by2 = (d.box[3] / sourceDims.height) * rect.height;
-
-        if (x >= bx1 && x <= bx2 && y >= by1 && y <= by2) {
-          const cls = d.class_name?.toLowerCase() || "";
-          if (cls.includes("person") || cls.includes("suspect")) {
-            detectedTemp = 36.8 + Math.sin(relX * 10) * 0.4;
-            classification = "HUMAN HEAT BLOOM";
-          } else if (cls.includes("car") || cls.includes("vehicle") || cls.includes("truck")) {
-            detectedTemp = 74.5 + Math.cos(relY * 10) * 2.0;
-            classification = "ENGINE / EXHAUST";
-          } else {
-            detectedTemp = 32.5;
-            classification = "TARGET HEAT SIGNATURE";
-          }
-          break;
-        }
-      }
-    } else if (thermalPalette !== "standard") {
-      detectedTemp = Math.round((12.0 + relY * 5.0 + Math.sin(relX * 6.28) * 1.5) * 10) / 10;
-    }
-
-    setSpotMeterData({
-      x,
-      y,
-      temp: Math.round(detectedTemp * 10) / 10,
-      classification,
-    });
-  };
-
-  const handleViewportMouseLeave = () => {
-    setSpotMeterData(null);
   };
 
   // Handle local video selection
@@ -938,7 +552,6 @@ export function LiveWorkspace() {
             confThreshold,
             iouThreshold,
             maxFrames: videoMaxFrames,
-            palette: thermalPalette,
           });
           videoMeta = result.video;
           framesProcessed = result.frames_processed ?? result.results.length;
@@ -966,7 +579,6 @@ export function LiveWorkspace() {
             iouThreshold,
             maxFrames: videoMaxFrames,
             postprocess: true,
-            palette: thermalPalette,
           });
           videoMeta = result.video;
           framesProcessed =
@@ -1110,109 +722,6 @@ export function LiveWorkspace() {
             `Sampled ${result.frames_sampled} frames from RTSP stream.`
           );
         }
-      } else if (sourceMode === "webcam") {
-        if (!webcamActive) {
-          setStatusMessage("Client webcam is not active. Click start or grant camera permission.");
-          setIsInferencing(false);
-          return;
-        }
-
-        const blob = await captureWebcamBlob();
-        if (!blob) {
-          setStatusMessage("Waiting for webcam video frame...");
-          setIsInferencing(false);
-          return;
-        }
-
-        const fileToSubmit = new File([blob], "webcam_capture.jpg", {
-          type: "image/jpeg",
-        });
-
-        setStatusMessage("Scanning client webcam frame with ONNX + Biometrics...");
-
-        const [result, faceScanResult] = await Promise.all([
-          api.runImageInference({
-            file: fileToSubmit,
-            modelName: modelToUse,
-            confThreshold,
-            iouThreshold,
-            postprocess: true,
-          }),
-          api.scanFaceImage(fileToSubmit, 0.40, 35).catch((err) => {
-            console.debug("Facial scan fallback:", err);
-            return null;
-          }),
-        ]);
-
-        const elapsed = Math.round(performance.now() - t0);
-        setLatencyMs(
-          result.inference_time_ms
-            ? Math.round(result.inference_time_ms)
-            : elapsed
-        );
-
-        const faceDetections: Detection[] = [];
-        const suspectsFound: Array<{ name: string; threat_level: string; confidence: number; category?: string }> = [];
-
-        if (faceScanResult && faceScanResult.faces && faceScanResult.faces.length > 0) {
-          for (const face of faceScanResult.faces) {
-            const isThreat = Boolean(face.is_threat);
-            const isKnown = Boolean(face.is_known);
-            const conf = normalizeConfidence(
-              face.calibrated_conf || face.match_score || face.confidence || 0.85
-            );
-
-            if (isThreat || isKnown) {
-              const faceDet: Detection = {
-                box: face.bbox,
-                confidence: conf,
-                class_id: 999,
-                class_name: isThreat ? `suspect_${face.name.toLowerCase()}` : `face_${face.name.toLowerCase()}`,
-                is_threat: isThreat,
-                threat_level: face.threat_level || (isThreat ? "HIGH" : undefined),
-                suspect_name: face.name,
-                category: face.category || (isThreat ? "Suspect Target" : "Personnel"),
-              };
-              faceDetections.push(faceDet);
-
-              if (isThreat) {
-                const tLevel = face.threat_level || "HIGH";
-                const sev: "High" | "Medium" | "Low" = "High";
-                suspectsFound.push({
-                  name: face.name,
-                  threat_level: tLevel,
-                  confidence: conf,
-                  category: face.category,
-                });
-
-                api.createAlert({
-                  title: `SUSPECT DETECTED: ${face.name.toUpperCase()}`,
-                  location: "Client Webcam Live Feed",
-                  severity: sev,
-                  cameraName: "Client Webcam",
-                  className: "suspect",
-                  confidence: conf,
-                  box: face.bbox,
-                  suspectName: face.name,
-                  threatLevel: tLevel,
-                  category: face.category,
-                  notes: `Biometric facial match verified via client webcam (${formatConfidence(conf)} match).`,
-                }).catch(() => {});
-              }
-            }
-          }
-        }
-
-        const combinedDetections = [...(result.detections || []), ...faceDetections];
-        setDetections(combinedDetections);
-        setDetectedSuspectsInMedia(suspectsFound);
-
-        const suspectNotice = suspectsFound.length > 0
-          ? ` • 🚨 ${suspectsFound.length} SUSPECT(S) IDENTIFIED: ${suspectsFound.map((s) => s.name).join(", ")}`
-          : "";
-        setStatusMessage(
-          `Webcam scanned: ${result.detections?.length || 0} objects, ${faceDetections.length} faces in ${elapsed}ms${suspectNotice}.`
-        );
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Inference failed";
@@ -1221,21 +730,6 @@ export function LiveWorkspace() {
       setIsInferencing(false);
     }
   };
-
-  // Auto AI scan loop for client webcam
-  useEffect(() => {
-    if (!autoAiDetection || sourceMode !== "webcam" || !webcamActive) {
-      return;
-    }
-
-    const timer = setInterval(() => {
-      if (!isInferencing && isOnline && webcamActive) {
-        handleRunInference();
-      }
-    }, 1200);
-
-    return () => clearInterval(timer);
-  }, [autoAiDetection, sourceMode, webcamActive, isInferencing, isOnline]);
 
   return (
     <div className="space-y-6">
@@ -1301,23 +795,6 @@ export function LiveWorkspace() {
           >
             <Radio className="w-3.5 h-3.5" />
             Live Surveillance (RTSP / IP Webcam)
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              setSourceMode("webcam");
-              startWebcam();
-            }}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-colors ${
-              sourceMode === "webcam"
-                ? "bg-white text-slate-900 shadow-xs"
-                : "text-slate-600 hover:text-slate-900"
-            }`}
-            title="Access this computer/device's webcam directly via the browser"
-          >
-            <Camera className="w-3.5 h-3.5 text-emerald-600" />
-            Client Webcam
           </button>
         </div>
 
@@ -1419,52 +896,6 @@ export function LiveWorkspace() {
                 ? `Video: ${selectedVideoFile.name.slice(0, 14)}...`
                 : "Upload Video"}
             </button>
-          ) : sourceMode === "webcam" ? (
-            <div className="flex items-center gap-2">
-              {availableCameras.length > 1 && (
-                <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5">
-                  <Camera className="w-3.5 h-3.5 text-slate-500 shrink-0" />
-                  <select
-                    value={selectedCameraDeviceId}
-                    onChange={(e) => {
-                      setSelectedCameraDeviceId(e.target.value);
-                      startWebcam(e.target.value);
-                    }}
-                    className="bg-transparent text-xs text-slate-700 font-semibold focus:outline-none cursor-pointer max-w-[130px] truncate"
-                  >
-                    {availableCameras.map((cam, idx) => (
-                      <option key={cam.deviceId || idx} value={cam.deviceId}>
-                        {cam.label || `Camera ${idx + 1}`}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
-
-              <button
-                type="button"
-                onClick={() => setAutoAiDetection((prev) => !prev)}
-                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
-                  autoAiDetection
-                    ? "bg-emerald-700 hover:bg-emerald-600 text-white border-emerald-500 shadow-xs"
-                    : "bg-slate-100 hover:bg-slate-200 text-slate-600 border-slate-300"
-                }`}
-                title="Continuously scan webcam frames for threats & biometric matches"
-              >
-                <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-                <span>Auto AI: {autoAiDetection ? "ON" : "OFF"}</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => startWebcam(selectedCameraDeviceId)}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 transition-colors cursor-pointer"
-                title="Restart client webcam"
-              >
-                <RefreshCw className="w-3.5 h-3.5" />
-                <span>Reconnect</span>
-              </button>
-            </div>
           ) : null}
 
           {/* ByteTrack MOT Toggle (for Video & RTSP) */}
@@ -1489,21 +920,17 @@ export function LiveWorkspace() {
             type="button"
             onClick={handleRunInference}
             disabled={isInferencing || !isOnline}
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-lg text-xs font-semibold bg-[#1e4b38] hover:bg-[#163a2b] text-white shadow-xs transition-all duration-150 disabled:opacity-50 cursor-pointer"
+            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-lg text-xs font-semibold bg-[#1e4b38] hover:bg-[#163a2b] text-white shadow-xs transition-all duration-150 disabled:opacity-50"
           >
             {isInferencing ? (
               <>
                 <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                {enableTracking && sourceMode !== "upload-image" && sourceMode !== "webcam" ? "Tracking..." : "Inferencing..."}
+                {enableTracking && sourceMode !== "upload-image" ? "Tracking..." : "Inferencing..."}
               </>
             ) : (
               <>
                 <Play className="w-3.5 h-3.5 fill-current" />
-                {sourceMode === "webcam"
-                  ? "Scan Webcam Frame"
-                  : enableTracking && sourceMode !== "upload-image"
-                  ? "Run ByteTrack Tracking"
-                  : "Run AI Detection"}
+                {enableTracking && sourceMode !== "upload-image" ? "Run ByteTrack Tracking" : "Run AI Detection"}
               </>
             )}
           </button>
@@ -1566,7 +993,7 @@ export function LiveWorkspace() {
                       handleConnectStream();
                     }
                   }}
-                  placeholder="e.g. 'webcam', http://192.168.1.5:8080, rtsp://10.20.72.101:554/live, or 'sample'"
+                  placeholder="e.g. http://12.10.5.194:8080, rtsp://10.20.72.101:554/live, or 'sample'"
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 pr-8 text-xs font-mono text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-700/20 focus:border-emerald-700 shadow-2xs"
                 />
                 {rtspInputValue && (
@@ -1650,30 +1077,6 @@ export function LiveWorkspace() {
               <button
                 type="button"
                 onClick={() => {
-                  setRtspInputValue("webcam");
-                  handleConnectStream("webcam");
-                }}
-                className="px-2 py-0.5 rounded-md bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-300 transition-colors font-mono font-medium cursor-pointer flex items-center gap-1 shadow-2xs"
-                title="Connect to webcam physically plugged into the backend server host"
-              >
-                <Camera className="w-3 h-3 text-emerald-600" />
-                Backend Host Cam (Server Cam 0)
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setSourceMode("webcam");
-                  startWebcam();
-                }}
-                className="px-2 py-0.5 rounded-md bg-sky-50 hover:bg-sky-100 text-sky-900 border border-sky-300 transition-colors font-mono font-medium cursor-pointer flex items-center gap-1 shadow-2xs"
-                title="Access this computer's local webcam via browser"
-              >
-                <Camera className="w-3 h-3 text-sky-600" />
-                Client Webcam (This Machine) ↗
-              </button>
-              <button
-                type="button"
-                onClick={() => {
                   setRtspInputValue("sample");
                   handleConnectStream("sample");
                 }}
@@ -1740,31 +1143,6 @@ export function LiveWorkspace() {
             </div>
           )}
 
-          {/* Helpful banner when 'webcam' is entered in RTSP input */}
-          {rtspInputValue.toLowerCase().trim() === "webcam" && (
-            <div className="bg-blue-950/40 border border-blue-500/40 rounded-xl p-3 text-xs text-blue-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5">
-              <div className="flex items-start gap-2">
-                <HelpCircle className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
-                <div>
-                  <span className="font-bold text-blue-100">Frontend &amp; Backend on Different Machines?</span>
-                  <p className="text-slate-300 text-[11px] mt-0.5">
-                    Connecting to <code className="bg-black/40 px-1 py-0.5 rounded text-blue-300 font-mono">&quot;webcam&quot;</code> in RTSP mode looks for a camera physically plugged into the <strong>backend server</strong>. To use the webcam on <strong>this device</strong>, switch to the Client Webcam tab.
-                  </p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => {
-                  setSourceMode("webcam");
-                  startWebcam();
-                }}
-                className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs shrink-0 cursor-pointer shadow-xs whitespace-nowrap"
-              >
-                Switch to Client Webcam
-              </button>
-            </div>
-          )}
-
           {isStreamActive && !streamError && streamDiagnostics && (
             <div className="bg-emerald-950/30 border border-emerald-500/30 rounded-lg px-3 py-1.5 text-xs text-emerald-300 flex items-center justify-between">
               <span className="flex items-center gap-2 font-mono">
@@ -1778,45 +1156,6 @@ export function LiveWorkspace() {
               )}
             </div>
           )}
-        </div>
-      )}
-
-      {/* Client Webcam Insecure Origin Guidance Banner */}
-      {sourceMode === "webcam" && isSecureOriginWarning && (
-        <div className="bg-amber-950/40 border border-amber-500/50 rounded-2xl p-4 text-xs text-amber-200 shadow-xs flex flex-col gap-2.5">
-          <div className="flex items-start gap-3">
-            <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
-            <div className="space-y-1.5">
-              <p className="font-bold text-sm text-amber-100">
-                Network Origin Notice: Browser Camera Security Policy
-              </p>
-              <p className="text-slate-300 text-xs leading-relaxed">
-                You are accessing this frontend over LAN / IP (
-                <code className="bg-black/50 px-1.5 py-0.5 rounded text-amber-300 font-mono">
-                  {typeof window !== "undefined" ? window.location.origin : ""}
-                </code>
-                ). Modern browsers (Chrome, Edge, Safari) restrict webcam API (<code className="text-slate-200 font-mono">getUserMedia</code>) over non-localhost HTTP unless served over <strong className="text-white">HTTPS</strong> or explicitly whitelisted in browser flags.
-              </p>
-              <div className="mt-2 bg-black/60 p-3 rounded-xl border border-amber-500/30 text-[11px] font-mono space-y-1.5">
-                <p className="text-amber-200 font-semibold">How to enable webcam in Chrome/Edge over LAN in 30 seconds:</p>
-                <ol className="list-decimal list-inside text-slate-300 space-y-1 ml-1">
-                  <li>
-                    Open a new tab and paste:{" "}
-                    <span className="text-cyan-300 select-all font-bold">chrome://flags/#unsafely-treat-insecure-origin-as-secure</span>
-                  </li>
-                  <li>
-                    Add your frontend address in the box:{" "}
-                    <span className="text-emerald-300 select-all font-bold">
-                      {typeof window !== "undefined" ? window.location.origin : "http://<YOUR_FRONTEND_IP>:3000"}
-                    </span>
-                  </li>
-                  <li>
-                    Change dropdown to <strong className="text-white">Enabled</strong> and click <strong className="text-white">Relaunch</strong>.
-                  </li>
-                </ol>
-              </div>
-            </div>
-          </div>
         </div>
       )}
 
@@ -1872,194 +1211,6 @@ export function LiveWorkspace() {
         </div>
       )}
 
-      {/* ─── Tactical Dual-Spectrum & Thermal Palette Control Bar ─── */}
-      <div className="bg-[#0c1317] text-white rounded-2xl border border-slate-800 p-3.5 shadow-md flex flex-wrap items-center justify-between gap-3 select-none">
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-black/60 border border-slate-700 text-xs font-mono font-bold text-slate-300">
-            <Flame className="w-3.5 h-3.5 text-amber-400" />
-            <span>SPECTRUM:</span>
-          </div>
-
-          {/* Palette buttons */}
-          <div className="flex flex-wrap items-center gap-1 bg-black/40 p-1 rounded-xl border border-slate-800 text-xs">
-            <button
-              type="button"
-              onClick={() => handleThermalPaletteChange("standard")}
-              className={`px-2.5 py-1 rounded-lg font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
-                thermalPalette === "standard"
-                  ? "bg-emerald-600 text-white shadow-xs font-bold"
-                  : "text-slate-400 hover:text-white hover:bg-slate-800/60"
-              }`}
-              title="Daylight Optical RGB (Visible 4K)"
-            >
-              <Sun className="w-3.5 h-3.5" />
-              <span>Optical (VIS)</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => handleThermalPaletteChange("ironbow")}
-              className={`px-2.5 py-1 rounded-lg font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
-                thermalPalette === "ironbow"
-                  ? "bg-purple-600 text-white shadow-xs font-bold"
-                  : "text-slate-400 hover:text-white hover:bg-slate-800/60"
-              }`}
-              title="FLIR Ironbow (Radiometric Thermal Violet-Amber-White)"
-            >
-              <Flame className="w-3.5 h-3.5 text-amber-300" />
-              <span>Ironbow (FLIR)</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => handleThermalPaletteChange("white_hot")}
-              className={`px-2.5 py-1 rounded-lg font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
-                thermalPalette === "white_hot"
-                  ? "bg-slate-200 text-slate-900 shadow-xs font-bold"
-                  : "text-slate-400 hover:text-white hover:bg-slate-800/60"
-              }`}
-              title="White Hot (Military Scout Thermal)"
-            >
-              <Eye className="w-3.5 h-3.5" />
-              <span>White Hot</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => handleThermalPaletteChange("black_hot")}
-              className={`px-2.5 py-1 rounded-lg font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
-                thermalPalette === "black_hot"
-                  ? "bg-slate-800 text-amber-300 border border-amber-400/60 shadow-xs font-bold"
-                  : "text-slate-400 hover:text-white hover:bg-slate-800/60"
-              }`}
-              title="Black Hot (Inverted Thermal Silhouette)"
-            >
-              <Moon className="w-3.5 h-3.5" />
-              <span>Black Hot</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => handleThermalPaletteChange("nvg_green")}
-              className={`px-2.5 py-1 rounded-lg font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
-                thermalPalette === "nvg_green"
-                  ? "bg-green-700 text-white shadow-xs font-bold"
-                  : "text-slate-400 hover:text-white hover:bg-slate-800/60"
-              }`}
-              title="Tactical P43 Green Phosphor Night Vision (NVG)"
-            >
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-              <span>NVG Green</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => handleThermalPaletteChange("msx_fusion")}
-              className={`px-2.5 py-1 rounded-lg font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
-                thermalPalette === "msx_fusion"
-                  ? "bg-cyan-600 text-white shadow-xs font-bold"
-                  : "text-slate-400 hover:text-white hover:bg-slate-800/60"
-              }`}
-              title="FLIR MSX Detail Fusion (High-Frequency Optical Edges Overlaid on Thermal Heatmap)"
-            >
-              <Layers className="w-3.5 h-3.5 text-cyan-300" />
-              <span>MSX Fusion</span>
-            </button>
-          </div>
-
-          {/* Server-Side Thermal Video Generator Button */}
-          {sourceMode === "upload-video" && thermalPalette !== "standard" && (
-            <button
-              type="button"
-              onClick={handleProcessThermalVideo}
-              disabled={isSimulatingThermal || isInferencing}
-              className="px-2.5 py-1 rounded-lg text-xs font-mono font-bold bg-amber-600 hover:bg-amber-500 text-slate-950 border border-amber-400 shadow-xs transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
-              title="Synthesize radiometric thermal rendering into full H.264 video with HUD and spot-meter"
-            >
-              {isSimulatingThermal ? (
-                <>
-                  <RefreshCw className="w-3 h-3 animate-spin" />
-                  <span>Synthesizing...</span>
-                </>
-              ) : (
-                <>
-                  <Flame className="w-3 h-3" />
-                  <span>Burn Radiometric Video</span>
-                </>
-              )}
-            </button>
-          )}
-
-          {isSimulatingThermal && (
-            <span className="text-xs font-mono text-amber-400 flex items-center gap-1.5 animate-pulse ml-2">
-              <RefreshCw className="w-3 h-3 animate-spin" />
-              Processing Radiometrics...
-            </span>
-          )}
-        </div>
-
-        {/* Right side controls: Spot Meter & Dual Stream view modes */}
-        <div className="flex items-center gap-2">
-          {/* Spot-Meter Toggle */}
-          <button
-            type="button"
-            onClick={() => setIsSpotMeterActive((prev) => !prev)}
-            className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-              isSpotMeterActive
-                ? "bg-amber-500 text-slate-950 border border-amber-300 shadow-md animate-pulse"
-                : "bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700"
-            }`}
-            title="Toggle Radiometric Crosshair Spot-Meter for real-time temperature telemetry"
-          >
-            <Crosshair className="w-3.5 h-3.5" />
-            <span>SPOT-METER: {isSpotMeterActive ? "ACTIVE" : "OFF"}</span>
-          </button>
-
-          {/* Dual-Spectrum View Options in RTSP mode */}
-          {sourceMode === "rtsp" && (
-            <div className="flex items-center gap-1 bg-black/40 p-1 rounded-xl border border-slate-800 text-xs">
-              <button
-                type="button"
-                onClick={() => setDualSpectrumMode("single")}
-                className={`px-2 py-1 rounded-lg font-medium transition-colors cursor-pointer ${
-                  dualSpectrumMode === "single"
-                    ? "bg-slate-700 text-white font-bold"
-                    : "text-slate-400 hover:text-white"
-                }`}
-                title="Single Main Feed"
-              >
-                Single
-              </button>
-              <button
-                type="button"
-                onClick={() => setDualSpectrumMode("side_by_side")}
-                className={`px-2 py-1 rounded-lg font-medium transition-colors flex items-center gap-1 cursor-pointer ${
-                  dualSpectrumMode === "side_by_side"
-                    ? "bg-emerald-700 text-white font-bold"
-                    : "text-slate-400 hover:text-white"
-                }`}
-                title="Dual Synchronized Side-by-Side (Optical + Thermal)"
-              >
-                <Split className="w-3 h-3" />
-                <span>Side-by-Side</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setDualSpectrumMode("pip")}
-                className={`px-2 py-1 rounded-lg font-medium transition-colors cursor-pointer ${
-                  dualSpectrumMode === "pip"
-                    ? "bg-emerald-700 text-white font-bold"
-                    : "text-slate-400 hover:text-white"
-                }`}
-                title="Picture-in-Picture Thermal Inset"
-              >
-                PiP
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
-
       {/* 2. Primary Feed with Tactical Overlay Canvas & Inspector */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Main Viewport (Col 8) */}
@@ -2076,19 +1227,12 @@ export function LiveWorkspace() {
                   ? "VIDEO FEED • BORDER SURVEILLANCE"
                   : sourceMode === "rtsp"
                   ? `${streamProtocol.toUpperCase()} • LIVE STREAM`
-                  : sourceMode === "webcam"
-                  ? "CLIENT WEBCAM • LIVE BROWSER FEED"
                   : selectedImageFile
                   ? `IMAGE SCAN • ${selectedImageFile.name.toUpperCase()}`
                   : imagePreviewUrl
                   ? "IMAGE SCAN • SAMPLE FRAME"
                   : "IMAGE SCAN • DIRECT UPLOAD"}
               </span>
-              {thermalPalette !== "standard" && (
-                <span className="px-2 py-0.5 rounded bg-purple-950/80 text-purple-300 border border-purple-500/50 text-[10px] font-mono font-bold">
-                  🔥 {thermalPalette.toUpperCase()}
-                </span>
-              )}
             </div>
             <div className="font-mono text-[11px] text-slate-400">
               RES: {sourceMode === "upload-image" && !imagePreviewUrl ? "Awaiting Input" : `${sourceDims.width}x${sourceDims.height}`}
@@ -2098,77 +1242,15 @@ export function LiveWorkspace() {
           </div>
 
           {/* Media Viewport + Overlay Canvas */}
-          <div
-            className="relative w-full aspect-video min-h-[360px] max-h-[560px] flex items-center justify-center bg-black overflow-hidden cursor-crosshair"
-            onMouseMove={handleViewportMouseMove}
-            onMouseLeave={handleViewportMouseLeave}
-          >
+          <div className="relative w-full aspect-video min-h-[360px] max-h-[560px] flex items-center justify-center bg-black overflow-hidden">
             {/* Corner Reticles */}
             <div className="absolute top-3 left-3 w-5 h-5 border-t-2 border-l-2 border-emerald-500/80 z-30 pointer-events-none" />
             <div className="absolute top-3 right-3 w-5 h-5 border-t-2 border-r-2 border-emerald-500/80 z-30 pointer-events-none" />
             <div className="absolute bottom-3 left-3 w-5 h-5 border-b-2 border-l-2 border-emerald-500/80 z-30 pointer-events-none" />
             <div className="absolute bottom-3 right-3 w-5 h-5 border-b-2 border-r-2 border-emerald-500/80 z-30 pointer-events-none" />
 
-            {/* Interactive Radiometric Crosshair Spot-Meter Reticle */}
-            {isSpotMeterActive && spotMeterData && (
-              <div
-                className="absolute pointer-events-none z-40 transform -translate-x-1/2 -translate-y-1/2 transition-transform duration-75"
-                style={{ left: spotMeterData.x, top: spotMeterData.y }}
-              >
-                <div className="relative flex items-center justify-center">
-                  <div className="w-8 h-8 rounded-full border border-amber-400/80 animate-ping opacity-40" />
-                  <div className="w-6 h-6 rounded-full border-2 border-amber-400 flex items-center justify-center">
-                    <div className="w-1.5 h-1.5 bg-amber-400 rounded-full" />
-                  </div>
-                  <div className="absolute left-8 top-[-10px] whitespace-nowrap bg-black/90 border border-amber-400/70 text-amber-300 font-mono text-[11px] px-2 py-0.5 rounded shadow-lg">
-                    <span className="font-bold">⌖ {spotMeterData.temp.toFixed(1)}°C</span>
-                    <span className="text-[9px] text-slate-400 ml-1.5">[{spotMeterData.classification}]</span>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* ── Client Webcam Feed ── */}
-            {sourceMode === "webcam" ? (
-              <div className="relative w-full h-full flex items-center justify-center bg-black">
-                <video
-                  ref={webcamVideoRef}
-                  autoPlay
-                  playsInline
-                  muted
-                  onLoadedMetadata={handleWebcamLoaded}
-                  style={{
-                    filter: getThermalVideoFilter(thermalPalette),
-                    transition: "filter 0.3s ease-in-out",
-                  }}
-                  className="w-full h-full object-contain"
-                />
-
-                {!webcamActive && !webcamError && (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/85 z-20 p-6 text-center">
-                    <Camera className="w-10 h-10 text-emerald-400 mb-3 animate-pulse" />
-                    <p className="text-white text-sm font-semibold">Initializing Client Webcam...</p>
-                    <p className="text-slate-400 text-xs mt-1">Please grant camera permissions in your browser.</p>
-                  </div>
-                )}
-
-                {webcamError && (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/90 z-20 p-6 text-center">
-                    <AlertTriangle className="w-10 h-10 text-amber-400 mb-3" />
-                    <p className="text-white text-sm font-semibold">Unable to Access Client Webcam</p>
-                    <p className="text-rose-300 text-xs mt-1 max-w-md font-mono">{webcamError}</p>
-                    <button
-                      type="button"
-                      onClick={() => startWebcam(selectedCameraDeviceId)}
-                      className="mt-4 px-4 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white flex items-center gap-2 shadow-xs cursor-pointer"
-                    >
-                      <RefreshCw className="w-3.5 h-3.5" />
-                      Retry Camera Access
-                    </button>
-                  </div>
-                )}
-              </div>
-            ) : sourceMode === "rtsp" ? (
+            {/* ── RTSP / IP Webcam Live MJPEG Stream ── */}
+            {sourceMode === "rtsp" ? (
               isStreamActive && activeMjpegSrc ? (
                 <div className="relative w-full h-full">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -2247,86 +1329,18 @@ export function LiveWorkspace() {
                 </div>
               )
             ) : sourceMode === "upload-video" ? (
-              <div
-                className="relative w-full h-full flex items-center justify-center"
-                onDragOver={(e) => {
-                  e.preventDefault();
-                  setIsDraggingOver(true);
-                }}
-                onDragLeave={() => setIsDraggingOver(false)}
-                onDrop={(e) => {
-                  e.preventDefault();
-                  setIsDraggingOver(false);
-                  const file = e.dataTransfer.files?.[0];
-                  if (file && file.type.startsWith("video/")) {
-                    setSelectedVideoFile(file);
-                    const url = URL.createObjectURL(file);
-                    setVideoPreviewUrl(url);
-                    setAnnotatedVideoUrl(null);
-                    setDetections([]);
-                    setVideoResults([]);
-                    setDetectedSuspectsInMedia([]);
-                    setStatusMessage(
-                      `Loaded video: ${file.name} (${(file.size / (1024 * 1024)).toFixed(1)} MB)`
-                    );
-                  }
-                }}
-              >
-                <video
-                  ref={videoRef}
-                  key={videoPreviewUrl}
-                  src={videoPreviewUrl}
-                  controls
-                  playsInline
-                  loop
-                  onLoadedMetadata={handleVideoLoaded}
-                  onTimeUpdate={handleVideoTimeUpdate}
-                  onError={handleVideoError}
-                  style={{
-                    filter: getThermalVideoFilter(thermalPalette),
-                    transition: "filter 0.3s ease-in-out",
-                  }}
-                  className="w-full h-full object-contain"
-                />
-
-                {/* Direct Upload / Replace / Reset Video Controls */}
-                <div className="absolute top-3 right-3 z-30 flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => videoFileInputRef.current?.click()}
-                    className="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-900/85 hover:bg-slate-800 text-white border border-slate-700 shadow-md flex items-center gap-1.5 transition-all cursor-pointer backdrop-blur-xs"
-                    title="Upload different video file"
-                  >
-                    <Upload className="w-3.5 h-3.5 text-emerald-400" />
-                    <span>Replace Video</span>
-                  </button>
-                  {selectedVideoFile && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setSelectedVideoFile(null);
-                        setVideoPreviewUrl("/videos/himalayan-border-animated.mp4");
-                        setAnnotatedVideoUrl(null);
-                        setDetections([]);
-                        setVideoResults([]);
-                        setDetectedSuspectsInMedia([]);
-                        setStatusMessage("Reset to demo surveillance sample video.");
-                      }}
-                      className="p-1.5 rounded-lg text-xs font-semibold bg-slate-900/85 hover:bg-rose-900 text-slate-300 hover:text-rose-200 border border-slate-700 shadow-md transition-all cursor-pointer backdrop-blur-xs"
-                      title="Reset to demo sample video"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  )}
-                </div>
-
-                {isDraggingOver && (
-                  <div className="absolute inset-0 bg-black/75 border-2 border-dashed border-emerald-400 flex flex-col items-center justify-center z-40 pointer-events-none">
-                    <UploadCloud className="w-12 h-12 text-emerald-400 animate-bounce mb-2" />
-                    <p className="text-white text-sm font-bold">Drop Video to Load</p>
-                  </div>
-                )}
-              </div>
+              <video
+                ref={videoRef}
+                key={videoPreviewUrl}
+                src={videoPreviewUrl}
+                controls
+                playsInline
+                loop
+                onLoadedMetadata={handleVideoLoaded}
+                onTimeUpdate={handleVideoTimeUpdate}
+                onError={handleVideoError}
+                className="w-full h-full object-contain"
+              />
             ) : sourceMode === "upload-image" && !imagePreviewUrl ? (
               /* DIRECT UPLOAD DROPZONE INSTEAD OF STATIC IMAGE */
               <div
@@ -2461,10 +1475,8 @@ export function LiveWorkspace() {
               </div>
             )}
 
-            {/* Detection overlay canvas — rendered for image scan, live video frames, and client webcam */}
-            {((sourceMode === "upload-image" && imagePreviewUrl) ||
-              (sourceMode === "upload-video" && videoPreviewUrl && (!annotatedVideoUrl || detections.length > 0)) ||
-              (sourceMode === "webcam" && webcamActive)) && (
+            {/* Detection overlay canvas — strictly for image mode; video mode uses server-side burned-in rendering */}
+            {sourceMode === "upload-image" && imagePreviewUrl && (
               <DetectionCanvas
                 detections={detections}
                 sourceWidth={sourceDims.width}
@@ -2540,12 +1552,6 @@ export function LiveWorkspace() {
                 isStreamActive && !streamError ? "text-emerald-400" : "text-slate-500"
               }`}>
                 {isStreamActive && !streamError ? "● LIVE" : streamError ? "● ERROR" : "○ STANDBY"}
-              </span>
-            ) : sourceMode === "webcam" ? (
-              <span className={`font-semibold text-xs font-mono ${
-                webcamActive ? "text-emerald-400" : "text-amber-400"
-              }`}>
-                {webcamActive ? `● WEBCAM LIVE (${detections.length} TARGETS)` : "○ CAMERA OFF"}
               </span>
             ) : (
               <span className="font-semibold text-emerald-400 text-xs font-mono">
@@ -2712,28 +1718,6 @@ export function LiveWorkspace() {
           onClose={() => setSelectedSuspectForTrajectory(null)}
         />
       )}
-
-      {/* ─── Hidden Tactical SVG Filter Definitions (GPU Acceleration) ─── */}
-      <svg className="absolute w-0 h-0 pointer-events-none -z-50" aria-hidden="true">
-        <defs>
-          <filter id="tactical-ironbow" colorInterpolationFilters="sRGB">
-            <feColorMatrix
-              type="matrix"
-              values="
-                0.33 0.33 0.33 0 0
-                0.33 0.33 0.33 0 0
-                0.33 0.33 0.33 0 0
-                0    0    0    1 0"
-              result="gray"
-            />
-            <feComponentTransfer in="gray">
-              <feFuncR type="table" tableValues="0.0 0.05 0.35 0.75 1.0 1.0 1.0" />
-              <feFuncG type="table" tableValues="0.0 0.0  0.0  0.25 0.7 0.95 1.0" />
-              <feFuncB type="table" tableValues="0.25 0.55 0.75 0.15 0.0 0.35 1.0" />
-            </feComponentTransfer>
-          </filter>
-        </defs>
-      </svg>
     </div>
   );
 }
