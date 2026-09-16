@@ -5,12 +5,12 @@
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1294 nodes · 2181 edges · 74 communities (57 shown, 7 thin omitted)
+- 1293 nodes · 2180 edges · 76 communities (58 shown, 8 thin omitted)
 - Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 48 edges (avg confidence: 0.94)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `4f1ebbaf`
+- Built from commit: `f9f515fd`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -18,7 +18,7 @@
 - authStore.ts
 - ByteTrackerWrapper
 - frontend/package.json
-- liveworkspace.tsx
+- backend.ts
 - BorderMap.tsx
 - ONNXEngine
 - tracking.py
@@ -57,8 +57,10 @@
 - GeofenceEngine
 - reset_global_traces
 - inference_status
-- auth.py
+- useBackendStatus.ts
+- SuspectTrailAnimator
 - inference_service.py
+- health
 - test_reid_and_global_tracking.py
 - alerts.py
 - FastAPI
@@ -74,7 +76,7 @@
 - geofences.py
 - test_cameras_security.py
 - logging.py
-- react
+- liveworkspace.tsx
 - ReIDService
 - test_facial_recognition.py
 - unexpected_exception_handler
@@ -87,27 +89,27 @@
 4. `ModelManager` - 22 edges
 5. `ONNXEngine` - 21 edges
 6. `Postprocessor` - 20 edges
-7. `Preprocessor` - 19 edges
-8. `ByteTrackerWrapper` - 19 edges
-9. `GeofenceEngine` - 18 edges
-10. `PreprocessingError` - 18 edges
+7. `ByteTrackerWrapper` - 19 edges
+8. `Preprocessor` - 19 edges
+9. `PreprocessingError` - 18 edges
+10. `GeofenceEngine` - 18 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `image_inference()` --uses--> `PreprocessingError`  [INFERRED]
-  backend/app/api/inference.py → backend/app/pipeline/preprocessor.py
-- `video_inference()` --uses--> `PreprocessingError`  [INFERRED]
-  backend/app/api/inference.py → backend/app/pipeline/preprocessor.py
-- `video_inference()` --uses--> `VideoLoader`  [INFERRED]
-  backend/app/api/inference.py → backend/app/pipeline/video_loader.py
-- `video_inference()` --uses--> `VideoLoaderError`  [INFERRED]
-  backend/app/api/inference.py → backend/app/pipeline/video_loader.py
-- `rtsp_inference()` --uses--> `PreprocessingError`  [INFERRED]
-  backend/app/api/inference.py → backend/app/pipeline/preprocessor.py
+- `video_tracking()` --uses--> `ByteTrackerWrapper`  [INFERRED]
+  backend/app/api/tracking.py → backend/app/tracking/tracker.py
+- `rtsp_inference()` --uses--> `RTSPConnectionError`  [INFERRED]
+  backend/app/api/inference.py → backend/app/pipeline/rtsp_loader.py
+- `rtsp_tracking()` --uses--> `RTSPConnectionError`  [INFERRED]
+  backend/app/api/tracking.py → backend/app/pipeline/rtsp_loader.py
+- `rtsp_inference()` --uses--> `RTSPStream`  [INFERRED]
+  backend/app/api/inference.py → backend/app/pipeline/rtsp_loader.py
+- `rtsp_tracking()` --uses--> `RTSPStream`  [INFERRED]
+  backend/app/api/tracking.py → backend/app/pipeline/rtsp_loader.py
 
 ## Import Cycles
 - None detected.
 
-## Communities (74 total, 7 thin omitted)
+## Communities (76 total, 8 thin omitted)
 
 ### Community 0 - "authStore.ts"
 Cohesion: 0.13
@@ -121,13 +123,13 @@ Nodes (28): ByteTracker configuration. Maps to the supervision ByteTrack constru
 Cohesion: 0.04
 Nodes (42): nextConfig, dependencies, clsx, lucide-react, maplibre-gl, next, react, react-dom (+34 more)
 
-### Community 3 - "liveworkspace.tsx"
-Cohesion: 0.09
-Nodes (29): SystemStatus(), ConnectionStatus(), CLASS_COLORS, DetectionCanvas(), DetectionCanvasProps, buildStreamUrl(), LiveWorkspace(), alertsStore (+21 more)
+### Community 3 - "backend.ts"
+Cohesion: 0.13
+Nodes (14): InferenceResponse, ModelMetadata, ModelStatusResponse, ModelTensorInfo, OutputTensorMetadata, ResourceStatus, RTSPInferenceResponse, RTSPTrackingResponse (+6 more)
 
 ### Community 4 - "BorderMap.tsx"
-Cohesion: 0.05
-Nodes (42): CAMERA_TYPES, CamerasPage(), COORDINATE_PRESETS, SECTORS, GeofencesPage(), BorderMap(), BorderMapProps, DEMO_ALERT (+34 more)
+Cohesion: 0.06
+Nodes (42): AnprPage(), CAMERA_TYPES, CamerasPage(), COORDINATE_PRESETS, SECTORS, GeofencesPage(), BorderMap(), BorderMapProps (+34 more)
 
 ### Community 5 - "ONNXEngine"
 Cohesion: 0.13
@@ -182,8 +184,8 @@ Cohesion: 0.14
 Nodes (11): ActivityOverviewChart(), DayData, WEEK_DATA, AnalyticsDashboard(), CameraOutpostGrid(), OutpostItem, OUTPOSTS, CATEGORIES (+3 more)
 
 ### Community 18 - "lucide-react"
-Cohesion: 0.10
-Nodes (18): AlertsPage(), TacticalThreatToast(), CameraFeedStrip(), cameras, RecentAlerts(), SuspectTrajectoryModal(), SuspectTrajectoryModalProps, api (+10 more)
+Cohesion: 0.13
+Nodes (4): GisMapPage(), CameraFeedStrip(), cameras, lucide-react
 
 ### Community 19 - "faces.py"
 Cohesion: 0.07
@@ -194,12 +196,12 @@ Cohesion: 0.11
 Nodes (17): calibrate_match_confidence(), compute_iou(), enhance_aligned_face(), FaceService, Any, ndarray, Compute Intersection over Union (IoU) between two bounding boxes [x1, y1, x2,…, Update classification and threat metadata for an enrolled person without re-… (+9 more)
 
 ### Community 21 - "AlertService"
-Cohesion: 0.09
-Nodes (15): AbstractEventLoop, AlertBroadcaster, AlertService, Any, WebSocket, No-op: Incident records are stored persistently on the frontend., Create a new alert record, persist it, update camera status, and broadcast to…, Mark camera node status as 'alert' in cameras.json. (+7 more)
+Cohesion: 0.06
+Nodes (32): AbstractEventLoop, create_token(), get_roster(), login(), LoginRequest, logout(), Any, BaseModel (+24 more)
 
 ### Community 22 - "api.ts"
-Cohesion: 0.14
-Nodes (20): AnprPage(), COLOR_PRESETS, FeedViewMode, ToolMode, ApiError, request(), StreamValidationResult, AnprRecord (+12 more)
+Cohesion: 0.11
+Nodes (25): COLOR_PRESETS, FeedViewMode, ToolMode, ApiError, request(), StreamValidationResult, AlertFilter, GlobalTraceItem (+17 more)
 
 ### Community 23 - "inference.py"
 Cohesion: 0.21
@@ -222,8 +224,8 @@ Cohesion: 0.12
 Nodes (16): 10. Contributors & Acknowledgments, 1. Overview, 2. Key Capabilities & System Modules, 3. High-Level Architecture, 4. AI Models Specification, 5. Repository Structure, 6. Installation & Setup Guide, 7. Key REST API Endpoints (+8 more)
 
 ### Community 29 - "alertsStore.ts"
-Cohesion: 0.13
-Nodes (20): GisMapPage(), MetricCard(), MetricCardProps, MetricsRow(), AlertListener, ConnectionListener, connectionListeners, getAlertsWsUrl() (+12 more)
+Cohesion: 0.16
+Nodes (18): RecentAlerts(), AlertListener, ConnectionListener, connectionListeners, getAlertsWsUrl(), INCIDENT_STORAGE_KEY, initWebSocket(), listeners (+10 more)
 
 ### Community 30 - "34. Recommended Final Model Integration Process"
 Cohesion: 0.15
@@ -269,13 +271,17 @@ Nodes (5): delete, Reset and remove the ByteTracker session for the given ``came
 Cohesion: 0.67
 Nodes (3): inference_status(), get, Return inference service and resource status.
 
-### Community 46 - "auth.py"
-Cohesion: 0.18
-Nodes (17): create_token(), get_roster(), login(), LoginRequest, logout(), Any, BaseModel, get (+9 more)
+### Community 45 - "useBackendStatus.ts"
+Cohesion: 0.21
+Nodes (9): MetricCard(), MetricCardProps, MetricsRow(), SystemStatus(), ConnectionStatus(), BackendStatusState, useBackendStatus(), HealthResponse (+1 more)
 
 ### Community 47 - "inference_service.py"
 Cohesion: 0.21
 Nodes (10): InferenceResourceError, InferenceServiceError, Any, Exception, ndarray, Base exception for inference service errors., Raised when inference resources are unavailable., Run inference using a loaded model, supporting both single-frame and batch… (+2 more)
+
+### Community 48 - "health"
+Cohesion: 0.40
+Nodes (4): health(), Any, get, Return backend health, device config, and execution providers.
 
 ### Community 59 - "test_reid_and_global_tracking.py"
 Cohesion: 0.18
@@ -286,8 +292,8 @@ Cohesion: 0.10
 Nodes (30): acknowledge_alert(), AlertCreateRequest, alerts_websocket_endpoint(), clear_alerts(), create_alert(), dispatch_qrt(), get_alert_snapshot(), get_scanner_status() (+22 more)
 
 ### Community 61 - "FastAPI"
-Cohesion: 0.14
-Nodes (13): health(), Any, get, Return backend health, device config, and execution providers., lifespan(), get, root(), get_logger() (+5 more)
+Cohesion: 0.22
+Nodes (9): lifespan(), get, root(), get_logger(), Configure application-wide logging. Logs are written to both: - the console - a…, Return a logger for a specific application module., setup_logging(), FastAPI (+1 more)
 
 ### Community 62 - "37. Troubleshooting"
 Cohesion: 0.33
@@ -321,9 +327,9 @@ Nodes (3): test_stream_target_rejects_addresses_outside_camera_network(), test_s
 Cohesion: 0.21
 Nodes (9): ONNXEngineError, ONNXInferenceError, ONNXModelError, Exception, ndarray, Run inference using a NumPy array. Preprocessing is intentionally kept outside…, Base exception for ONNX engine errors., Raised when an ONNX model cannot be loaded or is invalid. (+1 more)
 
-### Community 78 - "react"
-Cohesion: 0.29
-Nodes (4): DutyShiftCountdown(), NavItem, getRemainingShiftTime(), react
+### Community 78 - "liveworkspace.tsx"
+Cohesion: 0.13
+Nodes (20): AlertsPage(), DutyShiftCountdown(), NavItem, TacticalThreatToast(), SuspectTrajectoryModal(), SuspectTrajectoryModalProps, CLASS_COLORS, DetectionCanvas() (+12 more)
 
 ### Community 79 - "ReIDService"
 Cohesion: 0.18
@@ -338,22 +344,22 @@ Cohesion: 0.38
 Nodes (7): Exception, unexpected_exception_handler(), validation_exception_handler(), exception_handler, JSONResponse, Request, RequestValidationError
 
 ## Knowledge Gaps
-- **204 isolated node(s):** `nextConfig`, `name`, `version`, `private`, `dev` (+199 more)
+- **204 isolated node(s):** `NavItem`, `DayData`, `OutpostItem`, `CategoryStat`, `SuspectTrajectoryModalProps` (+199 more)
   These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 617 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **7 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **8 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `Postprocessor` connect `Postprocessor` to `inference.py`, `ResourceManager`, `inference_service.py`?**
-  _High betweenness centrality (0.037) - this node is a cross-community bridge._
-- **Why does `ANPRPipeline` connect `stream.py` to `ONNXEngine`?**
-  _High betweenness centrality (0.036) - this node is a cross-community bridge._
+  _High betweenness centrality (0.038) - this node is a cross-community bridge._
+- **Why does `ONNXEngine` connect `ONNXEngine` to `stream.py`, `logging.py`, `ModelManager`, `ModelManagerError`?**
+  _High betweenness centrality (0.028) - this node is a cross-community bridge._
 - **Are the 4 inferred relationships involving `ModelManager` (e.g. with `InferenceService` and `ONNXEngine`) actually correct?**
   _`ModelManager` has 4 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 2 inferred relationships involving `ONNXEngine` (e.g. with `ModelManager` and `ANPRPipeline`) actually correct?**
   _`ONNXEngine` has 2 INFERRED edges - model-reasoned connections that need verification._
-- **What connects `nextConfig`, `name`, `version` to the rest of the system?**
+- **What connects `NavItem`, `DayData`, `OutpostItem` to the rest of the system?**
   _204 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `authStore.ts` be split into smaller, more focused modules?**
   _Cohesion score 0.1349206349206349 - nodes in this community are weakly interconnected._
