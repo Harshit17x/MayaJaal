@@ -4,9 +4,10 @@ import logging
 import os
 from pathlib import Path
 import re
+import threading
 import time
 import uuid
-from typing import Any, Generator
+from typing import Any, Generator, Optional
 
 import cv2
 import numpy as np
@@ -1022,8 +1023,15 @@ class ANPRPipeline:
         camera_id: str = "STREAM-ANPR",
         fps_limit: int = 24,
         ocr_stride: int = 10,
+        stop_event: Optional[threading.Event] = None,
     ) -> Generator[bytes, None, None]:
-        """Generator yielding MJPEG multipart stream with real-time ANPR overlays (EasyOCR every 10th frame)."""
+        """Generator yielding MJPEG multipart stream with real-time ANPR overlays.
+
+        Args:
+            stop_event: Optional threading.Event. When set, the generator exits on
+                        the next loop iteration — used for reliable teardown when
+                        the client navigates away.
+        """
         from app.api.stream import create_standby_frame, open_video_source
 
         frame_interval = 1.0 / max(1, min(fps_limit, 30))
@@ -1042,6 +1050,14 @@ class ANPRPipeline:
 
         try:
             while True:
+                # ── Client stop-signal check ──────────────────────────────────
+                # The frontend calls DELETE /api/anpr/stream/stop?session_id=X
+                # when navigating away.  This is checked before every frame so
+                # the loop exits within one frame interval (~40 ms).
+                if stop_event is not None and stop_event.is_set():
+                    logger.info("ANPR stream: stop signal received, shutting down (%s)", stream_url)
+                    break
+
                 t_start = time.perf_counter()
 
                 if cap is None or not cap.isOpened():
@@ -1122,9 +1138,13 @@ class ANPRPipeline:
                 sleep_time = frame_interval - (time.perf_counter() - t_start)
                 if sleep_time > 0:
                     time.sleep(sleep_time)
+        except GeneratorExit:
+            # Client navigated away / closed the stream tab — stop inference cleanly
+            logger.info("Client disconnected from ANPR stream: %s", stream_url)
         finally:
             if cap is not None:
                 cap.release()
+
 
 
 # Singleton ANPR Pipeline Instance

@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useAlerts } from "@/lib/alertsStore";
-import { AlertItem, AlertSeverity, ScannerStatus } from "@/types/alert";
+import { AlertItem, AlertSeverity } from "@/types/alert";
 import { api } from "@/lib/api";
 import {
   ShieldAlert,
@@ -13,9 +13,6 @@ import {
   Check,
   RefreshCw,
   BellRing,
-  Radio,
-  Play,
-  Square,
   Trash2,
   UserX,
   Eye,
@@ -49,42 +46,6 @@ export default function AlertsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedSnapshot, setSelectedSnapshot] = useState<{ url: string; title: string; camera: string } | null>(null);
   const [selectedSuspectForTrajectory, setSelectedSuspectForTrajectory] = useState<string | null>(null);
-
-  // Scanner status telemetry
-  const [scannerStatus, setScannerStatus] = useState<ScannerStatus | null>(null);
-  const [scannerToggling, setScannerToggling] = useState(false);
-
-  const fetchScannerStatus = async () => {
-    try {
-      const st = await api.getScannerStatus();
-      setScannerStatus(st);
-    } catch {
-      // Backend scanner not yet responding
-    }
-  };
-
-  useEffect(() => {
-    fetchScannerStatus();
-    const interval = setInterval(fetchScannerStatus, 4000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const handleToggleScanner = async () => {
-    if (scannerToggling) return;
-    setScannerToggling(true);
-    try {
-      if (scannerStatus?.running) {
-        await api.stopScanner();
-      } else {
-        await api.startScanner();
-      }
-      await fetchScannerStatus();
-    } catch (err) {
-      console.error("Failed to toggle continuous scanner", err);
-    } finally {
-      setScannerToggling(false);
-    }
-  };
 
   const filteredAlerts = alerts.filter((alert) => {
     if (severityFilter === "Suspects") {
@@ -134,7 +95,7 @@ export default function AlertsPage() {
             </span>
           </div>
           <p className="text-xs md:text-sm font-medium text-slate-500 mt-0.5">
-            Continuous AI multi-feed scanner, suspect facial sightings, and real-time security alerts.
+            Suspect facial sightings, automated trajectory tracking, and real-time security alerts.
           </p>
         </div>
 
@@ -200,64 +161,6 @@ export default function AlertsPage() {
             title="Clear all local incident records"
           >
             <Trash2 className="w-3.5 h-3.5" /> Clear All
-          </button>
-        </div>
-      </div>
-
-      {/* Autonomous Continuous Feed Scanner Telemetry Banner */}
-      <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white rounded-xl p-4 shadow-sm border border-slate-700 flex flex-col md:flex-row items-center justify-between gap-4">
-        <div className="flex items-center gap-3.5">
-          <div
-            className={`w-10 h-10 rounded-lg flex items-center justify-center border ${
-              scannerStatus?.running
-                ? "bg-emerald-500/20 border-emerald-500/50 text-emerald-400"
-                : "bg-slate-800 border-slate-700 text-slate-400"
-            }`}
-          >
-            <Radio className={`w-5 h-5 ${scannerStatus?.running ? "animate-spin" : ""}`} />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-semibold tracking-wide">
-                Continuous Multi-Feed Suspect Scanner
-              </span>
-              <span
-                className={`px-2 py-0.5 rounded text-[10px] font-bold tracking-wider uppercase ${
-                  scannerStatus?.running
-                    ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
-                    : "bg-slate-700 text-slate-300 border border-slate-600"
-                }`}
-              >
-                {scannerStatus?.running ? "ACTIVE DAEMON" : "PAUSED"}
-              </span>
-            </div>
-            <p className="text-xs text-slate-300 font-mono mt-0.5">
-              {scannerStatus?.running
-                ? `Scanning ${scannerStatus.worker_count} active feeds • ${scannerStatus.total_scans} checks • ${scannerStatus.suspect_detections} suspect matches`
-                : "Scanner is idle. Start scanner to continuously monitor feeds against enrolled suspects."}
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-3 w-full md:w-auto justify-end">
-          <button
-            onClick={handleToggleScanner}
-            disabled={scannerToggling}
-            className={`px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 transition-all shadow-sm ${
-              scannerStatus?.running
-                ? "bg-rose-600 hover:bg-rose-700 text-white"
-                : "bg-emerald-600 hover:bg-emerald-700 text-white"
-            } disabled:opacity-50`}
-          >
-            {scannerStatus?.running ? (
-              <>
-                <Square className="w-3.5 h-3.5 fill-current" /> Stop Scanner
-              </>
-            ) : (
-              <>
-                <Play className="w-3.5 h-3.5 fill-current" /> Start Scanner
-              </>
-            )}
           </button>
         </div>
       </div>

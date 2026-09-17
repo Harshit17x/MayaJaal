@@ -3,8 +3,10 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 import tempfile
+import threading
 import time
 from typing import Optional
+import uuid
 
 import cv2
 from fastapi import APIRouter, File, Form, HTTPException, Query, Response, UploadFile
@@ -20,6 +22,13 @@ router = APIRouter(
     prefix="/api/anpr",
     tags=["ANPR"],
 )
+
+# ── Session-based stream stop registry ────────────────────────────────────────
+# Maps session_id → threading.Event.  The ANPR stream generator checks this
+# event on every iteration.  When the frontend navigates away it calls
+# DELETE /api/anpr/stream/stop?session_id=X which sets the event, causing the
+# generator to exit within one frame interval (~40 ms) and freeing GPU/CPU.
+_stream_stop_events: dict[str, threading.Event] = {}
 
 
 @router.post("/image")
@@ -143,21 +152,58 @@ def remove_from_watchlist(plate_number: str) -> dict:
     raise HTTPException(status_code=404, detail="Plate not found on watchlist")
 
 
+@router.delete("/stream/stop")
+def stop_anpr_stream(
+    session_id: str = Query(..., description="Stream session ID to stop"),
+) -> dict:
+    """Signal the ANPR stream generator to stop immediately.
+
+    The frontend calls this when the user navigates away from the ANPR page.
+    The generator checks this flag at the top of every frame loop and exits
+    within one frame interval (~40 ms), releasing all GPU/CPU inference resources.
+    """
+    event = _stream_stop_events.pop(session_id, None)
+    if event is not None:
+        event.set()
+        logger.info("ANPR stream stop signal sent for session: %s", session_id)
+        return {"status": "stopping", "session_id": session_id}
+    logger.debug(
+        "ANPR stream stop: session %s not found (may have already ended)", session_id
+    )
+    return {"status": "not_found", "session_id": session_id}
+
+
 @router.get("/stream")
 def stream_anpr(
     rtsp_url: str = Query("sample", description="RTSP feed URL or 'sample'"),
     camera_id: str = Query("BOP-04-ANPR", description="Camera identifier"),
     fps: int = Query(24, ge=5, le=30),
     ocr_stride: int = Query(10, ge=1, le=60, description="Run EasyOCR on every Nth frame"),
+    session_id: Optional[str] = Query(
+        None,
+        description="Unique client session ID.  When provided, DELETE /api/anpr/stream/stop stops inference.",
+    ),
 ) -> StreamingResponse:
     """Live MJPEG stream with real-time green plate reticles and vehicle identification."""
+    sid = session_id or str(uuid.uuid4())
+    stop_event = threading.Event()
+    _stream_stop_events[sid] = stop_event
+
+    def _gen_with_cleanup():
+        try:
+            yield from anpr_pipeline.stream_generator(
+                stream_url=rtsp_url,
+                camera_id=camera_id,
+                fps_limit=fps,
+                ocr_stride=ocr_stride,
+                stop_event=stop_event,
+            )
+        finally:
+            # Clean up registry entry when generator ends for any reason
+            _stream_stop_events.pop(sid, None)
+
     return StreamingResponse(
-        anpr_pipeline.stream_generator(
-            stream_url=rtsp_url,
-            camera_id=camera_id,
-            fps_limit=fps,
-            ocr_stride=ocr_stride,
-        ),
+        _gen_with_cleanup(),
         media_type="multipart/x-mixed-replace; boundary=frame",
         headers={
             "Cache-Control": "no-cache, no-store, must-revalidate, max-age=0",
