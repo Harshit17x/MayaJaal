@@ -78,10 +78,10 @@
     "semantic_hash": "3ae68257dd305be40f4a11391b409133"
   },
   "backend/app/inference/onnx_engine.py": {
-    "mtime": 1788993923.2387538,
-    "seen": 1789026248.1500468,
-    "ast_hash": "51fe8a063a7216e3a2df9d4774e8d700",
-    "semantic_hash": "51fe8a063a7216e3a2df9d4774e8d700"
+    "mtime": 1789585417.9338589,
+    "seen": 1789647054.5802052,
+    "ast_hash": "8967ad26997c9adf89b91397b5847427",
+    "semantic_hash": ""
   },
   "backend/app/main.py": {
     "mtime": 1789570409.7389946,
@@ -90,9 +90,9 @@
     "semantic_hash": ""
   },
   "backend/app/pipeline/anpr_service.py": {
-    "mtime": 1789226445.7546167,
-    "seen": 1789232338.3521976,
-    "ast_hash": "845787beecbf478f87a5a9bfda8e9cec",
+    "mtime": 1789646958.8793797,
+    "seen": 1789647054.5802076,
+    "ast_hash": "0f9e327bc798328359ff1fbf2f0aeed0",
     "semantic_hash": ""
   },
   "backend/app/pipeline/image_loader.py": {
@@ -324,9 +324,9 @@
     "semantic_hash": "990a23875bc028922373577d9125a37b"
   },
   "frontend/src/app/(operator)/diagnostics/page.tsx": {
-    "mtime": 1789059975.7958264,
-    "seen": 1789061558.7075331,
-    "ast_hash": "ec2463a862397ea0f4eb9ebd8050c140",
+    "mtime": 1789646389.0655532,
+    "seen": 1789647054.5802486,
+    "ast_hash": "3313ab7af719657a0b7f26cfc102089b",
     "semantic_hash": ""
   },
   "frontend/src/app/(operator)/geofences/page.tsx": {
@@ -336,9 +336,9 @@
     "semantic_hash": ""
   },
   "frontend/src/app/(operator)/gis-map/page.tsx": {
-    "mtime": 1789061459.9549522,
-    "seen": 1789061558.7075381,
-    "ast_hash": "fe00d063e65907a877a043b177472c8d",
+    "mtime": 1789646379.5830407,
+    "seen": 1789647054.5802512,
+    "ast_hash": "92bbd79739a04df5baeb574b8e8463a3",
     "semantic_hash": ""
   },
   "frontend/src/app/(operator)/layout.tsx": {
@@ -474,8 +474,8 @@
     "semantic_hash": "c1786940e913f47aea14b96a89b20b8d"
   },
   "frontend/src/components/map/BorderMap.tsx": {
-    "mtime": 1789119878.3663313,
-    "seen": 1789119982.838468,
+    "mtime": 1789645964.0705268,
+    "seen": 1789647054.580271,
     "ast_hash": "c33227d39f17680c4852694362aaa10a",
     "semantic_hash": ""
   },
@@ -762,9 +762,9 @@
     "semantic_hash": ""
   },
   "backend/app/data/faces/known_faces.json": {
-    "mtime": 1789118171.0435686,
-    "seen": 1789118190.6329997,
-    "ast_hash": "1bfdfea45af5c4f039c7f3bad10cf3b4",
+    "mtime": 1789585417.9298263,
+    "seen": 1789647054.580201,
+    "ast_hash": "4b4762f5dd8cb808af0796c77cfa7beb",
     "semantic_hash": ""
   },
   "backend/app/pipeline/face_service.py": {
@@ -795,18 +795,6 @@
     "mtime": 1789031386.1494963,
     "seen": 1789031401.426487,
     "ast_hash": "194753b70728193111b628041bf1fad7",
-    "semantic_hash": ""
-  },
-  "backend/app/data/faces/thumbnails/person_1789030367_5b83a4.jpg": {
-    "mtime": 1789030367.2878075,
-    "seen": 1789030814.224435,
-    "ast_hash": "5c350ccc292d0eaf3fcb6d1cafe52af6",
-    "semantic_hash": ""
-  },
-  "backend/app/data/faces/thumbnails/person_1789031811_e9deff.jpg": {
-    "mtime": 1789031812.907207,
-    "seen": 1789032148.9271045,
-    "ast_hash": "530f9b74a6ef356663d2c148a0c4089d",
     "semantic_hash": ""
   },
   "frontend/public/images/officer-rathore.png": {
@@ -870,9 +858,9 @@
     "semantic_hash": ""
   },
   "backend/app/pipeline/reid_service.py": {
-    "mtime": 1789064766.6552422,
-    "seen": 1789072973.651281,
-    "ast_hash": "a9f9ec02da120a7db0f0f34ffe36c8db",
+    "mtime": 1789585417.9338589,
+    "seen": 1789647054.5802128,
+    "ast_hash": "4eddb3677f2a5bea4197ffd17e057f9a",
     "semantic_hash": ""
   },
   "backend/app/tracking/global_tracker.py": {
@@ -888,9 +876,9 @@
     "semantic_hash": ""
   },
   "backend/app/data/geofences.json": {
-    "mtime": 1789124601.814549,
-    "seen": 1789135326.6007612,
-    "ast_hash": "3f856531eddee44fd16a6a5802843adb",
+    "mtime": 1789585417.931841,
+    "seen": 1789647054.5802023,
+    "ast_hash": "66b51b9109a98ea3089e48d7da12abca",
     "semantic_hash": ""
   },
   "frontend/src/components/map/SuspectTrailOverlay.ts": {
@@ -1967,18 +1955,6 @@
     "ast_hash": "d5b999dfbb42d77582efb3584c23ce14",
     "semantic_hash": ""
   },
-  "backend/app/data/faces/thumbnails/person_1789080464_24456b.jpg": {
-    "mtime": 1789118171.0435686,
-    "seen": 1789118190.6334953,
-    "ast_hash": "36dcaa7a7fb0cd33eb05532633360489",
-    "semantic_hash": ""
-  },
-  "backend/app/data/faces/thumbnails/person_1789080570_b7aa3d.jpg": {
-    "mtime": 1789118171.0435686,
-    "seen": 1789118190.6334965,
-    "ast_hash": "c040f8c962a96c291904b12bf8af7ae8",
-    "semantic_hash": ""
-  },
   "backend/app/api/auth.py": {
     "mtime": 1789119650.5539103,
     "seen": 1789119982.8382945,
@@ -2682,9 +2658,9 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1789135277.279151,
-    "seen": 1789135326.600866,
-    "ast_hash": "b06ea3d9b4307a413fd060e6570ad843",
+    "mtime": 1789585417.9250937,
+    "seen": 1789647054.5802948,
+    "ast_hash": "167226e1eef03c7ba77a7888754f5d8d",
     "semantic_hash": ""
   },
   "backend/app/data/alerts/snapshots/breach_1789118961748_bop-jk-01_tr13.jpg": {
