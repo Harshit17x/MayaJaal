@@ -55,10 +55,12 @@ class ONNXEngine:
         model_path: str | Path,
         intra_op_threads: int = 2,
         inter_op_threads: int = 1,
-        gpu_mem_limit_gb: float = 2.0,
+        gpu_mem_limit_gb: float | None = None,
     ) -> None:
-        # gpu_mem_limit_gb: upper bound on GPU memory the CUDA arena may allocate.
-        self.gpu_mem_limit_bytes = int(gpu_mem_limit_gb * 1024 ** 3)
+        # gpu_mem_limit_gb: VRAM cap per engine.
+        # None / 0 → read from settings (0 in settings = no hard cap).
+        resolved_limit = gpu_mem_limit_gb if gpu_mem_limit_gb is not None else getattr(settings, "gpu_mem_limit_gb", 0.0)
+        self.gpu_mem_limit_bytes: int | None = int(resolved_limit * 1024 ** 3) if resolved_limit > 0 else None
         self.model_path = Path(model_path)
 
         self.intra_op_threads = max(1, intra_op_threads)
@@ -110,21 +112,26 @@ class ONNXEngine:
 
         if requested_device in ("auto", "cuda", "gpu"):
             if "CUDAExecutionProvider" in available:
-                cuda_options = {
+                cuda_options: dict = {
                     "device_id": 0,
                     # kNextPowerOfTwo reduces allocator fragmentation on variable batch sizes
                     "arena_extend_strategy": "kNextPowerOfTwo",
-                    # Hard cap on GPU memory used by the CUDA arena
-                    "gpu_mem_limit": self.gpu_mem_limit_bytes,
                     # EXHAUSTIVE search finds the fastest cuDNN conv algorithm per shape
                     "cudnn_conv_algo_search": "EXHAUSTIVE",
                     # Run copies in the default CUDA stream to overlap with compute
                     "do_copy_in_default_stream": True,
                 }
+                if self.gpu_mem_limit_bytes is not None:
+                    # Only set a hard cap when explicitly configured; otherwise
+                    # ORT uses all available VRAM (the desired behaviour on a 12 GB GPU).
+                    cuda_options["gpu_mem_limit"] = self.gpu_mem_limit_bytes
+                    _limit_log = f"{self.gpu_mem_limit_bytes / 1024 ** 3:.1f} GB"
+                else:
+                    _limit_log = "unlimited"
                 providers.append(("CUDAExecutionProvider", cuda_options))
                 logger.info(
-                    "CUDAExecutionProvider selected | gpu_mem_limit=%.1f GB | cudnn_conv_algo=EXHAUSTIVE",
-                    self.gpu_mem_limit_bytes / 1024 ** 3,
+                    "CUDAExecutionProvider selected | gpu_mem_limit=%s | cudnn_conv_algo=EXHAUSTIVE",
+                    _limit_log,
                 )
             elif requested_device in ("cuda", "gpu"):
                 logger.warning(
@@ -399,7 +406,11 @@ class ONNXEngine:
             "model_path": str(self.model_path),
             "providers": self.session.get_providers(),
             "cuda_io_binding": self._use_cuda,
-            "gpu_mem_limit_gb": round(self.gpu_mem_limit_bytes / 1024 ** 3, 2),
+            "gpu_mem_limit_gb": (
+                round(self.gpu_mem_limit_bytes / 1024 ** 3, 2)
+                if self.gpu_mem_limit_bytes is not None
+                else "unlimited"
+            ),
             "inputs": self.get_inputs(),
             "outputs": self.get_outputs(),
             "class_labels": self.class_labels,

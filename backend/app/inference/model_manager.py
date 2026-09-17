@@ -44,6 +44,7 @@ class ModelManager:
         max_models: int = 4,
         intra_op_threads: int = 2,
         inter_op_threads: int = 1,
+        gpu_mem_limit_gb: float | None = None,
     ) -> None:
         if max_models < 1:
             raise ValueError("max_models must be at least 1.")
@@ -51,6 +52,8 @@ class ModelManager:
         self.max_models = max_models
         self.intra_op_threads = max(1, intra_op_threads)
         self.inter_op_threads = max(1, inter_op_threads)
+        # None means "let ONNXEngine read from settings" (0 = unlimited)
+        self.gpu_mem_limit_gb = gpu_mem_limit_gb
 
         self._models: dict[str, ONNXEngine] = {}
 
@@ -93,6 +96,7 @@ class ModelManager:
                     model_path=model_path,
                     intra_op_threads=self.intra_op_threads,
                     inter_op_threads=self.inter_op_threads,
+                    gpu_mem_limit_gb=self.gpu_mem_limit_gb,
                 )
 
                 self._models[model_name] = engine
