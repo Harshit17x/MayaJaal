@@ -1,6 +1,8 @@
 "use client";
 
 import { Activity, Cpu, HardDrive, Wifi, Server, CheckCircle2 } from "lucide-react";
+import { SystemStatus } from "@/components/dashboard/systemstatus";
+
 
 export default function DiagnosticsPage() {
   return (
@@ -18,6 +20,9 @@ export default function DiagnosticsPage() {
           </p>
         </div>
       </div>
+
+      {/* System & Hardware Status */}
+      <SystemStatus />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         <div className="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-xs">

@@ -12,24 +12,29 @@ import cv2
 import numpy as np
 from PIL import Image
 import torch
-import transformers.utils.import_utils
-from transformers import (
-    AutoImageProcessor,
-    RobertaTokenizer,
-    TrOCRProcessor,
-    VisionEncoderDecoderModel,
-)
 
 from app.core.config import settings
 from app.inference.onnx_engine import ONNXEngine
 
 logger = logging.getLogger("SIH26187.ANPR")
 
-# Bypass torch version check for loading .bin models
-def _mock_check_torch_load_is_safe():
-    pass
-
-transformers.utils.import_utils.check_torch_load_is_safe = _mock_check_torch_load_is_safe
+# Attempt to import transformers — may fail if the regex DLL is blocked by Windows App Control
+_TRANSFORMERS_AVAILABLE = False
+try:
+    import transformers.utils.import_utils
+    from transformers import (
+        AutoImageProcessor,
+        RobertaTokenizer,
+        TrOCRProcessor,
+        VisionEncoderDecoderModel,
+    )
+    # Bypass torch version check for loading .bin models
+    def _mock_check_torch_load_is_safe():
+        pass
+    transformers.utils.import_utils.check_torch_load_is_safe = _mock_check_torch_load_is_safe
+    _TRANSFORMERS_AVAILABLE = True
+except Exception as _transformers_err:
+    logger.warning("transformers library unavailable (TrOCR disabled): %s", _transformers_err)
 
 # Vehicle class mapping in COCO
 VEHICLE_CLASSES: dict[int, str] = {
@@ -53,16 +58,8 @@ class TrOCRPlateReader:
 
     def __init__(self, model_name: str = "microsoft/trocr-base-printed") -> None:
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-        logger.info("Initializing TrOCRPlateReader on device: %s", self.device)
-
-        tokenizer = RobertaTokenizer.from_pretrained(model_name)
-        feature_extractor = AutoImageProcessor.from_pretrained(model_name)
-        self.processor = TrOCRProcessor(image_processor=feature_extractor, tokenizer=tokenizer)
-
-        self.model = VisionEncoderDecoderModel.from_pretrained(model_name)
-        self.model.to(self.device)
-        self.model.eval()
-        logger.info("TrOCRPlateReader successfully loaded on %s", self.device)
+        self.processor = None
+        self.model = None
 
         # Initialize GPU EasyOCR as primary scene-text plate recognizer
         try:
@@ -73,9 +70,27 @@ class TrOCRPlateReader:
             logger.warning("EasyOCR init exception: %s", exc)
             self.easyocr_reader = None
 
+        # TrOCR is secondary fallback — only load if transformers is available
+        if _TRANSFORMERS_AVAILABLE:
+            try:
+                logger.info("Initializing TrOCRPlateReader on device: %s", self.device)
+                tokenizer = RobertaTokenizer.from_pretrained(model_name)
+                feature_extractor = AutoImageProcessor.from_pretrained(model_name)
+                self.processor = TrOCRProcessor(image_processor=feature_extractor, tokenizer=tokenizer)
+                self.model = VisionEncoderDecoderModel.from_pretrained(model_name)
+                self.model.to(self.device)
+                self.model.eval()
+                logger.info("TrOCRPlateReader successfully loaded on %s", self.device)
+            except Exception as trocr_err:
+                logger.warning("TrOCR model load failed (will use EasyOCR only): %s", trocr_err)
+                self.processor = None
+                self.model = None
+        else:
+            logger.info("TrOCR disabled — transformers library not available. Using EasyOCR only.")
+
     def _predict_batch(self, imgs: list[np.ndarray]) -> list[str]:
-        if not imgs:
-            return []
+        if not imgs or self.model is None or self.processor is None:
+            return [""] * len(imgs)
         rgb_imgs = [Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB)) for img in imgs]
         pixel_values = self.processor(rgb_imgs, return_tensors="pt").pixel_values.to(self.device)
         with torch.no_grad():
@@ -200,7 +215,11 @@ class TrOCRPlateReader:
             if plate_str:
                 return plate_str
 
-            # Second pass: normalize size and apply adaptive CLAHE contrast enhancement for TrOCR
+            # Second pass: TrOCR ensemble (only if model is available)
+            if self.model is None or self.processor is None:
+                return ""
+
+            # Normalize size and apply adaptive CLAHE contrast enhancement for TrOCR
             scale = 80.0 / max(1, h)
             new_w = max(30, int(w * scale))
             enhanced = cv2.resize(plate_bgr, (new_w, 80), interpolation=cv2.INTER_CUBIC)

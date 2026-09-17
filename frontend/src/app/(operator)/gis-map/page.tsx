@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { BorderMap } from "@/components/map/BorderMap";
 import { RecentAlerts } from "@/components/dashboard/recentalerts";
-import { SystemStatus } from "@/components/dashboard/systemstatus";
 import { CameraFeedStrip } from "@/components/dashboard/camerafeedstrip";
 import {
   Map as MapIcon,
@@ -241,8 +240,7 @@ export default function GisMapPage() {
         </div>
       </div>
 
-      {/* System Status & Camera Feed Strip */}
-      <SystemStatus />
+      {/* Camera Feed Strip */}
       <CameraFeedStrip />
 
       {/* Suspect Multi-Camera Trajectory Modal */}
