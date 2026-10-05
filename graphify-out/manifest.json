@@ -300,9 +300,9 @@
     "semantic_hash": "d1283e7566e136247b268494a6a545eb"
   },
   "frontend/src/app/(operator)/alerts/page.tsx": {
-    "mtime": 1791204236.6101413,
-    "seen": 1791204365.5431032,
-    "ast_hash": "5cc367dd62d3e753ebee0ff6671edc4a",
+    "mtime": 1791204459.2688067,
+    "seen": 1791204655.1919744,
+    "ast_hash": "736a9c0c586756b625dc84361fd63cf0",
     "semantic_hash": ""
   },
   "frontend/src/app/(operator)/anpr/page.tsx": {
@@ -840,9 +840,9 @@
     "semantic_hash": ""
   },
   "frontend/src/components/alerts/TacticalThreatToast.tsx": {
-    "mtime": 1791203647.7803442,
-    "seen": 1791203750.7445736,
-    "ast_hash": "0257c660c14d10ccb7e0661bba17d0bf",
+    "mtime": 1791204459.2715275,
+    "seen": 1791204655.191998,
+    "ast_hash": "7cc3a12aa6324964a2c76829235947bf",
     "semantic_hash": ""
   },
   "frontend/src/components/map/SuspectTrajectoryModal.tsx": {
@@ -1596,9 +1596,9 @@
     "semantic_hash": ""
   },
   "backend/app/pipeline/geofence_engine.py": {
-    "mtime": 1791204255.66338,
-    "seen": 1791204365.542973,
-    "ast_hash": "2cb84f4ee0a3af1c7d4dc0ef30fc353d",
+    "mtime": 1791204459.2688067,
+    "seen": 1791204655.1918974,
+    "ast_hash": "16f8c438d6b5ac20d9d15120135f1085",
     "semantic_hash": ""
   },
   "backend/tests/test_geofence_engine.py": {
