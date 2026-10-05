@@ -76,6 +76,15 @@ export default function AnprPage() {
   const [interceptionSearch, setInterceptionSearch] = useState<string>("");
 
   const streamViewportRef = useRef<HTMLDivElement>(null);
+  // Ref to the MJPEG <img> element — belt-and-suspenders conn abort on unmount
+  const streamImgRef = useRef<HTMLImageElement>(null);
+  // Stable session ID for this page mount — used to signal the backend to stop
+  // inference when the user navigates away (sent via DELETE /api/anpr/stream/stop)
+  const sessionIdRef = useRef<string>(
+    typeof crypto !== "undefined" && crypto.randomUUID
+      ? crypto.randomUUID()
+      : Math.random().toString(36).slice(2)
+  );
 
   // Fullscreen Change Listener
   useEffect(() => {
@@ -84,6 +93,28 @@ export default function AnprPage() {
     };
     document.addEventListener("fullscreenchange", handleFsChange);
     return () => document.removeEventListener("fullscreenchange", handleFsChange);
+  }, []);
+
+  // ── Reliable Stream Teardown on Unmount ─────────────────────────────────────
+  // When the user navigates away we:
+  //  1. Call DELETE /api/anpr/stream/stop?session_id=X with keepalive:true so the
+  //     request completes even if the page is being unloaded.  The backend generator
+  //     exits its while-True loop within one frame interval (~40 ms).
+  //  2. Clear the img src as belt-and-suspenders to close the HTTP connection.
+  useEffect(() => {
+    const sid = sessionIdRef.current;
+    return () => {
+      // Signal backend to stop inference for this session
+      fetch(
+        `${BACKEND_BASE_URL}/api/anpr/stream/stop?session_id=${encodeURIComponent(sid)}`,
+        { method: "DELETE", keepalive: true }
+      ).catch(() => {});
+
+      // Belt-and-suspenders: also clear the img src
+      if (streamImgRef.current) {
+        streamImgRef.current.src = "";
+      }
+    };
   }, []);
 
   // Image Upload State
@@ -112,7 +143,7 @@ export default function AnprPage() {
   // Copied Plate Toast
   const [copiedPlate, setCopiedPlate] = useState<string | null>(null);
 
-  // Load Records & Watchlist on Mount
+  // Load Records & Watchlist on Mount — poll every 4 s; cancel on unmount
   useEffect(() => {
     fetchWatchlist();
     fetchRecords();
@@ -838,9 +869,10 @@ export default function AnprPage() {
                   {isStreamPlaying ? (
                     <img
                       key={`stream-${streamKey}-${activeStreamUrl}`}
+                      ref={streamImgRef}
                       src={`${BACKEND_BASE_URL}/api/anpr/stream?rtsp_url=${encodeURIComponent(
                         activeStreamUrl
-                      )}&camera_id=${encodeURIComponent(activeCameraId)}&fps=${streamFps}`}
+                      )}&camera_id=${encodeURIComponent(activeCameraId)}&fps=${streamFps}&session_id=${encodeURIComponent(sessionIdRef.current)}`}
                       alt="ANPR Live Stream"
                       className="w-full h-full object-contain"
                     />

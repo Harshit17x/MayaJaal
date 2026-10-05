@@ -38,17 +38,26 @@ import {
   ScanFace,
   UploadCloud,
   Trash2,
+  Car,
 } from "lucide-react";
 
 /** Build the backend MJPEG stream URL (proxied Next.js → FastAPI). */
-function buildStreamUrl(rtspUrl: string, drawDetections = false, enableFaceBiometrics = true): string {
+function buildStreamUrl(
+  rtspUrl: string,
+  drawDetections = false,
+  enableFaceBiometrics = true,
+  enableVehicleDetector = false,
+  sessionId?: string
+): string {
   const params = new URLSearchParams({
     rtsp_url: rtspUrl,
     draw_detections: String(drawDetections),
     enable_face_recognition: String(enableFaceBiometrics),
+    enable_vehicle_detection: String(enableVehicleDetector),
     fps: "20",
     _t: String(Date.now()),
   });
+  if (sessionId) params.set("session_id", sessionId);
   return `/api/backend/stream/live?${params.toString()}`;
 }
 
@@ -83,6 +92,7 @@ export function LiveWorkspace() {
   const [detectedResolvedUrl, setDetectedResolvedUrl] = useState<string | null>(null);
   const [drawDetectionsOnStream, setDrawDetectionsOnStream] = useState<boolean>(false);
   const [enableFaceBiometrics, setEnableFaceBiometrics] = useState<boolean>(true);
+  const [enableVehicleDetector, setEnableVehicleDetector] = useState<boolean>(false);
   const [selectedCamera, setSelectedCamera] = useState<CameraType | null>(null);
   const [activeMjpegSrc, setActiveMjpegSrc] = useState<string | null>(null);
 
@@ -127,6 +137,13 @@ export function LiveWorkspace() {
   const imageRef = useRef<HTMLImageElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamImgRef = useRef<HTMLImageElement>(null);
+  // Stable session ID for this component mount — uniquely identifies the live
+  // stream connection so the backend can stop inference when we navigate away.
+  const sessionIdRef = useRef<string>(
+    typeof crypto !== "undefined" && crypto.randomUUID
+      ? crypto.randomUUID()
+      : Math.random().toString(36).slice(2)
+  );
 
   // Set default model when models list updates (prioritize 'best')
   useEffect(() => {
@@ -148,15 +165,40 @@ export function LiveWorkspace() {
     }
   }, [sourceMode]);
 
-  // Rebuild stream URL when AI overlay or Face Biometrics toggle changes while stream is live
+  // ── Reliable Stream Teardown on Unmount ───────────────────────────────────
+  // When the user navigates away from Live Surveillance:
+  //  1. Call DELETE /api/backend/stream/live/stop?session_id=X with keepalive:true
+  //     so the request completes even during page navigation.  The backend
+  //     generator exits within one frame interval (~40 ms), freeing GPU/CPU.
+  //  2. Clear img.src as belt-and-suspenders to close the HTTP connection.
+  useEffect(() => {
+    const sid = sessionIdRef.current;
+    return () => {
+      fetch(
+        `/api/backend/stream/live/stop?session_id=${encodeURIComponent(sid)}`,
+        { method: "DELETE", keepalive: true }
+      ).catch(() => {});
+      if (streamImgRef.current) {
+        streamImgRef.current.src = "";
+      }
+    };
+  }, []);
+
+  // Rebuild stream URL when AI overlay, Face Biometrics, or Vehicle Detector toggle changes while stream is live
   useEffect(() => {
     if (isStreamActive && rtspUrl) {
-      const src = buildStreamUrl(rtspUrl, drawDetectionsOnStream, enableFaceBiometrics);
+      const src = buildStreamUrl(
+        rtspUrl,
+        drawDetectionsOnStream,
+        enableFaceBiometrics,
+        enableVehicleDetector,
+        sessionIdRef.current
+      );
       setActiveMjpegSrc(src);
       setStreamKey((k) => k + 1);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [drawDetectionsOnStream, enableFaceBiometrics]);
+  }, [drawDetectionsOnStream, enableFaceBiometrics, enableVehicleDetector]);
 
   // Camera grid click → populate RTSP URL + auto-connect
   const handleCameraSelect = useCallback(
@@ -167,7 +209,13 @@ export function LiveWorkspace() {
       setRtspInputValue(url);
       setSourceMode("rtsp");
       if (url) {
-        const src = buildStreamUrl(url, drawDetectionsOnStream, enableFaceBiometrics);
+        const src = buildStreamUrl(
+          url,
+          drawDetectionsOnStream,
+          enableFaceBiometrics,
+          enableVehicleDetector,
+          sessionIdRef.current
+        );
         setActiveMjpegSrc(src);
         setIsStreamActive(true);
         setStreamError(false);
@@ -177,7 +225,7 @@ export function LiveWorkspace() {
         setStreamKey((k) => k + 1);
       }
     },
-    [drawDetectionsOnStream, enableFaceBiometrics]
+    [drawDetectionsOnStream, enableFaceBiometrics, enableVehicleDetector]
   );
 
   const handleConnectStream = useCallback(async (customUrl?: string) => {
@@ -202,7 +250,13 @@ export function LiveWorkspace() {
         setRtspUrl(rawUrl);
         setRtspInputValue(rawUrl);
         setStreamError(false);
-        const src = buildStreamUrl(rawUrl, drawDetectionsOnStream, enableFaceBiometrics);
+        const src = buildStreamUrl(
+          rawUrl,
+          drawDetectionsOnStream,
+          enableFaceBiometrics,
+          enableVehicleDetector,
+          sessionIdRef.current
+        );
         setActiveMjpegSrc(src);
         setIsStreamActive(true);
         setStreamKey((k) => k + 1);
@@ -216,7 +270,13 @@ export function LiveWorkspace() {
         setStatusMessage(validation.message);
         setStreamDiagnostics(validation.message);
         // Start standby stream so tactical overlay with diagnostic text is displayed
-        const src = buildStreamUrl(rawUrl, drawDetectionsOnStream, enableFaceBiometrics);
+        const src = buildStreamUrl(
+          rawUrl,
+          drawDetectionsOnStream,
+          enableFaceBiometrics,
+          enableVehicleDetector,
+          sessionIdRef.current
+        );
         setActiveMjpegSrc(src);
         setIsStreamActive(true);
         setStreamKey((k) => k + 1);
@@ -225,7 +285,13 @@ export function LiveWorkspace() {
       const msg = err instanceof Error ? err.message : "Validation failed";
       setRtspUrl(rawUrl);
       setRtspInputValue(rawUrl);
-      const src = buildStreamUrl(rawUrl, drawDetectionsOnStream, enableFaceBiometrics);
+      const src = buildStreamUrl(
+        rawUrl,
+        drawDetectionsOnStream,
+        enableFaceBiometrics,
+        enableVehicleDetector,
+        sessionIdRef.current
+      );
       setActiveMjpegSrc(src);
       setIsStreamActive(true);
       setStreamKey((k) => k + 1);
@@ -234,7 +300,7 @@ export function LiveWorkspace() {
     } finally {
       setIsValidatingStream(false);
     }
-  }, [rtspInputValue, drawDetectionsOnStream, enableFaceBiometrics]);
+  }, [rtspInputValue, drawDetectionsOnStream, enableFaceBiometrics, enableVehicleDetector]);
 
   const handleDisconnectStream = useCallback(() => {
     setIsStreamActive(false);
@@ -1066,6 +1132,20 @@ export function LiveWorkspace() {
                   <span className="flex items-center gap-1 text-emerald-800 font-semibold">
                     <ScanFace className="w-3.5 h-3.5 text-emerald-600" />
                     Face Biometrics
+                  </span>
+                </label>
+
+                {/* Vehicle detector overlay toggle */}
+                <label className="flex items-center gap-1.5 cursor-pointer select-none text-xs font-semibold text-slate-700 ml-1 border-l border-slate-200 pl-2.5" title="Overlay real-time vehicle and transport detection (vehicle_detector.onnx)">
+                  <input
+                    type="checkbox"
+                    checked={enableVehicleDetector}
+                    onChange={(e) => setEnableVehicleDetector(e.target.checked)}
+                    className="accent-amber-600 w-3.5 h-3.5 cursor-pointer"
+                  />
+                  <span className="flex items-center gap-1 text-amber-800 font-semibold">
+                    <Car className="w-3.5 h-3.5 text-amber-600" />
+                    Vehicle Detector
                   </span>
                 </label>
               </div>

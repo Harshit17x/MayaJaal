@@ -5,8 +5,10 @@ from datetime import datetime
 import logging
 import os
 from pathlib import Path
+import threading
 import time
 from typing import Generator, Optional
+import uuid
 
 import cv2
 from fastapi import APIRouter, Query, Response
@@ -24,6 +26,14 @@ router = APIRouter(
     tags=["Stream"],
 )
 
+# ── Session-based stream stop registry ────────────────────────────────────────
+# Maps session_id → threading.Event.  Each live stream connection registers
+# here.  When the frontend navigates away it calls
+# DELETE /api/stream/live/stop?session_id=X, which sets the event and causes
+# the generator to exit its while-True loop within one frame interval (~40 ms),
+# freeing all GPU/CPU inference resources immediately.
+_live_stop_events: dict[str, threading.Event] = {}
+
 # Colors for bounding box classes (BGR)
 CLASS_COLORS = {
     "person": (0, 220, 100),         # Emerald
@@ -35,6 +45,9 @@ CLASS_COLORS = {
     "fire_smoke": (0, 140, 255),     # Deep Amber
     "car": (255, 200, 0),            # Yellow
     "vehicle": (255, 200, 0),        # Yellow
+    "motorcycle": (255, 160, 0),     # Amber
+    "bus": (255, 180, 20),           # Amber-Orange
+    "truck": (255, 140, 0),          # Orange
 }
 DEFAULT_COLOR = (0, 255, 180)
 
@@ -400,12 +413,18 @@ def stream_generator(
     fps_limit: int = 24,
     rotation: int = 0,
     enable_face_recognition: bool = False,
+    enable_vehicle_detection: bool = False,
     camera_id: Optional[str] = None,
     camera_name: Optional[str] = None,
+    stop_event: Optional[threading.Event] = None,
 ) -> Generator[bytes, None, None]:
     """
     Generator yielding multipart JPEG frames from RTSP or IP Webcam Pro stream.
     Gracefully falls back to tactical standby or demo stream when link is offline.
+
+    Args:
+        stop_event: Optional threading.Event. When set (via DELETE /api/stream/live/stop),
+                    the generator exits within one frame interval, stopping all inference.
     """
     frame_interval = 1.0 / max(1, min(fps_limit, 30))
     cap, conn_diag, resolved_url, protocol = open_video_source(rtsp_url)
@@ -448,6 +467,7 @@ def stream_generator(
 
     cached_detections: list[dict] = []
     cached_faces: list[dict] = []
+    cached_vehicles: list[dict] = []
     seen_track_reid: dict[int, tuple[str, bool, float]] = {}  # Cache local_track_id -> Re-ID
     recent_track_breaches: dict[int, tuple[str, str, float]] = {}  # track_id -> (name, type, timestamp)
     active_breach_name: Optional[str] = None
@@ -461,6 +481,14 @@ def stream_generator(
 
     try:
         while True:
+            # ── Client stop-signal check ──────────────────────────────────────
+            # The frontend calls DELETE /api/stream/live/stop?session_id=X when
+            # the user navigates away.  This exits the loop within one frame
+            # interval, stopping all YOLO / face-recognition inference.
+            if stop_event is not None and stop_event.is_set():
+                logger.info("Live stream: stop signal received, shutting down (%s)", rtsp_url)
+                break
+
             t_start = time.perf_counter()
 
             if cap is None or not cap.isOpened():
@@ -631,9 +659,22 @@ def stream_generator(
                     except Exception as exc:
                         logger.debug("Live stream face recognition exception: %s", exc)
 
+            # Stage 3: Vehicle Detection (YOLOv8s vehicle_detector.onnx)
+            if enable_vehicle_detection:
+                if frame_count % 4 == 1 or not cached_vehicles:
+                    try:
+                        from app.pipeline.anpr_service import anpr_pipeline
+                        cached_vehicles = anpr_pipeline.detect_vehicles(frame, conf_thresh=0.35)
+                    except Exception as exc:
+                        logger.debug("Live stream vehicle detection exception: %s", exc)
+
             # Draw AI Threat Boxes (from cached detections)
             if draw_detections and cached_detections:
                 draw_bounding_boxes(frame, cached_detections)
+
+            # Draw Vehicle Detection Overlays (from cached vehicles)
+            if enable_vehicle_detection and cached_vehicles:
+                draw_bounding_boxes(frame, cached_vehicles)
 
             # Draw Biometric Face Overlays (from cached faces)
             if enable_face_recognition and cached_faces:
@@ -643,11 +684,12 @@ def stream_generator(
                 except Exception as draw_exc:
                     logger.debug("Live stream face draw exception: %s", draw_exc)
 
+            total_det_count = len(cached_detections) + (len(cached_vehicles) if enable_vehicle_detection else 0)
             draw_tactical_hud(
                 frame,
                 rtsp_url=resolved_url,
                 fps=measured_fps,
-                detections_count=len(cached_detections),
+                detections_count=total_det_count,
                 is_live=not is_video_file,
                 protocol=protocol,
                 breach_label=active_breach_name if (time.time() - active_breach_time < 4.0) else None,
@@ -722,6 +764,28 @@ def validate_stream(
     }
 
 
+
+@router.delete("/live/stop")
+def stop_live_stream(
+    session_id: str = Query(..., description="Stream session ID to stop"),
+) -> dict:
+    """Signal the live surveillance stream generator to stop immediately.
+
+    The frontend calls this when the user navigates away from Live Surveillance.
+    The generator exits its while-True loop within one frame interval, stopping
+    all YOLO / face-recognition inference and releasing GPU resources.
+    """
+    event = _live_stop_events.pop(session_id, None)
+    if event is not None:
+        event.set()
+        logger.info("Live stream stop signal sent for session: %s", session_id)
+        return {"status": "stopping", "session_id": session_id}
+    logger.debug(
+        "Live stream stop: session %s not found (may have already ended)", session_id
+    )
+    return {"status": "not_found", "session_id": session_id}
+
+
 @router.get("/live")
 def get_live_stream(
     rtsp_url: str = Query(
@@ -752,6 +816,10 @@ def get_live_stream(
         False,
         description="Overlay real-time facial recognition and identity labels",
     ),
+    enable_vehicle_detection: bool = Query(
+        False,
+        description="Overlay real-time vehicle detection boxes and labels",
+    ),
     camera_id: Optional[str] = Query(
         None,
         description="Optional camera UUID / ID for multi-camera Re-ID tracking",
@@ -760,22 +828,38 @@ def get_live_stream(
         None,
         description="Optional friendly camera name (e.g. North Gate)",
     ),
+    session_id: Optional[str] = Query(
+        None,
+        description="Unique client session ID.  When provided, DELETE /api/stream/live/stop stops inference.",
+    ),
 ) -> StreamingResponse:
     """
     Stream live RTSP or IP Webcam CCTV camera feed as multipart/x-mixed-replace (MJPEG)
     for native, zero-plugin display in any web browser.
     """
+    sid = session_id or str(uuid.uuid4())
+    stop_event = threading.Event()
+    _live_stop_events[sid] = stop_event
+
+    def _gen_with_cleanup():
+        try:
+            yield from stream_generator(
+                rtsp_url=rtsp_url,
+                draw_detections=draw_detections,
+                conf_threshold=conf_threshold,
+                model_name=model_name,
+                fps_limit=fps,
+                enable_face_recognition=enable_face_recognition,
+                enable_vehicle_detection=enable_vehicle_detection,
+                camera_id=camera_id,
+                camera_name=camera_name,
+                stop_event=stop_event,
+            )
+        finally:
+            _live_stop_events.pop(sid, None)
+
     return StreamingResponse(
-        stream_generator(
-            rtsp_url=rtsp_url,
-            draw_detections=draw_detections,
-            conf_threshold=conf_threshold,
-            model_name=model_name,
-            fps_limit=fps,
-            enable_face_recognition=enable_face_recognition,
-            camera_id=camera_id,
-            camera_name=camera_name,
-        ),
+        _gen_with_cleanup(),
         media_type="multipart/x-mixed-replace; boundary=frame",
         headers={
             "Cache-Control": "no-cache, no-store, must-revalidate, max-age=0",

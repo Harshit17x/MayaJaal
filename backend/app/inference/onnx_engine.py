@@ -357,6 +357,16 @@ class ONNXEngine:
             if self._use_cuda:
                 io_binding = self.session.io_binding()
 
+                # Guard against CUDA error 700 (illegal memory access):
+                # OrtValue.ortvalue_from_numpy reads raw buffer pointers, so
+                # the array MUST be C-contiguous and the correct dtype (float32).
+                # Non-contiguous arrays (from slicing/transposing) or float64
+                # arrays will cause cudaMemcpy(HostToDevice) to access invalid
+                # memory addresses.
+                expected_dtype = np.float32
+                if not input_data.flags["C_CONTIGUOUS"] or input_data.dtype != expected_dtype:
+                    input_data = np.ascontiguousarray(input_data, dtype=expected_dtype)
+
                 # Bind input: place tensor directly on CUDA device
                 input_ortvalue = ort.OrtValue.ortvalue_from_numpy(
                     input_data, device_type="cuda", device_id=0
