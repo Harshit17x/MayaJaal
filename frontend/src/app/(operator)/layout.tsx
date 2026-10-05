@@ -41,6 +41,73 @@ interface NavItem {
   badgeColor?: string;
 }
 
+function HeaderClock() {
+  const [timestamp, setTimestamp] = useState<{ date: string; time: string }>({
+    date: "09 Sep 2026",
+    time: "10:24:00",
+  });
+
+  useEffect(() => {
+    const updateTime = () => {
+      const now = new Date();
+      const date = now.toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        timeZone: "Asia/Kolkata",
+      });
+      const time = now.toLocaleTimeString("en-GB", {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false,
+        timeZone: "Asia/Kolkata",
+      });
+      setTimestamp((prev) => {
+        if (prev.date === date && prev.time === time) return prev;
+        return { date, time };
+      });
+    };
+
+    updateTime();
+    const interval = setInterval(updateTime, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div
+      className="hidden md:flex flex-col text-xs font-mono text-slate-500 flex-shrink-0"
+      suppressHydrationWarning
+    >
+      <span suppressHydrationWarning>{timestamp.date}</span>
+      <span className="text-[10px] text-slate-400" suppressHydrationWarning>
+        {timestamp.time} IST
+      </span>
+    </div>
+  );
+}
+
+function DutyShiftCountdown({ expiresAt }: { expiresAt?: string }) {
+  const [shiftRemaining, setShiftRemaining] = useState<string>("");
+
+  useEffect(() => {
+    if (!expiresAt) return;
+    const updateShift = () => {
+      const rem = getRemainingShiftTime(expiresAt);
+      setShiftRemaining((prev) => (prev === rem.formatted ? prev : rem.formatted));
+    };
+    updateShift();
+    const interval = setInterval(updateShift, 1000);
+    return () => clearInterval(interval);
+  }, [expiresAt]);
+
+  return (
+    <span className="font-mono text-[11px] font-bold text-emerald-900">
+      {shiftRemaining || "Active"}
+    </span>
+  );
+}
+
 export default function OperatorLayout({
   children,
 }: {
@@ -52,15 +119,7 @@ export default function OperatorLayout({
   const { unacknowledgedCount } = useAlerts();
   const [searchQuery, setSearchQuery] = useState("");
   const [showProfileMenu, setShowProfileMenu] = useState(false);
-  const [shiftRemaining, setShiftRemaining] = useState<string>("");
   const profileMenuRef = useRef<HTMLDivElement | null>(null);
-  const [currentTimestamp, setCurrentTimestamp] = useState<{
-    date: string;
-    time: string;
-  }>({
-    date: "09 Sep 2026",
-    time: "10:24:00",
-  });
 
   // Client-side authentication guard: immediately redirect unauthenticated users
   useEffect(() => {
@@ -69,24 +128,21 @@ export default function OperatorLayout({
     }
   }, [isLoading, isAuthenticated, pathname, router]);
 
-  // Periodic duty shift timer and auto-expiration monitor
+  // Periodic duty shift session expiration monitor (runs every 10s without forced layout re-renders)
   useEffect(() => {
     if (!operator) return;
 
-    const updateShift = () => {
+    const checkExpiry = () => {
       if (isSessionExpired(operator)) {
         logout();
         router.replace(
           `/login?reason=expired&redirect=${encodeURIComponent(pathname)}`
         );
-        return;
       }
-      const rem = getRemainingShiftTime(operator.expiresAt);
-      setShiftRemaining((prev) => (prev === rem.formatted ? prev : rem.formatted));
     };
 
-    updateShift();
-    const interval = setInterval(updateShift, 1000);
+    checkExpiry();
+    const interval = setInterval(checkExpiry, 10000);
     return () => clearInterval(interval);
   }, [operator?.badgeNumber, operator?.expiresAt, logout, pathname, router]);
 
@@ -145,38 +201,40 @@ export default function OperatorLayout({
     }
     leaveTimeoutRef.current = setTimeout(() => {
       setIsHovered(false);
-    }, 150);
+    }, 250);
   };
 
   // Whether the sidebar is currently showing its expanded view
   const isExpanded = sidebarMode === "pinned" || isHovered;
 
-  useEffect(() => {
-    const updateTime = () => {
-      const now = new Date();
-      const date = now.toLocaleDateString("en-GB", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-        timeZone: "Asia/Kolkata",
-      });
-      const time = now.toLocaleTimeString("en-GB", {
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-        hour12: false,
-        timeZone: "Asia/Kolkata",
-      });
-      setCurrentTimestamp((prev) => {
-        if (prev.date === date && prev.time === time) return prev;
-        return { date, time };
-      });
-    };
+  // Robust navigation handler with instant hover-collapse and new-tab support
+  const handleNavClick = (
+    e: React.MouseEvent<HTMLAnchorElement>,
+    href: string
+  ) => {
+    // Preserve standard browser behavior for special clicks (Ctrl/Cmd/Shift/Alt/middle-click)
+    if (e.ctrlKey || e.metaKey || e.shiftKey || e.altKey || e.button !== 0) {
+      return;
+    }
 
-    updateTime();
-    const interval = setInterval(updateTime, 1000);
-    return () => clearInterval(interval);
-  }, []);
+    e.preventDefault();
+
+    // Immediately dismiss floating hover menu so operator gets instant feedback
+    if (sidebarMode !== "pinned") {
+      if (leaveTimeoutRef.current) {
+        clearTimeout(leaveTimeoutRef.current);
+        leaveTimeoutRef.current = null;
+      }
+      setIsHovered(false);
+    }
+
+    // Skip redundant push if already on the target path
+    if (pathname === href || (href === "/dashboard" && pathname === "/")) {
+      return;
+    }
+
+    router.push(href);
+  };
 
   const mainNavItems: NavItem[] = [
     {
@@ -303,8 +361,14 @@ export default function OperatorLayout({
       {/* Subtle backdrop overlay when expanded in floating hover mode */}
       {sidebarMode !== "pinned" && isExpanded && (
         <div
-          onClick={() => setIsHovered(false)}
-          className="fixed inset-0 bg-slate-900/20 backdrop-blur-[0.5px] z-30 transition-opacity duration-300"
+          onClick={() => {
+            if (leaveTimeoutRef.current) {
+              clearTimeout(leaveTimeoutRef.current);
+              leaveTimeoutRef.current = null;
+            }
+            setIsHovered(false);
+          }}
+          className="fixed inset-0 bg-slate-900/20 backdrop-blur-[0.5px] z-30 transition-opacity duration-300 cursor-pointer"
         />
       )}
 
@@ -327,7 +391,8 @@ export default function OperatorLayout({
           <div className="flex items-center justify-between gap-2">
             <Link
               href="/dashboard"
-              className="flex items-center gap-3 group min-w-0"
+              onClick={(e) => handleNavClick(e, "/dashboard")}
+              className="flex items-center gap-3 group min-w-0 cursor-pointer"
               title="MAATRIX - Border Video Analytics"
             >
               {/* Official MAATRIX Brand Emblem */}
@@ -419,52 +484,45 @@ export default function OperatorLayout({
                 <Link
                   key={item.href}
                   href={item.href}
+                  onClick={(e) => handleNavClick(e, item.href)}
                   title={!isExpanded ? item.label : undefined}
-                  className={`flex items-center rounded-xl text-xs font-semibold transition-all relative group ${
-                    isExpanded
-                      ? "px-3.5 py-2.5 justify-between"
-                      : "w-11 h-11 mx-auto justify-center"
-                  } ${
+                  className={`w-full h-11 flex items-center rounded-xl text-xs font-semibold relative select-none cursor-pointer transition-colors active:scale-[0.98] px-3 ${
                     isActive
                       ? "bg-[#d5e6db] text-[#123621] font-bold shadow-2xs border border-[#b8d1c1]"
                       : "text-[#2e543d] hover:bg-[#e0ede4] hover:text-[#123621]"
                   }`}
                 >
-                  <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-5 h-5 flex items-center justify-center flex-shrink-0 pointer-events-none">
                     <Icon
-                      className={`flex-shrink-0 transition-colors ${
-                        isExpanded ? "w-4 h-4" : "w-5 h-5"
-                      } ${
+                      className={`w-5 h-5 flex-shrink-0 pointer-events-none transition-colors ${
                         isActive
                           ? "text-[#18492d]"
                           : "text-[#3d654f] group-hover:text-[#18492d]"
                       }`}
                     />
-                    {isExpanded && (
-                      <span className="truncate whitespace-nowrap animate-in fade-in duration-150">
-                        {item.label}
-                      </span>
-                    )}
                   </div>
 
-                  {item.badge !== undefined &&
-                    (isExpanded ? (
-                      <span
-                        className={`px-2 py-0.5 text-[10px] font-bold rounded-full flex-shrink-0 ${
-                          item.badgeColor || "bg-[#1e4b38] text-white"
-                        }`}
-                      >
-                        {item.badge}
-                      </span>
-                    ) : (
-                      <span
-                        className={`absolute -top-1 -right-1 flex h-4 min-w-4 px-1 items-center justify-center text-[9px] font-bold rounded-full ring-2 ring-[#edf3ef] ${
-                          item.badgeColor || "bg-rose-600 text-white"
-                        }`}
-                      >
-                        {item.badge}
-                      </span>
-                    ))}
+                  <span
+                    className={`ml-3 text-xs font-semibold truncate whitespace-nowrap pointer-events-none transition-all duration-200 ${
+                      isExpanded
+                        ? "opacity-100 translate-x-0 max-w-[130px]"
+                        : "opacity-0 -translate-x-2 max-w-0 overflow-hidden"
+                    }`}
+                  >
+                    {item.label}
+                  </span>
+
+                  {item.badge !== undefined && (
+                    <span
+                      className={`pointer-events-none transition-all duration-200 ${
+                        isExpanded
+                          ? "ml-auto px-2 py-0.5 text-[10px] font-bold rounded-full flex-shrink-0"
+                          : "absolute top-1.5 right-2 flex h-4 min-w-4 px-1 items-center justify-center text-[9px] font-bold rounded-full ring-2 ring-[#edf3ef]"
+                      } ${item.badgeColor || "bg-[#1e4b38] text-white"}`}
+                    >
+                      {item.badge}
+                    </span>
+                  )}
                 </Link>
               );
             })}
@@ -488,31 +546,33 @@ export default function OperatorLayout({
                   <Link
                     key={item.href}
                     href={item.href}
+                    onClick={(e) => handleNavClick(e, item.href)}
                     title={!isExpanded ? item.label : undefined}
-                    className={`flex items-center rounded-xl text-xs font-semibold transition-all relative group ${
-                      isExpanded
-                        ? "px-3.5 py-2.5 gap-3"
-                        : "w-11 h-11 mx-auto justify-center"
-                    } ${
+                    className={`w-full h-11 flex items-center rounded-xl text-xs font-semibold relative select-none cursor-pointer transition-colors active:scale-[0.98] px-3 ${
                       isActive
                         ? "bg-[#d5e6db] text-[#123621] font-bold shadow-2xs border border-[#b8d1c1]"
                         : "text-[#2e543d] hover:bg-[#e0ede4] hover:text-[#123621]"
                     }`}
                   >
-                    <Icon
-                      className={`flex-shrink-0 transition-colors ${
-                        isExpanded ? "w-4 h-4" : "w-5 h-5"
-                      } ${
-                        isActive
-                          ? "text-[#18492d]"
-                          : "text-[#3d654f] group-hover:text-[#18492d]"
+                    <div className="w-5 h-5 flex items-center justify-center flex-shrink-0 pointer-events-none">
+                      <Icon
+                        className={`w-5 h-5 flex-shrink-0 pointer-events-none transition-colors ${
+                          isActive
+                            ? "text-[#18492d]"
+                            : "text-[#3d654f] group-hover:text-[#18492d]"
+                        }`}
+                      />
+                    </div>
+
+                    <span
+                      className={`ml-3 text-xs font-semibold truncate whitespace-nowrap pointer-events-none transition-all duration-200 ${
+                        isExpanded
+                          ? "opacity-100 translate-x-0 max-w-[130px]"
+                          : "opacity-0 -translate-x-2 max-w-0 overflow-hidden"
                       }`}
-                    />
-                    {isExpanded && (
-                      <span className="truncate whitespace-nowrap animate-in fade-in duration-150">
-                        {item.label}
-                      </span>
-                    )}
+                    >
+                      {item.label}
+                    </span>
                   </Link>
                 );
               })}
@@ -585,15 +645,7 @@ export default function OperatorLayout({
             <div className="hidden md:block w-px h-4 bg-slate-200 flex-shrink-0" />
 
             {/* Time Stamp */}
-            <div
-              className="hidden md:flex flex-col text-xs font-mono text-slate-500 flex-shrink-0"
-              suppressHydrationWarning
-            >
-              <span suppressHydrationWarning>{currentTimestamp.date}</span>
-              <span className="text-[10px] text-slate-400" suppressHydrationWarning>
-                {currentTimestamp.time} IST
-              </span>
-            </div>
+            <HeaderClock />
 
           </div>
 
@@ -702,9 +754,7 @@ export default function OperatorLayout({
                       <Clock className="w-3.5 h-3.5 text-emerald-700" />
                       <span className="text-[11px] font-medium">Duty Shift:</span>
                     </div>
-                    <span className="font-mono text-[11px] font-bold text-emerald-900">
-                      {shiftRemaining || "Active"}
-                    </span>
+                    <DutyShiftCountdown expiresAt={operator?.expiresAt} />
                   </div>
 
                   {/* Quick Tactical Session Actions */}

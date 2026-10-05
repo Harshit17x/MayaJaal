@@ -4,32 +4,38 @@ import logging
 import os
 from pathlib import Path
 import re
+import threading
 import time
 import uuid
-from typing import Any, Generator
+from typing import Any, Generator, Optional
 
 import cv2
 import numpy as np
 from PIL import Image
 import torch
-import transformers.utils.import_utils
-from transformers import (
-    AutoImageProcessor,
-    RobertaTokenizer,
-    TrOCRProcessor,
-    VisionEncoderDecoderModel,
-)
 
 from app.core.config import settings
 from app.inference.onnx_engine import ONNXEngine
 
 logger = logging.getLogger("SIH26187.ANPR")
 
-# Bypass torch version check for loading .bin models
-def _mock_check_torch_load_is_safe():
-    pass
-
-transformers.utils.import_utils.check_torch_load_is_safe = _mock_check_torch_load_is_safe
+# Attempt to import transformers — may fail if the regex DLL is blocked by Windows App Control
+_TRANSFORMERS_AVAILABLE = False
+try:
+    import transformers.utils.import_utils
+    from transformers import (
+        AutoImageProcessor,
+        RobertaTokenizer,
+        TrOCRProcessor,
+        VisionEncoderDecoderModel,
+    )
+    # Bypass torch version check for loading .bin models
+    def _mock_check_torch_load_is_safe():
+        pass
+    transformers.utils.import_utils.check_torch_load_is_safe = _mock_check_torch_load_is_safe
+    _TRANSFORMERS_AVAILABLE = True
+except Exception as _transformers_err:
+    logger.warning("transformers library unavailable (TrOCR disabled): %s", _transformers_err)
 
 # Vehicle class mapping in COCO
 VEHICLE_CLASSES: dict[int, str] = {
@@ -53,16 +59,8 @@ class TrOCRPlateReader:
 
     def __init__(self, model_name: str = "microsoft/trocr-base-printed") -> None:
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-        logger.info("Initializing TrOCRPlateReader on device: %s", self.device)
-
-        tokenizer = RobertaTokenizer.from_pretrained(model_name)
-        feature_extractor = AutoImageProcessor.from_pretrained(model_name)
-        self.processor = TrOCRProcessor(image_processor=feature_extractor, tokenizer=tokenizer)
-
-        self.model = VisionEncoderDecoderModel.from_pretrained(model_name)
-        self.model.to(self.device)
-        self.model.eval()
-        logger.info("TrOCRPlateReader successfully loaded on %s", self.device)
+        self.processor = None
+        self.model = None
 
         # Initialize GPU EasyOCR as primary scene-text plate recognizer
         try:
@@ -73,9 +71,27 @@ class TrOCRPlateReader:
             logger.warning("EasyOCR init exception: %s", exc)
             self.easyocr_reader = None
 
+        # TrOCR is secondary fallback — only load if transformers is available
+        if _TRANSFORMERS_AVAILABLE:
+            try:
+                logger.info("Initializing TrOCRPlateReader on device: %s", self.device)
+                tokenizer = RobertaTokenizer.from_pretrained(model_name)
+                feature_extractor = AutoImageProcessor.from_pretrained(model_name)
+                self.processor = TrOCRProcessor(image_processor=feature_extractor, tokenizer=tokenizer)
+                self.model = VisionEncoderDecoderModel.from_pretrained(model_name)
+                self.model.to(self.device)
+                self.model.eval()
+                logger.info("TrOCRPlateReader successfully loaded on %s", self.device)
+            except Exception as trocr_err:
+                logger.warning("TrOCR model load failed (will use EasyOCR only): %s", trocr_err)
+                self.processor = None
+                self.model = None
+        else:
+            logger.info("TrOCR disabled — transformers library not available. Using EasyOCR only.")
+
     def _predict_batch(self, imgs: list[np.ndarray]) -> list[str]:
-        if not imgs:
-            return []
+        if not imgs or self.model is None or self.processor is None:
+            return [""] * len(imgs)
         rgb_imgs = [Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB)) for img in imgs]
         pixel_values = self.processor(rgb_imgs, return_tensors="pt").pixel_values.to(self.device)
         with torch.no_grad():
@@ -200,7 +216,11 @@ class TrOCRPlateReader:
             if plate_str:
                 return plate_str
 
-            # Second pass: normalize size and apply adaptive CLAHE contrast enhancement for TrOCR
+            # Second pass: TrOCR ensemble (only if model is available)
+            if self.model is None or self.processor is None:
+                return ""
+
+            # Normalize size and apply adaptive CLAHE contrast enhancement for TrOCR
             scale = 80.0 / max(1, h)
             new_w = max(30, int(w * scale))
             enhanced = cv2.resize(plate_bgr, (new_w, 80), interpolation=cv2.INTER_CUBIC)
@@ -286,13 +306,19 @@ class ANPRPipeline:
     def _initialize_engines(self) -> None:
         try:
             if self.vehicle_model_path.exists():
-                self.vehicle_engine = ONNXEngine(self.vehicle_model_path)
+                self.vehicle_engine = ONNXEngine(
+                    self.vehicle_model_path,
+                    gpu_mem_limit_gb=settings.gpu_mem_limit_gb or None,
+                )
                 logger.info("ANPR: Vehicle detector ONNX engine initialized.")
             else:
                 logger.warning("ANPR: vehicle_detector.onnx not found at %s", self.vehicle_model_path)
 
             if self.plate_model_path.exists():
-                self.plate_engine = ONNXEngine(self.plate_model_path)
+                self.plate_engine = ONNXEngine(
+                    self.plate_model_path,
+                    gpu_mem_limit_gb=settings.gpu_mem_limit_gb or None,
+                )
                 logger.info("ANPR: Plate detector ONNX engine initialized.")
             else:
                 logger.warning("ANPR: anpr_plate.onnx not found at %s", self.plate_model_path)
@@ -997,8 +1023,15 @@ class ANPRPipeline:
         camera_id: str = "STREAM-ANPR",
         fps_limit: int = 24,
         ocr_stride: int = 10,
+        stop_event: Optional[threading.Event] = None,
     ) -> Generator[bytes, None, None]:
-        """Generator yielding MJPEG multipart stream with real-time ANPR overlays (EasyOCR every 10th frame)."""
+        """Generator yielding MJPEG multipart stream with real-time ANPR overlays.
+
+        Args:
+            stop_event: Optional threading.Event. When set, the generator exits on
+                        the next loop iteration — used for reliable teardown when
+                        the client navigates away.
+        """
         from app.api.stream import create_standby_frame, open_video_source
 
         frame_interval = 1.0 / max(1, min(fps_limit, 30))
@@ -1017,6 +1050,14 @@ class ANPRPipeline:
 
         try:
             while True:
+                # ── Client stop-signal check ──────────────────────────────────
+                # The frontend calls DELETE /api/anpr/stream/stop?session_id=X
+                # when navigating away.  This is checked before every frame so
+                # the loop exits within one frame interval (~40 ms).
+                if stop_event is not None and stop_event.is_set():
+                    logger.info("ANPR stream: stop signal received, shutting down (%s)", stream_url)
+                    break
+
                 t_start = time.perf_counter()
 
                 if cap is None or not cap.isOpened():
@@ -1097,9 +1138,13 @@ class ANPRPipeline:
                 sleep_time = frame_interval - (time.perf_counter() - t_start)
                 if sleep_time > 0:
                     time.sleep(sleep_time)
+        except GeneratorExit:
+            # Client navigated away / closed the stream tab — stop inference cleanly
+            logger.info("Client disconnected from ANPR stream: %s", stream_url)
         finally:
             if cap is not None:
                 cap.release()
+
 
 
 # Singleton ANPR Pipeline Instance

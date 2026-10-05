@@ -55,13 +55,19 @@ class ONNXEngine:
         model_path: str | Path,
         intra_op_threads: int = 2,
         inter_op_threads: int = 1,
+        gpu_mem_limit_gb: float | None = None,
     ) -> None:
+        # gpu_mem_limit_gb: VRAM cap per engine.
+        # None / 0 → read from settings (0 in settings = no hard cap).
+        resolved_limit = gpu_mem_limit_gb if gpu_mem_limit_gb is not None else getattr(settings, "gpu_mem_limit_gb", 0.0)
+        self.gpu_mem_limit_bytes: int | None = int(resolved_limit * 1024 ** 3) if resolved_limit > 0 else None
         self.model_path = Path(model_path)
 
         self.intra_op_threads = max(1, intra_op_threads)
         self.inter_op_threads = max(1, inter_op_threads)
 
         self.session: ort.InferenceSession | None = None
+        self._use_cuda: bool = False  # set after session creation
         self.metadata: dict[str, str] = {}
         self.class_labels: list[str] | None = None
         self.input_size: tuple[int, int] | None = None
@@ -92,18 +98,40 @@ class ONNXEngine:
                 f"ONNX model is empty: {self.model_path}"
             )
 
-    def _get_execution_providers(self) -> list[str]:
-        """Detect and return preferred execution providers (GPU / CPU)."""
+    def _get_execution_providers(self) -> list:
+        """Detect and return preferred execution providers with tuned options.
+
+        Returns a list of (provider_name, options_dict) tuples so that
+        CUDAExecutionProvider uses the arena allocator, best cuDNN conv algo,
+        and a configurable VRAM cap.
+        """
         available = ort.get_available_providers()
         requested_device = getattr(settings, "device", "auto").lower().strip()
 
-        providers: list[str] = []
+        providers: list = []
 
         if requested_device in ("auto", "cuda", "gpu"):
             if "CUDAExecutionProvider" in available:
-                providers.append("CUDAExecutionProvider")
+                cuda_options: dict = {
+                    "device_id": 0,
+                    # kNextPowerOfTwo reduces allocator fragmentation on variable batch sizes
+                    "arena_extend_strategy": "kNextPowerOfTwo",
+                    # EXHAUSTIVE search finds the fastest cuDNN conv algorithm per shape
+                    "cudnn_conv_algo_search": "EXHAUSTIVE",
+                    # Run copies in the default CUDA stream to overlap with compute
+                    "do_copy_in_default_stream": True,
+                }
+                if self.gpu_mem_limit_bytes is not None:
+                    # Only set a hard cap when explicitly configured; otherwise
+                    # ORT uses all available VRAM (the desired behaviour on a 12 GB GPU).
+                    cuda_options["gpu_mem_limit"] = self.gpu_mem_limit_bytes
+                    _limit_log = f"{self.gpu_mem_limit_bytes / 1024 ** 3:.1f} GB"
+                else:
+                    _limit_log = "unlimited"
+                providers.append(("CUDAExecutionProvider", cuda_options))
                 logger.info(
-                    "CUDAExecutionProvider is available and selected for GPU acceleration."
+                    "CUDAExecutionProvider selected | gpu_mem_limit=%s | cudnn_conv_algo=EXHAUSTIVE",
+                    _limit_log,
                 )
             elif requested_device in ("cuda", "gpu"):
                 logger.warning(
@@ -111,25 +139,42 @@ class ONNXEngine:
                     available,
                 )
 
-        providers.append("CPUExecutionProvider")
+        providers.append(("CPUExecutionProvider", {}))
         return providers
 
     def _create_session(self) -> None:
-        """Create the ONNX Runtime session."""
+        """Create the ONNX Runtime session with all performance optimizations."""
 
         try:
             session_options = ort.SessionOptions()
 
-            # Enable graph optimizations.
+            # ── Graph optimizations ──────────────────────────────────────────
             session_options.graph_optimization_level = (
                 ort.GraphOptimizationLevel.ORT_ENABLE_ALL
             )
 
-            # CPU resource control.
+            # Persist the fused/optimized graph next to the model file so that
+            # subsequent restarts skip the optimization pass entirely.
+            optimized_path = self.model_path.with_suffix(".optimized.onnx")
+            session_options.optimized_model_filepath = str(optimized_path)
+
+            # ── Execution mode ───────────────────────────────────────────────
+            # ORT_PARALLEL allows independent graph nodes to run concurrently.
+            # Tune SIH_INTRA_OP_THREADS (= physical cores) and
+            # SIH_INTER_OP_THREADS via .env for best CPU throughput.
+            session_options.execution_mode = ort.ExecutionMode.ORT_PARALLEL
+
+            # ── CPU thread control ───────────────────────────────────────────
             session_options.intra_op_num_threads = self.intra_op_threads
             session_options.inter_op_num_threads = self.inter_op_threads
 
-            # Execution providers (prioritizes CUDA GPU if available)
+            # ── Memory optimizations ─────────────────────────────────────────
+            # Reuse memory allocations across inference calls to reduce GC pressure.
+            session_options.enable_mem_pattern = True
+            session_options.enable_mem_reuse = True
+            session_options.enable_cpu_mem_arena = True
+
+            # ── Execution providers (GPU preferred, CPU fallback) ─────────────
             providers = self._get_execution_providers()
 
             self.session = ort.InferenceSession(
@@ -139,15 +184,19 @@ class ONNXEngine:
             )
 
             active_providers = self.session.get_providers()
+            self._use_cuda = "CUDAExecutionProvider" in active_providers
 
             self._extract_metadata()
 
             logger.info(
-                "Loaded ONNX model: %s | Active providers: %s | Class labels: %s | Input size: %s",
+                "Loaded ONNX model: %s | Providers: %s | CUDA IO Binding: %s | "
+                "Class labels: %s | Input size: %s | Optimized graph: %s",
                 self.model_path.name,
                 active_providers,
+                self._use_cuda,
                 len(self.class_labels) if self.class_labels else "none",
                 self.input_size or "dynamic",
+                optimized_path.name,
             )
 
         except Exception as exc:
@@ -270,6 +319,10 @@ class ONNXEngine:
         """
         Run inference using a NumPy array.
 
+        When CUDAExecutionProvider is active, IO Binding is used to keep
+        tensors on-device and avoid redundant CPU<->GPU copies, which
+        significantly reduces latency on large batch inputs.
+
         Preprocessing is intentionally kept outside this class because
         Riyan's final ONNX models are not available yet.
         """
@@ -300,12 +353,44 @@ class ONNXEngine:
 
                 input_name = model_inputs[0].name
 
-            results = self.session.run(
-                None,
-                {input_name: input_data},
-            )
+            # ── GPU path: IO Binding avoids CPU<->GPU memcpy overhead ─────────
+            if self._use_cuda:
+                io_binding = self.session.io_binding()
 
-            return results
+                # Guard against CUDA error 700 (illegal memory access):
+                # OrtValue.ortvalue_from_numpy reads raw buffer pointers, so
+                # the array MUST be C-contiguous and the correct dtype (float32).
+                # Non-contiguous arrays (from slicing/transposing) or float64
+                # arrays will cause cudaMemcpy(HostToDevice) to access invalid
+                # memory addresses.
+                expected_dtype = np.float32
+                if not input_data.flags["C_CONTIGUOUS"] or input_data.dtype != expected_dtype:
+                    input_data = np.ascontiguousarray(input_data, dtype=expected_dtype)
+
+                # Bind input: place tensor directly on CUDA device
+                input_ortvalue = ort.OrtValue.ortvalue_from_numpy(
+                    input_data, device_type="cuda", device_id=0
+                )
+                io_binding.bind_input(
+                    name=input_name,
+                    device_type="cuda",
+                    device_id=0,
+                    element_type=input_data.dtype,
+                    shape=input_data.shape,
+                    buffer_ptr=input_ortvalue.data_ptr(),
+                )
+
+                # Bind all outputs on the CUDA device
+                for out_meta in self.session.get_outputs():
+                    io_binding.bind_output(out_meta.name, device_type="cuda")
+
+                self.session.run_with_iobinding(io_binding)
+
+                # Transfer outputs back to CPU NumPy arrays
+                return [ortval.numpy() for ortval in io_binding.get_outputs()]
+
+            # ── CPU path: standard run ────────────────────────────────────────
+            return self.session.run(None, {input_name: input_data})
 
         except ONNXInferenceError:
             raise
@@ -330,6 +415,12 @@ class ONNXEngine:
             "model_name": self.model_path.name,
             "model_path": str(self.model_path),
             "providers": self.session.get_providers(),
+            "cuda_io_binding": self._use_cuda,
+            "gpu_mem_limit_gb": (
+                round(self.gpu_mem_limit_bytes / 1024 ** 3, 2)
+                if self.gpu_mem_limit_bytes is not None
+                else "unlimited"
+            ),
             "inputs": self.get_inputs(),
             "outputs": self.get_outputs(),
             "class_labels": self.class_labels,

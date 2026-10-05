@@ -29,6 +29,13 @@ class Settings(BaseSettings):
     intra_op_threads: int = Field(default=2, ge=1)
     inter_op_threads: int = Field(default=1, ge=1)
 
+    # GPU memory cap per ONNX engine (0 = no hard cap, use all available VRAM)
+    gpu_mem_limit_gb: float = Field(
+        default=0.0,
+        ge=0.0,
+        description="Max VRAM (GB) each ONNX CUDA arena may allocate. 0 = unlimited.",
+    )
+
     # Inference concurrency
     max_concurrent_inference: int = Field(default=2, ge=1)
 
