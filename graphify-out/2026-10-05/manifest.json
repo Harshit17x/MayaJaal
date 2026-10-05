@@ -42,9 +42,9 @@
     "semantic_hash": ""
   },
   "backend/app/core/config.py": {
-    "mtime": 1789647057.17664,
-    "seen": 1791203750.7444394,
-    "ast_hash": "2f179c038331274ca3121c9f4b8941d3",
+    "mtime": 1789226038.9296672,
+    "seen": 1789232338.352173,
+    "ast_hash": "b57d4738d0db0e2b1715ab064b393525",
     "semantic_hash": ""
   },
   "backend/app/core/resource_manager.py": {
@@ -54,10 +54,10 @@
     "semantic_hash": ""
   },
   "backend/app/core/runtime.py": {
-    "mtime": 1789647057.1776884,
-    "seen": 1791203750.744444,
-    "ast_hash": "31788becf07d83fd030e547b8b485284",
-    "semantic_hash": ""
+    "mtime": 1788946168.7326102,
+    "seen": 1789026248.150041,
+    "ast_hash": "fc1210cf128bc2f54fc65e8c0ad439ad",
+    "semantic_hash": "fc1210cf128bc2f54fc65e8c0ad439ad"
   },
   "backend/app/data/cameras.json": {
     "mtime": 1789124601.8135533,
@@ -72,15 +72,15 @@
     "semantic_hash": ""
   },
   "backend/app/inference/model_manager.py": {
-    "mtime": 1789647057.1787326,
-    "seen": 1791203750.744458,
-    "ast_hash": "d3c4b84d8a28594f8358c0090f87bfa9",
-    "semantic_hash": ""
+    "mtime": 1788946168.7326102,
+    "seen": 1789026248.1500452,
+    "ast_hash": "3ae68257dd305be40f4a11391b409133",
+    "semantic_hash": "3ae68257dd305be40f4a11391b409133"
   },
   "backend/app/inference/onnx_engine.py": {
-    "mtime": 1789647057.1787326,
-    "seen": 1791203750.7444599,
-    "ast_hash": "9d9d5955c96d0d5c09b07867c84999f8",
+    "mtime": 1789585417.9338589,
+    "seen": 1789647054.5802052,
+    "ast_hash": "8967ad26997c9adf89b91397b5847427",
     "semantic_hash": ""
   },
   "backend/app/main.py": {
@@ -90,9 +90,9 @@
     "semantic_hash": ""
   },
   "backend/app/pipeline/anpr_service.py": {
-    "mtime": 1789647057.1787326,
-    "seen": 1791203750.7444654,
-    "ast_hash": "b2cf97cde460ace53b2cadff8fc7d8a9",
+    "mtime": 1789646958.8793797,
+    "seen": 1789647054.5802076,
+    "ast_hash": "0f9e327bc798328359ff1fbf2f0aeed0",
     "semantic_hash": ""
   },
   "backend/app/pipeline/image_loader.py": {
@@ -300,9 +300,9 @@
     "semantic_hash": "d1283e7566e136247b268494a6a545eb"
   },
   "frontend/src/app/(operator)/alerts/page.tsx": {
-    "mtime": 1791204236.6101413,
-    "seen": 1791204365.5431032,
-    "ast_hash": "5cc367dd62d3e753ebee0ff6671edc4a",
+    "mtime": 1789121484.9423156,
+    "seen": 1789121561.647253,
+    "ast_hash": "736a9c0c586756b625dc84361fd63cf0",
     "semantic_hash": ""
   },
   "frontend/src/app/(operator)/anpr/page.tsx": {
@@ -816,9 +816,9 @@
     "semantic_hash": ""
   },
   "backend/app/data/alerts.json": {
-    "mtime": 1791204279.1568778,
-    "seen": 1791204365.5429304,
-    "ast_hash": "09247e8cd059455506fcf9bc0fa6584f",
+    "mtime": 1789124601.7536235,
+    "seen": 1789135326.6007566,
+    "ast_hash": "cc1c5e9447e146c59d652fdebb7860f9",
     "semantic_hash": ""
   },
   "backend/app/pipeline/alert_service.py": {
@@ -840,9 +840,9 @@
     "semantic_hash": ""
   },
   "frontend/src/components/alerts/TacticalThreatToast.tsx": {
-    "mtime": 1791203647.7803442,
-    "seen": 1791203750.7445736,
-    "ast_hash": "0257c660c14d10ccb7e0661bba17d0bf",
+    "mtime": 1789117772.6026223,
+    "seen": 1789118047.8309686,
+    "ast_hash": "7cc3a12aa6324964a2c76829235947bf",
     "semantic_hash": ""
   },
   "frontend/src/components/map/SuspectTrajectoryModal.tsx": {
@@ -1596,9 +1596,9 @@
     "semantic_hash": ""
   },
   "backend/app/pipeline/geofence_engine.py": {
-    "mtime": 1791204255.66338,
-    "seen": 1791204365.542973,
-    "ast_hash": "2cb84f4ee0a3af1c7d4dc0ef30fc353d",
+    "mtime": 1789117649.442766,
+    "seen": 1789118047.8308642,
+    "ast_hash": "16f8c438d6b5ac20d9d15120135f1085",
     "semantic_hash": ""
   },
   "backend/tests/test_geofence_engine.py": {
