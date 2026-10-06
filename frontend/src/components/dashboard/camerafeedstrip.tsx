@@ -1,4 +1,4 @@
-import { Camera } from "lucide-react";
+import { CctvCameraIcon } from "@/components/icons/CctvCameraIcon";
 
 const cameras = [
   { id: "cam-1", name: "Camera 01", location: "North Perimeter" },
@@ -12,9 +12,12 @@ export function CameraFeedStrip() {
     <div className="bg-white rounded-xl border border-slate-200/80 shadow-xs p-5">
       {/* Title */}
       <div className="flex items-center justify-between mb-3.5">
-        <h2 className="text-base font-semibold text-slate-900">
-          Camera Feeds
-        </h2>
+        <div className="flex items-center gap-2">
+          <CctvCameraIcon className="w-4 h-4 text-emerald-700" />
+          <h2 className="text-base font-semibold text-slate-900">
+            Camera Feeds
+          </h2>
+        </div>
         <span className="text-xs font-mono text-slate-500">
           4 Feeds Connected
         </span>
@@ -29,7 +32,7 @@ export function CameraFeedStrip() {
           >
             {/* Dark Placeholder Video Canvas */}
             <div className="aspect-video relative flex flex-col items-center justify-center p-3 text-slate-600">
-              <Camera className="w-6 h-6 opacity-30 text-slate-400 mb-1" />
+              <CctvCameraIcon className="w-8 h-8 opacity-40 text-slate-400 mb-1 group-hover:opacity-75 group-hover:scale-105 transition-all" />
               <span className="text-[10px] tracking-wider uppercase font-mono text-slate-500">
                 Standby
               </span>

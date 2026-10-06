@@ -1,4 +1,5 @@
-import { Camera, AlertCircle } from "lucide-react";
+import { AlertCircle } from "lucide-react";
+import { CctvCameraIcon } from "@/components/icons/CctvCameraIcon";
 
 export function BorderMapPreview() {
   return (
@@ -46,7 +47,7 @@ export function BorderMapPreview() {
         {/* Marker 1: Camera 01 (Green) */}
         <div className="absolute top-[22%] left-[18%] -translate-x-1/2 -translate-y-1/2 flex flex-col items-center group cursor-pointer">
           <div className="w-7 h-7 rounded-full bg-emerald-500 text-slate-950 flex items-center justify-center shadow-lg shadow-emerald-500/30 border border-emerald-200">
-            <Camera className="w-3.5 h-3.5" />
+            <CctvCameraIcon className="w-4 h-4 text-slate-950" />
           </div>
           <span className="mt-1 text-[10px] font-mono text-emerald-200 bg-black/50 px-1.5 py-0.5 rounded-xs">
             CAM 01
@@ -56,7 +57,7 @@ export function BorderMapPreview() {
         {/* Marker 2: Camera 02 (Green) */}
         <div className="absolute top-[58%] left-[45%] -translate-x-1/2 -translate-y-1/2 flex flex-col items-center group cursor-pointer">
           <div className="w-7 h-7 rounded-full bg-emerald-500 text-slate-950 flex items-center justify-center shadow-lg shadow-emerald-500/30 border border-emerald-200">
-            <Camera className="w-3.5 h-3.5" />
+            <CctvCameraIcon className="w-4 h-4 text-slate-950" />
           </div>
           <span className="mt-1 text-[10px] font-mono text-emerald-200 bg-black/50 px-1.5 py-0.5 rounded-xs">
             CAM 02
@@ -66,7 +67,7 @@ export function BorderMapPreview() {
         {/* Marker 3: Camera 03 (Green) */}
         <div className="absolute top-[32%] right-[22%] -translate-x-1/2 -translate-y-1/2 flex flex-col items-center group cursor-pointer">
           <div className="w-7 h-7 rounded-full bg-emerald-500 text-slate-950 flex items-center justify-center shadow-lg shadow-emerald-500/30 border border-emerald-200">
-            <Camera className="w-3.5 h-3.5" />
+            <CctvCameraIcon className="w-4 h-4 text-slate-950" />
           </div>
           <span className="mt-1 text-[10px] font-mono text-emerald-200 bg-black/50 px-1.5 py-0.5 rounded-xs">
             CAM 03
@@ -93,7 +94,7 @@ export function BorderMapPreview() {
           Legend:
         </span>
         <div className="flex items-center gap-1.5">
-          <span className="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+          <CctvCameraIcon className="w-3 h-3 text-emerald-400" />
           <span>Camera Online</span>
         </div>
         <div className="flex items-center gap-1.5">

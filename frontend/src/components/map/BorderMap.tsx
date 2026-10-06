@@ -46,6 +46,7 @@ import {
   SuspectTrailAnimator,
   TrajectoryTelemetry,
 } from "./SuspectTrailOverlay";
+import { CCTV_CAMERA_SVG_PATH, CctvCameraIcon } from "@/components/icons/CctvCameraIcon";
 
 const GOOGLE_MAPS_KEY =
   process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ||
@@ -218,6 +219,7 @@ export function BorderMap({
   const [is3DMode, setIs3DMode] = useState<boolean>(false);
   const [showHeatmaps, setShowHeatmaps] = useState<boolean>(true);
   const [showFilters, setShowFilters] = useState<boolean>(true);
+  const [cameraMarkerStyle, setCameraMarkerStyle] = useState<"pin" | "cctv">("pin");
 
   // Virtual Geofences & Directional Tripwires layer state
   const [showGeofences, setShowGeofences] = useState<boolean>(true);
@@ -779,11 +781,11 @@ export function BorderMap({
       const pinTipY = 68;
       const pinCenterY = 32;
 
-      // Compound SVG: Radial Ground Heatmap + Realistic Shadow + 3D Elevated Pin with Camera Symbol
+      // Compound SVG: Radial Ground Heatmap + Realistic Shadow + Tactical CCTV Camera Node / Pin
       const markerSvg = `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(`
         <svg xmlns="http://www.w3.org/2000/svg" width="${svgW}" height="${svgH}" viewBox="0 0 ${svgW} ${svgH}">
           <defs>
-            <!-- Radial Ground Heatmap Gradient (Matching Reference Screenshot) -->
+            <!-- Radial Ground Heatmap Gradient -->
             <radialGradient id="heat-${cam.id}" cx="50%" cy="50%" r="50%">
               <stop offset="0%" stop-color="${color.heatCenter}" stop-opacity="${showHeatmaps ? "0.95" : "0"}" />
               <stop offset="45%" stop-color="${color.heatMid}" stop-opacity="${showHeatmaps ? "0.75" : "0"}" />
@@ -807,7 +809,7 @@ export function BorderMap({
           ${showHeatmaps ? `<ellipse cx="${cx}" cy="${groundY}" rx="${isSelected ? "36" : "32"}" ry="${isSelected ? "13" : "11"}" fill="url(#heat-${cam.id})" />` : ""}
 
           <!-- 2. Realistic Ground Shadow under pin contact point -->
-          <ellipse cx="${cx}" cy="${groundY}" rx="12" ry="4" fill="rgba(0,0,0,0.55)" />
+          <ellipse cx="${cx}" cy="${groundY}" rx="${cameraMarkerStyle === "cctv" ? "15" : "12"}" ry="4" fill="rgba(0,0,0,0.55)" />
 
           <!-- 3. Pulsing Alert Ring for Threats -->
           ${
@@ -816,29 +818,46 @@ export function BorderMap({
               : ""
           }
 
-          <!-- 4. Elevated 3D Teardrop Pin Body -->
-          <g filter="url(#shadow-${cam.id})">
-            <path d="M ${cx} ${pinTipY} 
-                     C ${cx - 6} ${pinTipY - 8}, ${cx - 18} ${pinCenterY + 12}, ${cx - 18} ${pinCenterY} 
-                     A 18 18 0 1 1 ${cx + 18} ${pinCenterY} 
-                     C ${cx + 18} ${pinCenterY + 12}, ${cx + 6} ${pinTipY - 8}, ${cx} ${pinTipY} Z" 
-                  fill="url(#pinGrad-${cam.id})" 
-                  stroke="#ffffff" 
-                  stroke-width="${isSelected ? "2.6" : "1.8"}" />
+          ${
+            cameraMarkerStyle === "cctv"
+              ? `<!-- 4. Tactical CCTV Camera Node (Direct User Reference Image) -->
+                 <g filter="url(#shadow-${cam.id})">
+                   <!-- Mounting mast to ground -->
+                   <line x1="${cx}" y1="${groundY}" x2="${cx}" y2="39" stroke="#0f172a" stroke-width="3" stroke-linecap="round" />
+                   <line x1="${cx}" y1="${groundY}" x2="${cx}" y2="39" stroke="${color.pinTop}" stroke-width="1.2" stroke-linecap="round" />
 
-            <!-- White Inner Circular Lens Badge -->
-            <circle cx="${cx}" cy="${pinCenterY}" r="10.5" fill="#ffffff" />
-            <circle cx="${cx}" cy="${pinCenterY}" r="9.2" fill="${color.pinTop}" fill-opacity="0.12" stroke="${color.pinTop}" stroke-width="0.7" />
+                   <!-- Circular Housing Pod with Status Halo -->
+                   <circle cx="${cx}" cy="29" r="18" fill="#0f172a" stroke="${color.pinTop}" stroke-width="${isSelected ? "3" : "2"}" />
+                   <circle cx="${cx}" cy="29" r="15.5" fill="#ffffff" />
 
-            <!-- CAMERA SYMBOL INSIDE PIN (Replacing Cars) -->
-            <g transform="translate(${cx - 7.5}, ${pinCenterY - 7.5}) scale(0.75)">
-              <path d="M16 5h-3.2l-1.5-2H6.7L5.2 5H2C0.9 5 0 5.9 0 7v9c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2z" fill="${color.pinBottom}" />
-              <circle cx="9" cy="11.5" r="3.6" fill="#ffffff" />
-              <circle cx="9" cy="11.5" r="2.2" fill="${color.pinBottom}" />
-              <!-- Lens reflection glint -->
-              <circle cx="8.1" cy="10.6" r="0.9" fill="#ffffff" />
-            </g>
-          </g>
+                   <!-- CCTV Camera Silhouette from User Reference -->
+                   <g transform="translate(${cx}, 29) scale(0.024) translate(-420, -378)">
+                     <path d="${CCTV_CAMERA_SVG_PATH}" fill="${color.pinBottom}" fill-rule="evenodd" />
+                   </g>
+
+                   <!-- Active Status LED -->
+                   <circle cx="${cx + 12}" cy="17" r="3.8" fill="${color.pinTop}" stroke="#ffffff" stroke-width="1.2" />
+                 </g>`
+              : `<!-- 4. Elevated 3D Teardrop Pin Body with CCTV Camera Badge -->
+                 <g filter="url(#shadow-${cam.id})">
+                   <path d="M ${cx} ${pinTipY} 
+                            C ${cx - 6} ${pinTipY - 8}, ${cx - 18} ${pinCenterY + 12}, ${cx - 18} ${pinCenterY} 
+                            A 18 18 0 1 1 ${cx + 18} ${pinCenterY} 
+                            C ${cx + 18} ${pinCenterY + 12}, ${cx + 6} ${pinTipY - 8}, ${cx} ${pinTipY} Z" 
+                         fill="url(#pinGrad-${cam.id})" 
+                         stroke="#ffffff" 
+                         stroke-width="${isSelected ? "2.6" : "1.8"}" />
+
+                   <!-- White Inner Circular Lens Badge -->
+                   <circle cx="${cx}" cy="${pinCenterY}" r="11" fill="#ffffff" />
+                   <circle cx="${cx}" cy="${pinCenterY}" r="10" fill="${color.pinTop}" fill-opacity="0.10" stroke="${color.pinTop}" stroke-width="0.8" />
+
+                   <!-- CCTV CAMERA SYMBOL INSIDE PIN (User Reference) -->
+                   <g transform="translate(${cx}, ${pinCenterY}) scale(0.0195) translate(-420, -378)">
+                     <path d="${CCTV_CAMERA_SVG_PATH}" fill="${color.pinBottom}" fill-rule="evenodd" />
+                   </g>
+                 </g>`
+          }
         </svg>
       `)}`;
 
@@ -861,7 +880,7 @@ export function BorderMap({
 
       markersRef.current.push(marker);
     });
-  }, [filteredCameras, inspectedCamera, propSelectedCameraId, showHeatmaps, getCameraVisuals, isLoaded]);
+  }, [filteredCameras, inspectedCamera, propSelectedCameraId, showHeatmaps, cameraMarkerStyle, getCameraVisuals, isLoaded]);
 
   // Sync MapType when parent prop changes
   useEffect(() => {
@@ -1702,6 +1721,24 @@ export function BorderMap({
                 <span>{isTrailActive ? "Trail Active" : "Suspect Trail"}</span>
               </button>
 
+              {/* CCTV Camera Marker Style Toggle */}
+              <button
+                type="button"
+                onClick={() => {
+                  setCameraMarkerStyle((prev) => (prev === "pin" ? "cctv" : "pin"));
+                  showToast(cameraMarkerStyle === "pin" ? "Tactical CCTV Camera Icons Active" : "3D Pin Camera View Active");
+                }}
+                className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                  cameraMarkerStyle === "cctv"
+                    ? "bg-[#1e4b38] text-white shadow-xs"
+                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+                }`}
+                title="Switch Camera Node Visual Style (Tactical CCTV / Pins)"
+              >
+                <CctvCameraIcon className="w-3.5 h-3.5 text-current" />
+                <span>{cameraMarkerStyle === "cctv" ? "CCTV Nodes" : "Pins"}</span>
+              </button>
+
               {/* Reset View */}
               <button
                 type="button"
@@ -1748,6 +1785,23 @@ export function BorderMap({
                       }
                       className="rounded accent-emerald-700 cursor-pointer"
                     />
+                    <CctvCameraIcon
+                      className={`w-3.5 h-3.5 shrink-0 ${
+                        typeKey.includes("Alert")
+                          ? "text-rose-600"
+                          : typeKey.includes("Offline")
+                          ? "text-slate-400"
+                          : typeKey.includes("Thermal")
+                          ? "text-cyan-600"
+                          : typeKey.includes("PTZ")
+                          ? "text-amber-600"
+                          : typeKey.includes("Night")
+                          ? "text-indigo-600"
+                          : typeKey.includes("Panoramic")
+                          ? "text-emerald-700"
+                          : "text-emerald-600"
+                      }`}
+                    />
                     <span className="truncate">{typeKey}</span>
                   </label>
                 ))}
@@ -1759,28 +1813,29 @@ export function BorderMap({
         {/* BOTTOM RIGHT: Map Legend Card (Exact Match to User Reference Screenshot) */}
         {showFilters && (
           <div className="absolute bottom-6 right-4 z-30 bg-white/95 backdrop-blur-md rounded-2xl border border-slate-200/90 p-3 shadow-xl text-slate-800 max-w-[200px] w-full pointer-events-auto select-none animate-in fade-in slide-in-from-bottom-3">
-            <div className="text-xs font-black text-slate-900 border-b border-slate-100 pb-1.5 mb-2">
-              Map Legend
+            <div className="text-xs font-black text-slate-900 border-b border-slate-100 pb-1.5 mb-2 flex items-center gap-1.5">
+              <CctvCameraIcon className="w-3.5 h-3.5 text-emerald-800" />
+              <span>Map Legend</span>
             </div>
             <div className="space-y-1.5 text-xs font-medium">
               <div className="flex items-center gap-2">
-                <span className="w-3 h-3 rounded-full bg-[#16a34a] shrink-0 shadow-xs" />
+                <CctvCameraIcon className="w-3.5 h-3.5 text-[#16a34a] shrink-0" />
                 <span>Optical 4K Online</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="w-3 h-3 rounded-full bg-[#f59e0b] shrink-0 shadow-xs" />
+                <CctvCameraIcon className="w-3.5 h-3.5 text-[#f59e0b] shrink-0" />
                 <span>PTZ 360 Turret</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="w-3 h-3 rounded-full bg-[#0ea5e9] shrink-0 shadow-xs" />
+                <CctvCameraIcon className="w-3.5 h-3.5 text-[#0ea5e9] shrink-0" />
                 <span>Thermal / ANPR</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="w-3 h-3 rounded-full bg-[#ef4444] shrink-0 animate-pulse shadow-xs" />
+                <CctvCameraIcon className="w-3.5 h-3.5 text-[#ef4444] shrink-0 animate-pulse" />
                 <span>Threat Alert</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="w-3 h-3 rounded-full bg-[#64748b] shrink-0 shadow-xs" />
+                <CctvCameraIcon className="w-3.5 h-3.5 text-[#64748b] shrink-0" />
                 <span>Offline / Degraded</span>
               </div>
               <div className="flex items-center gap-2 pt-1 border-t border-slate-100">
@@ -1800,36 +1855,52 @@ export function BorderMap({
           <div className="absolute top-4 left-4 bottom-4 z-40 w-full max-w-sm bg-white/95 text-slate-900 backdrop-blur-xl rounded-2xl border border-slate-200/90 shadow-[0_16px_40px_rgba(0,0,0,0.15)] p-4 flex flex-col justify-between overflow-hidden animate-in fade-in slide-in-from-left-4 duration-300 pointer-events-auto">
             {/* Header */}
             <div className="flex items-start justify-between gap-3 border-b border-slate-100 pb-3 shrink-0">
-              <div>
-                <div className="flex items-center gap-2">
-                  <span
-                    className={`w-2 h-2 rounded-full ${
-                      inspectedCamera.status === "alert" || inspectedAlert
-                        ? "bg-red-500 animate-pulse"
-                        : inspectedCamera.status === "degraded"
-                        ? "bg-amber-400"
-                        : inspectedCamera.status === "offline"
-                        ? "bg-slate-400"
-                        : "bg-emerald-500"
-                    }`}
-                  />
-                  {inspectedCamera.status === "alert" || inspectedAlert ? (
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-red-700 bg-red-50 border border-red-200 px-2 py-0.5 rounded-full font-mono flex items-center gap-1">
-                      <ShieldAlert className="w-3 h-3 text-red-600" />
-                      Threat Detected
-                    </span>
-                  ) : (
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#1b5032] bg-[#edf3ef] border border-[#c4ded0] px-2 py-0.5 rounded-full font-mono">
-                      {inspectedCamera.type || "Optical 4K"}
-                    </span>
-                  )}
+              <div className="flex items-start gap-2.5">
+                <div
+                  className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border shadow-xs ${
+                    inspectedCamera.status === "alert" || inspectedAlert
+                      ? "bg-rose-50 border-rose-200 text-rose-600"
+                      : inspectedCamera.status === "degraded"
+                      ? "bg-amber-50 border-amber-200 text-amber-600"
+                      : inspectedCamera.status === "offline"
+                      ? "bg-slate-100 border-slate-200 text-slate-500"
+                      : "bg-emerald-50 border-emerald-200 text-emerald-700"
+                  }`}
+                >
+                  <CctvCameraIcon className="w-5 h-5" />
                 </div>
-                <h3 className="text-sm sm:text-base font-extrabold text-slate-900 mt-1">
-                  {inspectedCamera.name}
-                </h3>
-                <p className="text-[11px] text-slate-500 font-medium">
-                  {inspectedCamera.sector} • {inspectedCamera.location}
-                </p>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={`w-2 h-2 rounded-full ${
+                        inspectedCamera.status === "alert" || inspectedAlert
+                          ? "bg-red-500 animate-pulse"
+                          : inspectedCamera.status === "degraded"
+                          ? "bg-amber-400"
+                          : inspectedCamera.status === "offline"
+                          ? "bg-slate-400"
+                          : "bg-emerald-500"
+                      }`}
+                    />
+                    {inspectedCamera.status === "alert" || inspectedAlert ? (
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-red-700 bg-red-50 border border-red-200 px-2 py-0.5 rounded-full font-mono flex items-center gap-1">
+                        <ShieldAlert className="w-3 h-3 text-red-600" />
+                        Threat Detected
+                      </span>
+                    ) : (
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-[#1b5032] bg-[#edf3ef] border border-[#c4ded0] px-2 py-0.5 rounded-full font-mono flex items-center gap-1">
+                        <CctvCameraIcon className="w-2.5 h-2.5" />
+                        {inspectedCamera.type || "Optical 4K"}
+                      </span>
+                    )}
+                  </div>
+                  <h3 className="text-sm sm:text-base font-extrabold text-slate-900 mt-1">
+                    {inspectedCamera.name}
+                  </h3>
+                  <p className="text-[11px] text-slate-500 font-medium">
+                    {inspectedCamera.sector} • {inspectedCamera.location}
+                  </p>
+                </div>
               </div>
 
               <button
@@ -1903,7 +1974,7 @@ export function BorderMap({
                     </div>
 
                     <div className="absolute bottom-2 left-2 flex items-center gap-1.5 bg-black/80 backdrop-blur-xs px-2 py-0.5 rounded-md border border-white/10 text-[9px] font-mono text-slate-300">
-                      <Camera className="w-3 h-3 text-red-400" />
+                      <CctvCameraIcon className="w-3 h-3 text-red-400" />
                       <span>INTERCEPT SNAPSHOT</span>
                       {inspectedAlert?.confidence && (
                         <span className="text-emerald-400 font-bold ml-1">
@@ -2119,14 +2190,14 @@ export function BorderMap({
         <div className="px-4 py-2.5 bg-slate-50 border-t border-slate-200/80 flex flex-wrap items-center justify-between text-xs text-slate-600 gap-3">
           <div className="flex flex-wrap items-center gap-4">
             <div className="flex items-center gap-1.5 font-medium">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-600 inline-block shadow-xs" />
+              <CctvCameraIcon className="w-3.5 h-3.5 text-emerald-600 inline-block shrink-0" />
               <span suppressHydrationWarning>
                 {filteredCameras.filter((c) => c.status === "online").length} Online Nodes
               </span>
             </div>
 
             <div className="flex items-center gap-1.5 font-medium">
-              <span className="w-2.5 h-2.5 rounded-full bg-rose-600 inline-block shadow-xs" />
+              <CctvCameraIcon className="w-3.5 h-3.5 text-rose-600 inline-block shrink-0 animate-pulse" />
               <span suppressHydrationWarning>
                 {filteredCameras.filter((c) => c.status === "alert").length} Active Threat Alerts
               </span>

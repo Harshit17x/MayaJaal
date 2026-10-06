@@ -19,6 +19,7 @@ import { useAlerts } from "@/lib/alertsStore";
 import { SuspectTrajectoryModal } from "@/components/map/SuspectTrajectoryModal";
 import { api } from "@/lib/api";
 import { GlobalTraceItem } from "@/types/alert";
+import { CctvCameraIcon } from "@/components/icons/CctvCameraIcon";
 
 export default function GisMapPage() {
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -142,16 +143,24 @@ export default function GisMapPage() {
                               </span>
                             )}
                           </div>
-                          <p className="text-[10px] text-slate-500 font-mono mt-0.5">
+                          <p className="text-[10px] text-slate-500 font-mono mt-0.5 flex items-center gap-1">
                             {t.suspect_name ? (
                               <span className="text-rose-700 font-semibold">{t.suspect_name}</span>
                             ) : (
-                              `${t.total_sightings} sightings • ${t.unique_cameras_count} camera(s)`
+                              <>
+                                <span>{t.total_sightings} sightings</span>
+                                <span>•</span>
+                                <span className="inline-flex items-center gap-0.5">
+                                  <CctvCameraIcon className="w-2.5 h-2.5 text-cyan-700" />
+                                  {t.unique_cameras_count} camera(s)
+                                </span>
+                              </>
                             )}
                           </p>
                         </div>
-                        <span className="text-[10px] font-mono font-medium text-slate-600 truncate max-w-[100px] text-right bg-slate-100 px-1.5 py-0.5 rounded">
-                          {t.last_camera_name}
+                        <span className="text-[10px] font-mono font-medium text-slate-600 truncate max-w-[110px] text-right bg-slate-100 px-1.5 py-0.5 rounded flex items-center gap-1 shrink-0">
+                          <CctvCameraIcon className="w-2.5 h-2.5 text-slate-500 shrink-0" />
+                          <span className="truncate">{t.last_camera_name}</span>
                         </span>
                       </button>
                     ))}
