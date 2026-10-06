@@ -97,34 +97,39 @@ export default function SettingsPage() {
       </div>
 
       {/* Autonomous Continuous Multi-Feed Suspect Scanner Banner & Control */}
-      <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white rounded-xl p-5 shadow-sm border border-slate-700 space-y-4">
+      <div className="bg-white rounded-2xl border border-slate-200/90 p-6 shadow-xs space-y-5">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className="flex items-center gap-3.5">
             <div
-              className={`w-11 h-11 rounded-lg flex items-center justify-center border ${
+              className={`w-11 h-11 rounded-xl flex items-center justify-center border transition-colors ${
                 scannerStatus?.running
-                  ? "bg-emerald-500/20 border-emerald-500/50 text-emerald-400"
-                  : "bg-slate-800 border-slate-700 text-slate-400"
+                  ? "bg-emerald-50 border-emerald-200 text-emerald-700 shadow-xs"
+                  : "bg-slate-100 border-slate-200 text-slate-500"
               }`}
             >
               <Radio className={`w-5 h-5 ${scannerStatus?.running ? "animate-spin" : ""}`} />
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <span className="text-base font-semibold tracking-wide">
+              <div className="flex items-center gap-2.5">
+                <span className="text-base font-bold text-slate-900 tracking-tight">
                   Continuous Multi-Feed Suspect Scanner
                 </span>
                 <span
-                  className={`px-2 py-0.5 rounded text-[10px] font-bold tracking-wider uppercase ${
+                  className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase border transition-colors ${
                     scannerStatus?.running
-                      ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
-                      : "bg-slate-700 text-slate-300 border border-slate-600"
+                      ? "bg-[#eaf4ed] text-[#1b5032] border-[#c4ded0]"
+                      : "bg-slate-100 text-slate-600 border-slate-200"
                   }`}
                 >
+                  <span
+                    className={`w-1.5 h-1.5 rounded-full ${
+                      scannerStatus?.running ? "bg-emerald-600 animate-pulse" : "bg-slate-400"
+                    }`}
+                  />
                   {scannerStatus?.running ? "ACTIVE DAEMON" : "PAUSED"}
                 </span>
               </div>
-              <p className="text-xs text-slate-300 font-mono mt-1">
+              <p className="text-xs text-slate-500 mt-1 font-medium">
                 {scannerStatus?.running
                   ? `Scanning ${scannerStatus.worker_count} active feeds • ${scannerStatus.total_scans} checks • ${scannerStatus.suspect_detections} suspect matches`
                   : "Scanner is idle. Start scanner to continuously monitor feeds against enrolled suspects."}
@@ -136,10 +141,10 @@ export default function SettingsPage() {
             <button
               onClick={handleToggleScanner}
               disabled={scannerToggling}
-              className={`px-4 py-2.5 rounded-lg text-xs font-semibold flex items-center gap-2 transition-all shadow-sm cursor-pointer ${
+              className={`px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 transition-all shadow-xs cursor-pointer active:scale-[0.98] ${
                 scannerStatus?.running
                   ? "bg-rose-600 hover:bg-rose-700 text-white"
-                  : "bg-emerald-600 hover:bg-emerald-700 text-white"
+                  : "bg-[#1e4b38] hover:bg-[#163a2b] text-white"
               } disabled:opacity-50`}
             >
               {scannerToggling ? (
@@ -161,50 +166,50 @@ export default function SettingsPage() {
         </div>
 
         {errorMessage && (
-          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-rose-950/60 border border-rose-800 text-rose-300 text-xs">
-            <AlertCircle className="w-4 h-4 shrink-0" />
+          <div className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium">
+            <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
             <span>{errorMessage}</span>
           </div>
         )}
 
         {/* Telemetry Breakdown Details */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3 border-t border-slate-700/60 text-xs">
-          <div className="bg-slate-800/60 border border-slate-700/60 rounded-lg p-2.5">
-            <div className="text-slate-400 text-[11px] font-medium flex items-center gap-1.5 mb-1">
-              <Camera className="w-3 h-3 text-slate-400" />
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 border-t border-slate-100 text-xs">
+          <div className="bg-[#f8faf9] border border-[#e2e8e5] rounded-xl p-3.5 hover:border-[#c4ded0] transition-colors">
+            <div className="text-slate-500 text-[11px] font-semibold flex items-center gap-1.5 mb-1.5">
+              <Camera className="w-3.5 h-3.5 text-[#1e4b38]" />
               Active Feed Workers
             </div>
-            <div className="font-semibold text-white font-mono text-sm">
+            <div className="font-bold text-slate-900 font-mono text-base">
               {scannerStatus?.worker_count ?? 0} Feeds
             </div>
           </div>
 
-          <div className="bg-slate-800/60 border border-slate-700/60 rounded-lg p-2.5">
-            <div className="text-slate-400 text-[11px] font-medium flex items-center gap-1.5 mb-1">
-              <Activity className="w-3 h-3 text-slate-400" />
+          <div className="bg-[#f8faf9] border border-[#e2e8e5] rounded-xl p-3.5 hover:border-[#c4ded0] transition-colors">
+            <div className="text-slate-500 text-[11px] font-semibold flex items-center gap-1.5 mb-1.5">
+              <Activity className="w-3.5 h-3.5 text-blue-600" />
               Total Scans
             </div>
-            <div className="font-semibold text-white font-mono text-sm">
+            <div className="font-bold text-slate-900 font-mono text-base">
               {scannerStatus?.total_scans ?? 0} Cycles
             </div>
           </div>
 
-          <div className="bg-slate-800/60 border border-slate-700/60 rounded-lg p-2.5">
-            <div className="text-slate-400 text-[11px] font-medium flex items-center gap-1.5 mb-1">
-              <ShieldCheck className="w-3 h-3 text-emerald-400" />
+          <div className="bg-[#f8faf9] border border-[#e2e8e5] rounded-xl p-3.5 hover:border-[#c4ded0] transition-colors">
+            <div className="text-slate-500 text-[11px] font-semibold flex items-center gap-1.5 mb-1.5">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
               Suspect Detections
             </div>
-            <div className="font-semibold text-white font-mono text-sm">
+            <div className="font-bold text-slate-900 font-mono text-base">
               {scannerStatus?.suspect_detections ?? 0} Hits
             </div>
           </div>
 
-          <div className="bg-slate-800/60 border border-slate-700/60 rounded-lg p-2.5">
-            <div className="text-slate-400 text-[11px] font-medium flex items-center gap-1.5 mb-1">
-              <Clock className="w-3 h-3 text-slate-400" />
+          <div className="bg-[#f8faf9] border border-[#e2e8e5] rounded-xl p-3.5 hover:border-[#c4ded0] transition-colors">
+            <div className="text-slate-500 text-[11px] font-semibold flex items-center gap-1.5 mb-1.5">
+              <Clock className="w-3.5 h-3.5 text-amber-600" />
               Scan Cadence
             </div>
-            <div className="font-semibold text-white font-mono text-sm">
+            <div className="font-bold text-slate-900 font-mono text-base">
               {scannerStatus?.sampling_interval_sec ?? 2.0}s / {scannerStatus?.debounce_cooldown_sec ?? 30}s
             </div>
           </div>
@@ -212,15 +217,15 @@ export default function SettingsPage() {
 
         {/* Monitored Camera List if Available */}
         {scannerStatus?.active_camera_ids && scannerStatus.active_camera_ids.length > 0 && (
-          <div className="pt-2 flex flex-wrap items-center gap-1.5 text-xs">
-            <span className="text-slate-400 text-[11px] font-medium mr-1 flex items-center gap-1">
-              <Layers className="w-3 h-3 text-slate-400" />
+          <div className="pt-2 flex flex-wrap items-center gap-2 text-xs">
+            <span className="text-slate-500 text-[11px] font-semibold mr-1 flex items-center gap-1.5">
+              <Layers className="w-3.5 h-3.5 text-slate-400" />
               Monitored Cameras:
             </span>
             {scannerStatus.active_camera_ids.map((camId) => (
               <span
                 key={camId}
-                className="px-2 py-0.5 rounded bg-slate-800 border border-slate-700 text-emerald-300 font-mono text-[11px]"
+                className="px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-200/80 text-[#1b5032] font-mono text-[11px] font-semibold shadow-2xs"
               >
                 {camId}
               </span>
