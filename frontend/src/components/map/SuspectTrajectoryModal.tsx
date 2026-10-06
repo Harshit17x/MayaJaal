@@ -14,8 +14,8 @@ import {
   Radio,
   ArrowDown,
   Check,
-  Camera,
 } from "lucide-react";
+import { CctvCameraIcon } from "@/components/icons/CctvCameraIcon";
 
 interface SuspectTrajectoryModalProps {
   suspectName: string;
@@ -215,8 +215,8 @@ export function SuspectTrajectoryModal({
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2">
-                            <span className="font-mono text-[11px] font-bold text-emerald-800 flex items-center gap-1">
-                              <Camera className="w-3 h-3 text-emerald-700" />
+                            <span className="font-mono text-[11px] font-bold text-emerald-800 flex items-center gap-1.5">
+                              <CctvCameraIcon className="w-3.5 h-3.5 text-emerald-700" />
                               {wp.camera_name}
                             </span>
                             {isLast && (

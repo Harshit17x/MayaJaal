@@ -1,4 +1,5 @@
 import { Camera as CameraEntity } from "@/types/camera";
+import { CCTV_CAMERA_SVG_PATH } from "@/components/icons/CctvCameraIcon";
 
 export interface TrajectoryWaypoint {
   name: string;
@@ -225,7 +226,10 @@ export class SuspectTrailAnimator {
           </defs>
           <circle cx="30" cy="30" r="28" fill="url(#camGlow)" />
           <circle cx="30" cy="30" r="16" fill="none" stroke="#ef4444" stroke-width="2.5" stroke-dasharray="4 2" />
-          <circle cx="30" cy="30" r="8" fill="#ff1a1a" stroke="#ffffff" stroke-width="1.8" />
+          <circle cx="30" cy="30" r="10" fill="#ffffff" stroke="#ef4444" stroke-width="2" />
+          <g transform="translate(30, 30) scale(0.016) translate(-420, -378)">
+            <path d="${CCTV_CAMERA_SVG_PATH}" fill="#ef4444" fill-rule="evenodd" />
+          </g>
         </svg>
       `)}`;
 
