@@ -33,3 +33,17 @@ body {
 .btn-forest-green:hover {
   background-color: var(--forest-green-hover);
 }
+
+@keyframes toastProgress {
+  0% {
+    width: 100%;
+  }
+  100% {
+    width: 0%;
+  }
+}
+
+.animate-toast-progress {
+  animation: toastProgress 1.5s linear forwards;
+}
+
