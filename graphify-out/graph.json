@@ -4,6 +4,19 @@
   "graph": {},
   "nodes": [
     {
+      "id": "frontend_src_app_operator_layout_navitem",
+      "label": "NavItem",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "authStore.ts",
+      "file_type": "code",
+      "norm_label": "navitem",
+      "source_file": "frontend/src/app/(operator)/layout.tsx",
+      "source_location": "L36"
+    },
+    {
       "id": "frontend_src_lib_authstore_operatoruser",
       "label": "OperatorUser",
       "_callable": true,
@@ -316,17 +329,56 @@
       "source_location": "L3"
     },
     {
+      "id": "frontend_src_components_alerts_tacticalthreattoast_threattoastcardprops",
+      "label": "ThreatToastCardProps",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "react",
+      "file_type": "code",
+      "norm_label": "threattoastcardprops",
+      "source_file": "frontend/src/components/alerts/TacticalThreatToast.tsx",
+      "source_location": "L19"
+    },
+    {
+      "id": "frontend_src_components_map_suspecttrajectorymodal_suspecttrajectorymodalprops",
+      "label": "SuspectTrajectoryModalProps",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "react",
+      "file_type": "code",
+      "norm_label": "suspecttrajectorymodalprops",
+      "source_file": "frontend/src/components/map/SuspectTrajectoryModal.tsx",
+      "source_location": "L20"
+    },
+    {
       "id": "frontend_src_types_alert_alertfilter",
       "label": "AlertFilter",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 18,
-      "community_name": "gis-map/page.tsx",
+      "community_name": "react",
       "file_type": "code",
       "norm_label": "alertfilter",
       "source_file": "frontend/src/types/alert.ts",
       "source_location": "L31"
+    },
+    {
+      "id": "frontend_src_types_alert_alertitem",
+      "label": "AlertItem",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "react",
+      "file_type": "code",
+      "norm_label": "alertitem",
+      "source_file": "frontend/src/types/alert.ts",
+      "source_location": "L10"
     },
     {
       "id": "frontend_src_types_alert_alertseverity",
@@ -335,7 +387,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 18,
-      "community_name": "gis-map/page.tsx",
+      "community_name": "react",
       "file_type": "code",
       "norm_label": "alertseverity",
       "source_file": "frontend/src/types/alert.ts",
@@ -348,7 +400,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 18,
-      "community_name": "gis-map/page.tsx",
+      "community_name": "react",
       "file_type": "code",
       "norm_label": "globaltraceitem",
       "source_file": "frontend/src/types/alert.ts",
@@ -361,7 +413,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 18,
-      "community_name": "gis-map/page.tsx",
+      "community_name": "react",
       "file_type": "code",
       "norm_label": "qrtdispatchrecord",
       "source_file": "frontend/src/types/alert.ts",
@@ -374,7 +426,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 18,
-      "community_name": "gis-map/page.tsx",
+      "community_name": "react",
       "file_type": "code",
       "norm_label": "scannerstatus",
       "source_file": "frontend/src/types/alert.ts",
@@ -387,7 +439,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 18,
-      "community_name": "gis-map/page.tsx",
+      "community_name": "react",
       "file_type": "code",
       "norm_label": "suspecttrajectory",
       "source_file": "frontend/src/types/alert.ts",
@@ -400,7 +452,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 18,
-      "community_name": "gis-map/page.tsx",
+      "community_name": "react",
       "file_type": "code",
       "norm_label": "suspectwaypoint",
       "source_file": "frontend/src/types/alert.ts",
@@ -459,17 +511,147 @@
       "source_location": "L76"
     },
     {
-      "id": "frontend_src_components_map_suspecttrailoverlay_suspecttrailanimator",
-      "label": "SuspectTrailAnimator",
+      "id": "frontend_src_app_operator_geofences_page_feedviewmode",
+      "label": "FeedViewMode",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 22,
-      "community_name": "SuspectTrailAnimator",
+      "community_name": "geofences/page.tsx",
       "file_type": "code",
-      "norm_label": "suspecttrailanimator",
-      "source_file": "frontend/src/components/map/SuspectTrailOverlay.ts",
-      "source_location": "L98"
+      "norm_label": "feedviewmode",
+      "source_file": "frontend/src/app/(operator)/geofences/page.tsx",
+      "source_location": "L51"
+    },
+    {
+      "id": "frontend_src_app_operator_geofences_page_toolmode",
+      "label": "ToolMode",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 22,
+      "community_name": "geofences/page.tsx",
+      "file_type": "code",
+      "norm_label": "toolmode",
+      "source_file": "frontend/src/app/(operator)/geofences/page.tsx",
+      "source_location": "L50"
+    },
+    {
+      "id": "frontend_src_types_geofence_createtripwirepayload",
+      "label": "CreateTripwirePayload",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 22,
+      "community_name": "geofences/page.tsx",
+      "file_type": "code",
+      "norm_label": "createtripwirepayload",
+      "source_file": "frontend/src/types/geofence.ts",
+      "source_location": "L77"
+    },
+    {
+      "id": "frontend_src_types_geofence_createzonepayload",
+      "label": "CreateZonePayload",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 22,
+      "community_name": "geofences/page.tsx",
+      "file_type": "code",
+      "norm_label": "createzonepayload",
+      "source_file": "frontend/src/types/geofence.ts",
+      "source_location": "L65"
+    },
+    {
+      "id": "frontend_src_types_geofence_directionaltripwire",
+      "label": "DirectionalTripwire",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 22,
+      "community_name": "geofences/page.tsx",
+      "file_type": "code",
+      "norm_label": "directionaltripwire",
+      "source_file": "frontend/src/types/geofence.ts",
+      "source_location": "L19"
+    },
+    {
+      "id": "frontend_src_types_geofence_geofencebreachevent",
+      "label": "GeofenceBreachEvent",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 22,
+      "community_name": "geofences/page.tsx",
+      "file_type": "code",
+      "norm_label": "geofencebreachevent",
+      "source_file": "frontend/src/types/geofence.ts",
+      "source_location": "L40"
+    },
+    {
+      "id": "frontend_src_types_geofence_geofenceevaluateresponse",
+      "label": "GeofenceEvaluateResponse",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 22,
+      "community_name": "geofences/page.tsx",
+      "file_type": "code",
+      "norm_label": "geofenceevaluateresponse",
+      "source_file": "frontend/src/types/geofence.ts",
+      "source_location": "L57"
+    },
+    {
+      "id": "frontend_src_types_geofence_geofenceseverity",
+      "label": "GeofenceSeverity",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 22,
+      "community_name": "geofences/page.tsx",
+      "file_type": "code",
+      "norm_label": "geofenceseverity",
+      "source_file": "frontend/src/types/geofence.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "frontend_src_types_geofence_geofencesresponse",
+      "label": "GeofencesResponse",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 22,
+      "community_name": "geofences/page.tsx",
+      "file_type": "code",
+      "norm_label": "geofencesresponse",
+      "source_file": "frontend/src/types/geofence.ts",
+      "source_location": "L35"
+    },
+    {
+      "id": "frontend_src_types_geofence_geofencezone",
+      "label": "GeofenceZone",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 22,
+      "community_name": "geofences/page.tsx",
+      "file_type": "code",
+      "norm_label": "geofencezone",
+      "source_file": "frontend/src/types/geofence.ts",
+      "source_location": "L5"
+    },
+    {
+      "id": "frontend_src_types_geofence_tripwiredirection",
+      "label": "TripwireDirection",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 22,
+      "community_name": "geofences/page.tsx",
+      "file_type": "code",
+      "norm_label": "tripwiredirection",
+      "source_file": "frontend/src/types/geofence.ts",
+      "source_location": "L3"
     },
     {
       "id": "backend_app_pipeline_preprocessor_preprocessingconfig",
@@ -483,19 +665,6 @@
       "norm_label": "preprocessingconfig",
       "source_file": "backend/app/pipeline/preprocessor.py",
       "source_location": "L30"
-    },
-    {
-      "id": "backend_app_pipeline_video_loader_videoloadererror",
-      "label": "VideoLoaderError",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 23,
-      "community_name": "inference.py",
-      "file_type": "code",
-      "norm_label": "videoloadererror",
-      "source_file": "backend/app/pipeline/video_loader.py",
-      "source_location": "L15"
     },
     {
       "id": "backend_app_pipeline_anpr_service_anprpipeline",
@@ -524,19 +693,6 @@
       "source_location": "L53"
     },
     {
-      "id": "frontend_src_app_operator_layout_navitem",
-      "label": "NavItem",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 29,
-      "community_name": "alertsStore.ts",
-      "file_type": "code",
-      "norm_label": "navitem",
-      "source_file": "frontend/src/app/(operator)/layout.tsx",
-      "source_location": "L36"
-    },
-    {
       "id": "frontend_src_lib_alertsstore_alertlistener",
       "label": "AlertListener",
       "_callable": true,
@@ -561,32 +717,6 @@
       "norm_label": "connectionlistener",
       "source_file": "frontend/src/lib/alertsStore.ts",
       "source_location": "L63"
-    },
-    {
-      "id": "frontend_src_app_operator_geofences_page_feedviewmode",
-      "label": "FeedViewMode",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "api.ts",
-      "file_type": "code",
-      "norm_label": "feedviewmode",
-      "source_file": "frontend/src/app/(operator)/geofences/page.tsx",
-      "source_location": "L51"
-    },
-    {
-      "id": "frontend_src_app_operator_geofences_page_toolmode",
-      "label": "ToolMode",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "api.ts",
-      "file_type": "code",
-      "norm_label": "toolmode",
-      "source_file": "frontend/src/app/(operator)/geofences/page.tsx",
-      "source_location": "L50"
     },
     {
       "id": "frontend_src_lib_api_apierror",
@@ -823,19 +953,6 @@
       "source_location": "L110"
     },
     {
-      "id": "frontend_src_types_backend_videoframeresult",
-      "label": "VideoFrameResult",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "api.ts",
-      "file_type": "code",
-      "norm_label": "videoframeresult",
-      "source_file": "frontend/src/types/backend.ts",
-      "source_location": "L94"
-    },
-    {
       "id": "frontend_src_types_backend_videoinferenceresponse",
       "label": "VideoInferenceResponse",
       "_callable": true,
@@ -849,134 +966,95 @@
       "source_location": "L112"
     },
     {
-      "id": "frontend_src_types_backend_videometadata",
-      "label": "VideoMetadata",
+      "id": "frontend_src_types_face_enrolledperson",
+      "label": "EnrolledPerson",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 3,
       "community_name": "api.ts",
       "file_type": "code",
-      "norm_label": "videometadata",
-      "source_file": "frontend/src/types/backend.ts",
-      "source_location": "L85"
-    },
-    {
-      "id": "frontend_src_types_geofence_createtripwirepayload",
-      "label": "CreateTripwirePayload",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "api.ts",
-      "file_type": "code",
-      "norm_label": "createtripwirepayload",
-      "source_file": "frontend/src/types/geofence.ts",
-      "source_location": "L77"
-    },
-    {
-      "id": "frontend_src_types_geofence_createzonepayload",
-      "label": "CreateZonePayload",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "api.ts",
-      "file_type": "code",
-      "norm_label": "createzonepayload",
-      "source_file": "frontend/src/types/geofence.ts",
-      "source_location": "L65"
-    },
-    {
-      "id": "frontend_src_types_geofence_directionaltripwire",
-      "label": "DirectionalTripwire",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "api.ts",
-      "file_type": "code",
-      "norm_label": "directionaltripwire",
-      "source_file": "frontend/src/types/geofence.ts",
-      "source_location": "L19"
-    },
-    {
-      "id": "frontend_src_types_geofence_geofencebreachevent",
-      "label": "GeofenceBreachEvent",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "api.ts",
-      "file_type": "code",
-      "norm_label": "geofencebreachevent",
-      "source_file": "frontend/src/types/geofence.ts",
-      "source_location": "L40"
-    },
-    {
-      "id": "frontend_src_types_geofence_geofenceevaluateresponse",
-      "label": "GeofenceEvaluateResponse",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "api.ts",
-      "file_type": "code",
-      "norm_label": "geofenceevaluateresponse",
-      "source_file": "frontend/src/types/geofence.ts",
-      "source_location": "L57"
-    },
-    {
-      "id": "frontend_src_types_geofence_geofenceseverity",
-      "label": "GeofenceSeverity",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "api.ts",
-      "file_type": "code",
-      "norm_label": "geofenceseverity",
-      "source_file": "frontend/src/types/geofence.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "frontend_src_types_geofence_geofencesresponse",
-      "label": "GeofencesResponse",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "api.ts",
-      "file_type": "code",
-      "norm_label": "geofencesresponse",
-      "source_file": "frontend/src/types/geofence.ts",
-      "source_location": "L35"
-    },
-    {
-      "id": "frontend_src_types_geofence_geofencezone",
-      "label": "GeofenceZone",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "api.ts",
-      "file_type": "code",
-      "norm_label": "geofencezone",
-      "source_file": "frontend/src/types/geofence.ts",
-      "source_location": "L5"
-    },
-    {
-      "id": "frontend_src_types_geofence_tripwiredirection",
-      "label": "TripwireDirection",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "api.ts",
-      "file_type": "code",
-      "norm_label": "tripwiredirection",
-      "source_file": "frontend/src/types/geofence.ts",
+      "norm_label": "enrolledperson",
+      "source_file": "frontend/src/types/face.ts",
       "source_location": "L3"
+    },
+    {
+      "id": "frontend_src_types_face_facedetection",
+      "label": "FaceDetection",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "api.ts",
+      "file_type": "code",
+      "norm_label": "facedetection",
+      "source_file": "frontend/src/types/face.ts",
+      "source_location": "L15"
+    },
+    {
+      "id": "frontend_src_types_face_faceenginestatus",
+      "label": "FaceEngineStatus",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "api.ts",
+      "file_type": "code",
+      "norm_label": "faceenginestatus",
+      "source_file": "frontend/src/types/face.ts",
+      "source_location": "L39"
+    },
+    {
+      "id": "frontend_src_types_face_faceevent",
+      "label": "FaceEvent",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "api.ts",
+      "file_type": "code",
+      "norm_label": "faceevent",
+      "source_file": "frontend/src/types/face.ts",
+      "source_location": "L48"
+    },
+    {
+      "id": "frontend_src_types_face_facescanresponse",
+      "label": "FaceScanResponse",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "api.ts",
+      "file_type": "code",
+      "norm_label": "facescanresponse",
+      "source_file": "frontend/src/types/face.ts",
+      "source_location": "L30"
+    },
+    {
+      "id": "frontend_src_types_face_registerfaceresponse",
+      "label": "RegisterFaceResponse",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "api.ts",
+      "file_type": "code",
+      "norm_label": "registerfaceresponse",
+      "source_file": "frontend/src/types/face.ts",
+      "source_location": "L60"
+    },
+    {
+      "id": "frontend_src_types_face_threatlevel",
+      "label": "ThreatLevel",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "api.ts",
+      "file_type": "code",
+      "norm_label": "threatlevel",
+      "source_file": "frontend/src/types/face.ts",
+      "source_location": "L1"
     },
     {
       "id": "backend_app_pipeline_postprocessor_detection",
@@ -1146,6 +1224,19 @@
       "norm_label": "neighborborder",
       "source_file": "frontend/src/components/map/BorderMap.tsx",
       "source_location": "L72"
+    },
+    {
+      "id": "frontend_src_components_map_suspecttrailoverlay_suspecttrailanimator",
+      "label": "SuspectTrailAnimator",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "BorderMap.tsx",
+      "file_type": "code",
+      "norm_label": "suspecttrailanimator",
+      "source_file": "frontend/src/components/map/SuspectTrailOverlay.ts",
+      "source_location": "L98"
     },
     {
       "id": "frontend_src_components_map_suspecttrailoverlay_trajectorytelemetry",
@@ -1341,97 +1432,6 @@
       "norm_label": "testgeofenceengine",
       "source_file": "backend/tests/test_geofence_engine.py",
       "source_location": "L15"
-    },
-    {
-      "id": "frontend_src_types_face_enrolledperson",
-      "label": "EnrolledPerson",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 43,
-      "community_name": "facial-recognition/page.tsx",
-      "file_type": "code",
-      "norm_label": "enrolledperson",
-      "source_file": "frontend/src/types/face.ts",
-      "source_location": "L3"
-    },
-    {
-      "id": "frontend_src_types_face_facedetection",
-      "label": "FaceDetection",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 43,
-      "community_name": "facial-recognition/page.tsx",
-      "file_type": "code",
-      "norm_label": "facedetection",
-      "source_file": "frontend/src/types/face.ts",
-      "source_location": "L15"
-    },
-    {
-      "id": "frontend_src_types_face_faceenginestatus",
-      "label": "FaceEngineStatus",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 43,
-      "community_name": "facial-recognition/page.tsx",
-      "file_type": "code",
-      "norm_label": "faceenginestatus",
-      "source_file": "frontend/src/types/face.ts",
-      "source_location": "L39"
-    },
-    {
-      "id": "frontend_src_types_face_faceevent",
-      "label": "FaceEvent",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 43,
-      "community_name": "facial-recognition/page.tsx",
-      "file_type": "code",
-      "norm_label": "faceevent",
-      "source_file": "frontend/src/types/face.ts",
-      "source_location": "L48"
-    },
-    {
-      "id": "frontend_src_types_face_facescanresponse",
-      "label": "FaceScanResponse",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 43,
-      "community_name": "facial-recognition/page.tsx",
-      "file_type": "code",
-      "norm_label": "facescanresponse",
-      "source_file": "frontend/src/types/face.ts",
-      "source_location": "L30"
-    },
-    {
-      "id": "frontend_src_types_face_registerfaceresponse",
-      "label": "RegisterFaceResponse",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 43,
-      "community_name": "facial-recognition/page.tsx",
-      "file_type": "code",
-      "norm_label": "registerfaceresponse",
-      "source_file": "frontend/src/types/face.ts",
-      "source_location": "L60"
-    },
-    {
-      "id": "frontend_src_types_face_threatlevel",
-      "label": "ThreatLevel",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 43,
-      "community_name": "facial-recognition/page.tsx",
-      "file_type": "code",
-      "norm_label": "threatlevel",
-      "source_file": "frontend/src/types/face.ts",
-      "source_location": "L1"
     },
     {
       "id": "frontend_src_components_dashboard_metriccard_metriccardprops",
@@ -1811,32 +1811,6 @@
       "source_location": "L32"
     },
     {
-      "id": "frontend_src_components_alerts_tacticalthreattoast_threattoastcardprops",
-      "label": "ThreatToastCardProps",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 78,
-      "community_name": "liveworkspace.tsx",
-      "file_type": "code",
-      "norm_label": "threattoastcardprops",
-      "source_file": "frontend/src/components/alerts/TacticalThreatToast.tsx",
-      "source_location": "L19"
-    },
-    {
-      "id": "frontend_src_components_map_suspecttrajectorymodal_suspecttrajectorymodalprops",
-      "label": "SuspectTrajectoryModalProps",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 78,
-      "community_name": "liveworkspace.tsx",
-      "file_type": "code",
-      "norm_label": "suspecttrajectorymodalprops",
-      "source_file": "frontend/src/components/map/SuspectTrajectoryModal.tsx",
-      "source_location": "L20"
-    },
-    {
       "id": "frontend_src_components_surveillance_detectioncanvas_detectioncanvasprops",
       "label": "DetectionCanvasProps",
       "_callable": true,
@@ -1850,19 +1824,6 @@
       "source_location": "L7"
     },
     {
-      "id": "frontend_src_types_alert_alertitem",
-      "label": "AlertItem",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 78,
-      "community_name": "liveworkspace.tsx",
-      "file_type": "code",
-      "norm_label": "alertitem",
-      "source_file": "frontend/src/types/alert.ts",
-      "source_location": "L10"
-    },
-    {
       "id": "frontend_src_types_backend_detection",
       "label": "Detection",
       "_callable": true,
@@ -1874,6 +1835,32 @@
       "norm_label": "detection",
       "source_file": "frontend/src/types/backend.ts",
       "source_location": "L46"
+    },
+    {
+      "id": "frontend_src_types_backend_videoframeresult",
+      "label": "VideoFrameResult",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 78,
+      "community_name": "liveworkspace.tsx",
+      "file_type": "code",
+      "norm_label": "videoframeresult",
+      "source_file": "frontend/src/types/backend.ts",
+      "source_location": "L94"
+    },
+    {
+      "id": "frontend_src_types_backend_videometadata",
+      "label": "VideoMetadata",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 78,
+      "community_name": "liveworkspace.tsx",
+      "file_type": "code",
+      "norm_label": "videometadata",
+      "source_file": "frontend/src/types/backend.ts",
+      "source_location": "L85"
     },
     {
       "id": "backend_app_pipeline_reid_service_reidservice",
@@ -1941,6 +1928,19 @@
       "source_location": "L31"
     },
     {
+      "id": "backend_app_pipeline_video_loader_videoloadererror",
+      "label": "VideoLoaderError",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 8,
+      "community_name": "VideoLoader",
+      "file_type": "code",
+      "norm_label": "videoloadererror",
+      "source_file": "backend/app/pipeline/video_loader.py",
+      "source_location": "L15"
+    },
+    {
       "id": "frontend_src_app_login_page_loginformcard",
       "label": "LoginFormCard()",
       "_callable": true,
@@ -1965,6 +1965,30 @@
       "source_location": "L234"
     },
     {
+      "id": "frontend_src_app_operator_layout_dutyshiftcountdown",
+      "label": "DutyShiftCountdown()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "authStore.ts",
+      "file_type": "code",
+      "norm_label": "dutyshiftcountdown()",
+      "source_file": "frontend/src/app/(operator)/layout.tsx",
+      "source_location": "L90"
+    },
+    {
+      "id": "frontend_src_app_operator_layout_headerclock",
+      "label": "HeaderClock()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "authStore.ts",
+      "file_type": "code",
+      "norm_label": "headerclock()",
+      "source_file": "frontend/src/app/(operator)/layout.tsx",
+      "source_location": "L44"
+    },
+    {
       "id": "frontend_src_app_operator_layout_operatorlayout",
       "label": "OperatorLayout()",
       "_callable": true,
@@ -1987,6 +2011,18 @@
       "norm_label": "homepage()",
       "source_file": "frontend/src/app/page.tsx",
       "source_location": "L3"
+    },
+    {
+      "id": "frontend_src_components_alerts_tacticalthreattoast_tacticalthreattoast",
+      "label": "TacticalThreatToast()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "authStore.ts",
+      "file_type": "code",
+      "norm_label": "tacticalthreattoast()",
+      "source_file": "frontend/src/components/alerts/TacticalThreatToast.tsx",
+      "source_location": "L254"
     },
     {
       "id": "frontend_src_components_landing_emblemindia_emblemindia",
@@ -2047,6 +2083,18 @@
       "norm_label": "createsessiontoken()",
       "source_file": "frontend/src/lib/authStore.ts",
       "source_location": "L155"
+    },
+    {
+      "id": "frontend_src_lib_authstore_getremainingshifttime",
+      "label": "getRemainingShiftTime()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "authStore.ts",
+      "file_type": "code",
+      "norm_label": "getremainingshifttime()",
+      "source_file": "frontend/src/lib/authStore.ts",
+      "source_location": "L130"
     },
     {
       "id": "frontend_src_lib_authstore_getstoredoperator",
@@ -2781,28 +2829,16 @@
       "source_location": "L6"
     },
     {
-      "id": "frontend_src_app_operator_gis_map_page_gismappage",
-      "label": "GisMapPage()",
+      "id": "frontend_src_app_operator_alerts_page_alertspage",
+      "label": "AlertsPage()",
       "_callable": true,
       "_origin": "ast",
       "community": 18,
-      "community_name": "gis-map/page.tsx",
+      "community_name": "react",
       "file_type": "code",
-      "norm_label": "gismappage()",
-      "source_file": "frontend/src/app/(operator)/gis-map/page.tsx",
-      "source_location": "L23"
-    },
-    {
-      "id": "frontend_src_app_operator_gis_map_page_gismappage_fetchtraces",
-      "label": "fetchTraces()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 18,
-      "community_name": "gis-map/page.tsx",
-      "file_type": "code",
-      "norm_label": "fetchtraces()",
-      "source_file": "frontend/src/app/(operator)/gis-map/page.tsx",
-      "source_location": "L34"
+      "norm_label": "alertspage()",
+      "source_file": "frontend/src/app/(operator)/alerts/page.tsx",
+      "source_location": "L29"
     },
     {
       "id": "frontend_src_app_operator_settings_page_settingspage",
@@ -2810,11 +2846,23 @@
       "_callable": true,
       "_origin": "ast",
       "community": 18,
-      "community_name": "gis-map/page.tsx",
+      "community_name": "react",
       "file_type": "code",
       "norm_label": "settingspage()",
       "source_file": "frontend/src/app/(operator)/settings/page.tsx",
       "source_location": "L24"
+    },
+    {
+      "id": "frontend_src_components_alerts_tacticalthreattoast_threattoastcard",
+      "label": "ThreatToastCard()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "react",
+      "file_type": "code",
+      "norm_label": "threattoastcard()",
+      "source_file": "frontend/src/components/alerts/TacticalThreatToast.tsx",
+      "source_location": "L26"
     },
     {
       "id": "frontend_src_components_dashboard_camerafeedstrip_camerafeedstrip",
@@ -2822,11 +2870,23 @@
       "_callable": true,
       "_origin": "ast",
       "community": 18,
-      "community_name": "gis-map/page.tsx",
+      "community_name": "react",
       "file_type": "code",
       "norm_label": "camerafeedstrip()",
       "source_file": "frontend/src/components/dashboard/camerafeedstrip.tsx",
       "source_location": "L10"
+    },
+    {
+      "id": "frontend_src_components_dashboard_dashboardheader_dashboardheader",
+      "label": "DashboardHeader()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "react",
+      "file_type": "code",
+      "norm_label": "dashboardheader()",
+      "source_file": "frontend/src/components/dashboard/dashboardheader.tsx",
+      "source_location": "L5"
     },
     {
       "id": "frontend_src_components_dashboard_recentalerts_recentalerts",
@@ -2834,7 +2894,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 18,
-      "community_name": "gis-map/page.tsx",
+      "community_name": "react",
       "file_type": "code",
       "norm_label": "recentalerts()",
       "source_file": "frontend/src/components/dashboard/recentalerts.tsx",
@@ -2846,11 +2906,47 @@
       "_callable": true,
       "_origin": "ast",
       "community": 18,
-      "community_name": "gis-map/page.tsx",
+      "community_name": "react",
       "file_type": "code",
       "norm_label": "severitybadge()",
       "source_file": "frontend/src/components/dashboard/recentalerts.tsx",
       "source_location": "L9"
+    },
+    {
+      "id": "frontend_src_components_map_suspecttrajectorymodal_suspecttrajectorymodal",
+      "label": "SuspectTrajectoryModal()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "react",
+      "file_type": "code",
+      "norm_label": "suspecttrajectorymodal()",
+      "source_file": "frontend/src/components/map/SuspectTrajectoryModal.tsx",
+      "source_location": "L26"
+    },
+    {
+      "id": "frontend_src_components_map_suspecttrajectorymodal_suspecttrajectorymodal_loadtrajectory",
+      "label": "loadTrajectory()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "react",
+      "file_type": "code",
+      "norm_label": "loadtrajectory()",
+      "source_file": "frontend/src/components/map/SuspectTrajectoryModal.tsx",
+      "source_location": "L41"
+    },
+    {
+      "id": "frontend_src_lib_utils_formatconfidence",
+      "label": "formatConfidence()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "react",
+      "file_type": "code",
+      "norm_label": "formatconfidence()",
+      "source_file": "frontend/src/lib/utils.ts",
+      "source_location": "L15"
     },
     {
       "id": "backend_app_api_faces_add_face_sample",
@@ -3441,148 +3537,28 @@
       "source_location": "L170"
     },
     {
-      "id": "frontend_src_components_map_suspecttrailoverlay_suspecttrailanimator_clearpolyline",
-      "label": ".clearPolyline()",
+      "id": "frontend_src_app_operator_geofences_page_geofencespage",
+      "label": "GeofencesPage()",
       "_callable": true,
       "_origin": "ast",
       "community": 22,
-      "community_name": "SuspectTrailAnimator",
+      "community_name": "geofences/page.tsx",
       "file_type": "code",
-      "norm_label": ".clearpolyline()",
-      "source_file": "frontend/src/components/map/SuspectTrailOverlay.ts",
-      "source_location": "L520"
+      "norm_label": "geofencespage()",
+      "source_file": "frontend/src/app/(operator)/geofences/page.tsx",
+      "source_location": "L62"
     },
     {
-      "id": "frontend_src_components_map_suspecttrailoverlay_suspecttrailanimator_clearpolylines",
-      "label": ".clearPolylines()",
+      "id": "frontend_src_app_operator_geofences_page_geofencespage_pointinpoly",
+      "label": "pointInPoly()",
       "_callable": true,
       "_origin": "ast",
       "community": 22,
-      "community_name": "SuspectTrailAnimator",
+      "community_name": "geofences/page.tsx",
       "file_type": "code",
-      "norm_label": ".clearpolylines()",
-      "source_file": "frontend/src/components/map/SuspectTrailOverlay.ts",
-      "source_location": "L525"
-    },
-    {
-      "id": "frontend_src_components_map_suspecttrailoverlay_suspecttrailanimator_constructor",
-      "label": ".constructor()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 22,
-      "community_name": "SuspectTrailAnimator",
-      "file_type": "code",
-      "norm_label": ".constructor()",
-      "source_file": "frontend/src/components/map/SuspectTrailOverlay.ts",
-      "source_location": "L122"
-    },
-    {
-      "id": "frontend_src_components_map_suspecttrailoverlay_suspecttrailanimator_destroy",
-      "label": ".destroy()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 22,
-      "community_name": "SuspectTrailAnimator",
-      "file_type": "code",
-      "norm_label": ".destroy()",
-      "source_file": "frontend/src/components/map/SuspectTrailOverlay.ts",
-      "source_location": "L301"
-    },
-    {
-      "id": "frontend_src_components_map_suspecttrailoverlay_suspecttrailanimator_fittrajectorybounds",
-      "label": ".fitTrajectoryBounds()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 22,
-      "community_name": "SuspectTrailAnimator",
-      "file_type": "code",
-      "norm_label": ".fittrajectorybounds()",
-      "source_file": "frontend/src/components/map/SuspectTrailOverlay.ts",
+      "norm_label": "pointinpoly()",
+      "source_file": "frontend/src/app/(operator)/geofences/page.tsx",
       "source_location": "L540"
-    },
-    {
-      "id": "frontend_src_components_map_suspecttrailoverlay_suspecttrailanimator_initmapobjects",
-      "label": ".initMapObjects()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 22,
-      "community_name": "SuspectTrailAnimator",
-      "file_type": "code",
-      "norm_label": ".initmapobjects()",
-      "source_file": "frontend/src/components/map/SuspectTrailOverlay.ts",
-      "source_location": "L133"
-    },
-    {
-      "id": "frontend_src_components_map_suspecttrailoverlay_suspecttrailanimator_interpolate",
-      "label": ".interpolate()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 22,
-      "community_name": "SuspectTrailAnimator",
-      "file_type": "code",
-      "norm_label": ".interpolate()",
-      "source_file": "frontend/src/components/map/SuspectTrailOverlay.ts",
-      "source_location": "L504"
-    },
-    {
-      "id": "frontend_src_components_map_suspecttrailoverlay_suspecttrailanimator_setcamerapulsevisible",
-      "label": ".setCameraPulseVisible()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 22,
-      "community_name": "SuspectTrailAnimator",
-      "file_type": "code",
-      "norm_label": ".setcamerapulsevisible()",
-      "source_file": "frontend/src/components/map/SuspectTrailOverlay.ts",
-      "source_location": "L531"
-    },
-    {
-      "id": "frontend_src_components_map_suspecttrailoverlay_suspecttrailanimator_setpolylinepath",
-      "label": ".setPolylinePath()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 22,
-      "community_name": "SuspectTrailAnimator",
-      "file_type": "code",
-      "norm_label": ".setpolylinepath()",
-      "source_file": "frontend/src/components/map/SuspectTrailOverlay.ts",
-      "source_location": "L515"
-    },
-    {
-      "id": "frontend_src_components_map_suspecttrailoverlay_suspecttrailanimator_start",
-      "label": ".start()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 22,
-      "community_name": "SuspectTrailAnimator",
-      "file_type": "code",
-      "norm_label": ".start()",
-      "source_file": "frontend/src/components/map/SuspectTrailOverlay.ts",
-      "source_location": "L286"
-    },
-    {
-      "id": "frontend_src_components_map_suspecttrailoverlay_suspecttrailanimator_stop",
-      "label": ".stop()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 22,
-      "community_name": "SuspectTrailAnimator",
-      "file_type": "code",
-      "norm_label": ".stop()",
-      "source_file": "frontend/src/components/map/SuspectTrailOverlay.ts",
-      "source_location": "L293"
-    },
-    {
-      "id": "frontend_src_components_map_suspecttrailoverlay_suspecttrailanimator_tick",
-      "label": ".tick()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 22,
-      "community_name": "SuspectTrailAnimator",
-      "file_type": "code",
-      "norm_label": ".tick()",
-      "source_file": "frontend/src/components/map/SuspectTrailOverlay.ts",
-      "source_location": "L325"
     },
     {
       "id": "backend_app_api_inference_batch_inference",
@@ -4053,40 +4029,28 @@
       "source_location": "L177"
     },
     {
-      "id": "frontend_src_app_operator_layout_dutyshiftcountdown",
-      "label": "DutyShiftCountdown()",
+      "id": "frontend_src_app_operator_gis_map_page_gismappage",
+      "label": "GisMapPage()",
       "_callable": true,
       "_origin": "ast",
       "community": 29,
       "community_name": "alertsStore.ts",
       "file_type": "code",
-      "norm_label": "dutyshiftcountdown()",
-      "source_file": "frontend/src/app/(operator)/layout.tsx",
-      "source_location": "L90"
+      "norm_label": "gismappage()",
+      "source_file": "frontend/src/app/(operator)/gis-map/page.tsx",
+      "source_location": "L23"
     },
     {
-      "id": "frontend_src_app_operator_layout_headerclock",
-      "label": "HeaderClock()",
+      "id": "frontend_src_app_operator_gis_map_page_gismappage_fetchtraces",
+      "label": "fetchTraces()",
       "_callable": true,
       "_origin": "ast",
       "community": 29,
       "community_name": "alertsStore.ts",
       "file_type": "code",
-      "norm_label": "headerclock()",
-      "source_file": "frontend/src/app/(operator)/layout.tsx",
-      "source_location": "L44"
-    },
-    {
-      "id": "frontend_src_components_alerts_tacticalthreattoast_tacticalthreattoast",
-      "label": "TacticalThreatToast()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 29,
-      "community_name": "alertsStore.ts",
-      "file_type": "code",
-      "norm_label": "tacticalthreattoast()",
-      "source_file": "frontend/src/components/alerts/TacticalThreatToast.tsx",
-      "source_location": "L254"
+      "norm_label": "fetchtraces()",
+      "source_file": "frontend/src/app/(operator)/gis-map/page.tsx",
+      "source_location": "L34"
     },
     {
       "id": "frontend_src_lib_alertsstore_getalertswsurl",
@@ -4197,16 +4161,16 @@
       "source_location": "L351"
     },
     {
-      "id": "frontend_src_lib_authstore_getremainingshifttime",
-      "label": "getRemainingShiftTime()",
+      "id": "frontend_src_app_operator_facial_recognition_page_facialrecognitionpage",
+      "label": "FacialRecognitionPage()",
       "_callable": true,
       "_origin": "ast",
-      "community": 29,
-      "community_name": "alertsStore.ts",
+      "community": 3,
+      "community_name": "api.ts",
       "file_type": "code",
-      "norm_label": "getremainingshifttime()",
-      "source_file": "frontend/src/lib/authStore.ts",
-      "source_location": "L130"
+      "norm_label": "facialrecognitionpage()",
+      "source_file": "frontend/src/app/(operator)/facial-recognition/page.tsx",
+      "source_location": "L44"
     },
     {
       "id": "frontend_src_lib_api_apierror_constructor",
@@ -4893,30 +4857,6 @@
       "source_location": "L1673"
     },
     {
-      "id": "frontend_src_app_operator_geofences_page_geofencespage",
-      "label": "GeofencesPage()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 4,
-      "community_name": "BorderMap.tsx",
-      "file_type": "code",
-      "norm_label": "geofencespage()",
-      "source_file": "frontend/src/app/(operator)/geofences/page.tsx",
-      "source_location": "L62"
-    },
-    {
-      "id": "frontend_src_app_operator_geofences_page_geofencespage_pointinpoly",
-      "label": "pointInPoly()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 4,
-      "community_name": "BorderMap.tsx",
-      "file_type": "code",
-      "norm_label": "pointinpoly()",
-      "source_file": "frontend/src/app/(operator)/geofences/page.tsx",
-      "source_location": "L540"
-    },
-    {
       "id": "frontend_src_components_map_bordermap_bordermap",
       "label": "BorderMap()",
       "_callable": true,
@@ -4975,6 +4915,150 @@
       "norm_label": "resolvesuspectwaypoints()",
       "source_file": "frontend/src/components/map/SuspectTrailOverlay.ts",
       "source_location": "L33"
+    },
+    {
+      "id": "frontend_src_components_map_suspecttrailoverlay_suspecttrailanimator_clearpolyline",
+      "label": ".clearPolyline()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "BorderMap.tsx",
+      "file_type": "code",
+      "norm_label": ".clearpolyline()",
+      "source_file": "frontend/src/components/map/SuspectTrailOverlay.ts",
+      "source_location": "L520"
+    },
+    {
+      "id": "frontend_src_components_map_suspecttrailoverlay_suspecttrailanimator_clearpolylines",
+      "label": ".clearPolylines()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "BorderMap.tsx",
+      "file_type": "code",
+      "norm_label": ".clearpolylines()",
+      "source_file": "frontend/src/components/map/SuspectTrailOverlay.ts",
+      "source_location": "L525"
+    },
+    {
+      "id": "frontend_src_components_map_suspecttrailoverlay_suspecttrailanimator_constructor",
+      "label": ".constructor()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "BorderMap.tsx",
+      "file_type": "code",
+      "norm_label": ".constructor()",
+      "source_file": "frontend/src/components/map/SuspectTrailOverlay.ts",
+      "source_location": "L122"
+    },
+    {
+      "id": "frontend_src_components_map_suspecttrailoverlay_suspecttrailanimator_destroy",
+      "label": ".destroy()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "BorderMap.tsx",
+      "file_type": "code",
+      "norm_label": ".destroy()",
+      "source_file": "frontend/src/components/map/SuspectTrailOverlay.ts",
+      "source_location": "L301"
+    },
+    {
+      "id": "frontend_src_components_map_suspecttrailoverlay_suspecttrailanimator_fittrajectorybounds",
+      "label": ".fitTrajectoryBounds()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "BorderMap.tsx",
+      "file_type": "code",
+      "norm_label": ".fittrajectorybounds()",
+      "source_file": "frontend/src/components/map/SuspectTrailOverlay.ts",
+      "source_location": "L540"
+    },
+    {
+      "id": "frontend_src_components_map_suspecttrailoverlay_suspecttrailanimator_initmapobjects",
+      "label": ".initMapObjects()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "BorderMap.tsx",
+      "file_type": "code",
+      "norm_label": ".initmapobjects()",
+      "source_file": "frontend/src/components/map/SuspectTrailOverlay.ts",
+      "source_location": "L133"
+    },
+    {
+      "id": "frontend_src_components_map_suspecttrailoverlay_suspecttrailanimator_interpolate",
+      "label": ".interpolate()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "BorderMap.tsx",
+      "file_type": "code",
+      "norm_label": ".interpolate()",
+      "source_file": "frontend/src/components/map/SuspectTrailOverlay.ts",
+      "source_location": "L504"
+    },
+    {
+      "id": "frontend_src_components_map_suspecttrailoverlay_suspecttrailanimator_setcamerapulsevisible",
+      "label": ".setCameraPulseVisible()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "BorderMap.tsx",
+      "file_type": "code",
+      "norm_label": ".setcamerapulsevisible()",
+      "source_file": "frontend/src/components/map/SuspectTrailOverlay.ts",
+      "source_location": "L531"
+    },
+    {
+      "id": "frontend_src_components_map_suspecttrailoverlay_suspecttrailanimator_setpolylinepath",
+      "label": ".setPolylinePath()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "BorderMap.tsx",
+      "file_type": "code",
+      "norm_label": ".setpolylinepath()",
+      "source_file": "frontend/src/components/map/SuspectTrailOverlay.ts",
+      "source_location": "L515"
+    },
+    {
+      "id": "frontend_src_components_map_suspecttrailoverlay_suspecttrailanimator_start",
+      "label": ".start()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "BorderMap.tsx",
+      "file_type": "code",
+      "norm_label": ".start()",
+      "source_file": "frontend/src/components/map/SuspectTrailOverlay.ts",
+      "source_location": "L286"
+    },
+    {
+      "id": "frontend_src_components_map_suspecttrailoverlay_suspecttrailanimator_stop",
+      "label": ".stop()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "BorderMap.tsx",
+      "file_type": "code",
+      "norm_label": ".stop()",
+      "source_file": "frontend/src/components/map/SuspectTrailOverlay.ts",
+      "source_location": "L293"
+    },
+    {
+      "id": "frontend_src_components_map_suspecttrailoverlay_suspecttrailanimator_tick",
+      "label": ".tick()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "BorderMap.tsx",
+      "file_type": "code",
+      "norm_label": ".tick()",
+      "source_file": "frontend/src/components/map/SuspectTrailOverlay.ts",
+      "source_location": "L325"
     },
     {
       "id": "frontend_src_components_surveillance_cameracard_cameracard",
@@ -5347,18 +5431,6 @@
       "norm_label": "trackspage()",
       "source_file": "frontend/src/app/(operator)/tracks/page.tsx",
       "source_location": "L1"
-    },
-    {
-      "id": "frontend_src_app_operator_facial_recognition_page_facialrecognitionpage",
-      "label": "FacialRecognitionPage()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 43,
-      "community_name": "facial-recognition/page.tsx",
-      "file_type": "code",
-      "norm_label": "facialrecognitionpage()",
-      "source_file": "frontend/src/app/(operator)/facial-recognition/page.tsx",
-      "source_location": "L44"
     },
     {
       "id": "backend_app_api_inference_inference_status",
@@ -6453,66 +6525,6 @@
       "source_location": "L314"
     },
     {
-      "id": "frontend_src_app_operator_alerts_page_alertspage",
-      "label": "AlertsPage()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 78,
-      "community_name": "liveworkspace.tsx",
-      "file_type": "code",
-      "norm_label": "alertspage()",
-      "source_file": "frontend/src/app/(operator)/alerts/page.tsx",
-      "source_location": "L29"
-    },
-    {
-      "id": "frontend_src_components_alerts_tacticalthreattoast_threattoastcard",
-      "label": "ThreatToastCard()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 78,
-      "community_name": "liveworkspace.tsx",
-      "file_type": "code",
-      "norm_label": "threattoastcard()",
-      "source_file": "frontend/src/components/alerts/TacticalThreatToast.tsx",
-      "source_location": "L26"
-    },
-    {
-      "id": "frontend_src_components_dashboard_dashboardheader_dashboardheader",
-      "label": "DashboardHeader()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 78,
-      "community_name": "liveworkspace.tsx",
-      "file_type": "code",
-      "norm_label": "dashboardheader()",
-      "source_file": "frontend/src/components/dashboard/dashboardheader.tsx",
-      "source_location": "L5"
-    },
-    {
-      "id": "frontend_src_components_map_suspecttrajectorymodal_suspecttrajectorymodal",
-      "label": "SuspectTrajectoryModal()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 78,
-      "community_name": "liveworkspace.tsx",
-      "file_type": "code",
-      "norm_label": "suspecttrajectorymodal()",
-      "source_file": "frontend/src/components/map/SuspectTrajectoryModal.tsx",
-      "source_location": "L26"
-    },
-    {
-      "id": "frontend_src_components_map_suspecttrajectorymodal_suspecttrajectorymodal_loadtrajectory",
-      "label": "loadTrajectory()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 78,
-      "community_name": "liveworkspace.tsx",
-      "file_type": "code",
-      "norm_label": "loadtrajectory()",
-      "source_file": "frontend/src/components/map/SuspectTrajectoryModal.tsx",
-      "source_location": "L41"
-    },
-    {
       "id": "frontend_src_components_surveillance_detectioncanvas_detectioncanvas",
       "label": "DetectionCanvas()",
       "_callable": true,
@@ -6547,18 +6559,6 @@
       "norm_label": "liveworkspace()",
       "source_file": "frontend/src/components/surveillance/liveworkspace.tsx",
       "source_location": "L64"
-    },
-    {
-      "id": "frontend_src_lib_utils_formatconfidence",
-      "label": "formatConfidence()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 78,
-      "community_name": "liveworkspace.tsx",
-      "file_type": "code",
-      "norm_label": "formatconfidence()",
-      "source_file": "frontend/src/lib/utils.ts",
-      "source_location": "L15"
     },
     {
       "id": "frontend_src_lib_utils_normalizeconfidence",
@@ -6905,6 +6905,17 @@
       "file_type": "code",
       "norm_label": "login/page.tsx",
       "source_file": "frontend/src/app/login/page.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "frontend_src_app_operator_layout",
+      "label": "(operator)/layout.tsx",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "authStore.ts",
+      "file_type": "code",
+      "norm_label": "(operator)/layout.tsx",
+      "source_file": "frontend/src/app/(operator)/layout.tsx",
       "source_location": "L1"
     },
     {
@@ -8774,11 +8785,22 @@
       "source_location": "L1"
     },
     {
+      "id": "frontend_src_app_operator_alerts_page",
+      "label": "alerts/page.tsx",
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "react",
+      "file_type": "code",
+      "norm_label": "alerts/page.tsx",
+      "source_file": "frontend/src/app/(operator)/alerts/page.tsx",
+      "source_location": "L1"
+    },
+    {
       "id": "frontend_src_app_operator_gis_map_page",
       "label": "gis-map/page.tsx",
       "_origin": "ast",
       "community": 18,
-      "community_name": "gis-map/page.tsx",
+      "community_name": "react",
       "file_type": "code",
       "norm_label": "gis-map/page.tsx",
       "source_file": "frontend/src/app/(operator)/gis-map/page.tsx",
@@ -8789,10 +8811,21 @@
       "label": "settings/page.tsx",
       "_origin": "ast",
       "community": 18,
-      "community_name": "gis-map/page.tsx",
+      "community_name": "react",
       "file_type": "code",
       "norm_label": "settings/page.tsx",
       "source_file": "frontend/src/app/(operator)/settings/page.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "frontend_src_components_alerts_tacticalthreattoast",
+      "label": "TacticalThreatToast.tsx",
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "react",
+      "file_type": "code",
+      "norm_label": "tacticalthreattoast.tsx",
+      "source_file": "frontend/src/components/alerts/TacticalThreatToast.tsx",
       "source_location": "L1"
     },
     {
@@ -8800,7 +8833,7 @@
       "label": "camerafeedstrip.tsx",
       "_origin": "ast",
       "community": 18,
-      "community_name": "gis-map/page.tsx",
+      "community_name": "react",
       "file_type": "code",
       "norm_label": "camerafeedstrip.tsx",
       "source_file": "frontend/src/components/dashboard/camerafeedstrip.tsx",
@@ -8811,21 +8844,65 @@
       "label": "cameras",
       "_origin": "ast",
       "community": 18,
-      "community_name": "gis-map/page.tsx",
+      "community_name": "react",
       "file_type": "code",
       "norm_label": "cameras",
       "source_file": "frontend/src/components/dashboard/camerafeedstrip.tsx",
       "source_location": "L3"
     },
     {
+      "id": "frontend_src_components_dashboard_dashboardheader",
+      "label": "dashboardheader.tsx",
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "react",
+      "file_type": "code",
+      "norm_label": "dashboardheader.tsx",
+      "source_file": "frontend/src/components/dashboard/dashboardheader.tsx",
+      "source_location": "L1"
+    },
+    {
       "id": "frontend_src_components_dashboard_recentalerts",
       "label": "recentalerts.tsx",
       "_origin": "ast",
       "community": 18,
-      "community_name": "gis-map/page.tsx",
+      "community_name": "react",
       "file_type": "code",
       "norm_label": "recentalerts.tsx",
       "source_file": "frontend/src/components/dashboard/recentalerts.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "frontend_src_components_map_suspecttrajectorymodal",
+      "label": "SuspectTrajectoryModal.tsx",
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "react",
+      "file_type": "code",
+      "norm_label": "suspecttrajectorymodal.tsx",
+      "source_file": "frontend/src/components/map/SuspectTrajectoryModal.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "frontend_src_lib_api_api",
+      "label": "api",
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "react",
+      "file_type": "code",
+      "norm_label": "api",
+      "source_file": "frontend/src/lib/api.ts",
+      "source_location": "L108"
+    },
+    {
+      "id": "frontend_src_lib_utils",
+      "label": "utils.ts",
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "react",
+      "file_type": "code",
+      "norm_label": "utils.ts",
+      "source_file": "frontend/src/lib/utils.ts",
       "source_location": "L1"
     },
     {
@@ -8833,11 +8910,22 @@
       "label": "alert.ts",
       "_origin": "ast",
       "community": 18,
-      "community_name": "gis-map/page.tsx",
+      "community_name": "react",
       "file_type": "code",
       "norm_label": "alert.ts",
       "source_file": "frontend/src/types/alert.ts",
       "source_location": "L1"
+    },
+    {
+      "id": "ref_react",
+      "label": "react",
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "react",
+      "file_type": "concept",
+      "norm_label": "react",
+      "source_file": "frontend/package.json",
+      "source_location": "L16"
     },
     {
       "id": "backend_app_api_faces",
@@ -9940,6 +10028,39 @@
       "source_location": "L96"
     },
     {
+      "id": "frontend_src_app_operator_geofences_page",
+      "label": "geofences/page.tsx",
+      "_origin": "ast",
+      "community": 22,
+      "community_name": "geofences/page.tsx",
+      "file_type": "code",
+      "norm_label": "geofences/page.tsx",
+      "source_file": "frontend/src/app/(operator)/geofences/page.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "frontend_src_app_operator_geofences_page_color_presets",
+      "label": "COLOR_PRESETS",
+      "_origin": "ast",
+      "community": 22,
+      "community_name": "geofences/page.tsx",
+      "file_type": "code",
+      "norm_label": "color_presets",
+      "source_file": "frontend/src/app/(operator)/geofences/page.tsx",
+      "source_location": "L53"
+    },
+    {
+      "id": "frontend_src_types_geofence",
+      "label": "geofence.ts",
+      "_origin": "ast",
+      "community": 22,
+      "community_name": "geofences/page.tsx",
+      "file_type": "code",
+      "norm_label": "geofence.ts",
+      "source_file": "frontend/src/types/geofence.ts",
+      "source_location": "L1"
+    },
+    {
       "id": "backend_app_api_inference",
       "label": "inference.py",
       "_origin": "ast",
@@ -9969,17 +10090,6 @@
       "community_name": "inference.py",
       "file_type": "code",
       "norm_label": "uploadfile",
-      "source_file": "",
-      "source_location": ""
-    },
-    {
-      "id": "backend_app_pipeline_video_loader_py_exception",
-      "label": "Exception",
-      "_origin": "ast",
-      "community": 23,
-      "community_name": "inference.py",
-      "file_type": "code",
-      "norm_label": "exception",
       "source_file": "",
       "source_location": ""
     },
@@ -10070,17 +10180,6 @@
       "norm_label": "generic preprocessing configuration. model-specific values can be changed later...",
       "source_file": "backend/app/pipeline/preprocessor.py",
       "source_location": "L31"
-    },
-    {
-      "id": "backend_app_pipeline_video_loader_rationale_16",
-      "label": "Base exception for video loading errors.",
-      "_origin": "ast",
-      "community": 23,
-      "community_name": "inference.py",
-      "file_type": "rationale",
-      "norm_label": "base exception for video loading errors.",
-      "source_file": "backend/app/pipeline/video_loader.py",
-      "source_location": "L16"
     },
     {
       "id": "backend_tests_test_onnx_batch_inference_rationale_1",
@@ -10804,17 +10903,6 @@
       "source_location": "L225"
     },
     {
-      "id": "frontend_src_app_operator_layout",
-      "label": "(operator)/layout.tsx",
-      "_origin": "ast",
-      "community": 29,
-      "community_name": "alertsStore.ts",
-      "file_type": "code",
-      "norm_label": "(operator)/layout.tsx",
-      "source_file": "frontend/src/app/(operator)/layout.tsx",
-      "source_location": "L1"
-    },
-    {
       "id": "frontend_src_lib_alertsstore",
       "label": "alertsStore.ts",
       "_origin": "ast",
@@ -10824,17 +10912,6 @@
       "norm_label": "alertsstore.ts",
       "source_file": "frontend/src/lib/alertsStore.ts",
       "source_location": "L1"
-    },
-    {
-      "id": "frontend_src_lib_alertsstore_alertsstore",
-      "label": "alertsStore",
-      "_origin": "ast",
-      "community": 29,
-      "community_name": "alertsStore.ts",
-      "file_type": "code",
-      "norm_label": "alertsstore",
-      "source_file": "frontend/src/lib/alertsStore.ts",
-      "source_location": "L230"
     },
     {
       "id": "frontend_src_lib_alertsstore_connectionlisteners",
@@ -10903,26 +10980,15 @@
       "source_location": "L1"
     },
     {
-      "id": "frontend_src_app_operator_geofences_page",
-      "label": "geofences/page.tsx",
+      "id": "frontend_src_app_operator_facial_recognition_page",
+      "label": "facial-recognition/page.tsx",
       "_origin": "ast",
       "community": 3,
       "community_name": "api.ts",
       "file_type": "code",
-      "norm_label": "geofences/page.tsx",
-      "source_file": "frontend/src/app/(operator)/geofences/page.tsx",
+      "norm_label": "facial-recognition/page.tsx",
+      "source_file": "frontend/src/app/(operator)/facial-recognition/page.tsx",
       "source_location": "L1"
-    },
-    {
-      "id": "frontend_src_app_operator_geofences_page_color_presets",
-      "label": "COLOR_PRESETS",
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "api.ts",
-      "file_type": "code",
-      "norm_label": "color_presets",
-      "source_file": "frontend/src/app/(operator)/geofences/page.tsx",
-      "source_location": "L53"
     },
     {
       "id": "frontend_src_lib_api",
@@ -10958,14 +11024,14 @@
       "source_location": "L1"
     },
     {
-      "id": "frontend_src_types_geofence",
-      "label": "geofence.ts",
+      "id": "frontend_src_types_face",
+      "label": "face.ts",
       "_origin": "ast",
       "community": 3,
       "community_name": "api.ts",
       "file_type": "code",
-      "norm_label": "geofence.ts",
-      "source_file": "frontend/src/types/geofence.ts",
+      "norm_label": "face.ts",
+      "source_file": "frontend/src/types/face.ts",
       "source_location": "L1"
     },
     {
@@ -11961,17 +12027,6 @@
       "source_location": "L891"
     },
     {
-      "id": "postcss_load_config",
-      "label": "postcss-load-config",
-      "_origin": "ast",
-      "community": 38,
-      "community_name": "postcss.config.mjs",
-      "confidence": "EXTRACTED",
-      "file_type": "code",
-      "norm_label": "postcss-load-config",
-      "source_file": "postcss-load-config"
-    },
-    {
       "id": "frontend_postcss_config",
       "label": "postcss.config.mjs",
       "_origin": "ast",
@@ -12431,28 +12486,6 @@
       "file_type": "code",
       "norm_label": "tracks/page.tsx",
       "source_file": "frontend/src/app/(operator)/tracks/page.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "frontend_src_app_operator_facial_recognition_page",
-      "label": "facial-recognition/page.tsx",
-      "_origin": "ast",
-      "community": 43,
-      "community_name": "facial-recognition/page.tsx",
-      "file_type": "code",
-      "norm_label": "facial-recognition/page.tsx",
-      "source_file": "frontend/src/app/(operator)/facial-recognition/page.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "frontend_src_types_face",
-      "label": "face.ts",
-      "_origin": "ast",
-      "community": 43,
-      "community_name": "facial-recognition/page.tsx",
-      "file_type": "code",
-      "norm_label": "face.ts",
-      "source_file": "frontend/src/types/face.ts",
       "source_location": "L1"
     },
     {
@@ -14544,50 +14577,6 @@
       "source_location": "L37"
     },
     {
-      "id": "frontend_src_app_operator_alerts_page",
-      "label": "alerts/page.tsx",
-      "_origin": "ast",
-      "community": 78,
-      "community_name": "liveworkspace.tsx",
-      "file_type": "code",
-      "norm_label": "alerts/page.tsx",
-      "source_file": "frontend/src/app/(operator)/alerts/page.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "frontend_src_components_alerts_tacticalthreattoast",
-      "label": "TacticalThreatToast.tsx",
-      "_origin": "ast",
-      "community": 78,
-      "community_name": "liveworkspace.tsx",
-      "file_type": "code",
-      "norm_label": "tacticalthreattoast.tsx",
-      "source_file": "frontend/src/components/alerts/TacticalThreatToast.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "frontend_src_components_dashboard_dashboardheader",
-      "label": "dashboardheader.tsx",
-      "_origin": "ast",
-      "community": 78,
-      "community_name": "liveworkspace.tsx",
-      "file_type": "code",
-      "norm_label": "dashboardheader.tsx",
-      "source_file": "frontend/src/components/dashboard/dashboardheader.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "frontend_src_components_map_suspecttrajectorymodal",
-      "label": "SuspectTrajectoryModal.tsx",
-      "_origin": "ast",
-      "community": 78,
-      "community_name": "liveworkspace.tsx",
-      "file_type": "code",
-      "norm_label": "suspecttrajectorymodal.tsx",
-      "source_file": "frontend/src/components/map/SuspectTrajectoryModal.tsx",
-      "source_location": "L1"
-    },
-    {
       "id": "frontend_src_components_surveillance_detectioncanvas",
       "label": "detectioncanvas.tsx",
       "_origin": "ast",
@@ -14621,37 +14610,15 @@
       "source_location": "L1"
     },
     {
-      "id": "frontend_src_lib_api_api",
-      "label": "api",
+      "id": "frontend_src_lib_alertsstore_alertsstore",
+      "label": "alertsStore",
       "_origin": "ast",
       "community": 78,
       "community_name": "liveworkspace.tsx",
       "file_type": "code",
-      "norm_label": "api",
-      "source_file": "frontend/src/lib/api.ts",
-      "source_location": "L108"
-    },
-    {
-      "id": "frontend_src_lib_utils",
-      "label": "utils.ts",
-      "_origin": "ast",
-      "community": 78,
-      "community_name": "liveworkspace.tsx",
-      "file_type": "code",
-      "norm_label": "utils.ts",
-      "source_file": "frontend/src/lib/utils.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "ref_react",
-      "label": "react",
-      "_origin": "ast",
-      "community": 78,
-      "community_name": "liveworkspace.tsx",
-      "file_type": "concept",
-      "norm_label": "react",
-      "source_file": "frontend/package.json",
-      "source_location": "L16"
+      "norm_label": "alertsstore",
+      "source_file": "frontend/src/lib/alertsStore.ts",
+      "source_location": "L230"
     },
     {
       "id": "backend_app_pipeline_reid_service",
@@ -14775,6 +14742,17 @@
       "source_location": ""
     },
     {
+      "id": "backend_app_pipeline_video_loader_py_exception",
+      "label": "Exception",
+      "_origin": "ast",
+      "community": 8,
+      "community_name": "VideoLoader",
+      "file_type": "code",
+      "norm_label": "exception",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
       "id": "backend_app_pipeline_video_loader_py_path",
       "label": "Path",
       "_origin": "ast",
@@ -14828,6 +14806,17 @@
       "norm_label": "read the next frame with orientation correction. returns: (true, frame) when...",
       "source_file": "backend/app/pipeline/video_loader.py",
       "source_location": "L153"
+    },
+    {
+      "id": "backend_app_pipeline_video_loader_rationale_16",
+      "label": "Base exception for video loading errors.",
+      "_origin": "ast",
+      "community": 8,
+      "community_name": "VideoLoader",
+      "file_type": "rationale",
+      "norm_label": "base exception for video loading errors.",
+      "source_file": "backend/app/pipeline/video_loader.py",
+      "source_location": "L16"
     },
     {
       "id": "backend_app_pipeline_video_loader_rationale_20",
@@ -19852,18 +19841,6 @@
       "context": "export",
       "source_file": "frontend/src/lib/camerasStore.ts",
       "source_location": "L15",
-      "weight": 1.0
-    },
-    {
-      "source": "frontend_src_components_alerts_tacticalthreattoast_threattoastcardprops",
-      "target": "frontend_src_types_alert_alertitem",
-      "relation": "references",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "field",
-      "source_file": "frontend/src/components/alerts/TacticalThreatToast.tsx",
-      "source_location": "L20",
       "weight": 1.0
     },
     {
@@ -34055,15 +34032,6 @@
       "weight": 1.0
     },
     {
-      "source": "frontend_postcss_config",
-      "target": "postcss_load_config",
-      "relation": "dynamic_import",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "frontend/postcss.config.mjs"
-    },
-    {
       "source": "backend_app_api_alerts_alertcreaterequest",
       "target": "backend_app_api_alerts_py_basemodel",
       "relation": "inherits",
@@ -40374,5 +40342,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "ecb1ccb7df0271a0fc439e2c6f0eaa66c355fd13"
+  "built_at_commit": "7664d384548873b0a39db7bef5aae95b6f705354"
 }
