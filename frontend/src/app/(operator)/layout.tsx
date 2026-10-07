@@ -207,18 +207,8 @@ export default function OperatorLayout({
   // Whether the sidebar is currently showing its expanded view
   const isExpanded = sidebarMode === "pinned" || isHovered;
 
-  // Robust navigation handler with instant hover-collapse and new-tab support
-  const handleNavClick = (
-    e: React.MouseEvent<HTMLAnchorElement>,
-    href: string
-  ) => {
-    // Preserve standard browser behavior for special clicks (Ctrl/Cmd/Shift/Alt/middle-click)
-    if (e.ctrlKey || e.metaKey || e.shiftKey || e.altKey || e.button !== 0) {
-      return;
-    }
-
-    e.preventDefault();
-
+  // Seamless navigation handler that preserves Next.js client-side prefetching and instantly closes hover sidebar
+  const handleNavClick = () => {
     // Immediately dismiss floating hover menu so operator gets instant feedback
     if (sidebarMode !== "pinned") {
       if (leaveTimeoutRef.current) {
@@ -227,13 +217,6 @@ export default function OperatorLayout({
       }
       setIsHovered(false);
     }
-
-    // Skip redundant push if already on the target path
-    if (pathname === href || (href === "/dashboard" && pathname === "/")) {
-      return;
-    }
-
-    router.push(href);
   };
 
   const mainNavItems: NavItem[] = [
@@ -391,7 +374,8 @@ export default function OperatorLayout({
           <div className="flex items-center justify-between gap-2">
             <Link
               href="/dashboard"
-              onClick={(e) => handleNavClick(e, "/dashboard")}
+              prefetch={true}
+              onClick={handleNavClick}
               className="flex items-center gap-3 group min-w-0 cursor-pointer"
               title="MAATRIX - Border Video Analytics"
             >
@@ -484,7 +468,8 @@ export default function OperatorLayout({
                 <Link
                   key={item.href}
                   href={item.href}
-                  onClick={(e) => handleNavClick(e, item.href)}
+                  prefetch={true}
+                  onClick={handleNavClick}
                   title={!isExpanded ? item.label : undefined}
                   className={`w-full h-11 flex items-center rounded-xl text-xs font-semibold relative select-none cursor-pointer transition-colors active:scale-[0.98] px-3 ${
                     isActive
@@ -546,7 +531,8 @@ export default function OperatorLayout({
                   <Link
                     key={item.href}
                     href={item.href}
-                    onClick={(e) => handleNavClick(e, item.href)}
+                    prefetch={true}
+                    onClick={handleNavClick}
                     title={!isExpanded ? item.label : undefined}
                     className={`w-full h-11 flex items-center rounded-xl text-xs font-semibold relative select-none cursor-pointer transition-colors active:scale-[0.98] px-3 ${
                       isActive

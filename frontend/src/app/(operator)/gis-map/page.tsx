@@ -1,7 +1,19 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { BorderMap } from "@/components/map/BorderMap";
+import dynamic from "next/dynamic";
+
+const BorderMap = dynamic(
+  () => import("@/components/map/BorderMap").then((m) => m.BorderMap),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-full w-full min-h-[600px] flex items-center justify-center bg-slate-900 rounded-2xl animate-pulse text-emerald-400 font-mono text-sm">
+        Initializing Tactical GIS Map Grid...
+      </div>
+    ),
+  }
+);
 import { RecentAlerts } from "@/components/dashboard/recentalerts";
 import { CameraFeedStrip } from "@/components/dashboard/camerafeedstrip";
 import {

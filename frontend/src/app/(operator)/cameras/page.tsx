@@ -40,8 +40,20 @@ import {
   UpdateCameraInput,
   StreamTestResult,
 } from "@/types/camera";
+import dynamic from "next/dynamic";
 import { useCameras } from "@/lib/camerasStore";
-import { BorderMap } from "@/components/map/BorderMap";
+
+const BorderMap = dynamic(
+  () => import("@/components/map/BorderMap").then((m) => m.BorderMap),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-[760px] w-full flex items-center justify-center bg-slate-100 rounded-2xl animate-pulse text-slate-400 text-xs font-mono">
+        Loading Tactical Border Map...
+      </div>
+    ),
+  }
+);
 
 // Common sector options across India's border sectors
 const SECTORS = [

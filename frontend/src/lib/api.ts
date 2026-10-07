@@ -57,8 +57,14 @@ async function request<T>(
 ): Promise<T> {
   const url = `${BACKEND_BASE_URL}${endpoint}`;
   try {
+    const timeoutSignal =
+      typeof AbortSignal !== "undefined" && "timeout" in AbortSignal
+        ? AbortSignal.timeout(6000)
+        : undefined;
+
     const res = await fetch(url, {
       ...options,
+      signal: options.signal || timeoutSignal,
       headers: {
         Accept: "application/json",
         ...(options.headers || {}),

@@ -1,6 +1,6 @@
 "use client";
 
-import { Activity, Cpu, HardDrive, Wifi, Server, CheckCircle2 } from "lucide-react";
+import { Activity, Cpu, HardDrive, Wifi, Server } from "lucide-react";
 import { SystemStatus } from "@/components/dashboard/systemstatus";
 
 
