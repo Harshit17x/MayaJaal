@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Search, User, ShieldCheck } from "lucide-react";
+import { User, ShieldCheck } from "lucide-react";
 import { EmblemIndia } from "./EmblemIndia";
 import { useAuth } from "@/lib/authStore";
 
@@ -44,19 +44,8 @@ export function LandingNavbar() {
       </div>
 
 
-      {/* Right Search & Login Button */}
+      {/* Right Login / Console Button */}
       <div className="flex items-center gap-4">
-        {/* Search Icon */}
-        <button
-          type="button"
-          aria-label="Search"
-          className="p-2 text-slate-700 hover:text-slate-950 transition-colors cursor-pointer"
-        >
-          <Search className="w-4 h-4" />
-        </button>
-
-        {/* Divider */}
-        <div className="h-4 w-[1px] bg-slate-400 hidden sm:block" />
 
         {/* Login / Console Button */}
         {isAuthenticated && operator ? (

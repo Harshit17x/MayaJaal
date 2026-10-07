@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useAlerts } from "@/lib/alertsStore";
 import { AlertItem } from "@/types/alert";
 import { api } from "@/lib/api";
@@ -16,53 +16,77 @@ import {
   Check,
 } from "lucide-react";
 
-interface ThreatToastCardProps {
-  alert: AlertItem;
-  onDismiss: (alert: AlertItem) => void;
-  onAcknowledge: (alert: AlertItem) => void;
-  backendBase: string;
+const STORAGE_DISMISSED_IDS_KEY = "maatrix_toast_dismissed_ids";
+const STORAGE_DISMISSED_KEYS_KEY = "maatrix_toast_dismissed_keys";
+const TOAST_AUTO_DISMISS_MS = 8000; // 8 seconds auto-dismiss
+const TICK_INTERVAL_MS = 100;
+
+function getSessionDismissedIds(): Set<string> {
+  if (typeof window === "undefined") return new Set();
+  try {
+    const raw = sessionStorage.getItem(STORAGE_DISMISSED_IDS_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return new Set(parsed);
+    }
+  } catch {}
+  return new Set();
 }
 
-function ThreatToastCard({
-  alert,
-  onDismiss,
-  onAcknowledge,
-  backendBase,
-}: ThreatToastCardProps) {
+function getSessionDismissedKeys(): Set<string> {
+  if (typeof window === "undefined") return new Set();
+  try {
+    const raw = sessionStorage.getItem(STORAGE_DISMISSED_KEYS_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return new Set(parsed);
+    }
+  } catch {}
+  return new Set();
+}
+
+interface ThreatToastCardProps {
+  alert: AlertItem;
+  onDismiss: (id: string, title?: string, suspectName?: string) => void;
+  onAcknowledge: (id: string, title?: string, suspectName?: string) => void;
+}
+
+function ThreatToastCard({ alert, onDismiss, onAcknowledge }: ThreatToastCardProps) {
   const router = useRouter();
+  const [timeLeft, setTimeLeft] = useState(TOAST_AUTO_DISMISS_MS);
+  const [isHovered, setIsHovered] = useState(false);
   const [isDispatching, setIsDispatching] = useState(false);
   const [selectedUnit, setSelectedUnit] = useState("QRT Alpha-1");
   const [dispatchSuccess, setDispatchSuccess] = useState(false);
-  const [isExiting, setIsExiting] = useState(false);
+  const hasDismissedRef = useRef(false);
 
-  // Auto-dismiss notification after 1.5 seconds (1500ms)
+  // Auto-dismiss countdown timer (pauses when hovered or dispatching)
   useEffect(() => {
-    // If the operator is interacting with QRT dispatch, pause auto-dismiss
-    if (isDispatching) return;
+    if (isHovered || isDispatching) return;
 
-    // Trigger smooth exit transition 200ms before final dismissal
-    const exitTimer = setTimeout(() => {
-      setIsExiting(true);
-    }, 1300);
+    const interval = setInterval(() => {
+      setTimeLeft((prev) => Math.max(0, prev - TICK_INTERVAL_MS));
+    }, TICK_INTERVAL_MS);
 
-    const dismissTimer = setTimeout(() => {
-      onDismiss(alert);
-    }, 1500);
+    return () => clearInterval(interval);
+  }, [isHovered, isDispatching]);
 
-    return () => {
-      clearTimeout(exitTimer);
-      clearTimeout(dismissTimer);
-    };
-  }, [alert, isDispatching, onDismiss]);
+  // Safely trigger onDismiss when countdown reaches 0 (outside of state updater / render)
+  useEffect(() => {
+    if (timeLeft <= 0 && !hasDismissedRef.current) {
+      hasDismissedRef.current = true;
+      onDismiss(alert.id, alert.title, alert.suspectName);
+    }
+  }, [timeLeft, alert.id, alert.title, alert.suspectName, onDismiss]);
 
-  const handleQuickDispatch = async () => {
+  const handleQuickDispatch = async (alertId: string) => {
     try {
-      await api.dispatchQrt(alert.id, selectedUnit, "Urgent intercept response via Tactical HUD");
+      await api.dispatchQrt(alertId, selectedUnit, "Urgent intercept response via Tactical HUD");
       setDispatchSuccess(true);
       setTimeout(() => {
         setIsDispatching(false);
         setDispatchSuccess(false);
-        onDismiss(alert);
+        onDismiss(alert.id, alert.title, alert.suspectName);
       }, 1500);
     } catch (err) {
       console.error("Failed to dispatch QRT", err);
@@ -76,24 +100,27 @@ function ThreatToastCard({
     alert.title?.toLowerCase().includes("geofence") ||
     alert.title?.toLowerCase().includes("tripwire");
 
+  const backendBase =
+    process.env.NEXT_PUBLIC_BACKEND_URL?.replace(/\/$/, "") || "http://localhost:8000";
   const snapshotUrl = alert.snapshotUrl
     ? alert.snapshotUrl.startsWith("http")
       ? alert.snapshotUrl
       : `${backendBase}${alert.snapshotUrl}`
     : null;
 
+  const secondsRemaining = Math.max(1, Math.ceil(timeLeft / 1000));
+  const progressPercent = Math.max(0, Math.min(100, (timeLeft / TOAST_AUTO_DISMISS_MS) * 100));
+
   return (
     <div
-      className={`pointer-events-auto bg-white/98 backdrop-blur-md text-slate-900 rounded-2xl border border-rose-200 shadow-2xl shadow-rose-950/15 p-4 ring-1 ring-rose-500/20 relative overflow-hidden transition-all duration-200 ${
-        isExiting
-          ? "opacity-0 translate-x-8 scale-95 ease-in"
-          : "animate-in slide-in-from-right-8 duration-300 ease-out"
-      }`}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      className="pointer-events-auto bg-white/98 backdrop-blur-md text-slate-900 rounded-2xl border border-rose-200 shadow-2xl shadow-rose-950/15 p-4 animate-in slide-in-from-right-8 duration-300 ring-1 ring-rose-500/20 relative overflow-hidden transition-all group"
     >
       {/* Tactical top beacon line */}
       <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-rose-600 via-rose-500 to-amber-500" />
 
-      {/* Header pill */}
+      {/* Header pill & countdown status */}
       <div className="flex items-center justify-between gap-2 pb-2.5 border-b border-slate-100">
         <div className="flex items-center gap-2">
           <span className="relative flex h-2.5 w-2.5">
@@ -108,14 +135,28 @@ function ThreatToastCard({
             {alert.threatLevel || "CRITICAL"}
           </span>
         </div>
-        <button
-          type="button"
-          onClick={() => onDismiss(alert)}
-          className="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
-          title="Dismiss banner"
-        >
-          <X className="w-4 h-4" />
-        </button>
+
+        <div className="flex items-center gap-1.5">
+          {/* Auto-dismiss countdown badge */}
+          <span
+            className="text-[10px] font-mono text-slate-400 font-medium px-1.5 py-0.5 rounded bg-slate-100/90 border border-slate-200/60 select-none"
+            title={isHovered ? "Timer paused on hover" : `Auto-dismisses in ${secondsRemaining}s`}
+          >
+            {isHovered ? "Paused" : `${secondsRemaining}s`}
+          </span>
+
+          <button
+            type="button"
+            onClick={() => {
+              hasDismissedRef.current = true;
+              onDismiss(alert.id, alert.title, alert.suspectName);
+            }}
+            className="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+            title="Dismiss banner"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
       </div>
 
       {/* Main Content */}
@@ -181,7 +222,7 @@ function ThreatToastCard({
             </select>
             <button
               type="button"
-              onClick={handleQuickDispatch}
+              onClick={() => handleQuickDispatch(alert.id)}
               className="px-3 py-1.5 rounded-lg text-xs font-bold bg-[#1e4b38] hover:bg-[#163a2b] text-white flex items-center gap-1 transition-colors shadow-xs cursor-pointer"
             >
               {dispatchSuccess ? (
@@ -204,7 +245,8 @@ function ThreatToastCard({
           <button
             type="button"
             onClick={() => {
-              onDismiss(alert);
+              hasDismissedRef.current = true;
+              onDismiss(alert.id, alert.title, alert.suspectName);
               router.push(`/live?camera=${alert.cameraId || ""}`);
             }}
             className="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center gap-1.5 transition-colors cursor-pointer"
@@ -214,7 +256,8 @@ function ThreatToastCard({
           <button
             type="button"
             onClick={() => {
-              onDismiss(alert);
+              hasDismissedRef.current = true;
+              onDismiss(alert.id, alert.title, alert.suspectName);
               router.push(`/gis-map?focus=${alert.cameraId || ""}`);
             }}
             className="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center gap-1.5 transition-colors cursor-pointer"
@@ -234,19 +277,26 @@ function ThreatToastCard({
 
         <button
           type="button"
-          onClick={() => onAcknowledge(alert)}
+          onClick={() => {
+            hasDismissedRef.current = true;
+            onAcknowledge(alert.id, alert.title, alert.suspectName);
+          }}
           className="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-emerald-800 hover:bg-emerald-50 border border-emerald-200/80 transition-colors flex items-center gap-1 cursor-pointer"
         >
           <Check className="w-3.5 h-3.5" /> Ack
         </button>
       </div>
 
-      {/* 1.5s auto-dismiss progress countdown line */}
-      {!isDispatching && (
-        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-rose-100/60 overflow-hidden">
-          <div className="h-full bg-gradient-to-r from-rose-500 to-amber-500 animate-toast-progress" />
-        </div>
-      )}
+      {/* Bottom Auto-Dismiss Countdown Progress Bar */}
+      <div className="absolute bottom-0 left-0 right-0 h-1 bg-slate-100 overflow-hidden">
+        <div
+          className="h-full bg-gradient-to-r from-rose-600 via-rose-500 to-amber-500"
+          style={{
+            width: `${progressPercent}%`,
+            transition: isHovered || isDispatching ? "none" : `width ${TICK_INTERVAL_MS}ms linear`,
+          }}
+        />
+      </div>
     </div>
   );
 }
@@ -254,43 +304,78 @@ function ThreatToastCard({
 export function TacticalThreatToast() {
   const { alerts, acknowledgeAlert } = useAlerts();
 
-  // Track toasts that have been dismissed by the operator in this browser session
-  const [dismissedIds, setDismissedIds] = useState<Set<string>>(new Set());
-  const alertsRef = useRef(alerts);
-  alertsRef.current = alerts;
+  // Track toasts dismissed in this browser session
+  const [dismissedIds, setDismissedIds] = useState<Set<string>>(getSessionDismissedIds);
+  const [dismissedKeys, setDismissedKeys] = useState<Set<string>>(getSessionDismissedKeys);
 
-  // Session mount time: ignore historical backlog older than 15s before page load
-  const mountTimeRef = useRef(Date.now());
+  const handleDismiss = useCallback(
+    (id: string, title?: string, suspectName?: string) => {
+      const alertKey = (suspectName || title || id).trim().toLowerCase();
 
-  const handleDismiss = useCallback((targetAlert: AlertItem) => {
-    setDismissedIds((prev) => {
-      const next = new Set(prev);
-      next.add(targetAlert.id);
-      if (targetAlert.suspectName) {
-        alertsRef.current
-          .filter((a) => a.suspectName?.toLowerCase() === targetAlert.suspectName?.toLowerCase())
-          .forEach((a) => next.add(a.id));
-      }
-      return next;
-    });
-  }, []);
+      // Find all IDs in current alerts matching this key, suspect, or title
+      const idsToDismiss = new Set<string>([id]);
+      alerts.forEach((a) => {
+        const aKey = (a.suspectName || a.title || a.id).trim().toLowerCase();
+        if (
+          aKey === alertKey ||
+          (suspectName && a.suspectName?.toLowerCase() === suspectName.toLowerCase()) ||
+          (title && a.title?.toLowerCase() === title.toLowerCase())
+        ) {
+          idsToDismiss.add(a.id);
+        }
+      });
 
-  const handleAcknowledge = useCallback((targetAlert: AlertItem) => {
-    handleDismiss(targetAlert);
-    acknowledgeAlert(targetAlert.id);
-    if (targetAlert.suspectName) {
-      alertsRef.current
-        .filter(
-          (a) =>
-            !a.acknowledged &&
-            a.suspectName?.toLowerCase() === targetAlert.suspectName!.toLowerCase() &&
-            a.id !== targetAlert.id
-        )
-        .forEach((a) => acknowledgeAlert(a.id));
-    }
-  }, [handleDismiss, acknowledgeAlert]);
+      setDismissedIds((prev) => {
+        const next = new Set(prev);
+        idsToDismiss.forEach((item) => next.add(item));
+        try {
+          sessionStorage.setItem(
+            STORAGE_DISMISSED_IDS_KEY,
+            JSON.stringify(Array.from(next))
+          );
+        } catch {}
+        return next;
+      });
 
-  // Find unacknowledged high-threat alerts (suspect sightings or perimeter breaches)
+      setDismissedKeys((prev) => {
+        const next = new Set(prev);
+        next.add(alertKey);
+        try {
+          sessionStorage.setItem(
+            STORAGE_DISMISSED_KEYS_KEY,
+            JSON.stringify(Array.from(next))
+          );
+        } catch {}
+        return next;
+      });
+    },
+    [alerts]
+  );
+
+  const handleAcknowledge = useCallback(
+    (id: string, title?: string, suspectName?: string) => {
+      handleDismiss(id, title, suspectName);
+      acknowledgeAlert(id);
+
+      // Acknowledge all unacknowledged alerts matching this threat event
+      const targetKey = (suspectName || title || id).trim().toLowerCase();
+      alerts.forEach((a) => {
+        if (!a.acknowledged && a.id !== id) {
+          const aKey = (a.suspectName || a.title || a.id).trim().toLowerCase();
+          if (
+            aKey === targetKey ||
+            (suspectName && a.suspectName?.toLowerCase() === suspectName.toLowerCase()) ||
+            (title && a.title?.toLowerCase() === title.toLowerCase())
+          ) {
+            acknowledgeAlert(a.id);
+          }
+        }
+      });
+    },
+    [alerts, acknowledgeAlert, handleDismiss]
+  );
+
+  // Find unacknowledged high-threat alerts that haven't been dismissed in this session
   const activeAlerts: AlertItem[] = [];
   const seenAlertKeys = new Set<string>();
 
@@ -303,14 +388,14 @@ export function TacticalThreatToast() {
       alert.title?.toLowerCase().includes("geofence") ||
       alert.title?.toLowerCase().includes("tripwire");
 
-    if (!alert.acknowledged && (isSuspect || isBreach) && !dismissedIds.has(alert.id)) {
-      // Ignore past backlog from previous sessions older than mount time minus 15s
-      const alertTime = alert.timestamp || 0;
-      if (alertTime < mountTimeRef.current - 15000) {
-        continue;
-      }
+    const alertKey = (alert.suspectName || alert.title || alert.id).trim().toLowerCase();
 
-      const alertKey = (alert.suspectName || alert.title || alert.id).trim().toLowerCase();
+    if (
+      !alert.acknowledged &&
+      (isSuspect || isBreach) &&
+      !dismissedIds.has(alert.id) &&
+      !dismissedKeys.has(alertKey)
+    ) {
       if (!seenAlertKeys.has(alertKey)) {
         seenAlertKeys.add(alertKey);
         activeAlerts.push(alert);
@@ -321,9 +406,6 @@ export function TacticalThreatToast() {
 
   if (activeAlerts.length === 0) return null;
 
-  const backendBase =
-    process.env.NEXT_PUBLIC_BACKEND_URL?.replace(/\/$/, "") || "http://localhost:8000";
-
   return (
     <div className="fixed top-20 right-4 sm:right-6 z-50 flex flex-col gap-3 max-w-md w-full pointer-events-none">
       {activeAlerts.map((alert) => (
@@ -332,7 +414,6 @@ export function TacticalThreatToast() {
           alert={alert}
           onDismiss={handleDismiss}
           onAcknowledge={handleAcknowledge}
-          backendBase={backendBase}
         />
       ))}
     </div>
