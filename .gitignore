@@ -63,6 +63,5 @@ bin/
 *.exe
 *.dll
 
-# Graphify Cache & Local Sidecars
-graphify-out/cache/
-graphify-out/.*
+# Graphify Outputs
+graphify-out/
