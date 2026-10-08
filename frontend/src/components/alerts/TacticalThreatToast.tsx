@@ -18,7 +18,7 @@ import {
 
 const STORAGE_DISMISSED_IDS_KEY = "maatrix_toast_dismissed_ids";
 const STORAGE_DISMISSED_KEYS_KEY = "maatrix_toast_dismissed_keys";
-const TOAST_AUTO_DISMISS_MS = 8000; // 8 seconds auto-dismiss
+const TOAST_AUTO_DISMISS_MS = 3000; // 3 seconds auto-dismiss
 const TICK_INTERVAL_MS = 100;
 
 function getSessionDismissedIds(): Set<string> {
